@@ -1,0 +1,11 @@
+{
+ "ranking_version":"rules-v1",
+ "human_reviewer":null,
+ "reviewed_at":null,
+ "queries":[
+   {"q":"Scary CCTV footage in an abandoned hospital","judgments":{},"timestamp_judgments":[]},
+   {"q":"Ghost stories with an unexpected plot twist","judgments":{},"timestamp_judgments":[]},
+   {"q":"A property tour showing a large bright bedroom","judgments":{},"timestamp_judgments":[]},
+   {"q":"A figure appearing in the background while the speaker does not notice","judgments":{},"timestamp_judgments":[]}
+ ]
+}

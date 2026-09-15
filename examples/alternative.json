@@ -1,0 +1,7 @@
+{
+  "url": "https://replacement.example.org",
+  "status": "verified",
+  "feed_url": null,
+  "review_note": "EXAMPLE ONLY: replace with evidence that this is the same operator's approved alternative and metadata retention remains permitted.",
+  "evidence_url": "https://original.example.org/official-domain-announcement"
+}

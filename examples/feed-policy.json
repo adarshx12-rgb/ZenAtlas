@@ -1,0 +1,1 @@
+{"status":"active","metadata":true,"transcripts":true,"retention_days":30,"adapter":"json_feed","feed_url":"https://your-public-domain.example/catalogue.json","review_note":"Replace with evidence that the owner permits this feed and transcript retention."}

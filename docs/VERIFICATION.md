@@ -1,0 +1,47 @@
+# Implementation and verification record
+
+Implemented locally on September 15–16, 2026. The workspace originally contained only the build brief and skill bundles. No existing website repository or deployment credentials were present.
+
+## Actually verified
+
+- `npm install` installed the dependencies and generated the lockfile from the npm registry; its audit reported zero known vulnerabilities at that time. `npm ci` is the documented reproducible setup command.
+- `npm run build`: passed. An evaluation-script typing issue was corrected during the check.
+- `npm test`: **9 tests passed**, no failures or skips, approximately 8.3 seconds in the final recorded regression run. Tests execute PostgreSQL SQL/PLpgSQL with isolated embedded PGlite databases. They do not use a running Docker/PostgreSQL server.
+- `npm run evaluate`: seven synthetic development queries completed, covering the four requested intents, a phrase, an exclusion, and a shorter query. Mean precision@10 is 0.10, recall@10 1.0, MRR 1.0 and nDCG@10 1.0. Each query has one intended relevant fixture, so precision includes nine empty slots. Individual elapsed search times were 7.92–19.17 ms on this tiny local dataset. These are **not** production latency measurements or human-judged relevance evidence. Exact output is in `evaluation/latest-development-report.json`.
+- `npm run preview`: a persistent embedded PostgreSQL catalogue served real curated links at http://127.0.0.1:3000. No synthetic transcript/footage fixtures were loaded into the preview.
+- Playwright CLI opened the actual reference client, searched `Big Buck Bunny` in catalogue mode, and observed the stored official YouTube link with `metadata match` and `Rights: unknown`. Clicking Useful displayed `Feedback saved`.
+- Browser network evidence: `GET /api/session` → 200; `GET /api/search?q=Big+Buck+Bunny&mode=catalogue&evidence=any&limit=20` → 200; `POST /api/feedback` → 204. This is an actual browser → API → embedded PostgreSQL flow, with no mocked HTTP search endpoint.
+- Desktop/mobile screenshots are in `output/playwright/catalogue-search.png` and `output/playwright/catalogue-mobile.png`. An initial favicon 404 was fixed by adding a local SVG favicon.
+- Official SearXNG API/settings/container documentation, PostgreSQL full-text documentation and pgvector documentation were consulted. The three curated YouTube watch-page titles were retrieved, with provenance recorded. Playback, rights and timestamps were not verified or fabricated.
+
+## Automated coverage
+
+The integration/security tests cover:
+
+1. Idempotent migrations, stored lexical matches, nullable metadata, language/evidence filters, and stable pagination as new content is inserted.
+2. Signed-cookie search ownership, admin denial, cross-origin write rejection, private feedback reads, and one vote per session/content.
+3. Valid retained transcript import, full overlapping chunk coverage, duration validation, atomic rollback of invalid import, and stale-evidence invalidation in old snapshots.
+4. Deduplication by normalized URL/provider identity without merging equal titles; sparse metadata refresh preserves known values; explicit deletion blocks provider aliases from re-ingesting removed content.
+5. Shared durable discovery jobs, reuse of recently completed jobs, later catalogue retrieval, candidate-domain review status, and provider outages preserving local results.
+6. Daily job-budget exhaustion and lexical fallback when optional semantic configuration is absent.
+7. Worker lease expiry/reclaim, stale-completion fencing, expiration hiding and cleanup.
+8. Private IPv4/IPv6/metadata addresses, unsafe schemes and URL credentials, provider redirect refusal, bounded response sizes and content types, malformed SearXNG result filtering, phrase/exclusion preservation, and partial-engine status.
+9. The same browser request controller rejects superseded responses in an explicit race test.
+
+External discovery tests use a named mock adapter. HTTP security tests use controlled local servers on ephemeral ports; they do not contact metadata services. The DNS pinning implementation is present, but no external DNS-rebinding infrastructure was used. Multi-process queue contention and a live approved feed still need deployment-level checks.
+
+## Remaining integrations and boundaries
+
+| Milestone | Delivered | Remaining |
+| --- | --- | --- |
+| 1. Catalogue/API/UI | Versioned schema, lexical search, typed API, curated links, working reference client | Connect the actual existing website and its account system; neither was supplied |
+| 2. Discovery | Configurable SearXNG adapter, bounded jobs/polling, deduplication, persistence, partial statuses | Run a real self-hosted instance and verify engine access; no configured endpoint supplied |
+| 3. Catalogue growth | Durable schedule, reviewed sources, protected CLI/API, JSON-feed adapter, backoff/expiry | Configure approved real feeds and deployment supervision; unsupported websites remain link-only/candidates |
+| 4. Meaning/moments | Optional pgvector migration/provider contract/RRF, extractive full-transcript windows, visual-provider interface | Live embedding integration; real retained transcripts; model-based story reasoning; visual/audio implementation with authorised media |
+| 5. Feedback/evaluation | Private deduplicated feedback, bounded personal ranking, versioned rules, development metrics and held-out template | Independent human judgments and separately verified timing quality before learned global ranking |
+
+Docker CLI 29.7.2 is installed, but its Linux-engine pipe was absent. No containers were started, no public deployment occurred, and no live embedding/SearXNG call or paid model inference was made. A SearXNG immutable image digest still needs selection; the overlay explicitly requires it rather than inventing a working version. No claim of universal web coverage, automatic quality improvement, accurate visual moments, or free unlimited operation is made.
+
+## Startup and next checks
+
+The immediate local path is `npm run preview`. Production setup is in `README.md`; the API contract is in `docs/API.md`; migration, supervision, real-provider checks, backups and rollback are in `docs/DEPLOYMENT.md`.

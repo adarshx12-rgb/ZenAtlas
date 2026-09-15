@@ -1,0 +1,8 @@
+.env
+.data
+.git
+.agents
+.claude
+node_modules
+output
+tests

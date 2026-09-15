@@ -1,0 +1,20 @@
+{
+ "description":"Synthetic, agent-authored development judgments. Not a human-judged held-out benchmark. Never seed these records into the live catalogue.",
+ "records":[
+   {"key":"hospital","title":"Scary CCTV footage in an abandoned hospital","description":"Fictional TEST FIXTURE: a metadata lead for hospital CCTV, with no inspected visual evidence."},
+   {"key":"ghost","title":"Ghost stories with an unexpected plot twist","description":"Fictional TEST FIXTURE: metadata describes a ghost story. No setup or payoff has been verified."},
+   {"key":"bedroom","title":"A property tour showing a large bright bedroom","description":"Fictional TEST FIXTURE: property tour metadata mentioning a bedroom."},
+   {"key":"background","title":"A figure appearing in the background while the speaker does not notice","description":"Fictional TEST FIXTURE: this title is only a lead, not evidence that the event occurred."},
+   {"key":"kitchen","title":"Small kitchen renovation","description":"Fictional TEST FIXTURE: kitchen cabinets and cooking appliances."},
+   {"key":"garden","title":"Sunny garden flowers","description":"Fictional TEST FIXTURE: outdoor garden tour."}
+ ],
+ "queries":[
+   {"q":"Scary CCTV footage in an abandoned hospital","judgments":{"hospital":1}},
+   {"q":"Ghost stories with an unexpected plot twist","judgments":{"ghost":1}},
+   {"q":"A property tour showing a large bright bedroom","judgments":{"bedroom":1}},
+   {"q":"A figure appearing in the background while the speaker does not notice","judgments":{"background":1}},
+   {"q":"bedroom -kitchen","judgments":{"bedroom":1}},
+   {"q":"\"plot twist\"","judgments":{"ghost":1}},
+   {"q":"background figure","judgments":{"background":1}}
+ ]
+}

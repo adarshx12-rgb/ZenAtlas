@@ -1,0 +1,15 @@
+# Optional overlay: explicitly select an immutable official SearXNG image digest.
+services:
+  searxng:
+    image: ${SEARXNG_IMAGE:?Set SEARXNG_IMAGE to an official image with a verified sha256 digest}
+    restart: unless-stopped
+    environment:
+      SEARXNG_SECRET: ${SEARXNG_SECRET:?Set a random SEARXNG_SECRET}
+      SEARXNG_BASE_URL: http://localhost:8080/
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./deploy/searxng/settings.yml:/etc/searxng/settings.yml:ro
+      - searxng-cache:/var/cache/searxng
+volumes:
+  searxng-cache:
