@@ -54,6 +54,23 @@ test('bulk review applies one validated policy to many websites',async()=>{
  }finally{await app.close();await db.close();}
 });
 
+test('the admin page can switch viewer comment timestamps on, and a rejected field is named',async()=>{
+ const {db,app}=await setup();
+ try{
+   const headers={...write,...auth};
+   const source=(await db.query("SELECT id FROM sources WHERE domain='videos.example.com'")).rows[0].id;
+   const saved=await app.inject({method:'PATCH',url:`/api/admin/sources/${source}`,headers,payload:policy({viewer_signals:true,retention_days:30})});
+   assert.equal(saved.statusCode,200);
+   assert.equal((await db.query('SELECT policy FROM sources WHERE id=$1',[source])).rows[0].policy.viewer_signals,true);
+   const unknown=await app.inject({method:'PATCH',url:`/api/admin/sources/${source}`,headers,payload:policy({surprise:true})});
+   assert.equal(unknown.statusCode,400);assert.match(unknown.json().error.message,/Unrecognized key.*surprise/);
+   const retention=await app.inject({method:'PATCH',url:`/api/admin/sources/${source}`,headers,payload:policy({retention_days:0})});
+   assert.match(retention.json().error.message,/retention_days: /);
+   const publicError=await app.inject('/api/search?q=x');
+   assert.equal(publicError.json().error.message,'Check the query, filters, or request fields.','public errors stay generic');
+ }finally{await app.close();await db.close();}
+});
+
 test('trust rules can be created, listed and deleted over the admin API',async()=>{
  const {db,app}=await setup();
  try{

@@ -48,7 +48,12 @@ export async function createApp(db:DB,config:Config) {
    }
  });
  app.setErrorHandler((error:any,req,reply)=>{
-   if(error instanceof ZodError) return reply.code(400).send({error:{code:'invalid_request',message:'Check the query, filters, or request fields.'}});
+   if(error instanceof ZodError) {
+     // Administrators have already authenticated, so they get the failing field to fix; public clients get the generic text.
+     const issue=error.issues[0];
+     const detail=req.url.startsWith('/api/admin/')&&issue?` (${issue.path.length?`${issue.path.join('.')}: `:''}${issue.message})`:'';
+     return reply.code(400).send({error:{code:'invalid_request',message:`Check the query, filters, or request fields.${detail}`}});
+   }
    if(error instanceof ApiError) return reply.code(error.statusCode).send({error:{code:error.code,message:error.message}});
    if(error?.message==='unsafe_url') return reply.code(400).send({error:{code:'unsafe_url',message:'Use a public http(s) web address.'}});
    if(error.statusCode && error.statusCode<500) return reply.code(error.statusCode).send({error:{code:'invalid_request',message:'The request could not be accepted.'}});
