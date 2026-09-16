@@ -9,7 +9,8 @@ type Options = { timeoutMs?: number; maxBytes?: number; method?: 'GET'|'POST'|'H
  headers?: Record<string,string>; probe?: boolean; accept?: string };
 export interface ProbeResponse {status:number;url:string;redirects:{from:string;to:string;status:number}[]}
 export interface TextResponse {url:string;contentType:string;text:string}
-type Raw = {status:number;url:string;contentType:string;data:string;redirects:ProbeResponse['redirects']};
+export interface BinaryResponse {url:string;contentType:string;data:Buffer}
+type Raw = {status:number;url:string;contentType:string;data:Buffer;redirects:ProbeResponse['redirects']};
 
 // Pin the validated DNS answer into the connection. Redirects repeat validation and never inherit credentials.
 async function request(input: string, options: Options, defaultTypes: string[]): Promise<Raw> {
@@ -24,10 +25,10 @@ async function request(input: string, options: Options, defaultTypes: string[]):
    if (!trusted) publicURL(target);
    const remaining = deadline - (Date.now() - started);
    if (remaining <= 0) throw new UpstreamError('timeout');
-   const response = await new Promise<{status: number; location?: string; contentType: string; data: string}>((resolve, reject) => {
+   const response = await new Promise<{status: number; location?: string; contentType: string; data: Buffer}>((resolve, reject) => {
      let req: http.ClientRequest | undefined;
      const timer = setTimeout(() => { req?.destroy(); reject(new UpstreamError('timeout')); }, remaining);
-     const finish = (error?: Error, value?: {status: number; location?: string; contentType: string; data: string}) => {
+     const finish = (error?: Error, value?: {status: number; location?: string; contentType: string; data: Buffer}) => {
        clearTimeout(timer); if (error) reject(error); else resolve(value!);
      };
      void (async () => {
@@ -47,9 +48,9 @@ async function request(input: string, options: Options, defaultTypes: string[]):
        }, res => {
          const status = res.statusCode ?? 502;
          if (status >= 300 && status < 400 && res.headers.location) {
-           res.destroy(); finish(undefined, {status, location: res.headers.location, contentType: '', data: ''}); return;
+           res.destroy(); finish(undefined, {status, location: res.headers.location, contentType: '', data: Buffer.alloc(0)}); return;
          }
-         if(options.probe){res.destroy();finish(undefined,{status,contentType:'',data:''});return;}
+         if(options.probe){res.destroy();finish(undefined,{status,contentType:'',data:Buffer.alloc(0)});return;}
          if (status !== 200) { res.destroy(); finish(new UpstreamError(status === 429 ? 'rate_limited' : 'upstream_failure', status)); return; }
          const type = (res.headers['content-type'] ?? '').split(';')[0].trim().toLowerCase();
          if (!(options.contentTypes ?? defaultTypes).includes(type) ||
@@ -62,7 +63,7 @@ async function request(input: string, options: Options, defaultTypes: string[]):
            if (bytes > (options.maxBytes ?? 1024 * 1024)) { res.destroy(); finish(new UpstreamError('response_too_large')); }
            else chunks.push(chunk);
          });
-         res.on('end', () => finish(undefined, {status, contentType: type, data: Buffer.concat(chunks).toString('utf8')}));
+         res.on('end', () => finish(undefined, {status, contentType: type, data: Buffer.concat(chunks)}));
          res.on('error', () => finish(new UpstreamError('network_error')));
        });
        req.on('error', () => finish(new UpstreamError('network_error')));
@@ -84,12 +85,18 @@ async function request(input: string, options: Options, defaultTypes: string[]):
 export async function fetchJSON(input: string, options: Options = {}): Promise<any> {
  const response = await request(input, options, ['application/json','application/feed+json']);
  if(options.probe)return {status:response.status,url:response.url,redirects:response.redirects} satisfies ProbeResponse;
- try { return JSON.parse(response.data); } catch { throw new UpstreamError('malformed_response'); }
+ try { return JSON.parse(response.data.toString('utf8')); } catch { throw new UpstreamError('malformed_response'); }
 }
 
 export async function fetchText(input: string, options: Options = {}): Promise<TextResponse> {
  const response = await request(input, {accept: 'text/html,application/xhtml+xml;q=0.9,text/plain;q=0.8', ...options}, ['text/html','application/xhtml+xml']);
- return {url: response.url, contentType: response.contentType, text: response.data};
+ return {url: response.url, contentType: response.contentType, text: response.data.toString('utf8')};
+}
+
+export async function fetchImage(input: string, options: Options = {}): Promise<BinaryResponse> {
+ const response = await request(input, {accept: 'image/avif,image/webp,image/png,image/jpeg,image/gif,image/*;q=0.8', maxBytes: 3*1024*1024, ...options},
+   ['image/jpeg','image/png','image/webp','image/gif','image/avif']);
+ return {url: response.url, contentType: response.contentType, data: response.data};
 }
 
 export async function probeURL(url:string,timeoutMs=5000):Promise<ProbeResponse>{

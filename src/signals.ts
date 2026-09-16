@@ -123,9 +123,11 @@ const unavailable = (provider: string, error: unknown, message: string): Provide
 
 // Enriches ranked discovery results with YouTube details and viewer timestamps, Reddit mentions and an AI relevance
 // judgement, then re-orders them. Every step is optional and a failing step leaves the others' results intact.
+// previews: first-screen captures of checked web pages by result id, kept only as long as the searches that show them.
 export async function applySignals(db: DB, config: Config, query: string, results: Result[], deps: SignalDeps = {}, context?: SignalContext) {
  const providers: ProviderStatus[] = [];
- if (!results.length) return {results, providers};
+ const previews = new Map<string,Buffer>();
+ if (!results.length) return {results, providers, previews};
  const rows = (await db.query(`SELECT c.id,c.duration,(s.policy->>'viewer_signals')::boolean AS viewer_signals FROM content c
    JOIN sources s ON s.id=c.source_id WHERE c.id=ANY($1::uuid[]) AND s.status='active'`, [results.map(r => r.id)])).rows;
  const stored = new Map(rows.map(r => [r.id, r]));
@@ -172,14 +174,16 @@ export async function applySignals(db: DB, config: Config, query: string, result
  const webResults = context ? results.filter(r => context.targets.get(r.id) === 'web' && !youtubeId(r.canonical_url)).slice(0, config.PAGE_CHECKS) : [];
  const pageTask = async (): Promise<ProviderStatus|null> => {
    if (!pages || !webResults.length) return null;
-   let checked = 0;
+   let checked = 0, rendered = 0;
    await mapLimit(webResults, 8, async r => {
      const evidence = await pages.check(r.canonical_url);
      const e = info(r.id); e.page = evidence; e.badges.push(...evidence.badges);
      if (evidence.status === 'checked') checked++;
+     if (evidence.rendered) rendered++;
+     if (evidence.screenshot) previews.set(r.id, evidence.screenshot);
    });
    // Blocked or script-only pages are common, so only a total failure is reported as a problem.
-   return checked ? {provider: 'pages', status: 'ok', message: `${checked} of ${webResults.length} result pages were checked.`}
+   return checked ? {provider: 'pages', status: 'ok', message: `${checked} of ${webResults.length} result pages were checked${rendered ? `, ${rendered} in a browser` : ''}.`}
      : {provider: 'pages', status: 'unavailable', message: 'Result pages could not be checked; websites are ranked from search snippets.'};
  };
  const [youtubeStatus, reddit, pageStatus] = await Promise.all([youtubeTask(), redditTask(), pageTask()]);
@@ -210,13 +214,15 @@ export async function applySignals(db: DB, config: Config, query: string, result
        moments: (e?.stored ?? []).map((s, j) => ({key: `${key}m${j + 1}`,
          at: formatSeconds(Math.min(...s.cluster.mentions.map(m => m.seconds))), viewers_said: s.cluster.mentions.map(m => m.excerpt)})),
        discussions: (e?.discussions ?? []).map(t => t.title),
-       ...(page ? {page: {status: page.status, title: page.title, description: page.description, text: page.text, libraries: page.libraries}} : {})};
+       ...(page ? {page: {status: page.status, title: page.title, description: page.description, text: page.text, libraries: page.libraries,
+         screenshot: previews.has(r.id)}} : {})};
    });
+   const screenshots = new Map([...previews].flatMap(([id, image]) => keys.has(id) ? [[keys.get(id)!, image] as const] : []));
    // Smaller batches in parallel answer faster, and a failed batch only leaves its own results unjudged.
    const size = config.JUDGE_BATCH_SIZE;
    const batches = Array.from({length: Math.ceil(candidates.length/size)}, (_, b) => candidates.slice(b*size, (b + 1)*size));
    const settled = await Promise.allSettled(batches.map(batch =>
-     judge.judge(query, batch, context ? {kind: context.kind, criteria: context.criteria} : undefined)));
+     judge.judge(query, batch, context ? {kind: context.kind, criteria: context.criteria} : undefined, screenshots)));
    const byKey = new Map<string,Verdict>();
    for (const s of settled) if (s.status === 'fulfilled') for (const [key, v] of s.value.verdicts) { byKey.set(key, v); modelOf.set(key, s.value.model); }
    const failed = settled.flatMap(s => s.status === 'rejected' ? [s.reason] : []);
@@ -240,8 +246,12 @@ export async function applySignals(db: DB, config: Config, query: string, result
      duration: r.duration ?? d?.duration ?? null, published_at: r.published_at ?? d?.publishedAt ?? null, creator: r.creator ?? (d?.channelTitle || null),
      moments: [...r.moments, ...chosen].sort((a, b) => a.start_seconds - b.start_seconds),
      badges: e?.badges.length ? [...new Set(e.badges)] : r.badges,
+     ...(previews.has(r.id) ? {preview: true} : {}),
      judgement: v ? {relevance: v.relevance, reason: v.reason, model: modelOf.get(keys.get(r.id)!) ?? ''} : (r.judgement ?? null)}};
  });
  const kept = scored.filter(s => !s.dropped);
- return {results: (kept.length ? kept : scored).sort((a, b) => b.score - a.score).map(s => s.result), providers};
+ const ranked = (kept.length ? kept : scored).sort((a, b) => b.score - a.score).map(s => s.result);
+ const shown = new Set(ranked.map(r => r.id));
+ for (const id of previews.keys()) if (!shown.has(id)) previews.delete(id);
+ return {results: ranked, providers, previews};
 }

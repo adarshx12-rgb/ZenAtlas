@@ -1,13 +1,32 @@
 import type { Config } from './config.js';
 import { fetchText, UpstreamError, type TextResponse } from './http.js';
+import { BrowserRenderer, type Renderer } from './render.js';
+import { Trafilatura, type TextExtractor } from './extract.js';
 
 const AGENT = 'zenatlas';
+const TEXT_CHARS = 800;
 export interface PageEvidence {
  status: 'checked'|'robots_disallowed'|'unavailable';
  title: string|null; description: string|null; text: string|null; libraries: string[]; badges: string[];
+ rendered?: boolean; screenshot?: Buffer|null;
 }
 export interface PageCheck { check(url: string): Promise<PageEvidence> }
+// renders: at most this many pages per checker are opened in the browser (default PAGE_RENDERS).
+export interface PageTools { renderer?: Renderer; extractor?: TextExtractor; renders?: number }
 type Transport = (url: string, options: Parameters<typeof fetchText>[1]) => Promise<TextResponse>;
+
+let shared: {key: string; tools: PageTools}|undefined;
+// One browser and one text helper serve every search in this worker process.
+export function pageTools(config: Config): PageTools {
+ const key = `${config.PAGE_RENDERS}|${config.PAGE_RENDER_TIMEOUT_MS}|${config.PAGE_TEXT_PYTHON}`;
+ if (shared?.key !== key) {
+   void shared?.tools.renderer?.close();
+   shared?.tools.extractor?.close();
+   shared = {key, tools: {renderer: config.PAGE_RENDERS > 0 ? new BrowserRenderer(config.PAGE_RENDER_TIMEOUT_MS) : undefined,
+     extractor: config.PAGE_TEXT_PYTHON ? new Trafilatura(config.PAGE_TEXT_PYTHON) : undefined}};
+ }
+ return shared.tools;
+}
 
 // Library names found in page source. A match is evidence; no match proves nothing, since many sites bundle their code.
 const LIBRARIES: {name: string; group: '3D'|'Motion'|'Video'|null; pattern: RegExp}[] = [
@@ -45,7 +64,13 @@ const clean = (text: string|undefined|null, max: number) => {
  return value ? value.slice(0, max) : null;
 };
 
-export function extractPage(html: string): Omit<PageEvidence,'status'> {
+const badgesFor = (names: string[]) => (['3D', 'Motion', 'Video'] as const).flatMap(group => {
+ const found = LIBRARIES.filter(l => l.group === group && names.includes(l.name)).map(l => l.name);
+ return found.length ? [group === 'Video' ? 'Background video' : `${group}: ${found.slice(0, 3).join(', ')}`] : [];
+});
+
+// scripts: script URLs a browser loaded; detected: library names a browser saw running (see render.ts).
+export function extractPage(html: string, seen: {scripts?: string[]; detected?: string[]} = {}): Omit<PageEvidence,'status'> {
  const meta = new Map<string,string>();
  for (const tag of html.match(/<meta\b[^>]*>/gi) ?? []) {
    const attrs = Object.fromEntries([...tag.matchAll(/([\w:-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g)].map(m => [m[1].toLowerCase(), m[2] ?? m[3]]));
@@ -54,14 +79,11 @@ export function extractPage(html: string): Omit<PageEvidence,'status'> {
  }
  const visible = html.replace(/<!--[\s\S]*?-->/g, ' ').replace(/<(script|style|noscript|svg|template)\b[\s\S]*?<\/\1\s*>/gi, ' ')
    .replace(/<[^>]+>/g, ' ');
- const libraries = LIBRARIES.filter(l => l.pattern.test(html));
- const badges = (['3D', 'Motion', 'Video'] as const).flatMap(group => {
-   const names = libraries.filter(l => l.group === group).map(l => l.name);
-   return names.length ? [group === 'Video' ? 'Background video' : `${group}: ${names.slice(0, 3).join(', ')}`] : [];
- });
+ const libraries = LIBRARIES.filter(l => l.pattern.test(html) || seen.scripts?.some(url => l.pattern.test(url)) || seen.detected?.includes(l.name))
+   .map(l => l.name);
  return {title: clean(/<title\b[^>]*>([\s\S]*?)<\/title>/i.exec(html)?.[1] ?? meta.get('og:title'), 200),
-   description: clean(meta.get('description') ?? meta.get('og:description'), 400), text: clean(visible, 800),
-   libraries: libraries.map(l => l.name), badges};
+   description: clean(meta.get('description') ?? meta.get('og:description'), 400), text: clean(visible, TEXT_CHARS),
+   libraries, badges: badgesFor(libraries)};
 }
 
 // Longest matching rule wins and Allow wins a tie, as in RFC 9309. A group naming this crawler replaces the "*" group.
@@ -94,7 +116,8 @@ export function robotsAllows(robots: string, path: string, agent = AGENT): boole
 
 export class PageChecker implements PageCheck {
  private robots = new Map<string, Promise<string|null|false>>();
- constructor(private config: Config, private transport: Transport = fetchText) {}
+ private renders = 0;
+ constructor(private config: Config, private transport: Transport = fetchText, private tools: PageTools = pageTools(config)) {}
  // null: no usable robots.txt, so crawling is allowed; false: robots.txt could not be read, so the page is skipped.
  private rules(origin: string) {
    let pending = this.robots.get(origin);
@@ -115,7 +138,21 @@ export class PageChecker implements PageCheck {
    if (robots !== null && !robotsAllows(robots, target.pathname + target.search)) return {status: 'robots_disallowed', ...empty};
    try {
      const page = await this.transport(url, {maxBytes: 1536*1024, timeoutMs: this.config.PAGE_TIMEOUT_MS, redirects: 3});
-     return {status: 'checked', ...extractPage(page.text)};
+     const rendered = await this.render(page.url);
+     const source = extractPage(page.text), live = rendered && extractPage(rendered.html, rendered);
+     const libraries = LIBRARIES.map(l => l.name).filter(name => source.libraries.includes(name) || !!live?.libraries.includes(name));
+     // Main-content text (trafilatura) skips menus and banners; the regex text is the fallback.
+     const main = await this.tools.extractor?.text(rendered?.html ?? page.text) ?? null;
+     return {status: 'checked', title: live?.title ?? source.title, description: live?.description ?? source.description,
+       text: clean(main, TEXT_CHARS) ?? live?.text ?? source.text, libraries, badges: badgesFor(libraries),
+       rendered: !!rendered, screenshot: rendered?.screenshot ?? null};
    } catch { return {status: 'unavailable', ...empty}; }
+ }
+ // Only pages that robots.txt allows and that answered a plain request are opened in the browser.
+ private async render(url: string) {
+   const {renderer} = this.tools;
+   if (!renderer || this.renders >= (this.tools.renders ?? this.config.PAGE_RENDERS)) return null;
+   this.renders++;
+   try { return await renderer.render(url); } catch { return null; }
  }
 }

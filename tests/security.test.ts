@@ -5,7 +5,8 @@ import { fetchJSON } from '../src/http.js';
 import { SearXNG } from '../src/providers.js';
 import { searchInput } from '../src/types.js';
 import { testConfig } from './helpers.js';
-import { createServer } from 'node:http';
+import { createServer, request as httpRequest } from 'node:http';
+import { publicDestination, startEgress } from '../src/egress.js';
 import { reciprocalRankFusion } from '../src/ranking.js';
 
 test('URL validation blocks private, metadata and unsafe schemes while preserving content identity',async()=>{
@@ -31,6 +32,40 @@ test('fixed internal providers reject redirects and bound response size/type',as
    const probe=await fetchJSON(`${origin}/html`,{trustedOrigin:origin,method:'HEAD',probe:true});
    assert.equal(probe.status,200,'health probes read headers without parsing HTML as JSON');
  }finally{await new Promise<void>(r=>server.close(()=>r()));}
+});
+test('the renderer egress proxy only reaches public web ports and forwards what its policy allows',async()=>{
+ for(const [host,port] of [['127.0.0.1',443],['localhost',443],['10.1.2.3',80],['169.254.169.254',80],['[::1]',443],['example.com',8080],['metadata.internal',443]] as const)
+   await assert.rejects(publicDestination(host,port),`${host}:${port}`);
+ let hits:string[]=[];
+ const target=createServer((req,res)=>{hits.push(`${req.headers.host} ${req.url}`);res.end('hello');});
+ await new Promise<void>(r=>target.listen(0,'127.0.0.1',r));
+ const port=(target.address() as any).port;
+ const strict=await startEgress();
+ const allowing=await startEgress(async(host,p)=>{if(host==='allowed.test'&&p===port)return {address:'127.0.0.1',family:4};throw new Error('blocked');});
+ const proxyPort=(egress:{server:string})=>Number(new URL(egress.server).port);
+ const get=(egress:{server:string},url:string)=>new Promise<{status:number;body:string}>((resolve,reject)=>
+   httpRequest({host:'127.0.0.1',port:proxyPort(egress),path:url},res=>{let body='';res.on('data',c=>body+=c).on('end',()=>resolve({status:res.statusCode!,body}));})
+     .on('error',reject).end());
+ const tunnel=(egress:{server:string},authority:string)=>new Promise<{status:number;socket:import('node:net').Socket}>((resolve,reject)=>
+   httpRequest({host:'127.0.0.1',port:proxyPort(egress),method:'CONNECT',path:authority}).on('connect',(res,socket)=>resolve({status:res.statusCode!,socket}))
+     .on('error',reject).end());
+ try{
+   assert.equal((await get(strict,`http://127.0.0.1:${port}/private`)).status,403);
+   const refused=await tunnel(strict,`127.0.0.1:${port}`);refused.socket.destroy();
+   assert.equal(refused.status,403);
+   assert.deepEqual(hits,[],'nothing reached the loopback service');
+   assert.deepEqual(await get(allowing,`http://allowed.test:${port}/page?q=1`),{status:200,body:'hello'});
+   assert.deepEqual(hits,[`allowed.test:${port} /page?q=1`],'the original host name is forwarded');
+   const open=await tunnel(allowing,`allowed.test:${port}`);
+   assert.equal(open.status,200);
+   const reply=await new Promise<string>(resolve=>{let data='';open.socket.on('data',c=>data+=c).on('end',()=>resolve(data));
+     open.socket.end(`GET /tunnelled HTTP/1.1\r\nHost: allowed.test\r\nConnection: close\r\n\r\n`);});
+   assert.match(reply,/200 OK[\s\S]*hello$/);
+   hits=[];
+   const other=await tunnel(allowing,`127.0.0.1:${port}`);other.socket.destroy();
+   assert.equal(other.status,403);
+   assert.deepEqual(hits,[]);
+ }finally{await strict.close();await allowing.close();await new Promise<void>(r=>{target.closeAllConnections();target.close(()=>r());});}
 });
 test('SearXNG validates individual results, preserves query phrases and reports partial engines',async()=>{
  let observed='';const adapter=new SearXNG({...testConfig,SEARXNG_BASE_URL:'http://localhost:8080'},async(url)=>{

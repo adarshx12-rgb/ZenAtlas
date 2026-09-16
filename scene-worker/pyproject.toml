@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "zenatlas-scenes"
 version = "0.1.0"
-description = "Gemini scene analysis worker for the ZenAtlas catalogue"
+description = "Gemini scene analysis worker and page text helper for the ZenAtlas catalogue"
 requires-python = ">=3.11"
 dependencies = [
   "google-genai>=2.23,<3",
@@ -16,6 +16,7 @@ dependencies = [
 
 [project.optional-dependencies]
 transcribe = ["faster-whisper>=1.2,<2"]
+pages = ["trafilatura>=2.2,<3"]
 test = ["pytest>=9,<10", "pgserver>=0.1.4,<0.2", "numpy>=2"]
 
 [project.scripts]

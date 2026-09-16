@@ -43,6 +43,9 @@ test('PostgreSQL catalogue/API, ownership, filters, evidence and stable paginati
    assert.equal((await app.inject({url:`/api/search/${data.search_id}`,headers:{cookie}})).statusCode,200);
    assert.equal((await app.inject('/api/search?q=x&unsupported=true')).statusCode,400);
    assert.equal((await app.inject('/api/admin/sources')).statusCode,403);
+   assert.equal((await app.inject('/api/thumbnail')).statusCode,400,'url is required');
+   const badThumb=await app.inject('/api/thumbnail?url=http://127.0.0.1/x.jpg');
+   assert.equal(badThumb.statusCode,400);assert.equal(badThumb.json().error.code,'unsafe_url');
    const feedback={method:'POST' as const,url:'/api/feedback',headers:{cookie,'x-requested-with':'CreatorSearch'},payload:{search_id:data.search_id,content_id:first.id,useful:true}};
    assert.equal((await app.inject(feedback)).statusCode,204);assert.equal((await app.inject(feedback)).statusCode,204);
    assert.equal((await db.query('SELECT * FROM feedback')).rows.length,1);

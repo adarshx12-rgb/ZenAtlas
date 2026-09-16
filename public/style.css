@@ -12,4 +12,9 @@ main.wide{max-width:1240px}h1.compact{font-size:40px;letter-spacing:-1.5px;margi
 .pill{display:inline-block;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:600}.status-active{background:#dcefd8;color:#1f5a33}.status-candidate{background:#fff1d9;color:#7a5412}.status-paused{background:#e6e9f2;color:#3b4a6b}.status-rejected{background:#fbe4e1;color:#8a2c20}
 .health-healthy{color:#2d6a3e}.health-degraded{color:#9a6a12}.health-down,.health-blocked{color:#9b3426}.health-unknown{color:#7b857f}
 .pager{display:flex;gap:12px;align-items:center;justify-content:flex-end;margin:10px 0 36px;font-size:13px;color:#5c7069}.pager button{margin:0}
+#results.thumb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;align-items:start}
+.thumb-grid .card{padding:14px}
+.thumb-wrap{position:relative;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:linear-gradient(135deg,#e4e9e0,#cfd8c8);margin:0 0 12px}
+.thumb-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb-wrap .badge.duration{position:absolute;right:6px;bottom:6px;margin:0;background:#17282bcc;color:#fff}
 dialog{border:1px solid #dde3d9;border-radius:14px;padding:0;max-width:520px;width:calc(100% - 32px);box-shadow:0 20px 60px #1a30242e}dialog::backdrop{background:#17282b66}dialog form{margin:0;padding:22px 24px;display:grid;gap:12px}dialog h3{margin:0;font-size:19px}#approve-options{display:grid;gap:12px}.dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:6px}.dialog-actions button{margin:0}#sign-out{margin:0}

@@ -54,6 +54,8 @@ export interface Result {
  evidence: 'metadata_match'|EvidenceType; moments: Moment[];
  origin: 'catalogue'|'discovery'; verified_at: string|null; scene_analysis?: SceneAnalysisStatus|null;
  badges?: string[]; judgement?: Judgement|null;
+ // A first-screen capture of the page is available from /api/search/:id/previews/:result while the search lasts.
+ preview?: boolean;
 }
 export interface SearchResponse {
  query: string; search_id: string; status: 'complete'|'discovering'|'partial'|'cancelled';

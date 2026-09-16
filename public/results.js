@@ -1,0 +1,87 @@
+import {SearchController} from './search-controller.js';
+const form=document.querySelector('#search-form'),results=document.querySelector('#results'),status=document.querySelector('#status');
+const notices=document.querySelector('#notices'),more=document.querySelector('#more'),retry=document.querySelector('#retry'),cancel=document.querySelector('#cancel');
+const controller=new SearchController();let searchId=null,next=null,params=null,pollTimer=null,current=null;const seen=new Set();
+const ready=fetch('/api/session',{credentials:'same-origin'}).then(r=>{if(!r.ok)throw Error('The search service is unavailable.');});
+ready.catch(()=>{});
+function node(tag,text,className){const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(className)el.className=className;return el;}
+function safeURL(value){try{const u=new URL(value);return ['https:','http:'].includes(u.protocol)&&!u.username&&!u.password?u:null;}catch{return null;}}
+function link(url,text){const u=safeURL(url);if(!u)throw Error('Invalid link');const a=node('a',text);a.href=u.href;a.target='_blank';a.rel='noopener noreferrer';return a;}
+async function api(url,options={}){const response=await fetch(url,{credentials:'same-origin',...options});if(!response.ok){const data=await response.json().catch(()=>null);throw Error(data?.error?.message??'Search is unavailable. Please retry.');}return response.status===204?null:response.json();}
+function duration(seconds){const s=Math.round(seconds),h=Math.floor(s/3600),m=Math.floor(s%3600/60),r=String(s%60).padStart(2,'0');return h?`${h}:${String(m).padStart(2,'0')}:${r}`:`${m}:${r}`;}
+function thumbnail(item){
+ const wrap=node('div',undefined,'thumb-wrap');
+ const source=safeURL(item.thumbnail);
+ const src=source?`/api/thumbnail?${new URLSearchParams({url:source.href})}`:item.preview&&searchId?`/api/search/${encodeURIComponent(searchId)}/previews/${encodeURIComponent(item.id)}`:null;
+ if(src){const img=node('img');img.src=src;img.alt='';img.loading='lazy';img.addEventListener('error',()=>img.remove());wrap.append(img);}
+ if(item.duration)wrap.append(node('span',duration(item.duration),'badge duration'));
+ return wrap;
+}
+function card(item){
+ const article=node('article',undefined,'card');article.dataset.id=item.id;
+ article.append(thumbnail(item));
+ article.append(node('div',`${item.source_name} · ${item.origin==='catalogue'?'Catalogue':'External discovery'}`,'meta'));
+ const heading=node('h3');heading.append(link(item.canonical_url,item.title));article.append(heading);
+ const details=[item.creator,item.duration?duration(item.duration):null,item.published_at?new Date(item.published_at).toLocaleDateString():null].filter(Boolean);
+ if(details.length)article.append(node('div',details.join(' · '),'details'));
+ for(const badge of item.badges??[])article.append(node('span',badge,'badge highlight'));
+ article.append(node('span',item.evidence.replaceAll('_',' '),'badge'),node('span',`Rights: ${item.rights_status}`,'badge'));
+ if(item.judgement)article.append(node('p',`Why this matches (${item.judgement.relevance}/10): ${item.judgement.reason}`,'why'));
+ if(item.description)article.append(node('p',item.description));
+ for(const moment of item.moments){
+  const passage=node('div',undefined,'moment');
+  if(moment.evidence_type==='viewer_timestamp'){
+   passage.append(node('strong',`Viewers point to ${duration(moment.start_seconds)} – ${duration(moment.end_seconds)}`));
+   for(const said of moment.summary.split(' · '))passage.append(node('p',`“${said}”`,'quote'));
+  }else{
+   passage.append(node('strong',`${moment.start_seconds}s – ${moment.end_seconds}s · ${moment.evidence_type.replaceAll('_',' ')}${moment.scene?` · ${moment.scene.model}`:''}`));
+   passage.append(node('p',moment.summary));
+  }
+  if(moment.scene){
+   for(const tag of moment.scene.tags)passage.append(node('span',tag,'badge'));
+   if(moment.scene.dialogue)passage.append(node('p',`Subtitles: “${moment.scene.dialogue}”`,'quote'));
+   const offset=moment.scene.timeline_offset_seconds;
+   passage.append(node('div',`Version ${moment.scene.media_version}${offset?` · media ${moment.scene.media_start_seconds}s – ${moment.scene.media_end_seconds}s, offset ${offset>0?'+':''}${offset}s`:''}`,'meta'));
+  }
+  const url=new URL(item.canonical_url);if(url.hostname==='www.youtube.com'&&url.pathname==='/watch'){url.searchParams.set('t',String(Math.floor(moment.start_seconds)));passage.append(link(url.href,'Open timestamp ↗'));}
+  article.append(passage);
+ }
+ if(item.scene_analysis&&item.scene_analysis.status!=='complete')article.append(node('p',item.scene_analysis.message,'notice'));
+ const message=node('span','');
+ for(const [text,useful] of [['Useful',true],['Not useful',false]]){const button=node('button',text,'secondary');
+  const cardSearchId=searchId;button.addEventListener('click',async()=>{button.disabled=true;try{await api('/api/feedback',{method:'POST',headers:{'Content-Type':'application/json','X-Requested-With':'CreatorSearch'},body:JSON.stringify({search_id:cardSearchId,content_id:item.id,useful})});message.textContent='Feedback saved';}catch(error){message.textContent=error.message;}finally{button.disabled=false;}});article.append(button);}
+ article.append(message);return article;
+}
+function render(data,paging=false){searchId=data.search_id;for(const item of data.results){if(!seen.has(item.id)){seen.add(item.id);try{results.append(card(item));}catch{/* Invalid links are not rendered. */}}}
+ if(!paging){notices.replaceChildren(...data.providers.filter(p=>p.status!=='ok').map(p=>node('p',p.message,'notice')));}
+ next=data.next_cursor;more.hidden=!data.has_more;cancel.hidden=data.status!=='discovering';
+ const countLabel=`${seen.size} ${seen.size===1?'result':'results'}`;
+ status.textContent=data.status==='discovering'?`${countLabel} so far. Searching external sources…`:seen.size?`${countLabel} · ${data.status==='partial'?'Some search services are unavailable':'Search complete'}`:data.status==='partial'?'No catalogue matches. Discovery is unavailable or incomplete.':'No matching results. Try another query or broader filters.';
+}
+async function poll(token,count=0){if(count>=40||!controller.current(token.generation)){cancel.hidden=true;return;}
+ try{const data=await api(`/api/search/${searchId}`,{signal:token.signal});if(!controller.current(token.generation))return;
+  // Keep the currently loaded pagination cursor: polling the first page must not rewind later pages.
+  const oldNext=next;render(data);if(oldNext){next=oldNext;more.hidden=false;}
+  if(data.status==='discovering')pollTimer=setTimeout(()=>poll(token,count+1),1500);
+ }catch(error){if(controller.current(token.generation)){status.textContent=error.message;retry.hidden=false;}}
+}
+async function search(){clearTimeout(pollTimer);const previous=searchId;current=controller.begin();const token=current;
+ if(previous)void api(`/api/search/${previous}`,{method:'DELETE',headers:{'X-Requested-With':'CreatorSearch'}}).catch(()=>{});
+ searchId=null;next=null;seen.clear();results.replaceChildren();notices.replaceChildren();more.hidden=true;retry.hidden=true;cancel.hidden=true;status.textContent='Searching the catalogue…';
+ params=new URLSearchParams([...new FormData(form)].filter(([,v])=>v!==''));params.set('limit','20');
+ try{await ready;const data=await api(`/api/search?${params}`,{signal:token.signal});if(!controller.current(token.generation))return;render(data);if(data.status==='discovering')pollTimer=setTimeout(()=>poll(token),1500);}
+ catch(error){if(controller.current(token.generation)){status.textContent=error.message;retry.hidden=false;}}
+}
+function applyParamsFromURL(){for(const [key,value] of new URLSearchParams(window.location.search)){const field=form.elements.namedItem(key);if(field)field.value=value;}}
+function runFromURL(){applyParamsFromURL();if(form.elements.namedItem('q').value)void search();else status.textContent='Enter a query to search the catalogue.';}
+form.addEventListener('submit',event=>{event.preventDefault();
+ const next=new URLSearchParams([...new FormData(form)].filter(([,v])=>v!==''));
+ window.history.pushState(null,'',`/results.html?${next}`);
+ void search();
+});
+retry.addEventListener('click',()=>void search());
+more.addEventListener('click',async()=>{if(!next)return;const token=current;more.disabled=true;const page=new URLSearchParams(params);page.set('cursor',next);
+ try{const data=await api(`/api/search?${page}`,{signal:token.signal});if(controller.current(token.generation))render(data,true);}catch(error){if(controller.current(token.generation))status.textContent=error.message;}finally{more.disabled=false;}});
+cancel.addEventListener('click',()=>{clearTimeout(pollTimer);controller.stop();cancel.hidden=true;status.textContent='Discovery updates stopped. Your current results remain available.';if(searchId)void api(`/api/search/${searchId}`,{method:'DELETE',headers:{'X-Requested-With':'CreatorSearch'}}).catch(()=>{});});
+window.addEventListener('popstate',runFromURL);
+runFromURL();

@@ -7,7 +7,10 @@ import {rankDiscovery} from '../src/ranking.js';
 import {SearXNG} from '../src/providers.js';
 import {UpstreamError} from '../src/http.js';
 import {SearchService} from '../src/search.js';
-import {workOnce} from '../src/worker.js';
+import {workOnce,schedule} from '../src/worker.js';
+import {createApp} from '../src/app.js';
+import type {Renderer} from '../src/render.js';
+import type {TextExtractor} from '../src/extract.js';
 import {contentInput,searchInput,type SourceAdapter} from '../src/types.js';
 import type {Judge,JudgeCandidate,JudgeContext} from '../src/judge.js';
 
@@ -82,6 +85,65 @@ test('page checks read robots.txt once per site and never fetch disallowed or un
  assert.equal((await checker.check('https://down.example/a')).status,'unavailable');
  assert.deepEqual(fetched,['https://open.example/robots.txt','https://open.example/a','https://open.example/broken',
    'https://rules.example/robots.txt','https://rules.example/public','https://down.example/robots.txt']);
+});
+
+test('page checks merge browser evidence, prefer main-content text and cap browser renders',async()=>{
+ const transport=async(url:string)=>{
+   if(new URL(url).pathname==='/robots.txt')throw new UpstreamError('upstream_failure',404);
+   return {url:url.replace('http:','https:'),contentType:'text/html',text:'<title>Shell</title><div id="app"></div><script src="/assets/index-4f2a.js"></script>'};
+ };
+ const rendered:string[]=[];
+ const renderer:Renderer={async render(url){rendered.push(url);if(url.includes('broken'))throw new Error('render_failed');
+   return {url,html:'<html><head><title>Nova — WebGL studio</title><meta name="description" content="Live 3D"></head><body><nav>Home</nav><canvas></canvas></body></html>',
+     scripts:['https://cdn.example/gsap.min.js'],detected:['three.js','WebGL','Canvas','Not a library'],screenshot:Buffer.from('jpeg')};},async close(){}};
+ const sent:string[]=[];
+ const extractor:TextExtractor={async text(html){sent.push(html);return html.includes('Nova')?'We build   real-time worlds.':null;},close(){}};
+ const checker=new PageChecker(testConfig,transport as any,{renderer,extractor,renders:2});
+ const first=await checker.check('http://a.example/');
+ assert.deepEqual({...first,screenshot:first.screenshot?.toString()},{status:'checked',title:'Nova — WebGL studio',description:'Live 3D',
+   text:'We build real-time worlds.',libraries:['three.js','WebGL','GSAP','Canvas'],badges:['3D: three.js, WebGL','Motion: GSAP'],rendered:true,screenshot:'jpeg'});
+ const broken=await checker.check('http://b.example/broken');
+ assert.deepEqual([broken.status,broken.title,broken.text,broken.rendered,broken.screenshot],['checked','Shell','Shell',false,null],
+   'a failed render keeps the plain check and its visible text');
+ const third=await checker.check('http://c.example/');
+ assert.equal(third.rendered,false);
+ assert.deepEqual(rendered,['https://a.example/','https://b.example/broken'],'the final address is rendered, at most twice per checker');
+ assert.equal(sent.length,3);assert.match(sent[0],/Nova/);assert.match(sent[1],/Shell/);
+ const plain=new PageChecker(testConfig,transport as any,{});
+ assert.equal((await plain.check('http://d.example/')).rendered,false);
+});
+
+test('browser previews are stored with the discovery job, shown only to the search owner, and expire',async()=>{
+ const db=await database();
+ const config={...testConfig,SEARXNG_BASE_URL:'http://localhost:8080',PAGE_CHECKS:20};
+ const app=await createApp(db,config);
+ try{
+   const adapter:SourceAdapter={name:'mock',capabilities:{transcripts:false,comments:false,embeds:false,accessible_media:false},
+     async search(){return {results:[contentInput.parse({url:'https://studio.example.net/',title:'Studio websites with 3D'}),
+       contentInput.parse({url:'https://blog.example.org/post',title:'Blog about studio websites'})],next_cursor:null,status:{provider:'mock',status:'ok',message:'Mocked provider'}};}};
+   const planner:Planner={async plan(query){return {kind:'websites',searches:[{query,target:'web'}],criteria:[],model:null};}};
+   const image=Buffer.from([0xff,0xd8,0xff,0xe0,1,2,3,0xff,0xd9]);
+   const pages:PageCheck={async check(url){return {status:'checked',title:null,description:null,text:null,libraries:[],badges:[],
+     rendered:true,screenshot:url.includes('studio')?image:null};}};
+   const started=await app.inject('/api/search?q=studio%20websites&mode=refresh');
+   const cookie=String(started.headers['set-cookie']).split(';')[0];
+   await workOnce(db,config,[adapter],undefined,{planner,pages});
+   const done=(await app.inject({url:`/api/search/${started.json().search_id}`,headers:{cookie}})).json();
+   const studio=done.results.find((r:any)=>r.canonical_url.includes('studio')),blog=done.results.find((r:any)=>r.canonical_url.includes('blog'));
+   assert.equal(studio.preview,true);assert.equal(blog.preview,undefined);
+   const url=`/api/search/${done.search_id}/previews/${studio.id}`;
+   const shown=await app.inject({url,headers:{cookie}});
+   assert.equal(shown.statusCode,200);assert.equal(shown.headers['content-type'],'image/jpeg');
+   assert.deepEqual(shown.rawPayload,image);assert.match(String(shown.headers['cache-control']),/^private/);
+   assert.equal((await app.inject(url)).statusCode,404,'another visitor cannot read it');
+   assert.equal((await app.inject({url:`/api/search/${done.search_id}/previews/${blog.id}`,headers:{cookie}})).statusCode,404);
+   assert.equal((await app.inject({url:`/api/search/${done.search_id}/previews/not-a-uuid`,headers:{cookie}})).statusCode,400);
+   await db.query(`UPDATE sources SET status='rejected' WHERE domain='studio.example.net'`);
+   assert.equal((await app.inject({url,headers:{cookie}})).statusCode,404,'a rejected source shows nothing');
+   await db.query(`UPDATE page_previews SET created_at=now()-interval '41 minutes'`);
+   await schedule(db,config);
+   assert.equal((await db.query('SELECT count(*)::int AS n FROM page_previews')).rows[0].n,0,'previews last one search lifetime past the job cache');
+ }finally{await app.close();await db.close();}
 });
 
 test('planned leads are scored against the query that found them, and agreement between searches counts',async()=>{

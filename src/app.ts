@@ -7,6 +7,8 @@ import { z, ZodError } from 'zod';
 import type { DB } from './db.js';
 import type { Config } from './config.js';
 import { SearchService, ApiError } from './search.js';
+import type { Result } from './types.js';
+import { fetchImage, UpstreamError } from './http.js';
 import { takeBudget } from './budgets.js';
 import { setSourcePolicy, sourcePolicy } from './admin.js';
 import {addSource,setAlternative} from './source-health.js';
@@ -75,6 +77,27 @@ export async function createApp(db:DB,config:Config) {
  app.get('/api/search',async req=>service.start(req.query,owner(req)));
  app.get('/api/search/:id',async req=>service.poll(id(req.params),owner(req)));
  app.delete('/api/search/:id',async req=>service.cancel(id(req.params),owner(req)));
+ app.get('/api/search/:id/previews/:result',async(req,reply)=>{
+   const params=z.object({id:z.string().uuid(),result:z.string().uuid()}).strict().parse(req.params);
+   const snapshot=await service.owned(params.id,owner(req));
+   const result=(snapshot.results as Result[]).find(r=>r.id===params.result&&r.preview);
+   // Mirrors the search page filter: a source that was since rejected, paused or found down shows nothing.
+   const row=result&&snapshot.job_id?(await db.query(`SELECT p.image FROM page_previews p JOIN sources s ON s.id=$3
+     WHERE p.job_id=$1 AND p.result_id=$2 AND s.status IN ('active','candidate') AND s.health_status<>'down'`,
+     [snapshot.job_id,result.id,result.source_id])).rows[0]:undefined;
+   if(!row) throw new ApiError(404,'preview_not_found','This preview is unavailable.');
+   return reply.header('Cache-Control','private, max-age=1800').header('Content-Type','image/jpeg').send(Buffer.from(row.image));
+ });
+ app.get('/api/thumbnail',async(req,reply)=>{
+   const input=z.object({url:z.string().url().max(2048)}).strict().parse(req.query);
+   try {
+     const image=await fetchImage(input.url,{timeoutMs:4000});
+     return reply.header('Cache-Control','public, max-age=86400').header('Content-Type',image.contentType).send(image.data);
+   } catch(error) {
+     if(error instanceof UpstreamError) return reply.code(404).send();
+     throw error;
+   }
+ });
  app.post('/api/feedback',async(req,reply)=>{
    const input=z.object({search_id:z.string().uuid(),content_id:z.string().uuid(),useful:z.boolean()}).strict().parse(req.body);
    const snapshot=await service.owned(input.search_id,owner(req));

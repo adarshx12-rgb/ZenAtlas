@@ -30,6 +30,7 @@ export async function workOnce(db:DB,config:Config,adapters?:SourceAdapter[],pro
    } else if(job.kind==='discovery') {
      const outcome=await runDiscovery(db,config,searchInput.parse(job.payload),adapters,deps??{},(name,ok)=>providerHealth(db,name,ok));
      for(const result of outcome.ingested) await enqueueEnrichment(db,config,result);
+     await storePreviews(db,job,outcome.previews);
      await complete(db,job,{results:outcome.results,providers:outcome.providers});
    } else if(job.kind==='collect') {
      const source=(await db.query(`SELECT * FROM sources WHERE id=$1 AND status='active' AND adapter='json_feed' AND health_status<>'down'`,[job.payload.source_id])).rows[0];
@@ -59,6 +60,15 @@ export async function workOnce(db:DB,config:Config,adapters?:SourceAdapter[],pro
  }
  return true;
 }
+async function storePreviews(db:DB,job:any,previews:Map<string,Buffer>) {
+ if(!previews.size) return;
+ await db.transaction(async tx=>{
+   // Only the worker that still holds the lease writes this job's previews.
+   if(!(await tx.query(`SELECT 1 FROM jobs WHERE id=$1 AND lease_token=$2 AND status='running' FOR UPDATE`,[job.id,job.lease_token])).rows.length) return;
+   for(const [resultId,image] of previews) await tx.query(`INSERT INTO page_previews(job_id,result_id,image) VALUES($1,$2,$3)
+     ON CONFLICT(job_id,result_id) DO UPDATE SET image=excluded.image,created_at=now()`,[job.id,resultId,image]);
+ });
+}
 async function enqueueEnrichment(db:DB,config:Config,result:Result) {
  if(!config.SEMANTIC_ENABLED || !await takeBudget(db,'enrichment_jobs',config.EMBEDDING_DAILY_BUDGET)) return;
  if(!(await db.query('SELECT 1 FROM content WHERE id=$1',[result.id])).rows.length) return;
@@ -79,6 +89,8 @@ export async function schedule(db:DB,config:Config) {
  });
  // Erase short-lived queries and provider payloads; retained catalogue metadata follows source policy.
  await db.query('DELETE FROM searches WHERE expires_at<=now()');
+ // A search may reuse a finished discovery job for DISCOVERY_CACHE_SECONDS and then lasts SEARCH_TTL_SECONDS.
+ await db.query(`DELETE FROM page_previews WHERE created_at<now()-(($1::int+$2::int)*interval '1 second')`,[config.SEARCH_TTL_SECONDS,config.DISCOVERY_CACHE_SECONDS]);
  await db.query(`DELETE FROM jobs WHERE status IN ('complete','failed') AND updated_at<now()-interval '1 hour'
    AND NOT EXISTS(SELECT 1 FROM searches s WHERE s.job_id=jobs.id)`);
  await db.query(`DELETE FROM budgets WHERE window_start<now()-interval '2 days'`);

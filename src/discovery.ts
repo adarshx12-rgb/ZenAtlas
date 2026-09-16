@@ -41,7 +41,7 @@ async function planFor(db: DB, config: Config, input: SearchInput, deps: Discove
 // Plans the search, runs every planned query on every provider in parallel, shortlists the leads, stores them,
 // then checks and judges the shortlist. Returns the ranked results and the newly ingested records.
 export async function runDiscovery(db: DB, config: Config, input: SearchInput, adapters: SourceAdapter[]|undefined,
- deps: DiscoveryDeps, health: Health): Promise<{results: Result[]; ingested: Result[]; providers: ProviderStatus[]}> {
+ deps: DiscoveryDeps, health: Health): Promise<{results: Result[]; ingested: Result[]; providers: ProviderStatus[]; previews: Map<string,Buffer>}> {
  const providers = (adapters ?? configuredProviders(config)).slice(0, 3);
  const {plan, status: planStatus} = await planFor(db, config, input, deps);
  const outcomes = await Promise.all(plan.searches.flatMap((search, index) => providers.map(async (provider): Promise<Outcome> => {
@@ -68,8 +68,8 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
    ingested.push(result);
    targets.set(result.id, webUrls.has(lead.item.url) ? 'web' : 'videos');
  }
- const signals = input.source ? {results: ingested, providers: []}
+ const signals = input.source ? {results: ingested, providers: [], previews: new Map<string,Buffer>()}
    : await applySignals(db, config, input.q, ingested, deps, {kind: plan.kind, criteria: plan.criteria, targets});
- return {results: signals.results, ingested,
+ return {results: signals.results, ingested, previews: signals.previews,
    providers: [...providers.map(p => summarise(p.name, outcomes.filter(o => o.provider === p))), ...(planStatus ? [planStatus] : []), ...signals.providers]};
 }

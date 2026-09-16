@@ -15,6 +15,7 @@ export const configSchema = z.object({
   SEARXNG_WEB_ENGINES: z.string().default('google,bing,brave,yahoo'),
   SEARXNG_DAILY_BUDGET: number(2000, 0, 100000),
   PLAN_SEARCHES: number(4, 1, 8), PAGE_CHECKS: number(20, 0, 40), PAGE_TIMEOUT_MS: number(6000, 1000, 20000),
+  PAGE_RENDERS: number(0, 0, 20), PAGE_RENDER_TIMEOUT_MS: number(12000, 3000, 30000), PAGE_TEXT_PYTHON: optional,
   JUDGE_CANDIDATES: number(30, 1, 50),
   GOOGLE_SEARCH_API_KEY: optional, GOOGLE_SEARCH_ENGINE_ID: optional, BRAVE_SEARCH_API_KEY: optional,
   PROVIDER_TIMEOUT_MS: number(5000, 100, 15000), DISCOVERY_RESULTS: number(20, 1, 50),
