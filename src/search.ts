@@ -117,6 +117,7 @@ export class SearchService {
    const activeMoments=momentIds.length?(await this.db.query(`SELECT m.id FROM moments m JOIN content c ON c.id=m.content_id
      JOIN sources s ON s.id=c.source_id WHERE m.id=ANY($1::uuid[]) AND m.status='active'
      AND (m.evidence_type<>'transcript_supported' OR (s.policy->>'transcripts')::boolean=true)
+     AND (m.evidence_type<>'viewer_timestamp' OR (s.policy->>'viewer_signals')::boolean=true)
      UNION ALL SELECT v.id FROM video_scenes v JOIN content c ON c.id=v.content_id JOIN sources s ON s.id=c.source_id
      WHERE v.id=ANY($1::uuid[]) AND ${activeScene}`,[momentIds])).rows.map(r=>r.id):[];
    const analyses = new Map<string,SceneAnalysisStatus>(slice.length?(await this.db.query(`SELECT mv.content_id,mv.version_key,mv.analysis_status,mv.analysis_code

@@ -12,11 +12,12 @@ use_default_settings:
       - duckduckgo videos
       - brave.videos
       - wikicommons.videos
-      # Replacement-domain searches (SEARXNG_SOURCE_ENGINES).
+      # Web page discovery (SEARXNG_WEB_ENGINES) and replacement-domain searches (SEARXNG_SOURCE_ENGINES).
+      # Checked on 2026-09-16; duckduckgo (CAPTCHA), qwant (access denied) and mojeek (no results) were left out.
       - google
       - bing
-      # brave.videos reuses the brave engine's network settings, so brave must exist (it stays disabled).
       - brave
+      - yahoo
 search:
   safe_search: 1
   formats:
@@ -27,11 +28,15 @@ server:
   public_instance: false
   image_proxy: false
 outgoing:
-  # Most video engines answer in 4-8 seconds; the app requests a per-search limit up to max_request_timeout.
+  # Most engines answer in 4-8 seconds; the app requests a per-search limit up to max_request_timeout.
   request_timeout: 8.0
   max_request_timeout: 12.0
 engines:
   - name: youtube
     disabled: false
-  - name: brave
-    disabled: true
+  - name: google
+    disabled: false
+  - name: bing
+    disabled: false
+  - name: yahoo
+    disabled: false

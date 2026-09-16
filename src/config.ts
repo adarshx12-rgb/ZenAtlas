@@ -12,6 +12,10 @@ export const configSchema = z.object({
   SEARXNG_ENGINES: z.string().default('youtube,dailymotion,sepiasearch,odysee,bing videos,google videos,duckduckgo videos,brave.videos,wikicommons.videos'),
   SEARXNG_CATEGORIES: z.string().default('videos'),
   SEARXNG_SOURCE_ENGINES: z.string().default('google,bing'),
+  SEARXNG_WEB_ENGINES: z.string().default('google,bing,brave,yahoo'),
+  SEARXNG_DAILY_BUDGET: number(2000, 0, 100000),
+  PLAN_SEARCHES: number(4, 1, 8), PAGE_CHECKS: number(20, 0, 40), PAGE_TIMEOUT_MS: number(6000, 1000, 20000),
+  JUDGE_CANDIDATES: number(30, 1, 50),
   GOOGLE_SEARCH_API_KEY: optional, GOOGLE_SEARCH_ENGINE_ID: optional, BRAVE_SEARCH_API_KEY: optional,
   PROVIDER_TIMEOUT_MS: number(5000, 100, 15000), DISCOVERY_RESULTS: number(20, 1, 50),
   DISCOVERY_DAILY_BUDGET: number(100, 0, 10000), COVERAGE_MIN_RESULTS: number(5, 1, 100),
@@ -24,6 +28,16 @@ export const configSchema = z.object({
   EMBEDDING_URL: optional, EMBEDDING_TOKEN: optional, EMBEDDING_MODEL: optional,
   EMBEDDING_DIMENSIONS: number(384, 1, 2000), EMBEDDING_DAILY_BUDGET: number(100, 0, 10000),
   SEMANTIC_ENABLED: z.enum(['true', 'false']).default('false').transform(v => v === 'true'),
+  YOUTUBE_API_KEY: optional, YOUTUBE_DAILY_UNITS: number(3000, 0, 1000000),
+  SIGNAL_VIDEOS: number(10, 1, 25), SIGNAL_COMMENTS: number(100, 1, 100),
+  OFFICIAL_YOUTUBE_CHANNELS: optional,
+  REDDIT_SIGNALS: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
+  GEMINI_API_KEY: optional, GEMINI_MODEL: z.string().regex(/^[\w.-]{1,100}$/).default('gemini-3.8-flash'),
+  JUDGE_MODEL: z.string().regex(/^[\w.-]{0,100}$/).default(''),
+  JUDGE_FALLBACK_MODELS: z.string().regex(/^[\w.,\s-]*$/).default(''),
+  JUDGE_BATCH_SIZE: number(30, 1, 50),
+  JUDGE_THINKING_LEVEL: z.enum(['model_default', 'minimal', 'low', 'medium', 'high']).default('low'),
+  JUDGE_DAILY_BUDGET: number(200, 0, 100000), JUDGE_TIMEOUT_MS: number(20000, 1000, 60000),
 });
 export type Config = z.infer<typeof configSchema>;
 export function readConfig(): Config { return configSchema.parse(process.env); }

@@ -19,11 +19,12 @@ export function rank(rows: (Result & {reliability:number;personal:number})[], li
  return result;
 }
 
-export interface DiscoveryCandidate { item: ContentInput; provider: string; position: number }
-const STOPWORDS = new Set(['a','an','the','and','or','of','to','in','on','for','with','by','at','from','is','are','how','what','my','your','video','videos']);
-const tokens = (text: string|null) => (text ?? '').normalize('NFKD').replace(/\p{M}/gu,'').toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? [];
+// query/searchIndex: which planned search found the lead; a lead is scored against the words of the query that found it.
+export interface DiscoveryCandidate { item: ContentInput; provider: string; position: number; query?: string; searchIndex?: number }
+export const STOPWORDS = new Set(['a','an','the','and','or','of','to','in','on','for','with','by','at','from','is','are','how','what','my','your','video','videos']);
+export const tokens = (text: string|null) => (text ?? '').normalize('NFKD').replace(/\p{M}/gu,'').toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? [];
 // Cheap stemming: "recipe" matches "recipes" and "cook" matches "cooking", without matching short words like "on"/"one".
-const sameWord = (term: string, token: string) => token === term ||
+export const sameWord = (term: string, token: string) => token === term ||
  term.length >= 4 && token.length >= 4 && (token.startsWith(term) || term.startsWith(token));
 const hasPhrase = (text: string[], phrase: string[]) =>
  text.some((_, i) => phrase.every((word, j) => text[i + j] === word));
@@ -32,7 +33,7 @@ export function discoveryQuery(q: string) {
  const phrases = [...q.matchAll(/"([^"]+)"/g)].map(m => tokens(m[1])).filter(p => p.length);
  const unquoted = q.replace(/"[^"]*"/g, ' ');
  const excluded = [...unquoted.matchAll(/(?:^|\s)-([^\s"]+)/g)].flatMap(m => tokens(m[1]));
- const words = tokens(unquoted.replace(/(?:^|\s)-[^\s"]+/g, ' ').replace(/\bOR\b/g, ' '));
+ const words = tokens(unquoted.replace(/(?:^|\s)-[^\s"]+/g, ' ').replace(/(?:^|\s)[a-z]+:[^\s"]+/gi, ' ').replace(/\bOR\b/g, ' '));
  return { phrases, excluded, terms: [...new Set([...words, ...phrases.flat()])].filter(t => !STOPWORDS.has(t)) };
 }
 
@@ -42,20 +43,24 @@ export function discoveryQuery(q: string) {
 // provider's own semantic matches survive queries whose words never appear literally.
 export function rankDiscovery<T extends DiscoveryCandidate>(q: string, candidates: T[], limit: number): T[] {
  const query = discoveryQuery(q);
- const unique = new Map<string,{candidate:T;providers:Set<string>;position:number}>();
+ const termsOf = new Map<string,string[]>([[q, query.terms]]);
+ const terms = (text: string) => termsOf.get(text) ?? termsOf.set(text, discoveryQuery(text).terms).get(text)!;
+ const unique = new Map<string,{candidate:T;providers:Set<string>;queries:Set<string>;position:number}>();
  for (const candidate of candidates) {
+   const found = `${candidate.provider}:${candidate.searchIndex ?? 0}`, asked = candidate.query ?? q;
    const seen = unique.get(candidate.item.url);
-   if (!seen) unique.set(candidate.item.url,{candidate,providers:new Set([candidate.provider]),position:candidate.position});
-   else { seen.providers.add(candidate.provider); seen.position = Math.min(seen.position,candidate.position); }
+   if (!seen) unique.set(candidate.item.url,{candidate,providers:new Set([found]),queries:new Set([asked]),position:candidate.position});
+   else { seen.providers.add(found); seen.queries.add(asked); seen.position = Math.min(seen.position,candidate.position); }
  }
  const scored = [];
- for (const {candidate,providers,position} of unique.values()) {
+ for (const {candidate,providers,queries,position} of unique.values()) {
    const title = tokens(candidate.item.title);
    const text = [...title,...tokens(candidate.item.description),...tokens(candidate.item.creator)];
    if (query.excluded.some(word => text.some(t => sameWord(word,t)))) continue;
    if (!query.phrases.every(phrase => hasPhrase(text,phrase))) continue;
-   const coverage = query.terms.length ? query.terms.reduce((sum,term) =>
-     sum + (title.some(t => sameWord(term,t)) ? 1 : text.some(t => sameWord(term,t)) ? 0.5 : 0), 0) / query.terms.length : 0;
+   const coverOf = (list: string[]) => list.length ? list.reduce((sum,term) =>
+     sum + (title.some(t => sameWord(term,t)) ? 1 : text.some(t => sameWord(term,t)) ? 0.5 : 0), 0) / list.length : 0;
+   const coverage = Math.max(...[...queries].map(asked => coverOf(terms(asked))));
    const exact = query.terms.length > 1 && hasPhrase(title.filter(t => !STOPWORDS.has(t)),query.terms) ? 0.25 : 0;
    scored.push({candidate,coverage,domain:new URL(candidate.item.url).hostname.replace(/^www\./,''),
      score:coverage + exact + 0.3/(1 + position/10) + 0.1*(providers.size - 1)});

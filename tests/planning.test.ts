@@ -1,0 +1,155 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {database,testConfig} from './helpers.js';
+import {fallbackPlan,normalisePlan,GeminiPlanner,type Planner} from '../src/planner.js';
+import {robotsAllows,extractPage,PageChecker,type PageCheck,type PageEvidence} from '../src/pages.js';
+import {rankDiscovery} from '../src/ranking.js';
+import {SearXNG} from '../src/providers.js';
+import {UpstreamError} from '../src/http.js';
+import {SearchService} from '../src/search.js';
+import {workOnce} from '../src/worker.js';
+import {contentInput,searchInput,type SourceAdapter} from '../src/types.js';
+import type {Judge,JudgeCandidate,JudgeContext} from '../src/judge.js';
+
+test('plans always keep the user query first, stay within limits and fall back without AI',()=>{
+ const plan=normalisePlan('3d websites',{kind:'mixed',searches:[{query:'  site:awwwards.com   three.js\n',target:'web'},{query:'3D WEBSITES',target:'web'},
+   {query:'x',target:'web'},{query:'webgl portfolio walkthrough',target:'videos'},{query:'one more',target:'web'}],
+   criteria:[' uses 3D ','uses 3D','a','b','c','d','e']},4,'m');
+ assert.deepEqual(plan.searches,[{query:'3d websites',target:'web'},{query:'3d websites',target:'videos'},
+   {query:'site:awwwards.com three.js',target:'web'},{query:'webgl portfolio walkthrough',target:'videos'}]);
+ assert.deepEqual(plan.criteria,['uses 3D','a','b','c','d']);
+ assert.deepEqual(fallbackPlan('websites with motion graphics').searches,[{query:'websites with motion graphics',target:'web'}]);
+ assert.deepEqual(fallbackPlan('horror stories with a twist').searches,[{query:'horror stories with a twist',target:'videos'}]);
+});
+
+test('the Gemini planner sends the planning schema and validates the reply',async()=>{
+ const db=await database();
+ try{
+   let sent:any;
+   const transport=async(_url:string,options:any)=>{sent=options;return {candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify(
+     {kind:'websites',searches:[{query:'site:awwwards.com 3d',target:'web'}],criteria:['Uses 3D']})}]}}]};};
+   const plan=await new GeminiPlanner(db,{...testConfig,GEMINI_API_KEY:'k',GEMINI_MODEL:'plan-model',PLAN_SEARCHES:3},transport as any).plan('3d sites');
+   assert.deepEqual(plan,{kind:'websites',searches:[{query:'3d sites',target:'web'},{query:'site:awwwards.com 3d',target:'web'}],criteria:['Uses 3D'],model:'plan-model'});
+   assert.match(sent.body.systemInstruction.parts[0].text,/up to 3 search-engine queries/);
+   assert.match(sent.body.systemInstruction.parts[0].text,/pirated copies/);
+   assert.deepEqual(sent.body.generationConfig.responseJsonSchema.properties.kind.enum,['videos','websites','mixed']);
+   const bad=async()=>({candidates:[{finishReason:'STOP',content:{parts:[{text:'{"kind":"everything"}'}]}}]});
+   await assert.rejects(new GeminiPlanner(db,{...testConfig,GEMINI_API_KEY:'k'},bad as any).plan('q'),/malformed_response/);
+ }finally{await db.close();}
+});
+
+test('robots.txt rules follow the longest match, prefer Allow on ties, and honour a named group',()=>{
+ const robots=`User-agent: *\nDisallow: /private\nAllow: /private/public\nDisallow: /*.pdf$\n\nUser-agent: BadBot\nDisallow: /`;
+ assert.equal(robotsAllows(robots,'/'),true);
+ assert.equal(robotsAllows(robots,'/private/page'),false);
+ assert.equal(robotsAllows(robots,'/private/public/page'),true);
+ assert.equal(robotsAllows(robots,'/files/a.pdf'),false);assert.equal(robotsAllows(robots,'/files/a.pdf?x=1'),true);
+ assert.equal(robotsAllows('User-agent: ZenAtlas\nDisallow: /\n\nUser-agent: *\nAllow: /','/any'),false);
+ assert.equal(robotsAllows('User-agent: *\nDisallow:','/any'),true);
+ assert.equal(robotsAllows('User-agent: *\nDisallow: /a\nAllow: /a','/a'),true);
+});
+
+test('page extraction reads title, description, visible text and front-end libraries',()=>{
+ const html=`<html><head><title>Nova &amp; Co — 3D Studio</title><meta content="Immersive &quot;WebGL&quot; experiences" name="description">
+   <script src="https://cdn.example/three.module.min.js"></script><script>gsap.to('.hero',{y:10}); var secret="do not show"</script>
+   <style>.x{color:red}</style></head><body><h1>We make   worlds</h1><!-- hidden --><canvas></canvas>
+   <video autoplay muted loop src="/bg.mp4"></video><p>Scroll&nbsp;to explore</p></body></html>`;
+ const page=extractPage(html);
+ assert.equal(page.title,'Nova & Co — 3D Studio');
+ assert.equal(page.description,'Immersive "WebGL" experiences');
+ assert.equal(page.text,'Nova & Co — 3D Studio We make worlds Scroll to explore');
+ assert.deepEqual(page.libraries,['three.js','GSAP','Background video','Canvas']);
+ assert.deepEqual(page.badges,['3D: three.js','Motion: GSAP','Background video']);
+ assert.deepEqual(extractPage('<p>Plain page about webgl tutorials</p>').libraries,[],'a word in text is not a library');
+});
+
+test('page checks read robots.txt once per site and never fetch disallowed or unreadable sites',async()=>{
+ const fetched:string[]=[];
+ const transport=async(url:string)=>{fetched.push(url);const u=new URL(url);
+   if(u.pathname==='/robots.txt'){
+     if(u.hostname==='open.example')throw new UpstreamError('upstream_failure',404);
+     if(u.hostname==='down.example')throw new UpstreamError('upstream_failure',503);
+     return {url,contentType:'text/plain',text:'User-agent: *\nDisallow: /members'};
+   }
+   if(u.hostname==='open.example'&&u.pathname==='/broken')throw new UpstreamError('timeout');
+   return {url,contentType:'text/html',text:'<title>Hello</title><script src="/lottie.min.js"></script>'};
+ };
+ const checker=new PageChecker({...testConfig,PAGE_TIMEOUT_MS:1000},transport as any);
+ assert.deepEqual((await checker.check('https://open.example/a')).libraries,['Lottie']);
+ assert.equal((await checker.check('https://open.example/broken')).status,'unavailable');
+ assert.equal((await checker.check('https://rules.example/members/x')).status,'robots_disallowed');
+ assert.equal((await checker.check('https://rules.example/public')).status,'checked');
+ assert.equal((await checker.check('https://down.example/a')).status,'unavailable');
+ assert.deepEqual(fetched,['https://open.example/robots.txt','https://open.example/a','https://open.example/broken',
+   'https://rules.example/robots.txt','https://rules.example/public','https://down.example/robots.txt']);
+});
+
+test('planned leads are scored against the query that found them, and agreement between searches counts',async()=>{
+ const lead=(url:string,title:string,query:string,searchIndex:number,position=0)=>({item:contentInput.parse({url,title}),provider:'searxng',position,query,searchIndex});
+ const ranked=rankDiscovery('websites with motion graphics',[
+   lead('https://a.example/','Motion graphics websites to inspire you','websites with motion graphics',0),
+   lead('https://b.example/','Three.js portfolio gallery','site:showcase.example three.js portfolio',1),
+   lead('https://c.example/','Cooking blog','site:showcase.example three.js portfolio',1,1),
+   lead('https://b.example/','Three.js portfolio gallery','three.js portfolio',2,5),
+ ],10);
+ assert.deepEqual(ranked.map(r=>r.item.url),['https://b.example/','https://a.example/'],'the site: operator is not a query word, and unmatched leads drop');
+ const web=new SearXNG({...testConfig,SEARXNG_BASE_URL:'http://localhost:8080',SEARXNG_WEB_ENGINES:'google,bing'},async(url:string)=>{
+   const params=new URL(url).searchParams;assert.equal(params.get('categories'),'general');assert.equal(params.get('engines'),'google,bing');return {results:[]};
+ }).forTarget('web');
+ await web.search('q',searchInput.parse({q:'qq'}));
+});
+
+test('a website request is planned, searched on several angles, page-checked and judged with its criteria',async()=>{
+ const db=await database();
+ try{
+   const q='websites containing motion graphics and 3d elements';
+   const calls:string[]=[];
+   const adapter:SourceAdapter={name:'mock',capabilities:{transcripts:false,comments:false,embeds:false,accessible_media:false},
+     async search(query){calls.push(query);
+       const results=query===q?[{url:'https://blog.example.org/what-is-motion-graphics',title:'What are motion graphics? Websites and 3d elements explained'},
+         {url:'https://studio.example.net/',title:'Studio with 3d elements and motion graphics website'}]
+         :query.startsWith('site:')?[{url:'https://showcase.example.com/sites/three-js',title:'Three.js portfolio websites gallery'},{url:'https://studio.example.net/',title:'Studio Example'}]
+         :[{url:'https://video.example.com/watch/1',title:'3D motion website examples video'}];
+       return {results:results.map(r=>contentInput.parse(r)),next_cursor:null,status:{provider:'mock',status:'ok',message:'Mocked provider'}};}};
+   const planner:Planner={async plan(query){return {kind:'websites',searches:[{query,target:'web'},{query:'site:showcase.example.com three.js portfolio',target:'web'},
+     {query:'3d motion website examples',target:'videos'}],criteria:['Uses 3D graphics','Uses motion graphics'],model:'test-planner'};}};
+   const checked:string[]=[];
+   const pages:PageCheck={async check(url){checked.push(url);
+     const base:PageEvidence={status:'checked',title:null,description:null,text:null,libraries:[],badges:[]};
+     if(url.includes('studio'))return {...base,title:'Studio',libraries:['three.js','GSAP'],badges:['3D: three.js','Motion: GSAP']};
+     return url.includes('showcase')?{...base,status:'robots_disallowed'}:base;}};
+   let judged:JudgeCandidate[]=[],context:JudgeContext|undefined;
+   const scores:Record<string,number>={'studio.example.net':9,'showcase.example.com':8,'blog.example.org':3,'video.example.com':1};
+   const judge:Judge={async judge(_q,candidates,ctx){judged=candidates;context=ctx;
+     return {model:'test-judge',verdicts:new Map(candidates.map(c=>[c.key,{key:c.key,relevance:scores[c.site],reason:`TEST ${c.site}`,momentKeys:[]}]))};}};
+   const config={...testConfig,SEARXNG_BASE_URL:'http://localhost:8080',PAGE_CHECKS:20};
+   const service=new SearchService(db,config);
+   const started=await service.start({q,mode:'refresh'},'alice');
+   await workOnce(db,config,[adapter],undefined,{planner,pages,judge});
+   const done=await service.poll(started.search_id,'alice');
+
+   assert.deepEqual(calls.sort(),['3d motion website examples','site:showcase.example.com three.js portfolio',q].sort());
+   assert.deepEqual(done.providers.map(p=>[p.provider,p.status]),[['mock','ok'],['planner','ok'],['pages','ok'],['judge','ok']]);
+   assert.deepEqual(done.results.map(r=>new URL(r.canonical_url).hostname),['studio.example.net','showcase.example.com','blog.example.org']);
+   assert.deepEqual(done.results[0].badges,['3D: three.js','Motion: GSAP']);
+   assert.equal(done.results[0].judgement?.model,'test-judge');
+   assert.deepEqual(checked.sort(),['https://blog.example.org/what-is-motion-graphics','https://showcase.example.com/sites/three-js','https://studio.example.net/'],
+     'only leads from web searches are page-checked');
+   const studio=judged.find(c=>c.site==='studio.example.net')!;
+   assert.equal(studio.kind,'website');assert.deepEqual(studio.page?.libraries,['three.js','GSAP']);
+   assert.equal(judged.find(c=>c.site==='showcase.example.com')!.page?.status,'robots_disallowed');
+   const video=judged.find(c=>c.site==='video.example.com')!;
+   assert.equal(video.kind,'video');assert.equal(video.page,undefined);
+   assert.deepEqual(context,{kind:'websites',criteria:['Uses 3D graphics','Uses motion graphics']});
+   const provenance=JSON.stringify((await db.query('SELECT provenance FROM sources')).rows);
+   assert.ok(!provenance.includes('three.js portfolio'),'planned queries are not stored with sources');
+
+   const failing:Planner={async plan(){throw new UpstreamError('upstream_failure',503);}};
+   calls.length=0;
+   const again=await service.start({q:`${q} again`,mode:'refresh'},'alice');
+   await workOnce(db,config,[adapter],undefined,{planner:failing,pages,judge});
+   const fallback=await service.poll(again.search_id,'alice');
+   assert.deepEqual(calls,[`${q} again`]);
+   assert.ok(fallback.providers.some(p=>p.provider==='planner'&&p.status==='unavailable'));
+ }finally{await db.close();}
+});

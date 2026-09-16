@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { DB } from './db.js';
-import { sourcePolicy } from './admin.js';
+import { sourcePolicy, storedPolicy } from './admin.js';
 
 // A rule pattern is either an exact domain or a *.domain wildcard covering that domain and every subdomain.
 const patternInput = z.string().min(3).max(255).trim().toLowerCase()
@@ -9,11 +9,6 @@ const patternInput = z.string().min(3).max(255).trim().toLowerCase()
 export function domainMatchesPattern(domain: string, pattern: string): boolean {
  if (pattern.startsWith('*.')) { const base = pattern.slice(2); return domain === base || domain.endsWith('.' + base); }
  return domain === pattern;
-}
-
-function policyColumns(policy: z.infer<typeof sourcePolicy>) {
- return JSON.stringify({ metadata: policy.metadata, transcripts: policy.transcripts,
-   video_analysis: policy.video_analysis, retention_days: policy.retention_days });
 }
 
 // Applying a rule only ever touches sources still at the default 'candidate' status, so it can never
@@ -30,7 +25,7 @@ export async function setPolicyRule(db: DB, rawPattern: string, raw: unknown) {
    for (const c of matched) {
      await tx.query(`UPDATE sources SET status=$2,policy=$3,adapter=$4,feed_url=$5,
        provenance=provenance||jsonb_build_object('auto_policy_rule',$6::text,'reviewed_at',now())
-       WHERE id=$1`,[c.id,policy.status,policyColumns(policy),policy.adapter,policy.feed_url,pattern]);
+       WHERE id=$1`,[c.id,policy.status,storedPolicy(policy),policy.adapter,policy.feed_url,pattern]);
    }
    return { rule, applied_to_existing: matched.length };
  });

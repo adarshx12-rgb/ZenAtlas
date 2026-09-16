@@ -7,7 +7,7 @@ export const searchInput = z.object({
  language: z.string().regex(/^[a-z]{2,3}(-[A-Za-z]{2,4})?$/).optional(),
  source: z.string().uuid().optional(),
  after: z.iso.datetime().optional(),
- evidence: z.enum(['any','transcript_supported','video_analysed']).default('any'),
+ evidence: z.enum(['any','transcript_supported','video_analysed','viewer_timestamp']).default('any'),
  cursor: z.string().max(512).optional(),
 }).strict();
 export type SearchInput = z.infer<typeof searchInput>;
@@ -39,9 +39,11 @@ export interface SceneDetails {
 export interface SceneAnalysisStatus {
  status: 'pending'|'complete'|'inaccessible'|'failed'|'not_permitted'; media_version: string; message: string;
 }
+export type EvidenceType = 'transcript_supported'|'video_analysed'|'viewer_timestamp';
+export interface Judgement { relevance: number; reason: string; model: string }
 export interface Moment {
  id: string; start_seconds: number; end_seconds: number; summary: string;
- evidence_type: 'transcript_supported'|'video_analysed'; analysis_version: string;
+ evidence_type: EvidenceType; analysis_version: string;
  inspected_ranges: [number,number][]; evidence_refs: string[]; scene?: SceneDetails;
 }
 export interface Result {
@@ -49,8 +51,9 @@ export interface Result {
  description: string|null; creator: string|null; published_at: string|null; duration: number|null;
  language: string|null; thumbnail: string|null; embeddable: boolean|null;
  rights_status: string; license_url: string|null; availability: string;
- evidence: 'metadata_match'|'transcript_supported'|'video_analysed'; moments: Moment[];
+ evidence: 'metadata_match'|EvidenceType; moments: Moment[];
  origin: 'catalogue'|'discovery'; verified_at: string|null; scene_analysis?: SceneAnalysisStatus|null;
+ badges?: string[]; judgement?: Judgement|null;
 }
 export interface SearchResponse {
  query: string; search_id: string; status: 'complete'|'discovering'|'partial'|'cancelled';

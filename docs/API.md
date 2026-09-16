@@ -20,7 +20,7 @@ Limits: 120 API requests per IP/minute; 30 writes per IP/minute; 20 discovery re
 | `language` | Optional ISO-like code such as `en` or `hi`; unknown-language records do not match a language filter |
 | `source` | Optional source UUID |
 | `after` | Optional UTC ISO date-time publication cutoff; unknown dates are excluded |
-| `evidence` | `any` (default), `transcript_supported`, `video_analysed`; requires a matching evidence window |
+| `evidence` | `any` (default), `transcript_supported`, `video_analysed`, `viewer_timestamp`; requires a matching evidence window |
 | `cursor` | Opaque signed cursor; keep every original query/filter/mode/limit parameter unchanged |
 
 The TypeScript response contract is in `src/types.ts`:
@@ -46,6 +46,8 @@ interface SearchResponse {
 Each result includes an internal ID, title, canonical URL, source ID/name, nullable metadata, availability (`unknown`, `available`, `unavailable`), rights status, origin (`catalogue` or `discovery`), evidence label, and zero or more matching moments. A moment includes start/end seconds, an extractive summary, evidence references, analysis version and inspected ranges. Timestamp units are seconds. Empty evidence is `metadata_match`; unknown metadata stays null. Availability is hidden for `unavailable` records. Rights status is not inferred from public searchability.
 
 Scene moments (`evidence_type: "video_analysed"`) come from the Gemini scene worker and add `scene`: `media_version` (the registered version key), `media_start_seconds`/`media_end_seconds` on the analysed file's own timeline, `timeline_offset_seconds`, `model`, `tags`, and `dialogue`/`dialogue_source` when subtitle cues were quoted. `start_seconds`/`end_seconds` always use the content URL's timeline (media time + offset). `evidence_refs` holds the analysis ID followed by any retained transcript segment IDs; `inspected_ranges` is the analysed span. When the source permits video analysis, a result can include `scene_analysis`: `{status, media_version, message}` for its current media version, where `status` is `pending`, `complete`, `inaccessible`, `failed` or `not_permitted` and `message` is a fixed readable sentence, never a raw provider error. Scenes from superseded versions, changed subtitles or revoked permissions are removed from new searches and existing snapshots.
+
+Viewer moments (`evidence_type: "viewer_timestamp"`) group timestamps that viewers wrote in public YouTube comments. `summary` joins the cited comment excerpts with ` · `, `evidence_refs` are the stored excerpt IDs (each timestamp lies inside the moment), and `inspected_ranges` is empty because no media was inspected. Discovery results can also include `badges` (short labels such as `Live now`, `Livestream replay`, `Official channel`, `Discussed on Reddit`, `3D: three.js`, `Motion: GSAP`) and `judgement`: `{relevance (0-10), reason, model}` from the AI relevance check. Search `providers` may then list `planner`, `youtube`, `reddit`, `pages` and `judge` with their own status.
 
 An unapproved candidate result has a temporary ID that does not correspond to persistent content. Feedback returns 409 for it until it is retained as an approved catalogue record. Searchability does not imply playback, embeddability, accessible media, or permission to reuse.
 

@@ -3,6 +3,7 @@ import type { DB } from './db.js';
 import { canonicalize, publicURL } from './urls.js';
 import { contentInput, type ContentInput, type Result } from './types.js';
 import { findMatchingRule } from './policy-rules.js';
+import { storedPolicy } from './admin.js';
 
 export async function ingest(db: DB, raw: ContentInput, provenance: Record<string, unknown>): Promise<Result|null> {
  const item = contentInput.parse(raw);
@@ -17,9 +18,7 @@ export async function ingest(db: DB, raw: ContentInput, provenance: Record<strin
      // A brand-new domain gets classified by any matching trust rule immediately; otherwise it lands as a plain candidate.
      const rule=await findMatchingRule(tx,domain);
      if(rule)await tx.query(`INSERT INTO sources(domain,display_name,status,policy,adapter,feed_url,provenance) VALUES($1,$1,$2,$3,$4,$5,$6)
-       ON CONFLICT(domain) DO NOTHING`,[domain,rule.policy.status,
-       JSON.stringify({metadata:rule.policy.metadata,transcripts:rule.policy.transcripts,video_analysis:rule.policy.video_analysis,retention_days:rule.policy.retention_days}),
-       rule.policy.adapter,rule.policy.feed_url,JSON.stringify({...provenance,auto_policy_rule:rule.pattern})]);
+       ON CONFLICT(domain) DO NOTHING`,[domain,rule.policy.status,storedPolicy(rule.policy),rule.policy.adapter,rule.policy.feed_url,JSON.stringify({...provenance,auto_policy_rule:rule.pattern})]);
      else await tx.query(`INSERT INTO sources(domain,display_name,provenance) VALUES($1,$1,$2)
        ON CONFLICT(domain) DO NOTHING`,[domain,JSON.stringify(provenance)]);
    }
@@ -47,7 +46,9 @@ export async function ingest(db: DB, raw: ContentInput, provenance: Record<strin
      item.duration,item.language,item.thumbnail,item.embeddable,item.rights_status,item.license_url,item.availability,
      Number(source.policy.retention_days ?? 30),JSON.stringify(provenance)];
    const record = existing ? (await tx.query(`UPDATE content SET title=$4,description=coalesce($5,description),creator=coalesce($6,creator),
-     published_at=coalesce($7,published_at),duration=coalesce($8,duration),language=coalesce($9,language),thumbnail=coalesce($10,thumbnail),
+     published_at=coalesce($7,published_at),
+     duration=CASE WHEN $8::float8 < greatest((SELECT max(end_seconds) FROM moments WHERE content_id=content.id),
+       (SELECT max(end_seconds) FROM transcript_segments WHERE content_id=content.id)) THEN duration ELSE coalesce($8,duration) END,language=coalesce($9,language),thumbnail=coalesce($10,thumbnail),
      embeddable=coalesce($11,embeddable),rights_status=CASE WHEN $12='unknown' THEN rights_status ELSE $12 END,license_url=coalesce($13,license_url),
      availability=CASE WHEN $14='unknown' THEN availability ELSE $14 END,fetched_at=now(),expires_at=now()+($15*interval '1 day'),provenance=$16,
      provider_id=coalesce(provider_id,$2),verified_at=CASE WHEN $14='available' THEN now() ELSE verified_at END

@@ -4,11 +4,17 @@ import { publicURL } from './urls.js';
 export const sourcePolicy = z.object({
  status:z.enum(['active','paused','rejected','candidate']),
  metadata:z.boolean(),transcripts:z.boolean().default(false),video_analysis:z.boolean().default(false),
+ viewer_signals:z.boolean().default(false),
  retention_days:z.number().int().min(1).max(365).default(30),
  adapter:z.enum(['link_only','json_feed']).default('link_only'),feed_url:z.string().url().nullable().default(null),
  review_note:z.string().min(10).max(2000),
 }).strict().refine(v=>v.status!=='active'||v.metadata,'Active sources must permit metadata retention')
  .refine(v=>v.adapter!=='json_feed'||!!v.feed_url,'Feed URL required');
+// The permission subset stored in sources.policy; status, adapter and feed live in their own columns.
+export function storedPolicy(policy:{metadata:boolean;transcripts?:boolean;video_analysis?:boolean;viewer_signals?:boolean;retention_days?:number}) {
+ return JSON.stringify({metadata:policy.metadata,transcripts:!!policy.transcripts,video_analysis:!!policy.video_analysis,
+   viewer_signals:!!policy.viewer_signals,retention_days:policy.retention_days??30});
+}
 export async function setSourcePolicy(db:DB,id:string,raw:unknown) {
  const policy=sourcePolicy.parse(raw);
  if(policy.feed_url) publicURL(policy.feed_url);
@@ -16,8 +22,7 @@ export async function setSourcePolicy(db:DB,id:string,raw:unknown) {
    const source=(await tx.query(`UPDATE sources SET status=$2,policy=$3,adapter=$4,feed_url=$5,
      provenance=provenance||jsonb_build_object('review_note',$6::text,'reviewed_at',now()),
      next_check_at=now(),health_next_at=now(),failure_count=0 WHERE id=$1 RETURNING id,domain,status`,
-     [id,policy.status,JSON.stringify({metadata:policy.metadata,transcripts:policy.transcripts,video_analysis:policy.video_analysis,
-       retention_days:policy.retention_days}),policy.adapter,policy.feed_url,policy.review_note])).rows[0];
+     [id,policy.status,storedPolicy(policy),policy.adapter,policy.feed_url,policy.review_note])).rows[0];
    if(!source) return null;
    if(!policy.metadata || policy.status==='rejected') await tx.query('DELETE FROM content WHERE source_id=$1',[id]);
    else {
@@ -26,8 +31,9 @@ export async function setSourcePolicy(db:DB,id:string,raw:unknown) {
      if(!policy.video_analysis || !policy.transcripts) await tx.query(`DELETE FROM scene_analyses
        WHERE content_id IN (SELECT id FROM content WHERE source_id=$1)
        AND ($2::boolean OR subtitle_source IN ('database_transcript','sidecar_file','faster_whisper'))`,[id,!policy.video_analysis]);
+     if(!policy.viewer_signals) await tx.query('DELETE FROM viewer_timestamps WHERE content_id IN (SELECT id FROM content WHERE source_id=$1)',[id]);
      if(!policy.transcripts) {
-       await tx.query('DELETE FROM moments WHERE content_id IN (SELECT id FROM content WHERE source_id=$1)',[id]);
+       await tx.query(`DELETE FROM moments WHERE evidence_type<>'viewer_timestamp' AND content_id IN (SELECT id FROM content WHERE source_id=$1)`,[id]);
        await tx.query('DELETE FROM transcript_segments WHERE content_id IN (SELECT id FROM content WHERE source_id=$1)',[id]);
      }
      await tx.query(`UPDATE media_versions mv SET analysis_status='pending',analysis_code='policy_changed',analysis_updated_at=now()

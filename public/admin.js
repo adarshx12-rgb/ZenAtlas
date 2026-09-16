@@ -60,7 +60,7 @@ function review({title,target,mode,feed=false,rule=null,defaults={}}){
  form.elements.note.value=defaults.note??({approve:'Approved in admin page: public video site; keep titles and links only.',
    reject:'Rejected in admin page: not a relevant or trustworthy video source.',pause:'Paused in admin page pending another review.'})[mode];
  form.elements.retention.value=defaults.retention??30;form.elements.feed.value=defaults.feed??'';
- form.elements.transcripts.checked=!!defaults.transcripts;form.elements.video.checked=!!defaults.video;
+ form.elements.transcripts.checked=!!defaults.transcripts;form.elements.viewers.checked=!!defaults.viewers;form.elements.video.checked=!!defaults.video;
  $('#rule-option').hidden=!rule;$('#rule-option-text').textContent=rule?`Also ${mode==='reject'?'block':'approve'} every ${rule} website, including ones found later`:'';
  $('#review-confirm').textContent={approve:'Approve',reject:'Reject',pause:'Pause'}[mode];
  $('#review-confirm').className=mode==='reject'?'danger':'';
@@ -69,17 +69,17 @@ function review({title,target,mode,feed=false,rule=null,defaults={}}){
      if(dialog.returnValue!=='confirm')return resolve(null);
      const feedValue=form.elements.feed.value.trim();
      resolve({note:form.elements.note.value.trim(),retention:Number(form.elements.retention.value),
-       feed:feed&&feedValue?normaliseURL(feedValue):null,transcripts:form.elements.transcripts.checked,
+       feed:feed&&feedValue?normaliseURL(feedValue):null,transcripts:form.elements.transcripts.checked,viewers:form.elements.viewers.checked,
        video:form.elements.video.checked,rule:!!rule&&form.elements.rule.checked});
    },{once:true});
    dialog.returnValue='';dialog.showModal();
  });
 }
-const approvePolicy=r=>({status:'active',metadata:true,transcripts:r.transcripts,video_analysis:r.video,retention_days:r.retention,
+const approvePolicy=r=>({status:'active',metadata:true,transcripts:r.transcripts,video_analysis:r.video,viewer_signals:r.viewers,retention_days:r.retention,
  adapter:r.feed?'json_feed':'link_only',feed_url:r.feed,review_note:r.note});
-const rejectPolicy=note=>({status:'rejected',metadata:false,transcripts:false,video_analysis:false,retention_days:30,adapter:'link_only',feed_url:null,review_note:note});
+const rejectPolicy=note=>({status:'rejected',metadata:false,transcripts:false,video_analysis:false,viewer_signals:false,retention_days:30,adapter:'link_only',feed_url:null,review_note:note});
 const pausePolicy=(row,note)=>({status:'paused',metadata:row.policy?.metadata===true,transcripts:!!row.policy?.transcripts,
- video_analysis:!!row.policy?.video_analysis,retention_days:row.policy?.retention_days??30,adapter:row.adapter,feed_url:row.feed_url,review_note:note});
+ video_analysis:!!row.policy?.video_analysis,viewer_signals:!!row.policy?.viewer_signals,retention_days:row.policy?.retention_days??30,adapter:row.adapter,feed_url:row.feed_url,review_note:note});
 const rulePattern=domain=>`*.${domain.replace(/^www\./,'')}`;
 function normaliseURL(value){return /^[a-z][a-z0-9+.-]*:\/\//i.test(value)?value:`https://${value}`;}
 
@@ -88,7 +88,7 @@ async function saveRule(pattern,policy){await api('/api/admin/rules',{method:'PO
 async function approve(row){
  const result=await review({title:`Approve ${row.domain}`,target:'Its videos will be saved and shown in catalogue searches.',mode:'approve',feed:true,
    rule:rulePattern(row.domain),defaults:row.status==='active'?{note:row.provenance?.review_note,retention:row.policy?.retention_days,
-   feed:row.feed_url,transcripts:row.policy?.transcripts,video:row.policy?.video_analysis}:{}});
+   feed:row.feed_url,transcripts:row.policy?.transcripts,video:row.policy?.video_analysis,viewers:row.policy?.viewer_signals}:{}});
  if(!result)return;
  await run(async()=>{
    await api(`/api/admin/sources/${row.id}`,{method:'PATCH',body:approvePolicy(result)});

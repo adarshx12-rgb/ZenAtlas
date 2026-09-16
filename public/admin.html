@@ -79,6 +79,7 @@
   <div id="approve-options">
    <label>Keep saved videos for (days)<input name="retention" type="number" min="1" max="365" value="30" required></label>
    <label id="feed-option">JSON feed address <span class="hint">(optional; collects new videos automatically)</span><input name="feed" maxlength="2048" placeholder="https://www.example.org/feed.json"></label>
+   <label class="check"><input type="checkbox" name="viewers"> Use viewer comment timestamps <span class="hint">(YouTube Data API; kept 30 days)</span></label>
    <label class="check"><input type="checkbox" name="transcripts"> Allow transcripts</label>
    <label class="check"><input type="checkbox" name="video"> Allow video analysis <span class="hint">(sends videos to Google Gemini)</span></label>
   </div>

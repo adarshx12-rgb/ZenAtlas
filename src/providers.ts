@@ -72,6 +72,9 @@ export function configuredProviders(config:Config,purpose:'content'|'sources'='c
 export class SearXNG implements SourceAdapter {
  name = 'searxng'; capabilities = caps;
  constructor(private config: Config, private transport = fetchJSON) {}
+ forTarget(target: 'videos'|'web') {
+   return target === 'web' ? new SearXNG({...this.config, SEARXNG_CATEGORIES: 'general', SEARXNG_ENGINES: this.config.SEARXNG_WEB_ENGINES}, this.transport) : this;
+ }
  async search(query: string, filters: SearchInput, cursor = '1'): Promise<DiscoveryPage> {
    if (!/^\d{1,2}$/.test(cursor)) throw new Error('invalid_provider_cursor');
    const url = new URL('/search', this.config.SEARXNG_BASE_URL);

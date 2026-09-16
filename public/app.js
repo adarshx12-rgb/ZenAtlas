@@ -14,11 +14,19 @@ function card(item){
  const heading=node('h3');heading.append(link(item.canonical_url,item.title));article.append(heading);
  const details=[item.creator,item.duration?duration(item.duration):null,item.published_at?new Date(item.published_at).toLocaleDateString():null].filter(Boolean);
  if(details.length)article.append(node('div',details.join(' · '),'details'));
+ for(const badge of item.badges??[])article.append(node('span',badge,'badge highlight'));
  article.append(node('span',item.evidence.replaceAll('_',' '),'badge'),node('span',`Rights: ${item.rights_status}`,'badge'));
+ if(item.judgement)article.append(node('p',`Why this matches (${item.judgement.relevance}/10): ${item.judgement.reason}`,'why'));
  if(item.description)article.append(node('p',item.description));
  for(const moment of item.moments){
-  const passage=node('div',undefined,'moment');passage.append(node('strong',`${moment.start_seconds}s – ${moment.end_seconds}s · ${moment.evidence_type.replaceAll('_',' ')}${moment.scene?` · ${moment.scene.model}`:''}`));
-  passage.append(node('p',moment.summary));
+  const passage=node('div',undefined,'moment');
+  if(moment.evidence_type==='viewer_timestamp'){
+   passage.append(node('strong',`Viewers point to ${duration(moment.start_seconds)} – ${duration(moment.end_seconds)}`));
+   for(const said of moment.summary.split(' · '))passage.append(node('p',`“${said}”`,'quote'));
+  }else{
+   passage.append(node('strong',`${moment.start_seconds}s – ${moment.end_seconds}s · ${moment.evidence_type.replaceAll('_',' ')}${moment.scene?` · ${moment.scene.model}`:''}`));
+   passage.append(node('p',moment.summary));
+  }
   if(moment.scene){
    for(const tag of moment.scene.tags)passage.append(node('span',tag,'badge'));
    if(moment.scene.dialogue)passage.append(node('p',`Subtitles: “${moment.scene.dialogue}”`,'quote'));
