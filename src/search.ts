@@ -1,7 +1,8 @@
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import type { DB } from './db.js';
 import type { Config } from './config.js';
-import { searchInput, type Result, type SearchInput, type SearchResponse, type ProviderStatus } from './types.js';
+import { searchInput, type Result, type SearchInput, type SearchResponse, type ProviderStatus, type SceneAnalysisStatus } from './types.js';
+import { activeScene, sceneAnalysisStatus } from './scenes.js';
 import { retrieve } from './retrieval.js';
 import { matchesFilters } from './catalogue.js';
 import { RANKING_VERSION } from './ranking.js';
@@ -39,7 +40,8 @@ export class SearchService {
    }
    const local = await retrieve(this.db,this.config,input,owner);
    let job: any = null; const providers = [...local.providers];
-   if (input.mode !== 'catalogue' && (input.mode==='refresh' || local.strong<this.config.COVERAGE_MIN_RESULTS)) {
+   if (input.mode !== 'catalogue' && (input.mode==='refresh' || local.strong<this.config.COVERAGE_MIN_RESULTS
+     || local.strongSources<this.config.COVERAGE_MIN_SOURCES)) {
      if (!configuredProviders(this.config).length) providers.push({provider:'discovery',status:'disabled',message:'External discovery is not configured.'});
      else if (!await takeBudget(this.db,`discovery-user:${owner}`,20,'day')) {
        providers.push({provider:'discovery',status:'budget_exhausted',message:'Your daily discovery limit has been reached.'});
@@ -114,9 +116,16 @@ export class SearchService {
    const momentIds=slice.flatMap(r=>r.moments.map(m=>m.id));
    const activeMoments=momentIds.length?(await this.db.query(`SELECT m.id FROM moments m JOIN content c ON c.id=m.content_id
      JOIN sources s ON s.id=c.source_id WHERE m.id=ANY($1::uuid[]) AND m.status='active'
-     AND (m.evidence_type<>'transcript_supported' OR (s.policy->>'transcripts')::boolean=true)`,[momentIds])).rows.map(r=>r.id):[];
+     AND (m.evidence_type<>'transcript_supported' OR (s.policy->>'transcripts')::boolean=true)
+     UNION ALL SELECT v.id FROM video_scenes v JOIN content c ON c.id=v.content_id JOIN sources s ON s.id=c.source_id
+     WHERE v.id=ANY($1::uuid[]) AND ${activeScene}`,[momentIds])).rows.map(r=>r.id):[];
+   const analyses = new Map<string,SceneAnalysisStatus>(slice.length?(await this.db.query(`SELECT mv.content_id,mv.version_key,mv.analysis_status,mv.analysis_code
+     FROM media_versions mv JOIN content c ON c.id=mv.content_id JOIN sources s ON s.id=c.source_id
+     WHERE mv.content_id=ANY($1::uuid[]) AND mv.status='current' AND (s.policy->>'video_analysis')::boolean=true`,
+     [slice.map(r=>r.id)])).rows.map(r=>[r.content_id,sceneAnalysisStatus(r)]):[]);
    const results = slice.filter(r=>allowed.includes(r.id) || r.origin==='discovery' && candidateSources.includes(r.source_id))
-     .map(r=>{const moments=r.moments.filter(m=>activeMoments.includes(m.id));return {...r,moments,evidence:moments[0]?.evidence_type??'metadata_match' as const};})
+     .map(r=>{const moments=r.moments.filter(m=>activeMoments.includes(m.id));
+       return {...r,moments,evidence:moments[0]?.evidence_type??'metadata_match' as const,scene_analysis:analyses.get(r.id)??null};})
      .filter(r=>matchesFilters(r,snapshot.filters));
    const more = offset+snapshot.filters.limit<all.length;
    return {query:snapshot.query,search_id:snapshot.id,status:snapshot.cancelled?'cancelled':

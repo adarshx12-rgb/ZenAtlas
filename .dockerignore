@@ -6,3 +6,5 @@
 node_modules
 output
 tests
+scene-worker/.venv
+**/__pycache__

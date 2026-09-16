@@ -30,6 +30,24 @@ The integration/security tests cover:
 
 External discovery tests use a named mock adapter. HTTP security tests use controlled local servers on ephemeral ports; they do not contact metadata services. The DNS pinning implementation is present, but no external DNS-rebinding infrastructure was used. Multi-process queue contention and a live approved feed still need deployment-level checks.
 
+## Gemini scene worker (September 16, 2026)
+
+Actually run:
+
+- `scene-worker\.venv\Scripts\python -m pytest scene-worker\tests`: **96 passed** in about 10 seconds. Environment: Python 3.12.10, google-genai 2.23.0, psycopg 3.3.5, pydantic 2.13.5, PyAV 18.1.0, faster-whisper 1.2.1, pgserver 0.1.4 (PostgreSQL 16.2).
+- The integration tests use a real PostgreSQL server. They apply the repository migrations and `db:app-user` through Node, run the worker as `search_app`, and register versions through the CLI. They query stored scenes over HTTP from `src/main.ts`, checking content times, media times, version keys and offsets. Also covered: a changed file recorded as `inaccessible`/`fingerprint_mismatch`; invalid, unviewable and mostly invalid replies retried and then failed with zero scenes stored; source policy denial; budget deferral; lease loss; reuse of retained transcripts across an offset; speech-to-text fallback; and media without audio.
+- `npm run build` passed. `npm test`: **19 passed**, including three scene tests: search, evidence filtering and snapshot revocation; database triggers for offsets, durations, immutability and transcript evidence; and policy revocation, including a check that the Node worker never claims scene jobs.
+- Inspection of the installed SDK confirmed `VideoMetadata.fps`, `FileData`, `response_json_schema`, `MediaResolution`, `FileState`, `FinishReason` and `ClientError`/`ServerError.code`. Google's documentation, read on this date, lists `gemini-3.8-flash` as the stable Flash model and supports only some JSON Schema keywords for structured output. It does not state which timeline clipped-video timestamps use, so the worker submits whole media.
+- Live YouTube oEmbed checks: Big Buck Bunny (`aqz-KE-bpKQ`) and Sintel (`eRsGyueVLvQ`) returned 200. Nonexistent IDs returned 404 and 400; both are now recorded as `not_found`.
+- Live faster-whisper `tiny` (CPU, int8) on a generated 440 Hz tone clip returned no cues, so it did not invent speech. The run took 27 seconds including the model download. A clip without an audio track raised `IndexError`; speech-to-text is now selected only when PyAV finds an audio stream, with a regression test.
+- Browser check with Playwright CLI against a throwaway PostgreSQL database. TEST FIXTURE scenes were stored by the real pipeline from a labelled fake reply. A catalogue search for `harbour` showed the scene card: content time 9s–16s, tags, quoted subtitle, version key and +4s offset. A YouTube version that failed the live check against an ID YouTube does not serve showed the explicit notice that the media could not be accessed and the video was not found. Browser console errors: 0. The rendered cards were checked through the page accessibility snapshot; no screenshot of the cards was kept.
+
+Not verified:
+
+- **No live Gemini request was made** because no `GEMINI_API_KEY` was available. Model output quality, real timestamp accuracy, YouTube URL input, API acceptance of the `fps` setting, Files API upload and processing, cost and latency are all unverified. No model-generated scene exists in any database.
+- No real speech was transcribed and evaluated, and no person has reviewed scene timestamps against video.
+- The Python worker has no container image, and concurrent workers were not tested against a production server.
+
 ## Remaining integrations and boundaries
 
 | Milestone | Delivered | Remaining |
@@ -37,7 +55,7 @@ External discovery tests use a named mock adapter. HTTP security tests use contr
 | 1. Catalogue/API/UI | Versioned schema, lexical search, typed API, curated links, working reference client | Connect the actual existing website and its account system; neither was supplied |
 | 2. Discovery | Configurable SearXNG adapter, bounded jobs/polling, deduplication, persistence, partial statuses | Run a real self-hosted instance and verify engine access; no configured endpoint supplied |
 | 3. Catalogue growth | Durable schedule, reviewed sources, protected CLI/API, JSON-feed adapter, backoff/expiry | Configure approved real feeds and deployment supervision; unsupported websites remain link-only/candidates |
-| 4. Meaning/moments | Optional pgvector migration/provider contract/RRF, extractive full-transcript windows, visual-provider interface | Live embedding integration; real retained transcripts; model-based story reasoning; visual/audio implementation with authorised media |
+| 4. Meaning/moments | Optional pgvector migration/provider contract/RRF, extractive full-transcript windows, Gemini scene worker with validated, versioned, offset-aware scenes, subtitle reuse and optional faster-whisper | Live embedding integration; real retained transcripts; a live Gemini run with human timestamp review; model-based story reasoning |
 | 5. Feedback/evaluation | Private deduplicated feedback, bounded personal ranking, versioned rules, development metrics and held-out template | Independent human judgments and separately verified timing quality before learned global ranking |
 
 Docker CLI 29.7.2 is installed, but its Linux-engine pipe was absent. No containers were started, no public deployment occurred, and no live embedding/SearXNG call or paid model inference was made. A SearXNG immutable image digest still needs selection; the overlay explicitly requires it rather than inventing a working version. No claim of universal web coverage, automatic quality improvement, accurate visual moments, or free unlimited operation is made.

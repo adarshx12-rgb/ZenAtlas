@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { DB } from './db.js';
 import { canonicalize, publicURL } from './urls.js';
 import { contentInput, type ContentInput, type Result } from './types.js';
+import { findMatchingRule } from './policy-rules.js';
 
 export async function ingest(db: DB, raw: ContentInput, provenance: Record<string, unknown>): Promise<Result|null> {
  const item = contentInput.parse(raw);
@@ -12,9 +13,18 @@ export async function ingest(db: DB, raw: ContentInput, provenance: Record<strin
  return db.transaction(async tx => {
    let sourceId=(await tx.query(`SELECT s.id FROM sources s WHERE domain=$1 OR active_domain=$1
      OR EXISTS(SELECT 1 FROM source_alternatives a WHERE a.source_id=s.id AND a.domain=$1 AND a.status='verified') LIMIT 1`,[domain])).rows[0]?.id;
-   if(!sourceId)await tx.query(`INSERT INTO sources(domain,display_name,provenance) VALUES($1,$1,$2)
-     ON CONFLICT(domain) DO NOTHING`,[domain,JSON.stringify(provenance)]);
+   if(!sourceId){
+     // A brand-new domain gets classified by any matching trust rule immediately; otherwise it lands as a plain candidate.
+     const rule=await findMatchingRule(tx,domain);
+     if(rule)await tx.query(`INSERT INTO sources(domain,display_name,status,policy,adapter,feed_url,provenance) VALUES($1,$1,$2,$3,$4,$5,$6)
+       ON CONFLICT(domain) DO NOTHING`,[domain,rule.policy.status,
+       JSON.stringify({metadata:rule.policy.metadata,transcripts:rule.policy.transcripts,video_analysis:rule.policy.video_analysis,retention_days:rule.policy.retention_days}),
+       rule.policy.adapter,rule.policy.feed_url,JSON.stringify({...provenance,auto_policy_rule:rule.pattern})]);
+     else await tx.query(`INSERT INTO sources(domain,display_name,provenance) VALUES($1,$1,$2)
+       ON CONFLICT(domain) DO NOTHING`,[domain,JSON.stringify(provenance)]);
+   }
    const source = (await tx.query('SELECT * FROM sources WHERE domain=$1 OR id=$2 FOR UPDATE',[domain,sourceId??null])).rows[0];
+   await tx.query(`UPDATE sources SET discovery_appearances=discovery_appearances+1,discovery_last_seen_at=now() WHERE id=$1`,[source.id]);
    if (['paused','rejected'].includes(source.status)) return null;
    if(source.health_status==='down' || source.active_domain!==domain)return null;
    if((await tx.query(`SELECT 1 FROM content_removals WHERE canonical_url=$1 OR (source_id=$2 AND provider_id=$3)`,[url,source.id,item.provider_id])).rows.length) return null;

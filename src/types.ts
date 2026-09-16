@@ -32,10 +32,17 @@ export interface SourceAdapter {
  fetchMetadata?(reference: string): Promise<ContentInput>;
  listUpdates?(source: {feed_url: string; cursor: string|null}): Promise<DiscoveryPage>;
 }
+export interface SceneDetails {
+ media_version: string; media_start_seconds: number; media_end_seconds: number; timeline_offset_seconds: number;
+ model: string; tags: string[]; dialogue: string|null; dialogue_source: string|null;
+}
+export interface SceneAnalysisStatus {
+ status: 'pending'|'complete'|'inaccessible'|'failed'|'not_permitted'; media_version: string; message: string;
+}
 export interface Moment {
  id: string; start_seconds: number; end_seconds: number; summary: string;
  evidence_type: 'transcript_supported'|'video_analysed'; analysis_version: string;
- inspected_ranges: [number,number][]; evidence_refs: string[];
+ inspected_ranges: [number,number][]; evidence_refs: string[]; scene?: SceneDetails;
 }
 export interface Result {
  id: string; title: string; canonical_url: string; source_id: string; source_name: string;
@@ -43,7 +50,7 @@ export interface Result {
  language: string|null; thumbnail: string|null; embeddable: boolean|null;
  rights_status: string; license_url: string|null; availability: string;
  evidence: 'metadata_match'|'transcript_supported'|'video_analysed'; moments: Moment[];
- origin: 'catalogue'|'discovery'; verified_at: string|null;
+ origin: 'catalogue'|'discovery'; verified_at: string|null; scene_analysis?: SceneAnalysisStatus|null;
 }
 export interface SearchResponse {
  query: string; search_id: string; status: 'complete'|'discovering'|'partial'|'cancelled';

@@ -10,6 +10,7 @@ import { claim, complete, fail, enqueue } from './queue.js';
 import { ingest } from './catalogue.js';
 import { contentHash, enrichEmbedding } from './embeddings.js';
 import { canonicalize } from './urls.js';
+import { rankDiscovery } from './ranking.js';
 
 export async function providerHealth(db:DB,provider:string,ok:boolean) {
  await db.query(`INSERT INTO provider_health(provider,failure_count,last_success_at,last_error_code)
@@ -36,10 +37,10 @@ export async function workOnce(db:DB,config:Config,adapters?:SourceAdapter[],pro
        catch { await providerHealth(db,adapter.name,false); return {results:[],next_cursor:null,
          status:{provider:adapter.name,status:'unavailable',message:'External discovery is unavailable. Catalogue results are still available.'}}; }
      }));
-     const results:Result[]=[]; const seen=new Set<string>();
-     for(const page of pages) for(const item of page.results) {
-       const url=canonicalize(item.url); if(seen.has(url)) continue; seen.add(url);
-       const result=await ingest(db,item,{adapter:page.status.provider,method:'search',discovered_at:new Date().toISOString()});
+     const candidates=pages.flatMap(page=>page.results.map((item,position)=>({item:{...item,url:canonicalize(item.url)},provider:page.status.provider,position})));
+     const results:Result[]=[];
+     for(const {item,provider} of rankDiscovery(input.q,candidates,config.DISCOVERY_RESULTS)) {
+       const result=await ingest(db,item,{adapter:provider,method:'search',discovered_at:new Date().toISOString()});
        if(result) {results.push(result); await enqueueEnrichment(db,config,result);}
      }
      await complete(db,job,{results,providers:pages.map(p=>p.status)});

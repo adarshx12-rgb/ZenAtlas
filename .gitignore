@@ -5,3 +5,7 @@ coverage/
 test-results/
 *.log
 .playwright-cli/
+scene-worker/.venv/
+__pycache__/
+.pytest_cache/
+*.egg-info/

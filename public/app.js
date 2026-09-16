@@ -7,18 +7,28 @@ ready.catch(()=>{});
 function node(tag,text,className){const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(className)el.className=className;return el;}
 function link(url,text){const u=new URL(url);if(!['https:','http:'].includes(u.protocol)||u.username||u.password)throw Error('Invalid link');const a=node('a',text);a.href=u.href;a.target='_blank';a.rel='noopener noreferrer';return a;}
 async function api(url,options={}){const response=await fetch(url,{credentials:'same-origin',...options});if(!response.ok){const data=await response.json().catch(()=>null);throw Error(data?.error?.message??'Search is unavailable. Please retry.');}return response.status===204?null:response.json();}
+function duration(seconds){const s=Math.round(seconds),h=Math.floor(s/3600),m=Math.floor(s%3600/60),r=String(s%60).padStart(2,'0');return h?`${h}:${String(m).padStart(2,'0')}:${r}`:`${m}:${r}`;}
 function card(item){
  const article=node('article',undefined,'card');article.dataset.id=item.id;
  article.append(node('div',`${item.source_name} · ${item.origin==='catalogue'?'Catalogue':'External discovery'}`,'meta'));
  const heading=node('h3');heading.append(link(item.canonical_url,item.title));article.append(heading);
+ const details=[item.creator,item.duration?duration(item.duration):null,item.published_at?new Date(item.published_at).toLocaleDateString():null].filter(Boolean);
+ if(details.length)article.append(node('div',details.join(' · '),'details'));
  article.append(node('span',item.evidence.replaceAll('_',' '),'badge'),node('span',`Rights: ${item.rights_status}`,'badge'));
  if(item.description)article.append(node('p',item.description));
  for(const moment of item.moments){
-  const passage=node('div',undefined,'moment');passage.append(node('strong',`${moment.start_seconds}s – ${moment.end_seconds}s · ${moment.evidence_type.replaceAll('_',' ')}`));
+  const passage=node('div',undefined,'moment');passage.append(node('strong',`${moment.start_seconds}s – ${moment.end_seconds}s · ${moment.evidence_type.replaceAll('_',' ')}${moment.scene?` · ${moment.scene.model}`:''}`));
   passage.append(node('p',moment.summary));
+  if(moment.scene){
+   for(const tag of moment.scene.tags)passage.append(node('span',tag,'badge'));
+   if(moment.scene.dialogue)passage.append(node('p',`Subtitles: “${moment.scene.dialogue}”`,'quote'));
+   const offset=moment.scene.timeline_offset_seconds;
+   passage.append(node('div',`Version ${moment.scene.media_version}${offset?` · media ${moment.scene.media_start_seconds}s – ${moment.scene.media_end_seconds}s, offset ${offset>0?'+':''}${offset}s`:''}`,'meta'));
+  }
   const url=new URL(item.canonical_url);if(url.hostname==='www.youtube.com'&&url.pathname==='/watch'){url.searchParams.set('t',String(Math.floor(moment.start_seconds)));passage.append(link(url.href,'Open timestamp ↗'));}
   article.append(passage);
  }
+ if(item.scene_analysis&&item.scene_analysis.status!=='complete')article.append(node('p',item.scene_analysis.message,'notice'));
  const message=node('span','');
  for(const [text,useful] of [['Useful',true],['Not useful',false]]){const button=node('button',text,'secondary');
   const cardSearchId=searchId;button.addEventListener('click',async()=>{button.disabled=true;try{await api('/api/feedback',{method:'POST',headers:{'Content-Type':'application/json','X-Requested-With':'CreatorSearch'},body:JSON.stringify({search_id:cardSearchId,content_id:item.id,useful})});message.textContent='Feedback saved';}catch(error){message.textContent=error.message;}finally{button.disabled=false;}});article.append(button);}

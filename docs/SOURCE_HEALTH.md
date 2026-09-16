@@ -16,7 +16,7 @@ Google's documentation states that Custom Search JSON API is closed to new custo
 
 Google requests at most ten results per call; Brave at most twenty. Both adapters return provider cursors but the background workflow intentionally processes one page per job. Query text is preserved. Final catalogue filters remain enforced locally; the adapters do not promise identical language/date/video filters across engines. Google and Brave currently return general web leads, so a result URL is not proof of a video, playable media, or an inspected scene. Unknown metadata remains null.
 
-For SearXNG, content searches retain `SEARXNG_ENGINES`/`SEARXNG_CATEGORIES`. Replacement-domain searches use the `general` category and `SEARXNG_SOURCE_ENGINES` (default `google,bing`). Those engines must actually be enabled and accessible in the instance. The supplied container settings allow YouTube, Google and Bing; upstream availability is not guaranteed.
+For SearXNG, content searches retain `SEARXNG_ENGINES`/`SEARXNG_CATEGORIES`. Replacement-domain searches use the `general` category and `SEARXNG_SOURCE_ENGINES` (default `google,bing`). Those engines must actually be enabled and accessible in the instance. The supplied container settings enable Google and Bing for these searches alongside the video engines listed in the README; upstream availability is not guaranteed.
 
 ## Run monitoring
 
@@ -42,6 +42,26 @@ Defaults:
 The worker uses HTTPS HEAD requests with pinned, validated DNS addresses; supported HEAD failures fall back to GET headers. Public-network URL, redirect and deadline protections apply to every hop. Credentials are never sent to source sites. A 2xx response on the expected domain establishes HTTP reachability, not identity, content quality or media availability. 401/403/429 mean access-limited or rate-limited (`blocked`), not a confirmed outage. Timeouts, network errors and unsuccessful endpoints accumulate failed checks. A successful check clears the streak. Cross-domain redirects propose alternatives; a redirect alone does not approve the destination.
 
 Health states are separate from administrative status and collection failure counts. A confirmed-down source is temporarily excluded from search results without deleting its catalogue. If its active endpoint later recovers, its unexpired eligible records become searchable again.
+
+## Scale review with trust rules instead of reviewing every domain
+
+Discovery can surface far more candidate domains than an administrator can reasonably review one by one. `source_policy_rules` lets you review a **pattern** once (e.g. an exact domain or a `*.domain` wildcard covering every subdomain) and have it apply automatically, forever, to every matching source — both new discoveries and any matching `candidate` sources already sitting in the database.
+
+```powershell
+npm.cmd run admin -- policy-rule "*.youtube.com" examples/policy-rule.json
+npm.cmd run admin -- policy-rules
+npm.cmd run admin -- policy-rule-delete "*.youtube.com"
+```
+
+The rule file uses the same shape as `examples/source-policy.json`, including its own `review_note`; the reviewed decision is the pattern, not any single domain. A rule is checked the moment a brand-new domain is first discovered (`src/catalogue.ts`'s `ingest`), and — when the rule is created or edited — retroactively against every source still sitting at the default `candidate` status. A source a human has already moved off `candidate` (via `policy`) is never touched by a later rule change. Rules are not only for approval: a pattern can just as well be set to `"status":"rejected"` to blocklist a known spam or scraper network the instant it's discovered.
+
+Every discovery hit also increments that source's `discovery_appearances` counter, whether or not a rule classified it. For domains no rule covers, this powers a small, prioritized human-review queue instead of a firehose:
+
+```powershell
+npm.cmd run admin -- review-queue 5
+```
+
+This lists `candidate` sources that have appeared in discovery results at least 5 times, most-frequent first — so review time goes to domains that have already proven they matter, and each approval is best turned into a new rule (covering that whole publisher going forward) rather than a one-off `policy` call, so the queue actually shrinks over time instead of growing with the catalogue. Deliberately not automated: flipping a source's `metadata` (permanent content retention) purely from traffic volume. Popularity doesn't establish permission to retain a domain's content or rule out spam/duplication — that's still a human (or a rule the human wrote) making the call, per the activation review above.
 
 ## Add a source and known alternatives
 

@@ -19,12 +19,6 @@ export function transcriptWindows(segments: Segment[], maxChars=6000, overlap=2)
  }
  return windows;
 }
-// Future model providers receive data only; no tools or fetching authority. This implementation is extractive.
-export interface VisualAnalysisProvider {
- analyse(input: { authorised_media_reference:string; inspected_ranges:[number,number][] }): Promise<{
-   findings:{start:number;end:number;summary:string;evidence_refs:string[]}[]; version:string;
- }>;
-}
 export async function importTranscript(db:DB,raw:unknown) {
  const input=transcriptInput.parse(raw);
  for(let i=1;i<input.segments.length;i++) if(input.segments[i].start<input.segments[i-1].start) throw new Error('Segments must be ordered');

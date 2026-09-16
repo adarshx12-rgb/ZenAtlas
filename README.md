@@ -43,7 +43,9 @@ Browse http://127.0.0.1:3000. `GET /health/live` checks the process; `GET /healt
 
 **SearXNG is optional.** ZenAtlas also has direct Google Custom Search and Brave Search adapters. Configure any combination of providers. The worker now monitors source availability and can switch to verified working alternatives after repeated failures. See [source monitoring and provider setup](docs/SOURCE_HEALTH.md) for credentials, health intervals, domain review, commands, and Google API availability limits.
 
-The implementation follows the official [SearXNG search API](https://docs.searxng.org/dev/search_api.html): JSON output must be enabled in `search.formats`; engine/filter support varies. `deploy/searxng/settings.yml` enables JSON and selects the YouTube engine. SearXNG is a metasearch service, not the persistent catalogue.
+The implementation follows the official [SearXNG search API](https://docs.searxng.org/dev/search_api.html): JSON output must be enabled in `search.formats`; engine/filter support varies. `deploy/searxng/settings.yml` enables JSON and nine video engines (YouTube, Dailymotion, SepiaSearch/PeerTube, Odysee, Wikimedia Commons, and the Bing, Google, DuckDuckGo and Brave video searches); each returned results from the pinned image on 16 September 2026, while Vimeo and Rumble did not and are left out. Upstream engines change and rate-limit without notice. SearXNG is a metasearch service, not the persistent catalogue.
+
+Discovery takes up to 100 SearXNG leads and keeps the best `DISCOVERY_RESULTS` (`src/ranking.ts`, `rankDiscovery`): leads are scored on how many query words appear in their title (or, at half weight, description/channel), with a small bonus for the engine's own order and for leads several providers agree on. Quoted phrases and `-exclusions` are enforced. Leads containing no query word are dropped when others do match. Each further result from the same site is penalised, so one platform cannot fill the page. SearXNG's channel, duration, publication date and thumbnail URL are retained when valid. The reference client shows channel, duration and date; it does not load third-party thumbnails, because its Content-Security-Policy only allows same-origin images.
 
 Configure your self-hosted instance with `SEARXNG_BASE_URL`. For a host process and the optional local container, use `http://127.0.0.1:8080`. `SEARXNG_TOKEN` is optional bearer authentication for **your reverse proxy**; it is not claimed to be a native SearXNG API-key setting.
 
@@ -65,9 +67,9 @@ SearXNG is distributed under [AGPL-3.0](https://github.com/searxng/searxng/blob/
 
 Unknown domains enter `candidate`; discovery alone never activates them. Candidates can appear as temporary external links, but their content is not added to the searchable catalogue. Their domain/provenance records expire after 30 days. Sources already approved for metadata retention can persist individual discovered items. Discovery grants no transcript, embed, media, or download capability.
 
-The minimum activation review is: relevant individual content; an identifiable publisher/access method; no evident spam/duplicate source; permission to retain the proposed metadata; a retention period; and an explicit connector decision. Record this evidence in `review_note`. Unsupported sites can be approved as `link_only`, with no automated page scraping; uncertain sites stay candidates. This build deliberately has **no automatic approval policy or universal crawler**.
+The minimum activation review is: relevant individual content; an identifiable publisher/access method; no evident spam/duplicate source; permission to retain the proposed metadata; a retention period; and an explicit connector decision. Record this evidence in `review_note`. Unsupported sites can be approved as `link_only`, with no automated page scraping; uncertain sites stay candidates. This build deliberately has **no universal crawler and no approval based on discovery traffic alone**: nothing gets activated just because a domain appeared or was visited often. An administrator can, however, record a `review_note`-backed decision once for a domain *pattern* (`source_policy_rules`, see [docs/SOURCE_HEALTH.md](docs/SOURCE_HEALTH.md)) and have it apply automatically to every current and future matching domain — the review is still explicit and human-authored, it just isn't repeated per instance.
 
-Use the protected HTTP source endpoints in [docs/API.md](docs/API.md), or the server-side CLI using the restricted service database connection:
+The easiest way to review sources is the admin page at **http://127.0.0.1:3000/admin** (use the same address as `PUBLIC_ORIGIN`; changes from other origins such as `localhost` are refused). Sign in with `ADMIN_TOKEN`. It lists every website with its status, discovery appearances, saved videos and health; filters by status or name; adds websites; approves, pauses or rejects one website or up to 100 selected at once; and manages trust rules. Every change asks for a review note, as the policy files do. The page uses the protected HTTP source endpoints in [docs/API.md](docs/API.md). The same actions are available from the server-side CLI using the restricted service database connection:
 
 ```powershell
 npm.cmd run admin -- sources
@@ -92,7 +94,44 @@ Keyword search uses PostgreSQL English full-text search with GIN indexes and `we
 
 `src/moments.ts` accepts **actual** ordered timestamped segments only from an active source that permits transcript retention. It validates positive ranges and known duration, retains language/origin/version/timing quality, and produces overlapping extractive windows over the **entire supplied transcript**. Search globally ranks matching windows. Each moment contains its exact evidence IDs and inspected transcript ranges. These broad passages preserve neighbouring context, but they do not implement model-based narrative setup/payoff reasoning or verify silent events. No model credentials are needed for this extractive mode.
 
-Visual/audio analysis is an interface only (`VisualAnalysisProvider`); no media fetching, visual model, invented findings, automatic transcript acquisition, or download capability is supplied. No production transcript was available during this build. The reference client only offers timestamp navigation for supported YouTube watch URLs and never shows a generic download button.
+No production transcript was available during this build. The reference client only offers timestamp navigation for supported YouTube watch URLs and never shows a generic download button.
+
+### Video scene analysis with Gemini
+
+`scene-worker/` is a separate Python background worker. It sends one registered, accessible media version to Gemini through the Google Gen AI SDK, validates the structured scenes that come back, and stores accepted scenes in PostgreSQL (migration `006_video_scenes.sql`: `media_versions`, `scene_analyses`, `video_scenes`). `GET /api/search` matches scene descriptions, tags and quoted subtitles together with transcript windows and returns each scene as a `video_analysed` moment. The Node worker never claims `scene_analysis` jobs, and catalogue search needs no Gemini credentials. The embedded `npm run preview` database is single-process, so the Python worker requires a PostgreSQL server.
+
+**Permission.** Analysis runs only for sources whose policy sets `"video_analysis": true` (default `false`), because media is sent to Google. Revoking it deletes that source's analyses; revoking transcript permission deletes analyses that were given subtitles.
+
+**Media access.** There is no generic downloader. A version is either:
+
+- `--youtube`: the content's canonical public YouTube watch URL, passed to Gemini by URL (a Gemini preview feature for public videos). Before each run, YouTube oEmbed must confirm public availability. The duration must already be known in the content metadata; the worker never estimates it.
+- `--file`: an authorised file under `SCENE_MEDIA_ROOT`. PyAV decodes a frame and reads the duration, and SHA-256 fingerprints the bytes. The file is uploaded through the Gemini Files API and deleted from it after the request.
+
+**Version identity and offsets.** A version stores its key, fingerprint, duration, `timeline_offset_seconds` (content time = media time + offset), the operator's `offset_basis`, and an optional subtitle file with its own offset (media time = cue time + subtitle offset). These columns are immutable in the database. Registering another version supersedes the current one and marks its scenes stale; a changed canonical URL does the same. Each scene keeps media and content timestamps, and triggers reject scenes that disagree with the offset, exceed the media or content duration, or cite transcript segments from another version or time range. Do not register a different release (a re-edit or remaster, for example) with offset 0 unless you have checked that the timelines match.
+
+**Subtitles.** When the source permits transcripts, the worker reuses, in order: retained `transcript_segments` whose `content_version` equals the version key; the registered SRT/WebVTT file; then faster-whisper, only if `SCENE_TRANSCRIBE_FALLBACK=true`, the optional `transcribe` extra is installed, and the local file has an audio track. Otherwise the model receives the video alone. Scene dialogue is quoted from those cues by timestamp, never written by the model, and subtitle text is sent as delimited, untrusted data.
+
+**Validation and failures.** The model returns `MM:SS` scenes under a JSON schema, and the worker revalidates them strictly. A timestamp may move at most one second (the output granularity) to fit the media. Scenes outside the media or content, overlapping scenes, and scenes citing non-overlapping cues are rejected; a response in which most scenes fail is discarded entirely. Invalid, truncated, blocked or "could not watch" responses store nothing. Network errors, rate limits and invalid output are retried at most three times. Inaccessible media (a missing or changed file, a private or removed video, or a provider processing failure) is recorded on the version with an explicit code. Search results show it through `scene_analysis`, while ordinary link results stay available.
+
+**Coverage and cost.** Each run submits the whole media at 1 frame per second and low media resolution. Sampled frames do not guarantee that brief events were seen; the analysed span is stored as `inspected_ranges`. Clip offsets are not used because Google's documentation does not state which timeline clipped timestamps refer to. Media longer than `SCENE_MAX_MEDIA_SECONDS` (45 minutes by default) fails with `media_too_long`. Results are cached by media version, model, sampling settings and subtitle identity, so an unchanged job completes without a model call. `SCENE_ANALYSIS_DAILY_BUDGET` caps Gemini requests; an exhausted budget defers the job to the next day without using an attempt.
+
+Setup, from the repository root so `.env` is read:
+
+```powershell
+py -3.12 -m venv scene-worker\.venv
+scene-worker\.venv\Scripts\python -m pip install -e "scene-worker[test]"   # [transcribe,test] adds faster-whisper
+npm.cmd run migrate
+npm.cmd run db:app-user
+# Set GEMINI_API_KEY and SCENE_MEDIA_ROOT in .env, and approve video_analysis in the reviewed source policy.
+scene-worker\.venv\Scripts\python -m zenatlas_scenes register CONTENT_UUID --version-key YOUR-VERSION --file sample.mp4 --offset 0 --offset-basis "How the timeline was verified"
+scene-worker\.venv\Scripts\python -m zenatlas_scenes enqueue MEDIA_VERSION_UUID
+scene-worker\.venv\Scripts\python -m zenatlas_scenes work --once
+scene-worker\.venv\Scripts\python -m zenatlas_scenes status CONTENT_UUID
+```
+
+Run `work` without `--once` under a supervisor for continuous processing. `check-media MEDIA_VERSION_UUID` rechecks access without calling Gemini. `GEMINI_MODEL` (default `gemini-3.8-flash`, listed as Google's stable Flash model in September 2026) sets the model for newly queued jobs, and `enqueue --model` overrides it per job.
+
+**Sample video status.** No `GEMINI_API_KEY` was available during this build, so no live Gemini analysis has run and no model-generated scenes have been stored. The curated Big Buck Bunny and Sintel YouTube links passed the live oEmbed check on 16 September 2026, but the curated metadata has no verified durations, so `--youtube` registration refuses them until a verified duration is imported. For a local sample, use a copy you are authorised to process and establish its offset against the catalogue URL.
 
 ### Optional embeddings
 
@@ -131,16 +170,21 @@ All names are in `.env.example` and parsed in `src/config.ts`:
 | `HOST`, `PORT`, `PUBLIC_ORIGIN` | Bind address and exact browser origin; `127.0.0.1`, `3000`, `http://127.0.0.1:3000` |
 | `SESSION_SECRET`, `ADMIN_TOKEN` | Required random session signing/admin secrets |
 | `SEARXNG_BASE_URL`, `SEARXNG_TOKEN` | Optional private discovery endpoint/proxy credential |
-| `SEARXNG_ENGINES`, `SEARXNG_CATEGORIES` | `youtube`, `videos`; must match the instance |
-| `PROVIDER_TIMEOUT_MS`, `DISCOVERY_RESULTS` | 5000 ms per attempt, 20 results |
+| `SEARXNG_ENGINES`, `SEARXNG_CATEGORIES` | The nine video engines above, `videos`; must match the instance |
+| `PROVIDER_TIMEOUT_MS`, `DISCOVERY_RESULTS` | 5000 ms per attempt (`.env.example` uses 12000 because video engines are slower; SearXNG is asked to finish 2 s earlier), 20 ranked results per search (30 in `.env.example`) |
 | `DISCOVERY_DAILY_BUDGET` | 100 searches per adapter/day; also caps scheduled collections |
 | `COVERAGE_MIN_RESULTS`, `COVERAGE_MIN_SCORE` | 5 sufficiently matching records; normalized lexical/moment score at least 0.03 |
+| `COVERAGE_MIN_SOURCES` | 1 (3 in `.env.example`); auto mode also runs discovery when those strong matches come from fewer sites |
 | `SEARCH_TTL_SECONDS`, `DISCOVERY_CACHE_SECONDS` | 1800-second snapshots; 600-second discovery reuse |
 | `SOURCE_REFRESH_HOURS` | 24-hour initial collection schedule |
 | `SEMANTIC_ENABLED` | `false`; lexical search remains independent |
 | `EMBEDDING_URL`, `EMBEDDING_TOKEN`, `EMBEDDING_MODEL` | Optional embedding service and model/version |
 | `EMBEDDING_DIMENSIONS`, `EMBEDDING_DAILY_BUDGET` | 384 dimensions; 100 query/content embeddings combined per day |
 | `SEARXNG_IMAGE`, `SEARXNG_SECRET` | Optional Compose image selection and SearXNG instance secret |
+| `GEMINI_API_KEY`, `GEMINI_MODEL`, `GEMINI_TIMEOUT_SECONDS` | Scene worker only (parsed in `scene-worker/src/zenatlas_scenes/config.py`); `gemini-3.8-flash`; 600-second requests |
+| `SCENE_MEDIA_ROOT`, `SCENE_MAX_MEDIA_SECONDS`, `SCENE_MAX_UPLOAD_BYTES` | Absolute authorised media directory; 2700 seconds; 2 GiB |
+| `SCENE_ANALYSIS_DAILY_BUDGET`, `SCENE_LEASE_SECONDS`, `SCENE_POLL_SECONDS` | 20 Gemini requests/day; 900-second job lease; 5-second polling |
+| `SCENE_TRANSCRIBE_FALLBACK`, `WHISPER_MODEL`, `WHISPER_DEVICE`, `WHISPER_COMPUTE_TYPE` | `false`; `small`; `cpu`; `int8` |
 
 Additional fixed protections: 120 API requests/IP/minute, 30 writes/IP/minute, 20 discovery requests/session/day, 500 query characters, 50 results/page, at most 250 snapshot results, 1 MiB upstream responses, at most two public-fetch redirects, and 16 KiB API request bodies. IPs are HMAC-hashed in quota records. Query strings are not written to application logs. Database budgets expire after two days, feedback after 90 days, searches after their TTL, and completed job payloads after one hour when no live snapshot references them. The worker performs cleanup; operating without a worker does not physically purge expired data. At present query contents are retained in search/job records within those windows for retrieval/polling.
 
@@ -150,7 +194,10 @@ Additional fixed protections: 120 API requests/IP/minute, 30 writes/IP/minute, 2
 npm.cmd run build
 npm.cmd test
 npm.cmd run evaluate
+scene-worker\.venv\Scripts\python -m pytest scene-worker\tests
 ```
+
+The Python integration tests start a temporary PostgreSQL server (`pgserver`), apply the repository migrations and runtime grants, run the worker as `search_app`, and query the real HTTP search API. Gemini is replaced by labelled fake replies, so these tests do not show live model quality.
 
 Tests execute real PostgreSQL SQL via an isolated PGlite instance. External adapters are explicitly mocked; network guard tests use local HTTP test servers. They are not evidence of live SearXNG results, container startup, or production PostgreSQL concurrency/performance. See [docs/VERIFICATION.md](docs/VERIFICATION.md) for the actual results, limits, and remaining checks.
 

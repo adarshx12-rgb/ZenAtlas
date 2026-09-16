@@ -5,12 +5,13 @@ export async function enqueue(db: DB, kind: 'discovery'|'collect'|'enrich'|'sour
  return (await db.query(`INSERT INTO jobs(kind,dedupe_key,payload) VALUES($1,$2,$3)
  ON CONFLICT(dedupe_key) DO UPDATE SET dedupe_key=excluded.dedupe_key RETURNING *`,[kind,key,JSON.stringify(payload)])).rows[0];
 }
+// Scene analysis jobs belong to the Python worker in scene-worker/.
 export async function claim(db: DB) {
  await db.query(`UPDATE jobs SET status='failed',error_code='retry_exhausted',lease_until=NULL,updated_at=now()
-   WHERE attempts>=3 AND ((status='running' AND lease_until<now()) OR status='queued')`);
+   WHERE kind<>'scene_analysis' AND attempts>=3 AND ((status='running' AND lease_until<now()) OR status='queued')`);
  return (await db.query(`UPDATE jobs SET status='running',attempts=attempts+1,lease_token=$1,
  lease_until=now()+interval '90 seconds',updated_at=now() WHERE id=(SELECT id FROM jobs
- WHERE ((status='queued' AND run_after<=now()) OR (status='running' AND lease_until<now())) AND attempts<3
+ WHERE kind<>'scene_analysis' AND ((status='queued' AND run_after<=now()) OR (status='running' AND lease_until<now())) AND attempts<3
  ORDER BY run_after,id FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING *`,[randomUUID()])).rows[0]??null;
 }
 export async function complete(db: DB, job: any, result: unknown) {

@@ -1,9 +1,22 @@
 use_default_settings:
   engines:
     keep_only:
+      # Video discovery (SEARXNG_ENGINES). Each was checked to return results from this image on 2026-09-16;
+      # vimeo (HTTP errors) and rumble (no results) were left out.
       - youtube
+      - dailymotion
+      - sepiasearch
+      - odysee
+      - bing videos
+      - google videos
+      - duckduckgo videos
+      - brave.videos
+      - wikicommons.videos
+      # Replacement-domain searches (SEARXNG_SOURCE_ENGINES).
       - google
       - bing
+      # brave.videos reuses the brave engine's network settings, so brave must exist (it stays disabled).
+      - brave
 search:
   safe_search: 1
   formats:
@@ -14,7 +27,11 @@ server:
   public_instance: false
   image_proxy: false
 outgoing:
-  request_timeout: 4.0
+  # Most video engines answer in 4-8 seconds; the app requests a per-search limit up to max_request_timeout.
+  request_timeout: 8.0
+  max_request_timeout: 12.0
 engines:
   - name: youtube
     disabled: false
+  - name: brave
+    disabled: true

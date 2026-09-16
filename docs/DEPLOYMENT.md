@@ -9,11 +9,13 @@ flowchart LR
   Worker[Supervised worker] --> DB
   Worker --> SearXNG[Private SearXNG]
   Worker --> Feed[Approved public JSON feeds]
+  SceneWorker[Supervised Python scene worker] --> DB
+  SceneWorker -. authorised media and subtitles .-> Gemini[Gemini API]
   API -. optional query embedding .-> Embeddings[Private embedding service]
   Worker -. optional enrichment .-> Embeddings
 ```
 
-Use `npm run start` for the API and `npm run worker` for a **separate supervised process**, both from the repository root. `Dockerfile` builds the Node service and can run either command. A static host cannot execute this engine. Short-lived/serverless web routes need continuously running worker/SearXNG compute elsewhere. No deployment credentials or existing hosting were supplied.
+Use `npm run start` for the API and `npm run worker` for a **separate supervised process**, both from the repository root. `Dockerfile` builds the Node service and can run either command. The optional scene worker is a third supervised process: Python 3.11+, installed with `pip install -e scene-worker` (add the `transcribe` extra for faster-whisper), started with `python -m zenatlas_scenes work` from the repository root. It needs the runtime `DATABASE_URL`, `GEMINI_API_KEY`, and read access to `SCENE_MEDIA_ROOT`; `Dockerfile` does not include it. Keep the Gemini key server-side and send media only from sources whose reviewed policy permits `video_analysis`. A static host cannot execute this engine. Short-lived/serverless web routes need continuously running worker/SearXNG compute elsewhere. No deployment credentials or existing hosting were supplied.
 
 Local Compose only publishes database/SearXNG ports on loopback. In production use a private service network, TLS/authenticated internal service calls where appropriate, and a reverse proxy exposing only the API/static reference client. A container cannot reach the host's services through its own `localhost`; use actual service DNS names (for example `db` or `searxng`) in its environment. Do not give internal addresses or credentials to the browser. Set `PUBLIC_ORIGIN` to the actual website origin.
 
@@ -55,7 +57,8 @@ Public fetches resolve all addresses, reject private/non-unicast networks, pin o
 7. Try another session's search ID, ordinary access to admin routes, and invalid cursors. All must be denied.
 8. Verify your authenticated identity mapping, HTTPS cookie behaviour, proxy IP configuration, quotas, actual source permissions and retention/cleanup.
 9. Optional vector integration: migrate, configure a compatible endpoint, enqueue content enrichment, verify the stored model/dimension and hybrid query, then stop the endpoint and confirm lexical fallback.
-10. Import only permitted real transcripts; review text, timings, duration and narrative context before treating timestamps as useful footage suggestions. Separately evaluate visual findings if you implement a visual provider.
+10. Import only permitted real transcripts; review text, timings, duration and narrative context before treating timestamps as useful footage suggestions. 
+11. Scene worker: approve `video_analysis` for one reviewed source, register an accessible version, run `work --once`, and confirm that `status` shows `complete` and `/api/search` returns its scenes at the expected offset. Then make the media unavailable (for example, rename the file), queue it again, and confirm an explicit `inaccessible` status with no new scenes. Have a person compare a sample of scene timestamps with the video before treating them as reliable.
 
 ## Backups and rollback
 

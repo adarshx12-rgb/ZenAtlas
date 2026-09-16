@@ -8,8 +8,18 @@ import type { DB } from './db.js';
 import type { Config } from './config.js';
 import { SearchService, ApiError } from './search.js';
 import { takeBudget } from './budgets.js';
-import { setSourcePolicy } from './admin.js';
+import { setSourcePolicy, sourcePolicy } from './admin.js';
 import {addSource,setAlternative} from './source-health.js';
+import { listPolicyRules, setPolicyRule } from './policy-rules.js';
+
+const sourceListQuery = z.object({
+ status:z.enum(['all','candidate','active','paused','rejected']).default('all'),
+ q:z.string().trim().toLowerCase().max(253).default(''),
+ sort:z.enum(['newest','seen','domain']).default('newest'),
+ limit:z.coerce.number().int().min(1).max(500).default(200),
+ offset:z.coerce.number().int().min(0).max(1000000).default(0),
+}).strict();
+const sourceOrder = {newest:'s.created_at DESC,s.domain',seen:'s.discovery_appearances DESC,s.discovery_last_seen_at DESC NULLS LAST,s.domain',domain:'s.domain'};
 
 export async function createApp(db:DB,config:Config) {
  const app=Fastify({logger:false,bodyLimit:16384,requestTimeout:15000,trustProxy:false});
@@ -40,6 +50,7 @@ export async function createApp(db:DB,config:Config) {
  app.setErrorHandler((error:any,req,reply)=>{
    if(error instanceof ZodError) return reply.code(400).send({error:{code:'invalid_request',message:'Check the query, filters, or request fields.'}});
    if(error instanceof ApiError) return reply.code(error.statusCode).send({error:{code:error.code,message:error.message}});
+   if(error?.message==='unsafe_url') return reply.code(400).send({error:{code:'unsafe_url',message:'Use a public http(s) web address.'}});
    if(error.statusCode && error.statusCode<500) return reply.code(error.statusCode).send({error:{code:'invalid_request',message:'The request could not be accepted.'}});
    console.error(JSON.stringify({event:'request_failed',request_id:req.id,code:'internal_error'}));
    return reply.code(503).send({error:{code:'service_unavailable',message:'Search is temporarily unavailable. Please retry.'}});
@@ -72,7 +83,29 @@ export async function createApp(db:DB,config:Config) {
  });
  app.get('/api/feedback',async req=>(await db.query('SELECT content_id,useful,updated_at FROM feedback WHERE owner=$1 ORDER BY updated_at DESC LIMIT 100',[owner(req)])).rows);
  app.delete('/api/feedback',async(req,reply)=>{await db.query('DELETE FROM feedback WHERE owner=$1',[owner(req)]);return reply.code(204).send();});
- app.get('/api/admin/sources',async req=>{admin(req);return (await db.query('SELECT * FROM sources ORDER BY created_at DESC LIMIT 200')).rows;});
+ app.get('/api/admin/sources',async(req,reply)=>{admin(req);
+   const input=sourceListQuery.parse(req.query);
+   const rows=(await db.query(`SELECT s.*,(SELECT count(*)::int FROM content c WHERE c.source_id=s.id) AS saved_videos,count(*) OVER()::int AS total_rows
+     FROM sources s WHERE ($1='all' OR s.status=$1) AND ($2='' OR s.domain LIKE '%'||$2||'%' ESCAPE '\\' OR lower(s.display_name) LIKE '%'||$2||'%' ESCAPE '\\')
+     ORDER BY ${sourceOrder[input.sort]} LIMIT $3 OFFSET $4`,[input.status,input.q.replace(/[\\%_]/g,'\\$&'),input.limit,input.offset])).rows;
+   reply.header('X-Total-Count',String(rows[0]?.total_rows??0));
+   return rows.map(({total_rows:_total,...row})=>row);});
+ app.get('/api/admin/sources/summary',async req=>{admin(req);return {
+   statuses:Object.fromEntries((await db.query('SELECT status,count(*)::int AS n FROM sources GROUP BY status')).rows.map(r=>[r.status,r.n])),
+   rules:(await db.query('SELECT count(*)::int AS n FROM source_policy_rules')).rows[0].n,
+   saved_videos:(await db.query('SELECT count(*)::int AS n FROM content')).rows[0].n,
+ };});
+ app.post('/api/admin/sources/bulk',async req=>{admin(req);
+   const input=z.object({ids:z.array(z.string().uuid()).min(1).max(100),policy:sourcePolicy}).strict().parse(req.body);
+   let updated=0;for(const sourceId of new Set(input.ids))if(await setSourcePolicy(db,sourceId,input.policy))updated++;
+   return {updated};});
+ app.get('/api/admin/rules',async req=>{admin(req);return listPolicyRules(db);});
+ app.post('/api/admin/rules',async req=>{admin(req);
+   const input=z.object({pattern:z.string().max(255),policy:z.unknown()}).strict().parse(req.body);
+   return setPolicyRule(db,input.pattern,input.policy);});
+ app.delete('/api/admin/rules/:id',async(req,reply)=>{admin(req);
+   if(!(await db.query('DELETE FROM source_policy_rules WHERE id=$1 RETURNING id',[id(req.params)])).rows.length)throw new ApiError(404,'rule_not_found','Rule not found.');
+   return reply.code(204).send();});
  app.post('/api/admin/sources',async req=>{admin(req);const input=z.object({url:z.string().url().max(2048),name:z.string().max(300).optional()}).strict().parse(req.body);return addSource(db,input.url,input.name);});
  app.get('/api/admin/sources/:id/alternatives',async req=>{admin(req);return (await db.query('SELECT * FROM source_alternatives WHERE source_id=$1 ORDER BY created_at DESC',[id(req.params)])).rows;});
  app.post('/api/admin/sources/:id/alternatives',async req=>{admin(req);return setAlternative(db,id(req.params),req.body);});
@@ -83,8 +116,10 @@ export async function createApp(db:DB,config:Config) {
    sources:(await db.query('SELECT id,domain,active_domain,health_status,health_failures,health_checked_at,health_next_at,health_code FROM sources ORDER BY health_next_at LIMIT 200')).rows,
    recent_switches:(await db.query("SELECT * FROM source_health_events WHERE kind='switch' ORDER BY created_at DESC LIMIT 50")).rows,
    jobs:(await db.query('SELECT kind,status,count(*)::int FROM jobs GROUP BY kind,status')).rows,
+   scene_analysis:(await db.query(`SELECT analysis_status,analysis_code,count(*)::int FROM media_versions WHERE status='current' GROUP BY analysis_status,analysis_code`)).rows,
    oldest_queued:(await db.query(`SELECT min(created_at) AS since FROM jobs WHERE status='queued'`)).rows[0]?.since??null,
  };});
+ app.get('/admin',async(_req,reply)=>reply.redirect('/admin.html'));
  await app.register(staticFiles,{root:resolve('public'),index:'index.html'});
  return app;
 }

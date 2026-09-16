@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>ZenAtlas · Sources admin</title><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/style.css"><script type="module" src="/admin.js"></script></head>
+<body>
+<header><a href="/" class="brand">ZenAtlas</a><span>ADMIN · SOURCES</span><button id="sign-out" class="secondary" hidden>Sign out</button></header>
+<main class="wide">
+ <section id="login">
+  <p class="eyebrow">ADMINISTRATION</p>
+  <h1>Sources</h1>
+  <form id="login-form">
+   <label for="token">Admin token</label>
+   <div class="searchbar"><input id="token" type="password" autocomplete="current-password" required minlength="32" placeholder="ADMIN_TOKEN from your .env file"><button type="submit">Sign in</button></div>
+   <p class="hint">The token is kept only for this browser tab and is sent only to this server.</p>
+   <p id="login-error" class="notice" hidden></p>
+  </form>
+ </section>
+
+ <section id="dashboard" hidden>
+  <h1 class="compact">Sources</h1>
+  <div id="summary" class="summary"></div>
+  <p id="flash" class="flash" role="status" aria-live="polite" hidden></p>
+
+  <h2>Add a website</h2>
+  <form id="add-form" class="row-form">
+   <label>Website address<input name="url" required maxlength="2048" placeholder="www.example.org or https://www.example.org"></label>
+   <label>Name <span class="hint">(optional)</span><input name="name" maxlength="300" placeholder="Example Videos"></label>
+   <label class="check"><input type="checkbox" name="approve" checked> Approve now</label>
+   <button type="submit">Add website</button>
+  </form>
+
+  <h2>Websites</h2>
+  <div class="toolbar">
+   <div class="tabs" id="status-tabs">
+    <button type="button" data-status="all" class="active">All</button>
+    <button type="button" data-status="candidate">Candidates</button>
+    <button type="button" data-status="active">Approved</button>
+    <button type="button" data-status="paused">Paused</button>
+    <button type="button" data-status="rejected">Rejected</button>
+   </div>
+   <input id="filter" type="search" placeholder="Filter by website" aria-label="Filter by website">
+   <select id="sort" aria-label="Sort"><option value="seen">Most seen</option><option value="newest">Newest</option><option value="domain">A–Z</option></select>
+  </div>
+  <div class="bulk">
+   <span id="selected-count">0 selected</span>
+   <button type="button" id="bulk-approve" class="secondary" disabled>Approve selected</button>
+   <button type="button" id="bulk-reject" class="secondary" disabled>Reject selected</button>
+  </div>
+  <div class="table-wrap">
+   <table id="sources">
+    <thead><tr><th><input type="checkbox" id="select-all" aria-label="Select all on this page"></th><th>Website</th><th>Status</th><th>Type</th><th class="num">Seen</th><th class="num">Saved</th><th>Health</th><th>Last seen</th><th>Added</th><th>Actions</th></tr></thead>
+    <tbody></tbody>
+   </table>
+  </div>
+  <p id="empty" class="hint" hidden>No websites match this view.</p>
+  <div class="pager"><button type="button" id="prev" class="secondary">← Previous</button><span id="page-info"></span><button type="button" id="next" class="secondary">Next →</button></div>
+
+  <h2>Trust rules</h2>
+  <p class="hint">A rule decides once for a website and all its subdomains, including ones found later. <code>*.example.org</code> covers example.org, www.example.org and video.example.org; <code>example.org</code> covers only that exact address. Existing candidates that match are updated immediately; websites you already reviewed are left alone.</p>
+  <form id="rule-form" class="row-form">
+   <label>Pattern<input name="pattern" required maxlength="255" placeholder="*.dailymotion.com"></label>
+   <label>Action<select name="action"><option value="approve">Approve all</option><option value="reject">Block all</option></select></label>
+   <button type="submit">Save rule</button>
+  </form>
+  <div class="table-wrap">
+   <table id="rules">
+    <thead><tr><th>Pattern</th><th>Action</th><th>Keeps videos</th><th>Note</th><th>Updated</th><th></th></tr></thead>
+    <tbody></tbody>
+   </table>
+  </div>
+  <p id="rules-empty" class="hint" hidden>No rules yet.</p>
+ </section>
+</main>
+
+<dialog id="review">
+ <form method="dialog" id="review-form">
+  <h3 id="review-title"></h3>
+  <p id="review-target" class="hint"></p>
+  <label>Review note <span class="hint">— why, at least 10 characters</span><textarea name="note" required minlength="10" maxlength="2000" rows="3"></textarea></label>
+  <div id="approve-options">
+   <label>Keep saved videos for (days)<input name="retention" type="number" min="1" max="365" value="30" required></label>
+   <label id="feed-option">JSON feed address <span class="hint">(optional; collects new videos automatically)</span><input name="feed" maxlength="2048" placeholder="https://www.example.org/feed.json"></label>
+   <label class="check"><input type="checkbox" name="transcripts"> Allow transcripts</label>
+   <label class="check"><input type="checkbox" name="video"> Allow video analysis <span class="hint">(sends videos to Google Gemini)</span></label>
+  </div>
+  <label class="check" id="rule-option"><input type="checkbox" name="rule"> <span id="rule-option-text"></span></label>
+  <div class="dialog-actions"><button type="submit" value="cancel" formnovalidate class="secondary">Cancel</button><button type="submit" value="confirm" id="review-confirm">Confirm</button></div>
+ </form>
+</dialog>
+<footer>ZenAtlas · Administration</footer>
+</body></html>

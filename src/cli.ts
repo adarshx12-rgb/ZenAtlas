@@ -6,6 +6,7 @@ import { ingest } from './catalogue.js';
 import { contentInput } from './types.js';
 import { enqueue } from './queue.js';
 import {addSource,setAlternative} from './source-health.js';
+import {setPolicyRule,listPolicyRules,deletePolicyRule,reviewQueue} from './policy-rules.js';
 const [command,arg,file]=process.argv.slice(2);
 if(!process.env.DATABASE_URL) throw new Error('Set DATABASE_URL to an administrative service connection');
 const db=connect(process.env.DATABASE_URL);
@@ -24,5 +25,9 @@ try {
  } else if(command==='enrich' && arg) console.log(await enqueue(db,'enrich',`manual-enrich:${arg}:${Date.now()}`,{content_id:arg}));
  else if(command==='delete-content' && arg) {
    console.log(await removeContent(db,arg)?'Content removed and blocked from re-ingestion':'Content not found');
- } else throw new Error('Usage: npm run admin -- sources | add-source <https-url> [name] | alternative <source-id> <review.json> | alternatives <source-id> | check-source <source-id> | policy <source-id> <policy.json> | import <items.json> | transcript <transcript.json> | enrich <content-id> | delete-content <content-id>');
+ } else if(command==='policy-rule' && arg && file) console.log(await setPolicyRule(db,arg,JSON.parse(await readFile(file,'utf8'))));
+ else if(command==='policy-rules') console.log(JSON.stringify(await listPolicyRules(db),null,2));
+ else if(command==='policy-rule-delete' && arg) console.log(await deletePolicyRule(db,arg)?'Rule deleted':'Rule not found');
+ else if(command==='review-queue') console.log(JSON.stringify(await reviewQueue(db,arg?Number(arg):undefined),null,2));
+ else throw new Error('Usage: npm run admin -- sources | add-source <https-url> [name] | alternative <source-id> <review.json> | alternatives <source-id> | check-source <source-id> | policy <source-id> <policy.json> | import <items.json> | transcript <transcript.json> | enrich <content-id> | delete-content <content-id> | policy-rule <pattern> <rule.json> | policy-rules | policy-rule-delete <pattern> | review-queue [min-appearances]');
 } finally {await db.close();}

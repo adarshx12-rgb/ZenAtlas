@@ -2,9 +2,28 @@ import { z } from 'zod';
 import type { Config } from './config.js';
 import { contentInput, type SourceAdapter, type SearchInput, type DiscoveryPage } from './types.js';
 import { fetchJSON, UpstreamError } from './http.js';
-import { canonicalize } from './urls.js';
+import { canonicalize, publicURL } from './urls.js';
 
 const caps = { transcripts: false, comments: false, embeds: false, accessible_media: false };
+// Discovery ranking picks the final DISCOVERY_RESULTS from this larger pool, so one site's top hits cannot crowd out the rest.
+const SEARXNG_CANDIDATES = 100;
+// Optional provider metadata is best effort: an unusable value becomes null instead of discarding the result.
+function mediaURL(value: unknown) {
+ if (typeof value !== 'string' || !value) return null;
+ try { const url = publicURL(value.startsWith('//') ? `https:${value}` : value).href; return url.length <= 2048 ? url : null; } catch { return null; }
+}
+function isoDate(value: unknown) {
+ if (typeof value !== 'string' || !value) return null;
+ // SearXNG omits the zone for some engines; treat those timestamps as UTC rather than server-local time.
+ const date = new Date(/T\d{2}:\d{2}(:\d{2}(\.\d+)?)?$/.test(value) ? `${value}Z` : value);
+ return Number.isFinite(date.getTime()) && date.getTime() <= Date.now() + 86400000 ? date.toISOString() : null;
+}
+function seconds(value: unknown) {
+ const total = typeof value === 'number' ? value :
+   typeof value === 'string' && /^\d{1,3}(:\d{1,2}){0,2}$/.test(value) ? value.split(':').reduce((sum, part) => sum * 60 + Number(part), 0) : NaN;
+ return Number.isFinite(total) && total > 0 && total <= 604800 ? total : null;
+}
+const text = (value: unknown, max: number) => typeof value === 'string' && value.trim() ? value.trim().slice(0, max) : null;
 function normaliseRows(rows:unknown[],keys:{url:string;description:string},limit:number){
  const items=[];
  for(const raw of rows.slice(0,limit))try{
@@ -58,6 +77,8 @@ export class SearXNG implements SourceAdapter {
    const url = new URL('/search', this.config.SEARXNG_BASE_URL);
    url.search = new URLSearchParams({q: query, format:'json', pageno:cursor, safesearch:'1',
      categories:this.config.SEARXNG_CATEGORIES, engines:this.config.SEARXNG_ENGINES,
+     // Let SearXNG return partial results before this client's own deadline aborts the whole request.
+     timeout_limit:String(Math.max(1, this.config.PROVIDER_TIMEOUT_MS/1000 - 2)),
      ...(filters.language ? {language:filters.language} : {})}).toString();
    let payload: any;
    for (let attempt = 0; attempt < 2; attempt++) {
@@ -71,10 +92,12 @@ export class SearXNG implements SourceAdapter {
    }
    const parsed = z.object({results:z.array(z.unknown()).max(1000), unresponsive_engines:z.array(z.unknown()).optional()}).parse(payload);
    const results = [];
-   for (const raw of parsed.results.slice(0, this.config.DISCOVERY_RESULTS)) {
+   for (const raw of parsed.results.slice(0, SEARXNG_CANDIDATES)) {
      try {
-       const row = z.object({url:z.string(),title:z.string(),content:z.string().optional()}).parse(raw);
-       results.push(contentInput.parse({url:canonicalize(row.url),title:row.title,description:row.content ?? null}));
+       const row = z.looseObject({url:z.string(),title:z.string()}).parse(raw);
+       results.push(contentInput.parse({url:canonicalize(row.url),title:row.title,description:text(row.content,10000),
+         creator:text(row.author,300),published_at:isoDate(row.publishedDate),duration:seconds(row.length),
+         thumbnail:mediaURL(row.thumbnail || row.thumbnail_src || row.img_src)}));
      } catch { /* A malformed entry must not discard other providers' valid results. */ }
    }
    const partial = !!parsed.unresponsive_engines?.length;
