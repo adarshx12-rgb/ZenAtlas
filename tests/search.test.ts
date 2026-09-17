@@ -120,6 +120,18 @@ test('leases recover after worker death, fence stale completion, and expire reta
  }finally{await db.close();}
 });
 
+test('a waiting search is claimed before background jobs that were queued earlier',async()=>{
+ const db=await database();
+ try{
+   await enqueue(db,'source_health','health:older',{source_id:crypto.randomUUID()});
+   await enqueue(db,'enrich','enrich:older',{content_id:crypto.randomUUID()});
+   await db.query("UPDATE jobs SET run_after=now()-CASE kind WHEN 'source_health' THEN interval '2 minutes' ELSE interval '1 minute' END");
+   const search=await enqueue(db,'discovery','discovery:newer',searchInput.parse({q:'space scenes'}));
+   assert.equal((await claim(db)).id,search.id);
+   assert.equal((await claim(db)).kind,'source_health','the rest keep their queue order');
+ }finally{await db.close();}
+});
+
 test('full transcript chunking preserves every segment and overlapping context',()=>{
  const segments=Array.from({length:50},(_,i)=>({id:String(i),start_seconds:i*10,end_seconds:i*10+9,text:'x'.repeat(1000)}));
  const windows=transcriptWindows(segments);assert.equal(new Set(windows.flat().map(s=>s.id)).size,50);

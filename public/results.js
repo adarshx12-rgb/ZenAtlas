@@ -2,12 +2,19 @@ import {SearchController} from './search-controller.js';
 const form=document.querySelector('#search-form'),results=document.querySelector('#results'),status=document.querySelector('#status');
 const notices=document.querySelector('#notices'),more=document.querySelector('#more'),retry=document.querySelector('#retry'),cancel=document.querySelector('#cancel');
 const controller=new SearchController();let searchId=null,next=null,params=null,pollTimer=null,current=null;const seen=new Set();
-const ready=fetch('/api/session',{credentials:'same-origin'}).then(r=>{if(!r.ok)throw Error('The search service is unavailable.');});
-ready.catch(()=>{});
+// A failed session check is retried by the next search instead of failing every later one.
+let ready=null;
+function session(){return ready??=api('/api/session').catch(error=>{ready=null;throw error;});}
+session().catch(()=>{});
+// Longer than the server's two-minute discovery window, so the server reports a delay before the page gives up.
+const POLL_LIMIT=100;
 function node(tag,text,className){const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(className)el.className=className;return el;}
 function safeURL(value){try{const u=new URL(value);return ['https:','http:'].includes(u.protocol)&&!u.username&&!u.password?u:null;}catch{return null;}}
 function link(url,text){const u=safeURL(url);if(!u)throw Error('Invalid link');const a=node('a',text);a.href=u.href;a.target='_blank';a.rel='noopener noreferrer';return a;}
-async function api(url,options={}){const response=await fetch(url,{credentials:'same-origin',...options});if(!response.ok){const data=await response.json().catch(()=>null);throw Error(data?.error?.message??'Search is unavailable. Please retry.');}return response.status===204?null:response.json();}
+async function api(url,options={}){let response;
+ try{response=await fetch(url,{credentials:'same-origin',...options});}
+ catch(error){if(error.name==='AbortError')throw error;throw Object.assign(Error('Cannot reach the search service. Check your connection and retry.'),{network:true});}
+ if(!response.ok){const data=await response.json().catch(()=>null);throw Error(data?.error?.message??'Search is unavailable. Please retry.');}return response.status===204?null:response.json();}
 function duration(seconds){const s=Math.round(seconds),h=Math.floor(s/3600),m=Math.floor(s%3600/60),r=String(s%60).padStart(2,'0');return h?`${h}:${String(m).padStart(2,'0')}:${r}`:`${m}:${r}`;}
 function thumbnail(item){
  const wrap=node('div',undefined,'thumb-wrap');
@@ -58,18 +65,22 @@ function render(data,paging=false){searchId=data.search_id;for(const item of dat
  const countLabel=`${seen.size} ${seen.size===1?'result':'results'}`;
  status.textContent=data.status==='discovering'?`${countLabel} so far. Searching external sources…`:seen.size?`${countLabel} · ${data.status==='partial'?'Some search services are unavailable':'Search complete'}`:data.status==='partial'?'No catalogue matches. Discovery is unavailable or incomplete.':'No matching results. Try another query or broader filters.';
 }
-async function poll(token,count=0){if(count>=40||!controller.current(token.generation)){cancel.hidden=true;return;}
+async function poll(token,count=0,misses=0){if(!controller.current(token.generation))return;
+ if(count>=POLL_LIMIT){cancel.hidden=true;retry.hidden=false;status.textContent=`${seen.size} ${seen.size===1?'result':'results'} so far. External sources are taking longer than expected; retry to check again.`;return;}
  try{const data=await api(`/api/search/${searchId}`,{signal:token.signal});if(!controller.current(token.generation))return;
   // Keep the currently loaded pagination cursor: polling the first page must not rewind later pages.
   const oldNext=next;render(data);if(oldNext){next=oldNext;more.hidden=false;}
   if(data.status==='discovering')pollTimer=setTimeout(()=>poll(token,count+1),1500);
- }catch(error){if(controller.current(token.generation)){status.textContent=error.message;retry.hidden=false;}}
+ }catch(error){if(!controller.current(token.generation))return;
+  // A brief outage, such as the service restarting, should not end the search.
+  if(error.network&&misses<5){pollTimer=setTimeout(()=>poll(token,count+1,misses+1),3000);return;}
+  status.textContent=error.message;retry.hidden=false;}
 }
 async function search(){clearTimeout(pollTimer);const previous=searchId;current=controller.begin();const token=current;
  if(previous)void api(`/api/search/${previous}`,{method:'DELETE',headers:{'X-Requested-With':'CreatorSearch'}}).catch(()=>{});
  searchId=null;next=null;seen.clear();results.replaceChildren();notices.replaceChildren();more.hidden=true;retry.hidden=true;cancel.hidden=true;status.textContent='Searching the catalogue…';
  params=new URLSearchParams([...new FormData(form)].filter(([,v])=>v!==''));params.set('limit','20');
- try{await ready;const data=await api(`/api/search?${params}`,{signal:token.signal});if(!controller.current(token.generation))return;render(data);if(data.status==='discovering')pollTimer=setTimeout(()=>poll(token),1500);}
+ try{await session();const data=await api(`/api/search?${params}`,{signal:token.signal});if(!controller.current(token.generation))return;render(data);if(data.status==='discovering')pollTimer=setTimeout(()=>poll(token),1500);}
  catch(error){if(controller.current(token.generation)){status.textContent=error.message;retry.hidden=false;}}
 }
 function applyParamsFromURL(){for(const [key,value] of new URLSearchParams(window.location.search)){const field=form.elements.namedItem(key);if(field)field.value=value;}}
