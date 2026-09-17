@@ -10,6 +10,7 @@ import {contentInput,searchInput,type SourceAdapter} from '../src/types.js';
 import type {Planner} from '../src/planner.js';
 import type {Judge} from '../src/judge.js';
 import type {YouTubeClient} from '../src/youtube.js';
+import type {AnimeClient, AnimeMatch} from '../src/anilist.js';
 
 const lead=(url:string,title:string,provider='searxng',position=0,description:string|null=null):DiscoveryCandidate=>
  ({item:contentInput.parse({url,title,description}),provider,position});
@@ -160,7 +161,7 @@ test('a deep dive searches niche engines, later pages and leads, and adds ranked
    const cookie=String(started.headers['set-cookie']).split(';')[0];
    await workOnce(db,config,[searxng],undefined,deps);
    const quick=(await app.inject({url:`/api/search/${started.json().search_id}`,headers:{cookie}})).json();
-   assert.deepEqual([quick.depth,quick.status,plans],['quick','complete',[null]],'a quick search plans with AI too');
+   assert.deepEqual([quick.depth,quick.status,plans],['quick','complete',[{anime:null}]],'a quick search plans with AI too');
    assert.deepEqual(asked,['std:1:orbit scenes'],'and asks the standard engines for first pages');
    assert.deepEqual(quick.discovered.map((r:any)=>[r.title,r.judgement.relevance,!!r.deep_find]),
      [['Orbit scenes classic',6,false],['Orbit scenes remastered',6,false]],'and ranks its finds with AI');
@@ -171,7 +172,7 @@ test('a deep dive searches niche engines, later pages and leads, and adds ranked
    await workOnce(db,config,[searxng],undefined,deps);
    const deep=(await app.inject({url:`/api/search/${begun.search_id}`,headers:{cookie}})).json();
    assert.deepEqual([deep.depth,deep.status],['deep','complete']);
-   assert.deepEqual(plans[1],{deep:true,avoid:['orbit scenes']},'the deep plan avoids what the quick search ran');
+   assert.deepEqual(plans[1],{deep:true,avoid:['orbit scenes'],anime:null},'the deep plan avoids what the quick search ran');
    assert.ok(!asked.includes('std:1:orbit scenes'),'first pages the quick search saw are not asked again');
    for(const key of ['niche:1:orbit scenes','std:2:orbit scenes','niche:2:orbit scenes','std:1:orbit scene compilation obscure',
      'niche:1:orbit scene compilation obscure','std:2:orbit scene compilation obscure','niche:2:orbit scene compilation obscure','niche:1:orbit scene lead'])
@@ -197,6 +198,50 @@ test('a deep dive searches niche engines, later pages and leads, and adds ranked
    assert.equal((await app.inject({method:'POST',url:`/api/search/${quick.search_id}/deep`,headers:{'x-requested-with':'CreatorSearch'}})).statusCode,404,
      'another visitor cannot deepen it');
  }finally{await app.close();await db.close();}
+});
+
+test('a confident anime match gives the planner and judge its official titles and details, and is silent on a miss',async()=>{
+ const db=await database();
+ const config={...testConfig,SEARXNG_BASE_URL:'http://localhost:8080'};
+ try{
+   const anime:AnimeMatch={id:16498,title:'Attack on Titan',romaji:'Shingeki no Kyojin',english:'Attack on Titan',native:'進撃の巨人',
+     synonyms:['AoT'],genres:['Action','Drama'],format:'TV',episodes:25,status:'FINISHED',studios:['Wit Studio'],
+     seasonYear:2013,averageScore:84,siteUrl:'https://anilist.co/anime/16498'};
+   const lookups:string[]=[];
+   const anilist:AnimeClient={async lookup(query){lookups.push(query);return query.includes('titan')?anime:null;}};
+   const adapter:SourceAdapter={name:'mock',capabilities:{transcripts:false,comments:false,embeds:false,accessible_media:false},
+     async search(){return {results:[contentInput.parse({url:'https://videos.example.com/watch/1',title:'AoT clip'})],next_cursor:null,
+       status:{provider:'mock',status:'ok',message:'Mocked provider'}};}};
+   let planOptions:any,judgeContext:any;
+   const planner:Planner={async plan(query,options){planOptions=options;
+     return {kind:'videos',searches:[{query,target:'videos'}],criteria:[],model:'m'};}};
+   const judge:Judge={async judge(_q,candidates,context){judgeContext=context;
+     return {model:'j',verdicts:new Map(candidates.map(c=>[c.key,{key:c.key,relevance:6,reason:'TEST',momentKeys:[]}]))};}};
+
+   const service=new SearchService(db,config);
+   const started=await service.start({q:'attack on titan season 4',mode:'refresh'},'alice');
+   await workOnce(db,config,[adapter],undefined,{planner,judge,anilist});
+   const done=await service.poll(started.search_id,'alice');
+   assert.deepEqual(lookups,['attack on titan season 4']);
+   assert.deepEqual(planOptions,{anime});
+   assert.deepEqual(judgeContext,{kind:'videos',criteria:[],anime});
+   assert.deepEqual(done.providers.find(p=>p.provider==='anilist'),
+     {provider:'anilist',status:'ok',message:'Recognised the anime "Attack on Titan"; searches and AI checks use its official titles and details.'});
+
+   const other=await service.start({q:'best pasta recipes',mode:'refresh'},'alice');
+   await workOnce(db,config,[adapter],undefined,{planner,judge,anilist});
+   const missed=await service.poll(other.search_id,'alice');
+   assert.deepEqual(planOptions,{anime:null});
+   assert.deepEqual(judgeContext,{kind:'videos',criteria:[],anime:null});
+   assert.equal(missed.providers.find(p=>p.provider==='anilist'),undefined,'a miss adds no notice to an unrelated search');
+
+   const failing:AnimeClient={async lookup(){throw new Error('down');}};
+   const resilient=await service.start({q:'attack on titan movie',mode:'refresh'},'alice');
+   await workOnce(db,config,[adapter],undefined,{planner,judge,anilist:failing});
+   const survived=await service.poll(resilient.search_id,'alice');
+   assert.equal(survived.status,'complete','a failed lookup never blocks or degrades the rest of the search');
+   assert.equal(survived.providers.find(p=>p.provider==='anilist'),undefined);
+ }finally{await db.close();}
 });
 
 test('auto mode also runs discovery when strong catalogue matches come from too few sites',async()=>{

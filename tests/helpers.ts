@@ -4,7 +4,7 @@ import { migrate } from '../src/migrate.js';
 import { configSchema } from '../src/config.js';
 import { ingest } from '../src/catalogue.js';
 import { contentInput } from '../src/types.js';
-export const testConfig=configSchema.parse({DATABASE_URL:'test',SESSION_SECRET:'test-session-secret-32-characters-long',ADMIN_TOKEN:'test-admin-token-32-characters-long',REDDIT_SIGNALS:'false',PAGE_CHECKS:'0'});
+export const testConfig=configSchema.parse({DATABASE_URL:'test',SESSION_SECRET:'test-session-secret-32-characters-long',ADMIN_TOKEN:'test-admin-token-32-characters-long',REDDIT_SIGNALS:'false',PAGE_CHECKS:'0',ANILIST_ENABLED:'false'});
 export async function database():Promise<DB>{
  const db=embedded();
  await migrate(db);return db;

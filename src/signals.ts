@@ -235,7 +235,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
    // Smaller batches in parallel answer faster, and a failed batch only leaves its own results unjudged.
    const judgeAll = (list: JudgeCandidate[], size: number) => Promise.allSettled(
      Array.from({length: Math.ceil(list.length/size)}, (_, b) => list.slice(b*size, (b + 1)*size)).map(batch =>
-       judge.judge(query, batch, context ? {kind: context.kind, criteria: context.criteria} : undefined, screenshots).then(out => ({batch, out}))));
+       judge.judge(query, batch, context ? {kind: context.kind, criteria: context.criteria, anime: context.anime} : undefined, screenshots).then(out => ({batch, out}))));
    const byKey = new Map<string,Verdict>();
    const collect = (settled: PromiseSettledResult<{batch: JudgeCandidate[]; out: JudgeResult}>[]) => {
      for (const s of settled) if (s.status === 'fulfilled') for (const [key, v] of s.value.out.verdicts) { byKey.set(key, v); modelOf.set(key, s.value.out.model); }

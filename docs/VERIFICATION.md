@@ -73,6 +73,16 @@ Actually run:
 
 Not verified: judging quality of the Flash models on the new prompts, and a deep dive's run time with every step on a paid Gemini tier.
 
+## AniList anime recognition (September 17, 2026, later still)
+
+Actually run, against the real AniList API (no key needed) and the local PM2-supervised app:
+
+- `npm run build` passed. `npm test`: **68 passed**, including the confidence heuristic (title-direction and query-direction, a verbose arc-specific title, a single-word title needing a short query), the season/episode-stripping fallback search and its own budget handling, and that a match reaches the planner and judge unchanged while a miss or a failed lookup adds no notice and never blocks the rest of a search.
+- Sending a full natural request straight to AniList's search mostly failed: of 6 realistic queries, only a bare "naruto" matched, because AniList's search is title-literal and returns nothing for "attack on titan season 4 episode 28" or similar. Stripping "season 4"/"episode 28"-style pairs and trailing descriptive words for a second, narrower attempt raised this to 8 of 9 real anime queries across two follow-up runs (misses: an arc name AniList does not index separately, a query needing mid-string removal my heuristic does not do, and an apostrophe/wording mismatch); a widened confidence check (matching either direction: most of the title's words in the query, or most of the query's words in the title) additionally recovered a verbose arc-specific title ("Demon Slayer: Kimetsu no Yaiba Swordsmith Village Arc") that the first version of the heuristic missed. Across 8 plainly non-anime or generic queries (a recipe, "naruto" embedded in a recipe, website/scene searches, "best anime to watch this weekend"), none matched.
+- Live end-to-end run for "attack on titan season 4 episode 28": the `anilist` provider reported the recognised title; the planner, YouTube, Reddit and page checks all used it and returned `ok`; only AI judging failed, with the already-known `rate_limited` cause (the free Gemini tier's daily quota, unrelated to this change) logged by event name and code, not a raw error. A second live run for "jujutsu kaisen shibuya arc", checked in a browser through a full quick search and deep dive, showed on-topic results throughout, an `Underrated find` badge on a fan edit, and no console errors.
+
+Not verified: recognition of manga-only or non-anime AniList entries (only `type: ANIME` is queried), and behaviour when AniList itself is rate-limited or unreachable (covered only by the mocked tests).
+
 ## Remaining integrations and boundaries
 
 | Milestone | Delivered | Remaining |

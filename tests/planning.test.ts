@@ -220,7 +220,7 @@ test('a website request is planned, searched on several angles, page-checked and
    assert.equal(judged.find(c=>c.site==='showcase.example.com')!.page?.status,'robots_disallowed');
    const video=judged.find(c=>c.site==='video.example.com')!;
    assert.equal(video.kind,'video');assert.equal(video.page,undefined);
-   assert.deepEqual(context,{kind:'websites',criteria:['Uses 3D graphics','Uses motion graphics']});
+   assert.deepEqual(context,{kind:'websites',criteria:['Uses 3D graphics','Uses motion graphics'],anime:null});
    const provenance=JSON.stringify((await db.query('SELECT provenance FROM sources')).rows);
    assert.ok(!provenance.includes('three.js portfolio'),'planned queries are not stored with sources');
 

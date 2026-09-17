@@ -9,9 +9,10 @@ import { ingest } from './catalogue.js';
 import { UpstreamError } from './http.js';
 import { applySignals, discussionsFor, logFailure, type Discussion, type SignalDeps } from './signals.js';
 import { GeminiPlanner, fallbackPlan, uniqueSearches, type PlannedSearch, type Planner, type SearchPlan, type SearchTarget } from './planner.js';
+import { AniListClient, type AnimeClient, type AnimeMatch } from './anilist.js';
 import { queryKey } from './search.js';
 
-export interface DiscoveryDeps extends SignalDeps { planner?: Planner }
+export interface DiscoveryDeps extends SignalDeps { planner?: Planner; anilist?: AnimeClient }
 export interface DiscoveryProgress { results: Result[]; providers: ProviderStatus[]; stage: 'searching'|'following'|'checking' }
 type Health = (provider: string, ok: boolean) => Promise<void>;
 type Progress = (update: DiscoveryProgress) => Promise<void>;
@@ -42,10 +43,10 @@ function summarise(name: string, outcomes: Outcome[]): ProviderStatus {
  return {provider: name, status: 'partial', message: 'Some discovery searches or engines did not respond.'};
 }
 
-async function planWith(planner: Planner|undefined, query: string, deep: boolean, avoid: string[]): Promise<{plan: SearchPlan; status: ProviderStatus|null}> {
+async function planWith(planner: Planner|undefined, query: string, deep: boolean, avoid: string[], anime: AnimeMatch|null): Promise<{plan: SearchPlan; status: ProviderStatus|null}> {
  if (!planner) return {plan: fallbackPlan(query), status: null};
  try {
-   const plan = await planner.plan(query, deep ? {deep, avoid} : undefined);
+   const plan = await planner.plan(query, deep ? {deep, avoid, anime} : {anime});
    return {plan, status: {provider: 'planner', status: 'ok',
      message: deep ? `AI planned ${plan.searches.length} searches for lesser-known sources.` : `AI planned ${plan.searches.length} searches for ${plan.kind}.`}};
  } catch (error) {
@@ -53,6 +54,21 @@ async function planWith(planner: Planner|undefined, query: string, deep: boolean
    return {plan: deep ? {...fallbackPlan(query), searches: []} : fallbackPlan(query), status: error instanceof UpstreamError && error.code === 'budget_exhausted'
      ? {provider: 'planner', status: 'budget_exhausted', message: 'The daily AI planning limit has been reached; the query was searched as typed.'}
      : {provider: 'planner', status: 'unavailable', message: 'AI search planning is unavailable right now; the query was searched as typed.'}};
+ }
+}
+
+// A confident AniList match, used to give the planner and judge an anime's real titles and details. Silent on a
+// miss or a failure (logged only): most searches are not about anime, so failing this optional lookup should
+// never show as a service problem on an unrelated query.
+async function animeContext(client: AnimeClient|undefined, query: string): Promise<{anime: AnimeMatch|null; status: ProviderStatus|null}> {
+ if (!client) return {anime: null, status: null};
+ try {
+   const anime = await client.lookup(query);
+   return {anime, status: anime ? {provider: 'anilist', status: 'ok',
+     message: `Recognised the anime "${anime.title}"; searches and AI checks use its official titles and details.`} : null};
+ } catch (error) {
+   logFailure('anilist_failed', error);
+   return {anime: null, status: null};
  }
 }
 
@@ -76,14 +92,19 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
  const deep = input.depth === 'deep' && !input.source;
  const providers = (adapters ?? configuredProviders(config)).slice(0, 3);
  const planner = input.source ? undefined : deps.planner ?? (config.GEMINI_API_KEY ? new GeminiPlanner(db, config) : undefined);
+ const anilist = input.source ? undefined : deps.anilist ?? (config.ANILIST_ENABLED ? new AniListClient(db, config) : undefined);
  let limit = deep ? config.DEEP_RESULTS : config.DISCOVERY_RESULTS;
  const deadline = deep ? Date.now() + config.DEEP_SEARCH_SECONDS*1000 : Infinity;
- const earlier = deep ? await quickJob(db, input) : {results: [], searches: []};
+ const [earlier, anime] = await Promise.all([
+   deep ? quickJob(db, input) : Promise.resolve({results: [] as Result[], searches: [] as PlannedSearch[]}),
+   animeContext(anilist, input.q),
+ ]);
  const leads: Lead[] = [];
  const found: Result[] = [];
  const tried = new Set(earlier.results.map(r => r.canonical_url));
  const leadUrl = new Map<string,string>();
  const notes: ProviderStatus[] = [];
+ if (anime.status) notes.push(anime.status);
  const outcomes: Outcome[] = [];
  let stage: DiscoveryProgress['stage'] = 'searching';
  const report = () => progress({results: found, providers: notes, stage});
@@ -155,7 +176,7 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
    // A search scoped to one source (replacement-domain discovery) runs exactly as asked.
    const typed = input.source ? [{query: input.q, target: 'videos' as const}] : fallbackPlan(input.q).searches;
    const planning = input.source ? Promise.resolve({plan: {kind: 'videos' as const, searches: typed, criteria: [], model: null}, status: null})
-     : planWith(planner, input.q, false, []);
+     : planWith(planner, input.q, false, [], anime.anime);
    await Promise.all([
      run(typed.map(s => ({...s, page: 1, engines: 'standard'}))),
      planning.then(({plan}) => run(plan.searches.filter(s => !typed.some(t => sameSearch(t, s))).map(s => ({...s, page: 1, engines: 'standard'})))),
@@ -167,7 +188,7 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
  } else {
    // What an ordinary search asked; its first result pages are already known unless no quick search ran.
    const ordinary = earlier.searches.length ? earlier.searches : fallbackPlan(input.q).searches;
-   const planning = planWith(planner, input.q, true, ordinary.map(s => s.query));
+   const planning = planWith(planner, input.q, true, ordinary.map(s => s.query), anime.anime);
    await Promise.all([
      run(ordinary.flatMap(s => [
        ...(earlier.searches.length ? [{...s, page: 1, engines: 'extra' as const}] : [{...s, page: 1, engines: 'all' as const}]),
@@ -218,7 +239,7 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
  const webUrls = new Set(leads.filter(l => l.target === 'web').map(l => l.item.url));
  const targets = new Map(found.map(r => [r.id, webUrls.has(leadUrl.get(r.id)!) ? 'web' as const : 'videos' as const]));
  const signals = await applySignals(db, {...config, JUDGE_CANDIDATES: Math.max(config.JUDGE_CANDIDATES, found.length)}, input.q, found, signalDeps,
-   {kind: plan.kind, criteria: plan.criteria, targets, underrated: deep});
+   {kind: plan.kind, criteria: plan.criteria, targets, underrated: deep, anime: anime.anime});
  const kept = new Set(signals.results.map(r => r.id));
  return {results: signals.results, ingested: found, previews: signals.previews, searches,
    dropped: found.filter(r => !kept.has(r.id)).map(r => r.canonical_url), providers: [...statuses, ...signals.providers]};
