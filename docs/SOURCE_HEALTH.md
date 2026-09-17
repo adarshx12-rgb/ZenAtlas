@@ -16,7 +16,7 @@ Google's documentation states that Custom Search JSON API is closed to new custo
 
 Google requests at most ten results per call; Brave at most twenty. Both adapters return provider cursors but the background workflow intentionally processes one page per job. Query text is preserved. Final catalogue filters remain enforced locally; the adapters do not promise identical language/date/video filters across engines. Google and Brave currently return general web leads, so a result URL is not proof of a video, playable media, or an inspected scene. Unknown metadata remains null.
 
-For SearXNG, content searches retain `SEARXNG_ENGINES`/`SEARXNG_CATEGORIES`. Replacement-domain searches use the `general` category and `SEARXNG_SOURCE_ENGINES` (default `google,bing`). Those engines must actually be enabled and accessible in the instance. The supplied container settings enable Google and Bing for these searches alongside the video engines listed in the README; upstream availability is not guaranteed.
+For SearXNG, content searches use `SEARXNG_ENGINES`. Replacement-domain searches use `SEARXNG_SOURCE_ENGINES` (default `google,bing`). Each engine is asked in its own request. Those engines must actually be enabled and accessible in the instance. The supplied container settings enable Google and Bing for these searches alongside the video engines listed in the README; upstream availability is not guaranteed.
 
 ## Run monitoring
 

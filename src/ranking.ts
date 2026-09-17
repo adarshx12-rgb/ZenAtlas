@@ -40,8 +40,9 @@ export function discoveryQuery(q: string) {
 // Orders discovery leads by how well their own title/description match the query, then spreads them
 // across sites so one platform cannot fill every slot. Quoted phrases and -exclusions are enforced, as in
 // catalogue search. Results with no query word at all are dropped only when other results do match, so a
-// provider's own semantic matches survive queries whose words never appear literally.
-export function rankDiscovery<T extends DiscoveryCandidate>(q: string, candidates: T[], limit: number): T[] {
+// provider's own semantic matches survive queries whose words never appear literally. minCoverage additionally
+// drops leads that match less of their query than that share (a title word counts fully, a description word half).
+export function rankDiscovery<T extends DiscoveryCandidate>(q: string, candidates: T[], limit: number, minCoverage = 0): T[] {
  const query = discoveryQuery(q);
  const termsOf = new Map<string,string[]>([[q, query.terms]]);
  const terms = (text: string) => termsOf.get(text) ?? termsOf.set(text, discoveryQuery(text).terms).get(text)!;
@@ -65,7 +66,8 @@ export function rankDiscovery<T extends DiscoveryCandidate>(q: string, candidate
    scored.push({candidate,coverage,domain:new URL(candidate.item.url).hostname.replace(/^www\./,''),
      score:coverage + exact + 0.3/(1 + position/10) + 0.1*(providers.size - 1)});
  }
- const remaining = scored.some(s => s.coverage >= 0.5) ? scored.filter(s => s.coverage > 0) : scored;
+ const strong = scored.some(s => s.coverage >= 0.5);
+ const remaining = scored.filter(s => s.coverage >= minCoverage && (!strong || s.coverage > 0));
  const counts = new Map<string,number>(); const result: T[] = [];
  while (remaining.length && result.length < limit) {
    let best = 0, bestValue = -Infinity;

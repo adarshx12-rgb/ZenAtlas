@@ -8,6 +8,9 @@ export const searchInput = z.object({
  source: z.string().uuid().optional(),
  after: z.iso.datetime().optional(),
  evidence: z.enum(['any','transcript_supported','video_analysed','viewer_timestamp']).default('any'),
+ // quick: the query as typed, keyword-ranked, results shown as each engine answers. deep: AI-planned searches,
+ // page, comment and Reddit checks, then AI ranking. Deep only runs when asked for.
+ depth: z.enum(['quick','deep']).default('quick'),
  cursor: z.string().max(512).optional(),
 }).strict();
 export type SearchInput = z.infer<typeof searchInput>;
@@ -24,7 +27,9 @@ export const contentInput = z.object({
 });
 export type ContentInput = z.infer<typeof contentInput>;
 export type ProviderStatus = { provider: string; status: 'ok'|'partial'|'unavailable'|'disabled'|'budget_exhausted'; message: string };
-export interface DiscoveryPage { results: ContentInput[]; next_cursor: string | null; status: ProviderStatus }
+export interface EngineFailure { engine: string; reason: string }
+// engines: set by metasearch adapters that ask several engines; failed lists the ones that did not answer.
+export interface DiscoveryPage { results: ContentInput[]; next_cursor: string | null; status: ProviderStatus; engines?: {asked: string[]; failed: EngineFailure[]} }
 export interface SourceAdapter {
  name: string;
  capabilities: { transcripts: boolean; comments: boolean; embeds: boolean; accessible_media: boolean };
@@ -57,8 +62,12 @@ export interface Result {
  // A first-screen capture of the page is available from /api/search/:id/previews/:result while the search lasts.
  preview?: boolean;
 }
+export type DiscoveryStage = 'queued'|'searching'|'checking';
 export interface SearchResponse {
  query: string; search_id: string; status: 'complete'|'discovering'|'partial'|'cancelled';
+ depth: SearchInput['depth']; stage: DiscoveryStage|null;
  results: Result[]; next_cursor: string|null; has_more: boolean;
+ // Every discovered result in the snapshot, in display order, including ones found while discovery is still running.
+ discovered: Result[]; catalogue_total: number;
  discovery_job_id: string|null; providers: ProviderStatus[]; ranking_version: string;
 }

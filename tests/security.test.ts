@@ -68,7 +68,7 @@ test('the renderer egress proxy only reaches public web ports and forwards what 
  }finally{await strict.close();await allowing.close();await new Promise<void>(r=>{target.closeAllConnections();target.close(()=>r());});}
 });
 test('SearXNG validates individual results, preserves query phrases and reports partial engines',async()=>{
- let observed='';const adapter=new SearXNG({...testConfig,SEARXNG_BASE_URL:'http://localhost:8080'},async(url)=>{
+ let observed='';const adapter=new SearXNG({...testConfig,SEARXNG_BASE_URL:'http://localhost:8080',SEARXNG_ENGINES:'youtube'},async(url)=>{
    observed=url;return {results:[{url:'javascript:alert(1)',title:'bad'},{url:'https://example.com/watch?id=3',title:'Legitimate video'}],unresponsive_engines:[['youtube','timeout']]};
  });
  const input=searchInput.parse({q:'  "ghost story" -fake  '});const page=await adapter.search(input.q,input);

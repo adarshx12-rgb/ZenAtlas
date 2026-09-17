@@ -146,7 +146,7 @@ test('discovery uses viewer timestamps, Reddit and AI judgement to rank, explain
    const discussions=async()=>[{title:'Best horror story with a twist? youtube AAAAAAAAAA2',url:'https://www.reddit.com/r/horror/comments/1',snippet:null}];
    const config={...testConfig,SEARXNG_BASE_URL:'http://localhost:8080',OFFICIAL_YOUTUBE_CHANNELS:'UCofficial'};
    const service=new SearchService(db,config);
-   const started=await service.start({q:'horror story plot twist',mode:'refresh'},'alice');
+   const started=await service.start({q:'horror story plot twist',mode:'refresh',depth:'deep'},'alice');
    await workOnce(db,config,[adapter],undefined,{youtube,judge,discussions});
    const done=await service.poll(started.search_id,'alice');
 

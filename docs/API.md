@@ -21,7 +21,8 @@ Limits: 120 API requests per IP/minute; 30 writes per IP/minute; 20 discovery re
 | `source` | Optional source UUID |
 | `after` | Optional UTC ISO date-time publication cutoff; unknown dates are excluded |
 | `evidence` | `any` (default), `transcript_supported`, `video_analysed`, `viewer_timestamp`; requires a matching evidence window |
-| `cursor` | Opaque signed cursor; keep every original query/filter/mode/limit parameter unchanged |
+| `depth` | `quick` (default): the query as typed, keyword-ranked. `deep`: AI-planned searches, page, comment and Reddit checks, and AI ranking; a deep search always runs discovery unless `mode` is `catalogue` |
+| `cursor` | Opaque signed cursor; keep every original query/filter/mode/limit/depth parameter unchanged |
 
 The TypeScript response contract is in `src/types.ts`:
 
@@ -30,9 +31,13 @@ interface SearchResponse {
   query: string;
   search_id: string;
   status: 'complete' | 'discovering' | 'partial' | 'cancelled';
-  results: Result[];
+  depth: 'quick' | 'deep';
+  stage: 'queued' | 'searching' | 'checking' | null; // set while status is 'discovering'
+  results: Result[];                // one page, catalogue results first, then discoveries
   next_cursor: string | null;
   has_more: boolean;
+  discovered: Result[];             // every discovered result so far, in display order
+  catalogue_total: number;          // catalogue results in the snapshot; later positions are discoveries
   discovery_job_id: string | null;
   providers: {
     provider: string;
@@ -47,7 +52,7 @@ Each result includes an internal ID, title, canonical URL, source ID/name, nulla
 
 Scene moments (`evidence_type: "video_analysed"`) come from the Gemini scene worker and add `scene`: `media_version` (the registered version key), `media_start_seconds`/`media_end_seconds` on the analysed file's own timeline, `timeline_offset_seconds`, `model`, `tags`, and `dialogue`/`dialogue_source` when subtitle cues were quoted. `start_seconds`/`end_seconds` always use the content URL's timeline (media time + offset). `evidence_refs` holds the analysis ID followed by any retained transcript segment IDs; `inspected_ranges` is the analysed span. When the source permits video analysis, a result can include `scene_analysis`: `{status, media_version, message}` for its current media version, where `status` is `pending`, `complete`, `inaccessible`, `failed` or `not_permitted` and `message` is a fixed readable sentence, never a raw provider error. Scenes from superseded versions, changed subtitles or revoked permissions are removed from new searches and existing snapshots.
 
-Viewer moments (`evidence_type: "viewer_timestamp"`) group timestamps that viewers wrote in public YouTube comments. `summary` joins the cited comment excerpts with ` · `, `evidence_refs` are the stored excerpt IDs (each timestamp lies inside the moment), and `inspected_ranges` is empty because no media was inspected. Discovery results can also include `badges` (short labels such as `Live now`, `Livestream replay`, `Official channel`, `Discussed on Reddit`, `3D: three.js`, `Motion: GSAP`) and `judgement`: `{relevance (0-10), reason, model}` from the AI relevance check. Search `providers` may then list `planner`, `youtube`, `reddit`, `pages` and `judge` with their own status.
+Viewer moments (`evidence_type: "viewer_timestamp"`) group timestamps that viewers wrote in public YouTube comments. `summary` joins the cited comment excerpts with ` · `, `evidence_refs` are the stored excerpt IDs (each timestamp lies inside the moment), and `inspected_ranges` is empty because no media was inspected. Discovery results can also include `badges` (short labels such as `Live now`, `Livestream replay`, `Official channel`, `Discussed on Reddit`, `3D: three.js`, `Motion: GSAP`) and `judgement`: `{relevance (0-10), reason, model}` from the AI relevance check. Search `providers` may then list `planner`, `youtube`, `reddit`, `pages` and `judge` with their own status (deep searches only). A `searxng` status stays `ok` while at least half of its engines answered; its message then names the engines that did not.
 
 An unapproved candidate result has a temporary ID that does not correspond to persistent content. Feedback returns 409 for it until it is retained as an approved catalogue record. Searchability does not imply playback, embeddability, accessible media, or permission to reuse.
 
@@ -55,9 +60,13 @@ An unapproved candidate result has a temporary ID that does not correspond to pe
 
 ## GET /api/search/:id
 
-Poll the owning session's search to retrieve its first page and discovery status. It is also the job-progress endpoint; the shared job itself has no public unowned route. The reference client polls every 1.5 seconds, at most 40 times. Resume manually while the search is unexpired if necessary. Discovery is labelled delayed after two minutes; lack of an active worker cannot leave the UI claiming an empty successful search.
+Poll the owning session's search to retrieve its first page, its discovered results and discovery status. It is also the job-progress endpoint; the shared job itself has no public unowned route. The reference client polls every 1.5 seconds while `status` is `discovering` (at most 150 seconds for a quick search and 330 for a deep one), and keeps polling through up to five failed requests in a row. Resume manually while the search is unexpired if necessary. Discovery is labelled delayed after two minutes (five for a deep search); lack of an active worker cannot leave the UI claiming an empty successful search.
 
-When discovery completes, append new unique results in provider order after the frozen local ranking. To retrieve later pages, use `/api/search` with its original parameters and the returned cursor. Client code should preserve the current page cursor across first-page polls, retain displayed cards and ignore stale query responses. Already displayed results are not reordered. New searches can rank newly retained content normally.
+While discovery runs, `discovered` grows as the worker stores the best leads of each engine's answer; new unique results are appended after the frozen local ranking and after earlier discoveries. `stage` is `searching` while engines answer and `checking` while a deep search checks pages and comments and ranks with AI. When a quick search completes, remaining results are appended and nothing already listed moves. When a deep search completes, listed entries take its judgement, badges and moments, the discovered part is reordered by its ranking, and discoveries its judge rejected are removed; catalogue results keep their place. Render `discovered` in the given order and update cards whose data changed. To retrieve later catalogue pages, use `/api/search` with its original parameters and the returned cursor, while `catalogue_total` exceeds what is loaded. Client code should preserve the current page cursor across first-page polls, retain displayed cards and ignore stale query responses. New searches can rank newly retained content normally.
+
+## POST /api/search/:id/deep
+
+Continues the owner's search as a deep dive and returns a new search (a `SearchResponse` with a new `search_id` and `depth: "deep"`). The new search starts with every result of the original, including discoveries, and follows a deep discovery job for the same query and filters; asking again reuses that job while it runs and for the discovery cache period. Poll the new ID. Deepening a deep search returns it unchanged. A `catalogue`-mode search returns 400 `discovery_disabled`. The request needs the `X-Requested-With` header, counts as a write, and uses the same discovery budgets as `/api/search`; when a budget is exhausted the response is `partial` with a notice and keeps the original results. Page the new search with `depth=deep` added to the original parameters.
 
 Search snapshots expire after `SEARCH_TTL_SECONDS`; another session or expired ID receives 404. Invalid/tampered/mismatched cursors return 400. Revoked/deleted content is removed from API results; source-policy changes invalidate snapshots. Therefore a page may contain fewer than `limit` results after revocation.
 

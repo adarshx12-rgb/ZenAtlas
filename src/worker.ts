@@ -6,7 +6,7 @@ import { JsonFeed } from './providers.js';
 import {checkSource,discoverAlternatives,scheduleHealth} from './source-health.js';
 import type {probeURL} from './http.js';
 import { takeBudget } from './budgets.js';
-import { claim, complete, fail, enqueue } from './queue.js';
+import { claim, complete, fail, enqueue, progress } from './queue.js';
 import { ingest } from './catalogue.js';
 import { contentHash, enrichEmbedding } from './embeddings.js';
 import { canonicalize } from './urls.js';
@@ -28,10 +28,11 @@ export async function workOnce(db:DB,config:Config,adapters?:SourceAdapter[],pro
    } else if(job.kind==='source_discovery') {
      await complete(db,job,await discoverAlternatives(db,config,job,adapters));
    } else if(job.kind==='discovery') {
-     const outcome=await runDiscovery(db,config,searchInput.parse(job.payload),adapters,deps??{},(name,ok)=>providerHealth(db,name,ok));
+     const outcome=await runDiscovery(db,config,searchInput.parse(job.payload),adapters,deps??{},(name,ok)=>providerHealth(db,name,ok),
+       update=>progress(db,job,update));
      for(const result of outcome.ingested) await enqueueEnrichment(db,config,result);
      await storePreviews(db,job,outcome.previews);
-     await complete(db,job,{results:outcome.results,providers:outcome.providers});
+     await complete(db,job,{results:outcome.results,providers:outcome.providers,dropped:outcome.dropped});
    } else if(job.kind==='collect') {
      const source=(await db.query(`SELECT * FROM sources WHERE id=$1 AND status='active' AND adapter='json_feed' AND health_status<>'down'`,[job.payload.source_id])).rows[0];
      if(source && source.policy.metadata===true) {

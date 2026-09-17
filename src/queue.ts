@@ -15,6 +15,11 @@ export async function claim(db: DB) {
  WHERE kind<>'scene_analysis' AND ((status='queued' AND run_after<=now()) OR (status='running' AND lease_until<now())) AND attempts<3
  ORDER BY kind<>'discovery',run_after,id FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING *`,[randomUUID()])).rows[0]??null;
 }
+// Publishes partial results to the searches waiting on a running job, and renews its lease while it makes progress.
+export async function progress(db: DB, job: any, result: unknown) {
+ await db.query(`UPDATE jobs SET result=$3,lease_until=now()+interval '90 seconds'
+ WHERE id=$1 AND lease_token=$2 AND status='running'`,[job.id,job.lease_token,JSON.stringify(result)]);
+}
 export async function complete(db: DB, job: any, result: unknown) {
  await db.query(`UPDATE jobs SET status='complete',result=$3,lease_until=NULL,updated_at=now()
  WHERE id=$1 AND lease_token=$2 AND status='running'`,[job.id,job.lease_token,JSON.stringify(result)]);

@@ -15,8 +15,9 @@
  </form>
  <div class="results-heading"><h2>Search results</h2><button id="cancel" class="secondary" hidden>Stop discovery updates</button></div>
  <p id="status" role="status" aria-live="polite">Enter a query to search the catalogue.</p>
+ <div id="deep-row" class="deep-row" hidden><button id="deep" type="button">Dig deeper ↓</button><span class="hint">Deep dive: AI plans more searches, checks pages, viewer comments and Reddit, then ranks everything it finds. Takes a minute or two.</span></div>
  <div id="notices"></div>
- <section id="results" class="thumb-grid" aria-label="Search results"></section>
+ <section id="results" class="thumb-grid" aria-label="Search results"><div id="catalogue-results" class="card-group"></div><div id="found-results" class="card-group"></div></section>
  <button id="more" class="secondary" hidden>Load more results</button>
  <button id="retry" class="secondary" hidden>Retry search</button>
  <aside><strong>Evidence matters.</strong> A metadata match is a lead. A transcript supports spoken content. Visual findings require inspected media. Check the source’s rights before reusing footage.</aside>

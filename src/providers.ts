@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { Config } from './config.js';
-import { contentInput, type SourceAdapter, type SearchInput, type DiscoveryPage } from './types.js';
+import { contentInput, type SourceAdapter, type SearchInput, type DiscoveryPage, type EngineFailure, type ProviderStatus } from './types.js';
 import { fetchJSON, UpstreamError } from './http.js';
 import { canonicalize, publicURL } from './urls.js';
 
@@ -66,20 +66,61 @@ export function configuredProviders(config:Config,purpose:'content'|'sources'='c
  const providers:SourceAdapter[]=[];
  if(config.GOOGLE_SEARCH_API_KEY && config.GOOGLE_SEARCH_ENGINE_ID)providers.push(new GoogleSearch(config));
  if(config.BRAVE_SEARCH_API_KEY)providers.push(new BraveSearch(config));
- if(config.SEARXNG_BASE_URL)providers.push(new SearXNG(purpose==='sources'?{...config,SEARXNG_CATEGORIES:'general',SEARXNG_ENGINES:config.SEARXNG_SOURCE_ENGINES}:config));
+ if(config.SEARXNG_BASE_URL)providers.push(new SearXNG(purpose==='sources'?{...config,SEARXNG_ENGINES:config.SEARXNG_SOURCE_ENGINES}:config));
  return providers;
 }
+
+const engineName = (engine: string) => engine.replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+function failureReason(reason: string) {
+ return /captcha/i.test(reason) ? 'blocked by a CAPTCHA' : /too many requests|rate limit/i.test(reason) ? 'rate-limited'
+   : /timeout/i.test(reason) ? 'timed out' : /access denied|forbidden/i.test(reason) ? 'access denied' : 'returned an error';
+}
+// A metasearch where most engines answered is a normal search: the status names the engines that did not, without flagging it.
+export function engineStatus(provider: string, asked: string[], failed: EngineFailure[]): ProviderStatus {
+ if (!failed.length) return {provider, status: 'ok', message: 'Discovery completed.'};
+ const answered = asked.length - failed.length;
+ return {provider, status: answered * 2 >= asked.length ? 'ok' : 'partial',
+   message: `${answered} of ${asked.length} search engines answered; ${failed.map(f => `${engineName(f.engine)} (${f.reason})`).join(', ')} did not.`};
+}
+
+// One request at a time per engine, so parallel searches do not set off upstream rate limits and CAPTCHAs.
+const lanes = new Map<string,Promise<void>>();
+function inLane<T>(key: string, task: () => Promise<T>): Promise<T> {
+ const run = (lanes.get(key) ?? Promise.resolve()).then(task);
+ const done = run.then(() => {}, () => {});
+ lanes.set(key, done);
+ void done.then(() => { if (lanes.get(key) === done) lanes.delete(key); });
+ return run;
+}
+
 export class SearXNG implements SourceAdapter {
  name = 'searxng'; capabilities = caps;
  constructor(private config: Config, private transport = fetchJSON) {}
+ get engines() { return [...new Set(this.config.SEARXNG_ENGINES.split(',').map(e => e.trim()).filter(Boolean))]; }
  forTarget(target: 'videos'|'web') {
-   return target === 'web' ? new SearXNG({...this.config, SEARXNG_CATEGORIES: 'general', SEARXNG_ENGINES: this.config.SEARXNG_WEB_ENGINES}, this.transport) : this;
+   return target === 'web' ? new SearXNG({...this.config, SEARXNG_ENGINES: this.config.SEARXNG_WEB_ENGINES}, this.transport) : this;
  }
- async search(query: string, filters: SearchInput, cursor = '1'): Promise<DiscoveryPage> {
+ // Asks each engine separately so a slow or blocked engine cannot hold back the others; onPage receives each engine's answer as it arrives.
+ async search(query: string, filters: SearchInput, cursor = '1', onPage?: (page: DiscoveryPage) => void): Promise<DiscoveryPage> {
    if (!/^\d{1,2}$/.test(cursor)) throw new Error('invalid_provider_cursor');
+   const engines = this.engines;
+   if (!engines.length) throw new UpstreamError('not_configured');
+   const settled = await Promise.allSettled(engines.map(async engine => {
+     const page = await inLane(`${this.config.SEARXNG_BASE_URL}|${engine}`, () => this.searchEngine(engine, query, filters, cursor));
+     onPage?.(page);
+     return page;
+   }));
+   const pages = settled.flatMap(s => s.status === 'fulfilled' ? [s.value] : []);
+   if (!pages.length) throw (settled[0] as PromiseRejectedResult).reason;
+   const failed = settled.flatMap((s, i) => s.status === 'fulfilled' ? s.value.engines!.failed : [{engine: engines[i], reason: 'returned an error'}]);
+   const results = pages.flatMap(p => p.results);
+   return {results, next_cursor: results.length ? String(Number(cursor)+1) : null,
+     engines: {asked: engines, failed}, status: engineStatus(this.name, engines, failed)};
+ }
+ private async searchEngine(engine: string, query: string, filters: SearchInput, cursor: string): Promise<DiscoveryPage> {
    const url = new URL('/search', this.config.SEARXNG_BASE_URL);
-   url.search = new URLSearchParams({q: query, format:'json', pageno:cursor, safesearch:'1',
-     categories:this.config.SEARXNG_CATEGORIES, engines:this.config.SEARXNG_ENGINES,
+   // No categories: SearXNG adds every engine of a named category to an explicit engine list.
+   url.search = new URLSearchParams({q: query, format:'json', pageno:cursor, safesearch:'1', engines:engine,
      // Let SearXNG return partial results before this client's own deadline aborts the whole request.
      timeout_limit:String(Math.max(1, this.config.PROVIDER_TIMEOUT_MS/1000 - 2)),
      ...(filters.language ? {language:filters.language} : {})}).toString();
@@ -103,9 +144,10 @@ export class SearXNG implements SourceAdapter {
          thumbnail:mediaURL(row.thumbnail || row.thumbnail_src || row.img_src)}));
      } catch { /* A malformed entry must not discard other providers' valid results. */ }
    }
-   const partial = !!parsed.unresponsive_engines?.length;
+   const unresponsive = parsed.unresponsive_engines?.[0];
+   const failed = unresponsive ? [{engine, reason: failureReason(Array.isArray(unresponsive) ? String(unresponsive[1] ?? '') : '')}] : [];
    return {results,next_cursor:results.length ? String(Number(cursor)+1) : null,
-     status:{provider:this.name,status:partial?'partial':'ok',message:partial?'Some discovery engines are unavailable.':'Discovery completed.'}};
+     engines:{asked:[engine],failed}, status:engineStatus(this.name,[engine],failed)};
  }
 }
 

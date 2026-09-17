@@ -10,7 +10,6 @@ export const configSchema = z.object({
   ADMIN_TOKEN: z.string().min(32).refine(v => !v.startsWith('replace-'), 'Replace the admin token'),
   SEARXNG_BASE_URL: optional, SEARXNG_TOKEN: optional,
   SEARXNG_ENGINES: z.string().default('youtube,dailymotion,sepiasearch,odysee,bing videos,google videos,duckduckgo videos,brave.videos,wikicommons.videos'),
-  SEARXNG_CATEGORIES: z.string().default('videos'),
   SEARXNG_SOURCE_ENGINES: z.string().default('google,bing'),
   SEARXNG_WEB_ENGINES: z.string().default('google,bing,brave,yahoo'),
   SEARXNG_DAILY_BUDGET: number(2000, 0, 100000),

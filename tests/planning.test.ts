@@ -125,7 +125,7 @@ test('browser previews are stored with the discovery job, shown only to the sear
    const image=Buffer.from([0xff,0xd8,0xff,0xe0,1,2,3,0xff,0xd9]);
    const pages:PageCheck={async check(url){return {status:'checked',title:null,description:null,text:null,libraries:[],badges:[],
      rendered:true,screenshot:url.includes('studio')?image:null};}};
-   const started=await app.inject('/api/search?q=studio%20websites&mode=refresh');
+   const started=await app.inject('/api/search?q=studio%20websites&mode=refresh&depth=deep');
    const cookie=String(started.headers['set-cookie']).split(';')[0];
    await workOnce(db,config,[adapter],undefined,{planner,pages});
    const done=(await app.inject({url:`/api/search/${started.json().search_id}`,headers:{cookie}})).json();
@@ -155,10 +155,12 @@ test('planned leads are scored against the query that found them, and agreement 
    lead('https://b.example/','Three.js portfolio gallery','three.js portfolio',2,5),
  ],10);
  assert.deepEqual(ranked.map(r=>r.item.url),['https://b.example/','https://a.example/'],'the site: operator is not a query word, and unmatched leads drop');
+ const asked:string[]=[];
  const web=new SearXNG({...testConfig,SEARXNG_BASE_URL:'http://localhost:8080',SEARXNG_WEB_ENGINES:'google,bing'},async(url:string)=>{
-   const params=new URL(url).searchParams;assert.equal(params.get('categories'),'general');assert.equal(params.get('engines'),'google,bing');return {results:[]};
+   const params=new URL(url).searchParams;assert.equal(params.get('categories'),null);asked.push(params.get('engines')!);return {results:[]};
  }).forTarget('web');
  await web.search('q',searchInput.parse({q:'qq'}));
+ assert.deepEqual(asked.sort(),['bing','google'],'each web engine is asked on its own');
 });
 
 test('a website request is planned, searched on several angles, page-checked and judged with its criteria',async()=>{
@@ -186,7 +188,7 @@ test('a website request is planned, searched on several angles, page-checked and
      return {model:'test-judge',verdicts:new Map(candidates.map(c=>[c.key,{key:c.key,relevance:scores[c.site],reason:`TEST ${c.site}`,momentKeys:[]}]))};}};
    const config={...testConfig,SEARXNG_BASE_URL:'http://localhost:8080',PAGE_CHECKS:20};
    const service=new SearchService(db,config);
-   const started=await service.start({q,mode:'refresh'},'alice');
+   const started=await service.start({q,mode:'refresh',depth:'deep'},'alice');
    await workOnce(db,config,[adapter],undefined,{planner,pages,judge});
    const done=await service.poll(started.search_id,'alice');
 
@@ -208,7 +210,7 @@ test('a website request is planned, searched on several angles, page-checked and
 
    const failing:Planner={async plan(){throw new UpstreamError('upstream_failure',503);}};
    calls.length=0;
-   const again=await service.start({q:`${q} again`,mode:'refresh'},'alice');
+   const again=await service.start({q:`${q} again`,mode:'refresh',depth:'deep'},'alice');
    await workOnce(db,config,[adapter],undefined,{planner:failing,pages,judge});
    const fallback=await service.poll(again.search_id,'alice');
    assert.deepEqual(calls,[`${q} again`]);

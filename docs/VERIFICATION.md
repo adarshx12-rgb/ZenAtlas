@@ -48,6 +48,19 @@ Not verified:
 - No real speech was transcribed and evaluated, and no person has reviewed scene timestamps against video.
 - The Python worker has no container image, and concurrent workers were not tested against a production server.
 
+## Streamed quick search and deep dive (September 17, 2026)
+
+Actually run, on the local PM2-supervised API and worker with the Compose PostgreSQL and SearXNG (image 2026.9.16+f725cc793):
+
+- `npm run build` passed. `npm test`: **61 passed**, including results shown while a slow engine is still searching, engine failure messages and per-engine health counters, one request at a time per engine, and the full dig-deeper flow (ownership, request header, job reuse, judge ordering and removal, catalogue-mode refusal).
+- SearXNG, queried one engine at a time: Google and Google Videos answered with a CAPTCHA (suspended by SearXNG), Brave web was rate-limited, DuckDuckGo Videos and Dailymotion timed out now and then, and Bing Videos failed on some queries with an XPath error. The error came from result cards without a `vrhdata` block. With the patched engine mounted (and `PYTHONPYCACHEPREFIX` set, because the image's unchecked bytecode ignored the mount at first), Bing Videos returned 20–39 results for all five test queries, including two that had failed.
+- Earlier requests passed `categories` together with `engines`; SearXNG then queried the whole category (a `dailymotion`-only request returned 167 results from every video engine), so Reddit lookups also hit Brave. Requests now name one engine and no category.
+- Live quick search `astronaut spacewalk scenes in films`: first results after 1.9 s, complete after 3.5 s with 30 results, all nine video engines answering. Before this change, a comparable search took about 18 s and always showed "Some discovery engines are unavailable."
+- Live deep dive from that search: planning, YouTube details and comments, Reddit and AI judgement all `ok`; complete after about 30 s. Google Videos was reported as the one engine blocked by a CAPTCHA, with status `ok`.
+- Playwright browser check (`rocket launch scenes in movies`): the quick search showed 15 results at 3.7 s and completed at 5.2 s with 30 results, no notice, and **Dig deeper** visible. The deep dive grew to 60 results while searching, then showed the checking stage, and finished at 38 s with 27 results, each with an AI reason. The button stayed hidden in catalogue-only mode. Console errors were two thumbnail 404s; one image no longer exists at YouTube.
+
+Not verified: behaviour with several workers sharing one deep job's progress, and a deep dive whose Gemini or YouTube quota is exhausted mid-run (covered only by the existing mocked tests).
+
 ## Remaining integrations and boundaries
 
 | Milestone | Delivered | Remaining |

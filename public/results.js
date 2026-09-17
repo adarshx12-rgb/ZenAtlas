@@ -1,13 +1,19 @@
 import {SearchController} from './search-controller.js';
-const form=document.querySelector('#search-form'),results=document.querySelector('#results'),status=document.querySelector('#status');
-const notices=document.querySelector('#notices'),more=document.querySelector('#more'),retry=document.querySelector('#retry'),cancel=document.querySelector('#cancel');
-const controller=new SearchController();let searchId=null,next=null,params=null,pollTimer=null,current=null;const seen=new Set();
+const form=document.querySelector('#search-form'),status=document.querySelector('#status'),notices=document.querySelector('#notices');
+const catalogueBox=document.querySelector('#catalogue-results'),foundBox=document.querySelector('#found-results');
+const more=document.querySelector('#more'),retry=document.querySelector('#retry'),cancel=document.querySelector('#cancel');
+const deepRow=document.querySelector('#deep-row'),deep=document.querySelector('#deep');
+const controller=new SearchController();
+let searchId=null,next=null,params=null,pollTimer=null,current=null,pageEnd=0,catalogueTotal=0;
+// Result id -> its card and the data it was drawn from, so a changed result is redrawn in place.
+const cards=new Map();
+const PAGE=20;
+// A little longer than the server's discovery windows, so the server reports a delay before the page gives up.
+const POLL_WINDOW_MS={quick:150000,deep:330000};
 // A failed session check is retried by the next search instead of failing every later one.
 let ready=null;
 function session(){return ready??=api('/api/session').catch(error=>{ready=null;throw error;});}
 session().catch(()=>{});
-// Longer than the server's two-minute discovery window, so the server reports a delay before the page gives up.
-const POLL_LIMIT=100;
 function node(tag,text,className){const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(className)el.className=className;return el;}
 function safeURL(value){try{const u=new URL(value);return ['https:','http:'].includes(u.protocol)&&!u.username&&!u.password?u:null;}catch{return null;}}
 function link(url,text){const u=safeURL(url);if(!u)throw Error('Invalid link');const a=node('a',text);a.href=u.href;a.target='_blank';a.rel='noopener noreferrer';return a;}
@@ -59,40 +65,104 @@ function card(item){
   const cardSearchId=searchId;button.addEventListener('click',async()=>{button.disabled=true;try{await api('/api/feedback',{method:'POST',headers:{'Content-Type':'application/json','X-Requested-With':'CreatorSearch'},body:JSON.stringify({search_id:cardSearchId,content_id:item.id,useful})});message.textContent='Feedback saved';}catch(error){message.textContent=error.message;}finally{button.disabled=false;}});article.append(button);}
  article.append(message);return article;
 }
-function render(data,paging=false){searchId=data.search_id;for(const item of data.results){if(!seen.has(item.id)){seen.add(item.id);try{results.append(card(item));}catch{/* Invalid links are not rendered. */}}}
- if(!paging){notices.replaceChildren(...data.providers.filter(p=>p.status!=='ok').map(p=>node('p',p.message,'notice')));}
- next=data.next_cursor;more.hidden=!data.has_more;cancel.hidden=data.status!=='discovering';
- const countLabel=`${seen.size} ${seen.size===1?'result':'results'}`;
- status.textContent=data.status==='discovering'?`${countLabel} so far. Searching external sources…`:seen.size?`${countLabel} · ${data.status==='partial'?'Some search services are unavailable':'Search complete'}`:data.status==='partial'?'No catalogue matches. Discovery is unavailable or incomplete.':'No matching results. Try another query or broader filters.';
+// Returns the card for a result, redrawing it in place when the result changed. Results with unsafe links get no card.
+function cardFor(item){
+ const json=JSON.stringify(item),known=cards.get(item.id);
+ if(known?.json===json)return known.el;
+ let el;try{el=card(item);}catch{return null;}
+ if(known)known.el.replaceWith(el);
+ cards.set(item.id,{el,json});
+ return el;
 }
-async function poll(token,count=0,misses=0){if(!controller.current(token.generation))return;
- if(count>=POLL_LIMIT){cancel.hidden=true;retry.hidden=false;status.textContent=`${seen.size} ${seen.size===1?'result':'results'} so far. External sources are taking longer than expected; retry to check again.`;return;}
+function showCatalogue(items){
+ for(const item of items)if(item.origin==='catalogue'){const el=cardFor(item);if(el&&!el.isConnected)catalogueBox.append(el);}
+}
+// Discovered results follow the server's order: new finds are added at the end, and a finished deep search may reorder them.
+function showFound(items){
+ const keep=new Set();let previous=null;
+ for(const item of items){
+  const el=cardFor(item);if(!el)continue;keep.add(el);
+  const expected=previous?previous.nextElementSibling:foundBox.firstElementChild;
+  if(el!==expected)foundBox.insertBefore(el,expected);
+  previous=el;
+ }
+ for(const el of [...foundBox.children])if(!keep.has(el))el.remove();
+ for(const [id,entry] of cards)if(!entry.el.isConnected)cards.delete(id);
+}
+function progressText(data){
+ if(data.depth!=='deep')return 'Searching external sources…';
+ return data.stage==='checking'?'Digging deeper: checking pages, viewer comments and Reddit, then ranking with AI…':'Digging deeper: searching from more angles…';
+}
+function render(data){
+ searchId=data.search_id;catalogueTotal=data.catalogue_total;
+ showCatalogue(data.results);showFound(data.discovered);
+ notices.replaceChildren(...data.providers.filter(p=>p.status!=='ok').map(p=>node('p',p.message,'notice')));
+ const busy=data.status==='discovering',partial=data.status==='partial',deepDone=data.depth==='deep';
+ cancel.hidden=!busy;
+ more.hidden=!(next&&pageEnd<catalogueTotal);
+ deepRow.hidden=busy||deepDone||data.status==='cancelled'||params.get('mode')==='catalogue';
+ const count=catalogueBox.children.length+foundBox.children.length;
+ const label=`${count} ${count===1?'result':'results'}`;
+ status.textContent=busy?`${label} so far. ${progressText(data)}`
+  :count?`${label} · ${deepDone?(partial?'Deep search finished; some services were unavailable':'Deep search complete'):partial?'Some search services are unavailable':'Search complete'}`
+  :partial?'No catalogue matches. Discovery is unavailable or incomplete.':'No matching results. Try another query or broader filters.';
+}
+async function poll(token,deadline,misses=0){if(!controller.current(token.generation))return;
+ if(Date.now()>deadline){cancel.hidden=true;retry.hidden=false;const count=catalogueBox.children.length+foundBox.children.length;
+  status.textContent=`${count} ${count===1?'result':'results'} so far. External sources are taking longer than expected; retry to check again.`;return;}
  try{const data=await api(`/api/search/${searchId}`,{signal:token.signal});if(!controller.current(token.generation))return;
-  // Keep the currently loaded pagination cursor: polling the first page must not rewind later pages.
-  const oldNext=next;render(data);if(oldNext){next=oldNext;more.hidden=false;}
-  if(data.status==='discovering')pollTimer=setTimeout(()=>poll(token,count+1),1500);
+  // Polling reads the first page; once later pages are loaded, keep their cursor.
+  if(pageEnd<=PAGE)next=data.next_cursor;
+  render(data);
+  if(data.status==='discovering')pollTimer=setTimeout(()=>poll(token,deadline),1500);
  }catch(error){if(!controller.current(token.generation))return;
   // A brief outage, such as the service restarting, should not end the search.
-  if(error.network&&misses<5){pollTimer=setTimeout(()=>poll(token,count+1,misses+1),3000);return;}
+  if(error.network&&misses<5){pollTimer=setTimeout(()=>poll(token,deadline,misses+1),3000);return;}
   status.textContent=error.message;retry.hidden=false;}
+}
+function follow(token,data){
+ next=data.next_cursor;pageEnd=PAGE;render(data);
+ if(data.status==='discovering')pollTimer=setTimeout(()=>poll(token,Date.now()+POLL_WINDOW_MS[data.depth]),1500);
 }
 async function search(){clearTimeout(pollTimer);const previous=searchId;current=controller.begin();const token=current;
  if(previous)void api(`/api/search/${previous}`,{method:'DELETE',headers:{'X-Requested-With':'CreatorSearch'}}).catch(()=>{});
- searchId=null;next=null;seen.clear();results.replaceChildren();notices.replaceChildren();more.hidden=true;retry.hidden=true;cancel.hidden=true;status.textContent='Searching the catalogue…';
- params=new URLSearchParams([...new FormData(form)].filter(([,v])=>v!==''));params.set('limit','20');
- try{await session();const data=await api(`/api/search?${params}`,{signal:token.signal});if(!controller.current(token.generation))return;render(data);if(data.status==='discovering')pollTimer=setTimeout(()=>poll(token),1500);}
+ searchId=null;next=null;cards.clear();catalogueBox.replaceChildren();foundBox.replaceChildren();notices.replaceChildren();
+ more.hidden=true;retry.hidden=true;cancel.hidden=true;deepRow.hidden=true;status.textContent='Searching the catalogue…';
+ params=new URLSearchParams([...new FormData(form)].filter(([,v])=>v!==''));params.set('limit',String(PAGE));
+ try{await session();const data=await api(`/api/search?${params}`,{signal:token.signal});if(controller.current(token.generation))follow(token,data);}
  catch(error){if(controller.current(token.generation)){status.textContent=error.message;retry.hidden=false;}}
+}
+// The deep search starts from everything already shown and keeps adding to the same grid.
+async function digDeeper(){if(!searchId)return;
+ clearTimeout(pollTimer);current=controller.begin();const token=current;
+ deep.disabled=true;retry.hidden=true;status.textContent='Starting a deep search…';
+ try{const data=await api(`/api/search/${encodeURIComponent(searchId)}/deep`,{method:'POST',headers:{'X-Requested-With':'CreatorSearch'},signal:token.signal});
+  if(!controller.current(token.generation))return;
+  params.set('depth','deep');follow(token,data);}
+ catch(error){if(controller.current(token.generation)){status.textContent=error.message;deepRow.hidden=false;}}
+ finally{deep.disabled=false;}
 }
 function applyParamsFromURL(){for(const [key,value] of new URLSearchParams(window.location.search)){const field=form.elements.namedItem(key);if(field)field.value=value;}}
 function runFromURL(){applyParamsFromURL();if(form.elements.namedItem('q').value)void search();else status.textContent='Enter a query to search the catalogue.';}
 form.addEventListener('submit',event=>{event.preventDefault();
- const next=new URLSearchParams([...new FormData(form)].filter(([,v])=>v!==''));
- window.history.pushState(null,'',`/results.html?${next}`);
+ const query=new URLSearchParams([...new FormData(form)].filter(([,v])=>v!==''));
+ window.history.pushState(null,'',`/results.html?${query}`);
  void search();
 });
 retry.addEventListener('click',()=>void search());
-more.addEventListener('click',async()=>{if(!next)return;const token=current;more.disabled=true;const page=new URLSearchParams(params);page.set('cursor',next);
- try{const data=await api(`/api/search?${page}`,{signal:token.signal});if(controller.current(token.generation))render(data,true);}catch(error){if(controller.current(token.generation))status.textContent=error.message;}finally{more.disabled=false;}});
+deep.addEventListener('click',()=>void digDeeper());
+// A page can hold only results already on screen (for example after a deep search restarts paging), so keep going until something new appears.
+more.addEventListener('click',async()=>{if(!next)return;const token=current;more.disabled=true;
+ try{
+  for(let pages=0;next&&pages<10;pages++){
+   const page=new URLSearchParams(params);page.set('cursor',next);
+   const before=catalogueBox.children.length;
+   const data=await api(`/api/search?${page}`,{signal:token.signal});if(!controller.current(token.generation))return;
+   next=data.next_cursor;pageEnd+=PAGE;showCatalogue(data.results);
+   if(catalogueBox.children.length>before||pageEnd>=catalogueTotal)break;
+  }
+  more.hidden=!(next&&pageEnd<catalogueTotal);
+ }catch(error){if(controller.current(token.generation))status.textContent=error.message;}finally{more.disabled=false;}});
 cancel.addEventListener('click',()=>{clearTimeout(pollTimer);controller.stop();cancel.hidden=true;status.textContent='Discovery updates stopped. Your current results remain available.';if(searchId)void api(`/api/search/${searchId}`,{method:'DELETE',headers:{'X-Requested-With':'CreatorSearch'}}).catch(()=>{});});
 window.addEventListener('popstate',runFromURL);
 runFromURL();

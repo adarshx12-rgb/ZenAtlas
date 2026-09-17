@@ -67,7 +67,7 @@ export function clusterMentions(mentions: TimestampMention[], duration: number, 
 
 export async function redditDiscussions(db: DB, config: Config, query: string): Promise<Discussion[]> {
  if (!await takeBudget(db, 'reddit_signals', config.DISCOVERY_DAILY_BUDGET)) throw new UpstreamError('budget_exhausted');
- const adapter = new SearXNG({...config, SEARXNG_CATEGORIES: 'general', SEARXNG_ENGINES: config.SEARXNG_SOURCE_ENGINES});
+ const adapter = new SearXNG({...config, SEARXNG_ENGINES: config.SEARXNG_SOURCE_ENGINES});
  const q = `site:reddit.com ${query}`.slice(0, 500);
  const page = await adapter.search(q, searchInput.parse({q}));
  return page.results.filter(r => /(^|\.)reddit\.com$/.test(new URL(r.url).hostname)).slice(0, 10)

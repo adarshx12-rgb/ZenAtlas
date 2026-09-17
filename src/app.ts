@@ -77,6 +77,7 @@ export async function createApp(db:DB,config:Config) {
  app.get('/api/search',async req=>service.start(req.query,owner(req)));
  app.get('/api/search/:id',async req=>service.poll(id(req.params),owner(req)));
  app.delete('/api/search/:id',async req=>service.cancel(id(req.params),owner(req)));
+ app.post('/api/search/:id/deep',async req=>service.deepen(id(req.params),owner(req)));
  app.get('/api/search/:id/previews/:result',async(req,reply)=>{
    const params=z.object({id:z.string().uuid(),result:z.string().uuid()}).strict().parse(req.params);
    const snapshot=await service.owned(params.id,owner(req));

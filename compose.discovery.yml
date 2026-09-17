@@ -6,10 +6,13 @@ services:
     environment:
       SEARXNG_SECRET: ${SEARXNG_SECRET:?Set a random SEARXNG_SECRET}
       SEARXNG_BASE_URL: http://localhost:8080/
+      # The image ships unchecked bytecode, which would ignore the patched engine mounted below.
+      PYTHONPYCACHEPREFIX: /tmp/pycache
     ports:
       - "127.0.0.1:8080:8080"
     volumes:
       - ./deploy/searxng/settings.yml:/etc/searxng/settings.yml:ro
+      - ./deploy/searxng/engines/bing_videos.py:/usr/local/searxng/searx/engines/bing_videos.py:ro
       - searxng-cache:/var/cache/searxng
 volumes:
   searxng-cache:
