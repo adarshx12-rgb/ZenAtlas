@@ -61,6 +61,18 @@ Actually run, on the local PM2-supervised API and worker with the Compose Postgr
 
 Not verified: behaviour with several workers sharing one deep job's progress, and a deep dive whose Gemini or YouTube quota is exhausted mid-run (covered only by the existing mocked tests).
 
+## AI in quick search and a rabbit-hole deep dive (September 17, 2026, later)
+
+Actually run:
+
+- `npm run build` passed. `npm test`: **61 passed**. Among them: quick searches plan and judge; a deep dive avoids the quick search's queries and first pages, asks extra engines and page 2, follows leads with room beyond the result limit, and judges only its new finds. The `Underrated find` badge needs the judge's lesser-known call, a score of 7 or more, and few views. Also covered: videos with comments turned off are not asked for comments; skipped judge verdicts are asked again in batches of ten; a model with a spent daily quota is set aside for an hour; and a per-minute limit is waited out once.
+- 28 disabled SearXNG engines were probed with four queries in a throwaway container. Bilibili, AcFun and PrivacyWall Videos (video) and Yep, ResultHunter, PrivacyWall and Hacker News (web) answered on-topic and were enabled for deep dives. The others failed, answered off-topic, or (YaCy) returned adult sites despite safe search; `deploy/searxng/settings.yml` lists them.
+- Four live browser runs on real engines, Gemini and YouTube. A quick search completed in 36–49 s with its first results after 3–4 s. A deep dive completed 65–119 s after **Dig deeper**. The "underwater scenes in movies" dive followed leads to underwater-cinematography forums, Ricou Browning interviews and a cinematographer podcast (64 finds, 41 kept). After the lesser-known call moved to the judge, the "zero gravity fight scenes in movies" dive marked 11 of 28 finds as underrated (a DIY effect video, a zero-G flight company's filming page, a university article, a stunt-rigging course) and none of Collider, Looper, Gizmodo, Reddit or Facebook.
+- The Gemini key is on the free tier: `GenerateRequestsPerDayPerProjectPerModel-FreeTier` allows 20 requests per model per day, and the three Flash models were spent after 112 calls. Later runs were judged by `gemini-3.1-flash-lite`, which answered only 6 of 30 candidates in one batch but all of them in batches of ten, hence the retry. Before the wait-and-retry and failure logging were added, one deep dive's follow-up step failed with a 429 from the lite model, and one quick search's judging failed for an unlogged reason; repeating that judging succeeded.
+- YouTube: of 12 result videos, the one without a `commentCount` was the one whose comments returned `403 commentsDisabled`.
+
+Not verified: judging quality of the Flash models on the new prompts, and a deep dive's run time with every step on a paid Gemini tier.
+
 ## Remaining integrations and boundaries
 
 | Milestone | Delivered | Remaining |

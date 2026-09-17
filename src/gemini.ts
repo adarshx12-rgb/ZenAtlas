@@ -17,9 +17,17 @@ const response = z.object({
 const retryable = (error: unknown) => error instanceof UpstreamError &&
  (['rate_limited', 'timeout'].includes(error.code) || error.code === 'upstream_failure' && (error.status ?? 0) >= 500);
 // An overloaded model often stays overloaded for minutes and can take the whole timeout to fail, so it is tried last for a while.
-// Rate limits are per minute, so a rate-limited model is only set aside for one minute.
-const cooldown = (error: unknown) => error instanceof UpstreamError && error.code === 'rate_limited' ? 60_000 : 5 * 60_000;
+// Most rate limits are per minute, so a rate-limited model is set aside for one minute; one whose daily quota is spent
+// is only tried again an hour later.
+const cooldown = (error: unknown) => !(error instanceof UpstreamError) || error.code !== 'rate_limited' ? 5 * 60_000
+ : /PerDay/i.test(error.detail ?? '') ? 60 * 60_000 : 60_000;
 const coolingUntil = new Map<string,number>();
+const perMinuteLimit = (error: unknown) => error instanceof UpstreamError && error.code === 'rate_limited' && !/PerDay/i.test(error.detail ?? '');
+// The wait the API suggested, kept between 1 and 30 seconds; 10 seconds when it suggested none.
+const retryDelayMs = (error: unknown) => {
+ const seconds = Number(/retry=(\d+(?:\.\d+)?)s/.exec((error as UpstreamError).detail ?? '')?.[1] ?? 10);
+ return Math.min(30_000, Math.max(1000, seconds*1000));
+};
 export interface InlineImage { label: string; mimeType: 'image/jpeg'; data: Buffer }
 
 export class GeminiClient {
@@ -33,7 +41,18 @@ export class GeminiClient {
  async json(bucket: string, system: string, text: string, schema: object, images: InlineImage[] = []): Promise<{model: string; value: unknown}> {
    const now = Date.now();
    const cooling = (m: string) => (coolingUntil.get(m) ?? 0) > now;
-   const models = [...this.models.filter(m => !cooling(m)), ...this.models.filter(cooling)];
+   const failures = new Map<string,unknown>();
+   try {
+     return await this.attempt([...this.models.filter(m => !cooling(m)), ...this.models.filter(cooling)], failures, bucket, system, text, schema, images);
+   } catch (error) {
+     // A per-minute limit clears within the minute, so the models held back only by one are tried once more after a wait.
+     const waiting = [...failures].filter(([, e]) => perMinuteLimit(e));
+     if (!waiting.length) throw error;
+     await new Promise(resolve => setTimeout(resolve, Math.min(...waiting.map(([, e]) => retryDelayMs(e)))));
+     return this.attempt(waiting.map(([m]) => m), new Map(), bucket, system, text, schema, images);
+   }
+ }
+ private async attempt(models: string[], failures: Map<string,unknown>, bucket: string, system: string, text: string, schema: object, images: InlineImage[]) {
    for (const [i, model] of models.entries()) {
      if (!await takeBudget(this.db, bucket, this.config.JUDGE_DAILY_BUDGET)) throw new UpstreamError('budget_exhausted');
      try {
@@ -41,6 +60,7 @@ export class GeminiClient {
        coolingUntil.delete(model);
        return {model, value};
      } catch (error) {
+       failures.set(model, error);
        if (retryable(error)) coolingUntil.set(model, Date.now() + cooldown(error));
        if (i === models.length - 1 || !retryable(error)) throw error;
      }

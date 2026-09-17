@@ -7,18 +7,22 @@ import { canonicalize } from './urls.js';
 import { rankDiscovery, type DiscoveryCandidate } from './ranking.js';
 import { ingest } from './catalogue.js';
 import { UpstreamError } from './http.js';
-import { applySignals, type SignalDeps } from './signals.js';
-import { GeminiPlanner, fallbackPlan, type Planner, type SearchPlan, type SearchTarget } from './planner.js';
+import { applySignals, discussionsFor, logFailure, type Discussion, type SignalDeps } from './signals.js';
+import { GeminiPlanner, fallbackPlan, uniqueSearches, type PlannedSearch, type Planner, type SearchPlan, type SearchTarget } from './planner.js';
 import { queryKey } from './search.js';
 
 export interface DiscoveryDeps extends SignalDeps { planner?: Planner }
-export interface DiscoveryProgress { results: Result[]; providers: ProviderStatus[]; stage: 'searching'|'checking' }
+export interface DiscoveryProgress { results: Result[]; providers: ProviderStatus[]; stage: 'searching'|'following'|'checking' }
 type Health = (provider: string, ok: boolean) => Promise<void>;
 type Progress = (update: DiscoveryProgress) => Promise<void>;
 type Outcome = {provider: SourceAdapter; page: DiscoveryPage|null; failure?: 'budget_exhausted'|'unavailable'};
 type Lead = DiscoveryCandidate & {target: SearchTarget};
+// engines: which SearXNG engines to ask (see SearXNG.forTarget); other providers only take standard first pages.
+type Search = PlannedSearch & {page: number; engines: 'standard'|'extra'|'all'};
 // Leads shown as soon as they arrive must match at least half of the query that found them.
 const CLEAR_MATCH = 0.5;
+// A deep dive only asks for follow-up leads when this much of its search time is left.
+const FOLLOW_UP_MIN_MS = 15000;
 
 function summarise(name: string, outcomes: Outcome[]): ProviderStatus {
  const pages = outcomes.flatMap(o => o.page ? [o.page] : []);
@@ -38,43 +42,51 @@ function summarise(name: string, outcomes: Outcome[]): ProviderStatus {
  return {provider: name, status: 'partial', message: 'Some discovery searches or engines did not respond.'};
 }
 
-async function planFor(db: DB, config: Config, input: SearchInput, deps: DiscoveryDeps): Promise<{plan: SearchPlan; status: ProviderStatus|null}> {
- // A search scoped to one source (replacement-domain discovery) runs exactly as asked.
- if (input.source) return {plan: {kind: 'videos', searches: [{query: input.q, target: 'videos'}], criteria: [], model: null}, status: null};
- const planner = input.depth === 'deep' ? deps.planner ?? (config.GEMINI_API_KEY ? new GeminiPlanner(db, config) : undefined) : undefined;
- if (!planner) return {plan: fallbackPlan(input.q), status: null};
+async function planWith(planner: Planner|undefined, query: string, deep: boolean, avoid: string[]): Promise<{plan: SearchPlan; status: ProviderStatus|null}> {
+ if (!planner) return {plan: fallbackPlan(query), status: null};
  try {
-   const plan = await planner.plan(input.q);
-   return {plan, status: {provider: 'planner', status: 'ok', message: `AI planned ${plan.searches.length} searches for ${plan.kind}.`}};
+   const plan = await planner.plan(query, deep ? {deep, avoid} : undefined);
+   return {plan, status: {provider: 'planner', status: 'ok',
+     message: deep ? `AI planned ${plan.searches.length} searches for lesser-known sources.` : `AI planned ${plan.searches.length} searches for ${plan.kind}.`}};
  } catch (error) {
-   return {plan: fallbackPlan(input.q), status: error instanceof UpstreamError && error.code === 'budget_exhausted'
+   logFailure('planner_failed', error);
+   return {plan: deep ? {...fallbackPlan(query), searches: []} : fallbackPlan(query), status: error instanceof UpstreamError && error.code === 'budget_exhausted'
      ? {provider: 'planner', status: 'budget_exhausted', message: 'The daily AI planning limit has been reached; the query was searched as typed.'}
      : {provider: 'planner', status: 'unavailable', message: 'AI search planning is unavailable right now; the query was searched as typed.'}};
  }
 }
 
-// Runs every planned query on every provider in parallel and stores and reports the best leads of each answer as it
-// arrives. A deep search then checks and judges what it found. Returns the final order, every stored record, and the
-// addresses a deep search's judge rejected after they had been shown.
+const pages = (from: number, to: number) => Array.from({length: Math.max(0, to - from + 1)}, (_, i) => from + i);
+const sameSearch = (a: PlannedSearch, b: PlannedSearch) => a.target === b.target && a.query.toLowerCase() === b.query.toLowerCase();
+function leadsMaterial(results: Result[], threads: Discussion[]) {
+ const line = (text: string|null) => text ? ` — ${text.replace(/\s+/g, ' ').slice(0, 160)}` : '';
+ return [...results.slice(0, 40).map(r => `${new URL(r.canonical_url).hostname}: ${r.title}${r.creator ? ` (by ${r.creator})` : ''}${line(r.description)}`),
+   ...threads.slice(0, 10).map(t => `reddit: ${t.title}${line(t.snippet)}`)];
+}
+
+// Plans the search with AI, runs every search on every provider in parallel, and stores and reports the best leads of
+// each answer as it arrives; then checks pages, comments and Reddit and ranks the finds with AI. A deep dive also
+// searches niche engines and later result pages, follows leads from its first finds, and prefers lesser-known sources;
+// it only reports what the quick search for the same query did not already find.
+// Returns the final order, the records it stored, the addresses its judge rejected after they had been shown, and the
+// searches it ran.
 export async function runDiscovery(db: DB, config: Config, input: SearchInput, adapters: SourceAdapter[]|undefined,
  deps: DiscoveryDeps, health: Health, progress: Progress = async () => {}): Promise<{results: Result[]; ingested: Result[]; dropped: string[];
- providers: ProviderStatus[]; previews: Map<string,Buffer>}> {
+ providers: ProviderStatus[]; previews: Map<string,Buffer>; searches: PlannedSearch[]}> {
+ const deep = input.depth === 'deep' && !input.source;
  const providers = (adapters ?? configuredProviders(config)).slice(0, 3);
- const {plan, status: planStatus} = await planFor(db, config, input, deps);
- const planned = plan.searches.flatMap((search, index) => providers.map(provider =>
-   ({search, index, provider, adapter: provider instanceof SearXNG ? provider.forTarget(search.target) : provider})));
- const answers = planned.reduce((n, p) => n + (p.adapter instanceof SearXNG ? p.adapter.engines.length : 1), 0);
- const limit = config.DISCOVERY_RESULTS;
- // Each answer adds only its best few leads, so the engines that answer first cannot take every slot.
- const quota = Math.max(2, Math.floor(limit / Math.max(1, answers)));
+ const planner = input.source ? undefined : deps.planner ?? (config.GEMINI_API_KEY ? new GeminiPlanner(db, config) : undefined);
+ let limit = deep ? config.DEEP_RESULTS : config.DISCOVERY_RESULTS;
+ const deadline = deep ? Date.now() + config.DEEP_SEARCH_SECONDS*1000 : Infinity;
+ const earlier = deep ? await quickJob(db, input) : {results: [], searches: []};
  const leads: Lead[] = [];
- // A deep search also checks and ranks what the quick search for the same query already showed.
- const earlier = input.depth === 'deep' && !input.source ? await quickFinds(db, input) : [];
  const found: Result[] = [];
- const shown = () => [...earlier, ...found];
- const tried = new Set(earlier.map(r => r.canonical_url));
+ const tried = new Set(earlier.results.map(r => r.canonical_url));
  const leadUrl = new Map<string,string>();
- const notes = planStatus ? [planStatus] : [];
+ const notes: ProviderStatus[] = [];
+ const outcomes: Outcome[] = [];
+ let stage: DiscoveryProgress['stage'] = 'searching';
+ const report = () => progress({results: found, providers: notes, stage});
 
  const store = async (picks: Lead[]) => {
    let added = 0;
@@ -84,67 +96,138 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
      tried.add(lead.item.url);
      const result = await ingest(db, lead.item, {adapter: lead.provider, method: 'search', discovered_at: new Date().toISOString()});
      if (!result) continue;
-     found.push(result); leadUrl.set(result.id, lead.item.url); added++;
+     found.push(deep ? {...result, deep_find: true} : result); leadUrl.set(result.id, lead.item.url); added++;
    }
    return added;
  };
  // Answers are handled one at a time, in arrival order; a failure is raised once every search has returned.
  let arrivals = Promise.resolve();
  let failure: unknown = null;
- const arrived = (page: DiscoveryPage, query: string, index: number, target: SearchTarget, provider: string) => {
-   const batch: Lead[] = page.results.map((item, position) => ({item: {...item, url: canonicalize(item.url)}, provider, position, query, searchIndex: index, target}));
+ // Leads that several different searches found rank higher; pages of one search count as the same search.
+ const searchIds = new Map<string,number>();
+ const searchIndex = (s: PlannedSearch) => { const key = `${s.target}:${s.query.toLowerCase()}`; return searchIds.get(key) ?? searchIds.set(key, searchIds.size).get(key)!; };
+ const arrived = (page: DiscoveryPage, search: Search, provider: string, quota: number) => {
+   const batch: Lead[] = page.results.map((item, position) => ({item: {...item, url: canonicalize(item.url)}, provider,
+     position: position + (search.page - 1)*20, query: search.query, searchIndex: searchIndex(search), target: search.target}));
    arrivals = arrivals.then(async () => {
      leads.push(...batch);
      const urls = new Set(batch.map(l => l.item.url));
      const picks = rankDiscovery(input.q, leads, leads.length, CLEAR_MATCH).filter(l => urls.has(l.item.url) && !tried.has(l.item.url)).slice(0, quota);
-     if (await store(picks)) await progress({results: shown(), providers: notes, stage: 'searching'});
+     if (await store(picks)) await report();
    }).catch(error => { failure ??= error; });
  };
-
- const outcomes = await Promise.all(planned.map(async ({search, index, provider, adapter}): Promise<Outcome> => {
-   const budget = provider.name === 'searxng' ? config.SEARXNG_DAILY_BUDGET : config.DISCOVERY_DAILY_BUDGET;
-   if (!await takeBudget(db, `discovery:${provider.name}`, budget)) return {provider, page: null, failure: 'budget_exhausted'};
-   const filters = {...input, q: search.query};
-   try {
-     let page: DiscoveryPage;
-     if (adapter instanceof SearXNG) {
-       page = await adapter.search(search.query, filters, undefined, answer =>
-         arrived(answer, search.query, index, search.target, `${provider.name}:${answer.engines?.asked[0] ?? ''}`));
-     } else {
-       page = await adapter.search(search.query, filters);
-       arrived(page, search.query, index, search.target, provider.name);
+ const run = async (searches: Search[]) => {
+   const jobs = searches.flatMap(search => providers.flatMap(provider => {
+     if (!(provider instanceof SearXNG)) return search.page === 1 && search.engines !== 'extra' ? [{search, provider, adapter: provider}] : [];
+     const adapter = provider.forTarget(search.target, search.engines);
+     return adapter.engines.length ? [{search, provider, adapter}] : [];
+   }));
+   const answers = jobs.reduce((n, j) => n + (j.adapter instanceof SearXNG ? j.adapter.engines.length : 1), 0);
+   // Each answer adds only its best few leads, so the engines that answer first cannot take every slot.
+   const quota = Math.max(2, Math.floor(limit / Math.max(1, answers)));
+   outcomes.push(...(await Promise.all(jobs.map(async ({search, provider, adapter}): Promise<Outcome|null> => {
+     if (Date.now() > deadline) return null;
+     const budget = provider.name === 'searxng' ? config.SEARXNG_DAILY_BUDGET : config.DISCOVERY_DAILY_BUDGET;
+     if (!await takeBudget(db, `discovery:${provider.name}`, budget)) return {provider, page: null, failure: 'budget_exhausted'};
+     const filters = {...input, q: search.query};
+     try {
+       let page: DiscoveryPage;
+       if (adapter instanceof SearXNG) {
+         page = await adapter.search(search.query, filters, String(search.page), {deadline,
+           onPage: answer => arrived(answer, search, `${provider.name}:${answer.engines?.asked[0] ?? ''}`, quota)});
+       } else {
+         page = await adapter.search(search.query, filters);
+         arrived(page, search, provider.name, quota);
+       }
+       await health(provider.name, page.status.status === 'ok');
+       for (const engine of page.engines?.asked ?? []) await health(`${provider.name}:${engine}`, !page.engines!.failed.some(f => f.engine === engine));
+       return {provider, page};
+     } catch {
+       await health(provider.name, false);
+       return {provider, page: null, failure: 'unavailable'};
      }
-     await health(provider.name, page.status.status === 'ok');
-     for (const engine of page.engines?.asked ?? []) await health(`${provider.name}:${engine}`, !page.engines!.failed.some(f => f.engine === engine));
-     return {provider, page};
-   } catch {
-     await health(provider.name, false);
-     return {provider, page: null, failure: 'unavailable'};
-   }
- }));
+   }))).flatMap(o => o ? [o] : []));
+ };
+
+ let plan: SearchPlan;
+ let ran: PlannedSearch[];
+ if (!deep) {
+   // A search scoped to one source (replacement-domain discovery) runs exactly as asked.
+   const typed = input.source ? [{query: input.q, target: 'videos' as const}] : fallbackPlan(input.q).searches;
+   const planning = input.source ? Promise.resolve({plan: {kind: 'videos' as const, searches: typed, criteria: [], model: null}, status: null})
+     : planWith(planner, input.q, false, []);
+   await Promise.all([
+     run(typed.map(s => ({...s, page: 1, engines: 'standard'}))),
+     planning.then(({plan}) => run(plan.searches.filter(s => !typed.some(t => sameSearch(t, s))).map(s => ({...s, page: 1, engines: 'standard'})))),
+   ]);
+   const planned = await planning;
+   plan = planned.plan;
+   if (planned.status) notes.push(planned.status);
+   ran = [...typed, ...plan.searches.filter(s => !typed.some(t => sameSearch(t, s)))];
+ } else {
+   // What an ordinary search asked; its first result pages are already known unless no quick search ran.
+   const ordinary = earlier.searches.length ? earlier.searches : fallbackPlan(input.q).searches;
+   const planning = planWith(planner, input.q, true, ordinary.map(s => s.query));
+   await Promise.all([
+     run(ordinary.flatMap(s => [
+       ...(earlier.searches.length ? [{...s, page: 1, engines: 'extra' as const}] : [{...s, page: 1, engines: 'all' as const}]),
+       ...pages(2, config.DEEP_PAGES).map(page => ({...s, page, engines: 'all' as const}))])),
+     planning.then(({plan}) => run(plan.searches.flatMap(s => pages(1, config.DEEP_PAGES).map(page => ({...s, page, engines: 'all' as const}))))),
+   ]);
+   const planned = await planning;
+   plan = planned.plan;
+   if (planned.status) notes.push(planned.status);
+   ran = [...ordinary, ...plan.searches];
+ }
  await arrivals;
  if (failure) throw failure;
+
+ // Reddit threads are read once: as leads for a deep dive and as evidence for the checks.
+ const discussions = discussionsFor(db, config, deps);
+ const reddit = deep && discussions ? await discussions(input.q).then(threads => ({threads, error: null}), error => ({threads: [], error})) : null;
+ const signalDeps: SignalDeps = reddit ? {...deps, discussions: async () => { if (reddit.error) throw reddit.error; return reddit.threads; }} : deps;
+ // Each round follows leads in the newest finds, until time runs short or the leads stop turning up anything new.
+ let followed = 0, rounds = 0, newest = 0, leadError: unknown = null;
+ while (deep && planner?.followUps && config.DEEP_FOLLOW_UPS && rounds < config.DEEP_ROUNDS && deadline - Date.now() > FOLLOW_UP_MIN_MS) {
+   stage = 'following'; await report();
+   const material = leadsMaterial([...found.slice(newest), ...found.slice(0, newest), ...earlier.results], reddit?.threads ?? []);
+   const next = await planner.followUps(input.q, material, ran.map(s => s.query)).catch(error => { leadError = error; logFailure('deep_leads_failed', error); return null; });
+   const searches = uniqueSearches(next ?? [], config.DEEP_FOLLOW_UPS, ran.map(s => s.query));
+   if (!searches.length) break;
+   rounds++; newest = found.length;
+   // Room for this round's finds, even when the first searches used the whole limit.
+   limit = found.length + searches.length*3;
+   await run(searches.map(s => ({...s, page: 1, engines: 'all'})));
+   await arrivals;
+   if (failure) throw failure;
+   ran.push(...searches); followed += searches.length;
+   if (found.length === newest) break;
+ }
+ if (leadError) notes.push({provider: 'leads', status: leadError instanceof UpstreamError && leadError.code === 'budget_exhausted' ? 'budget_exhausted' : 'unavailable',
+   message: 'Following leads from the first finds is unavailable right now.'});
+ else if (rounds) notes.push({provider: 'leads', status: 'ok', message: `AI followed ${followed} leads from what it found, in ${rounds} ${rounds === 1 ? 'round' : 'rounds'}.`});
  // Fill any slots the per-answer limit left open with the best remaining clear matches, or, when no lead matches
  // clearly, with the provider's own best guesses.
  const clear = rankDiscovery(input.q, leads, limit, CLEAR_MATCH);
  await store(clear.length ? clear : rankDiscovery(input.q, leads, limit));
  const statuses = [...providers.map(p => summarise(p.name, outcomes.filter(o => o.provider === p))), ...notes];
- if (input.depth !== 'deep' || input.source) return {results: found, ingested: found, dropped: [], providers: statuses, previews: new Map()};
+ const searches = uniqueRan(ran);
+ if (input.source) return {results: found, ingested: found, dropped: [], providers: statuses, previews: new Map(), searches};
 
- // New finds go first, so they get the limited YouTube comment checks; the judge sees every result.
- const pool = [...found, ...earlier];
- await progress({results: pool, providers: notes, stage: 'checking'});
+ stage = 'checking'; await report();
  const webUrls = new Set(leads.filter(l => l.target === 'web').map(l => l.item.url));
- const targets = new Map(pool.map(r => [r.id, webUrls.has(leadUrl.get(r.id) ?? r.canonical_url) ? 'web' as const : 'videos' as const]));
- const signals = await applySignals(db, {...config, JUDGE_CANDIDATES: Math.max(config.JUDGE_CANDIDATES, pool.length)}, input.q, pool, deps,
-   {kind: plan.kind, criteria: plan.criteria, targets});
+ const targets = new Map(found.map(r => [r.id, webUrls.has(leadUrl.get(r.id)!) ? 'web' as const : 'videos' as const]));
+ const signals = await applySignals(db, {...config, JUDGE_CANDIDATES: Math.max(config.JUDGE_CANDIDATES, found.length)}, input.q, found, signalDeps,
+   {kind: plan.kind, criteria: plan.criteria, targets, underrated: deep});
  const kept = new Set(signals.results.map(r => r.id));
- return {results: signals.results, ingested: found, previews: signals.previews,
-   dropped: pool.filter(r => !kept.has(r.id)).map(r => r.canonical_url), providers: [...statuses, ...signals.providers]};
+ return {results: signals.results, ingested: found, previews: signals.previews, searches,
+   dropped: found.filter(r => !kept.has(r.id)).map(r => r.canonical_url), providers: [...statuses, ...signals.providers]};
 }
 
-async function quickFinds(db: DB, input: SearchInput): Promise<Result[]> {
+const uniqueRan = (list: PlannedSearch[]) => list.filter((s, i) => list.findIndex(o => sameSearch(o, s)) === i);
+
+async function quickJob(db: DB, input: SearchInput): Promise<{results: Result[]; searches: PlannedSearch[]}> {
  const row = (await db.query(`SELECT result FROM jobs WHERE dedupe_key=$1 AND status='complete'`,
    [`discovery:${queryKey({...input, depth: 'quick'})}`])).rows[0];
- return row?.result?.results ?? [];
+ return {results: row?.result?.results ?? [], searches: row?.result?.searches ?? []};
 }

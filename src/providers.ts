@@ -70,6 +70,7 @@ export function configuredProviders(config:Config,purpose:'content'|'sources'='c
  return providers;
 }
 
+const engineList = (engines: string) => [...new Set(engines.split(',').map(e => e.trim()).filter(Boolean))];
 const engineName = (engine: string) => engine.replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 function failureReason(reason: string) {
  return /captcha/i.test(reason) ? 'blocked by a CAPTCHA' : /too many requests|rate limit/i.test(reason) ? 'rate-limited'
@@ -96,26 +97,34 @@ function inLane<T>(key: string, task: () => Promise<T>): Promise<T> {
 export class SearXNG implements SourceAdapter {
  name = 'searxng'; capabilities = caps;
  constructor(private config: Config, private transport = fetchJSON) {}
- get engines() { return [...new Set(this.config.SEARXNG_ENGINES.split(',').map(e => e.trim()).filter(Boolean))]; }
- forTarget(target: 'videos'|'web') {
-   return target === 'web' ? new SearXNG({...this.config, SEARXNG_ENGINES: this.config.SEARXNG_WEB_ENGINES}, this.transport) : this;
+ get engines() { return engineList(this.config.SEARXNG_ENGINES); }
+ // standard: the engines every search uses; extra: the ones only deep dives add; all: both.
+ forTarget(target: 'videos'|'web', set: 'standard'|'extra'|'all' = 'standard') {
+   const [standard, extra] = target === 'web' ? [this.config.SEARXNG_WEB_ENGINES, this.config.SEARXNG_DEEP_WEB_ENGINES]
+     : [this.config.SEARXNG_ENGINES, this.config.SEARXNG_DEEP_ENGINES];
+   const engines = set === 'standard' ? standard : set === 'extra' ? extra : `${standard},${extra}`;
+   return new SearXNG({...this.config, SEARXNG_ENGINES: engineList(engines).join(',')}, this.transport);
  }
- // Asks each engine separately so a slow or blocked engine cannot hold back the others; onPage receives each engine's answer as it arrives.
- async search(query: string, filters: SearchInput, cursor = '1', onPage?: (page: DiscoveryPage) => void): Promise<DiscoveryPage> {
+ // Asks each engine separately so a slow or blocked engine cannot hold back the others; onPage receives each engine's
+ // answer as it arrives. Engines whose turn comes after the deadline are not asked.
+ async search(query: string, filters: SearchInput, cursor = '1', options: {onPage?: (page: DiscoveryPage) => void; deadline?: number} = {}): Promise<DiscoveryPage> {
    if (!/^\d{1,2}$/.test(cursor)) throw new Error('invalid_provider_cursor');
    const engines = this.engines;
    if (!engines.length) throw new UpstreamError('not_configured');
    const settled = await Promise.allSettled(engines.map(async engine => {
-     const page = await inLane(`${this.config.SEARXNG_BASE_URL}|${engine}`, () => this.searchEngine(engine, query, filters, cursor));
-     onPage?.(page);
+     const page = await inLane(`${this.config.SEARXNG_BASE_URL}|${engine}`, () =>
+       Date.now() > (options.deadline ?? Infinity) ? Promise.resolve(null) : this.searchEngine(engine, query, filters, cursor));
+     if (page) options.onPage?.(page);
      return page;
    }));
-   const pages = settled.flatMap(s => s.status === 'fulfilled' ? [s.value] : []);
-   if (!pages.length) throw (settled[0] as PromiseRejectedResult).reason;
-   const failed = settled.flatMap((s, i) => s.status === 'fulfilled' ? s.value.engines!.failed : [{engine: engines[i], reason: 'returned an error'}]);
+   const pages = settled.flatMap(s => s.status === 'fulfilled' && s.value ? [s.value] : []);
+   const rejected = settled.flatMap(s => s.status === 'rejected' ? [s.reason] : []);
+   if (!pages.length && rejected.length) throw rejected[0];
+   const asked = engines.filter((_, i) => settled[i].status === 'rejected' || (settled[i] as PromiseFulfilledResult<DiscoveryPage|null>).value);
+   const failed = settled.flatMap((s, i) => s.status === 'fulfilled' ? s.value?.engines!.failed ?? [] : [{engine: engines[i], reason: 'returned an error'}]);
    const results = pages.flatMap(p => p.results);
    return {results, next_cursor: results.length ? String(Number(cursor)+1) : null,
-     engines: {asked: engines, failed}, status: engineStatus(this.name, engines, failed)};
+     engines: {asked, failed}, status: engineStatus(this.name, asked, failed)};
  }
  private async searchEngine(engine: string, query: string, filters: SearchInput, cursor: string): Promise<DiscoveryPage> {
    const url = new URL('/search', this.config.SEARXNG_BASE_URL);

@@ -8,8 +8,8 @@ export const searchInput = z.object({
  source: z.string().uuid().optional(),
  after: z.iso.datetime().optional(),
  evidence: z.enum(['any','transcript_supported','video_analysed','viewer_timestamp']).default('any'),
- // quick: the query as typed, keyword-ranked, results shown as each engine answers. deep: AI-planned searches,
- // page, comment and Reddit checks, then AI ranking. Deep only runs when asked for.
+ // Both depths plan with AI, check pages, comments and Reddit, and rank with AI. deep additionally searches niche
+ // engines, later result pages and leads from its first finds, for sources ordinary searches miss. Deep only runs when asked for.
  depth: z.enum(['quick','deep']).default('quick'),
  cursor: z.string().max(512).optional(),
 }).strict();
@@ -61,8 +61,10 @@ export interface Result {
  badges?: string[]; judgement?: Judgement|null;
  // A first-screen capture of the page is available from /api/search/:id/previews/:result while the search lasts.
  preview?: boolean;
+ // Found by a deep dive rather than by the search it continued.
+ deep_find?: boolean;
 }
-export type DiscoveryStage = 'queued'|'searching'|'checking';
+export type DiscoveryStage = 'queued'|'searching'|'following'|'checking';
 export interface SearchResponse {
  query: string; search_id: string; status: 'complete'|'discovering'|'partial'|'cancelled';
  depth: SearchInput['depth']; stage: DiscoveryStage|null;

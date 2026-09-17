@@ -10,6 +10,8 @@ const ORIGIN = 'https://www.googleapis.com';
 export interface VideoDetails {
  id: string; title: string; description: string; channelId: string; channelTitle: string;
  publishedAt: string|null; duration: number|null; live: 'none'|'live'|'upcoming'; wasLive: boolean;
+ // commentCount is null when the video's comments are turned off (YouTube then omits the count).
+ views?: number|null; commentCount?: number|null;
 }
 export interface ViewerComment { id: string; text: string; likes: number }
 export interface YouTubeClient {
@@ -35,6 +37,7 @@ const videoList = z.object({items: z.array(z.object({
    channelTitle: z.string().default(''), publishedAt: z.string().optional(), liveBroadcastContent: z.string().optional()}),
  contentDetails: z.object({duration: z.string().optional()}).optional(),
  liveStreamingDetails: z.object({actualStartTime: z.string().optional()}).optional(),
+ statistics: z.object({viewCount: z.string().regex(/^\d{1,15}$/).optional(), commentCount: z.string().regex(/^\d{1,15}$/).optional()}).optional(),
 })).max(50).default([])});
 const commentList = z.object({items: z.array(z.object({
  id: z.string(),
@@ -53,14 +56,15 @@ export class YouTubeData implements YouTubeClient {
  async videos(ids: string[]) {
    const found = new Map<string,VideoDetails>();
    for (let i = 0; i < ids.length; i += 50) {
-     const data = videoList.parse(await this.get('videos', {part: 'snippet,contentDetails,liveStreamingDetails', id: ids.slice(i, i+50).join(','), maxResults: '50'}));
+     const data = videoList.parse(await this.get('videos', {part: 'snippet,contentDetails,liveStreamingDetails,statistics', id: ids.slice(i, i+50).join(','), maxResults: '50'}));
      for (const v of data.items) {
        const published = v.snippet.publishedAt ? new Date(v.snippet.publishedAt) : null;
        const live = v.snippet.liveBroadcastContent;
        found.set(v.id, {id: v.id, title: v.snippet.title, description: v.snippet.description, channelId: v.snippet.channelId,
          channelTitle: v.snippet.channelTitle, publishedAt: published && Number.isFinite(published.getTime()) ? published.toISOString() : null,
          duration: isoSeconds(v.contentDetails?.duration), live: live === 'live' || live === 'upcoming' ? live : 'none',
-         wasLive: !!v.liveStreamingDetails?.actualStartTime});
+         wasLive: !!v.liveStreamingDetails?.actualStartTime, views: v.statistics?.viewCount ? Number(v.statistics.viewCount) : null,
+         commentCount: v.statistics ? (v.statistics.commentCount ? Number(v.statistics.commentCount) : null) : undefined});
      }
    }
    return found;

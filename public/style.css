@@ -15,6 +15,8 @@ main.wide{max-width:1240px}h1.compact{font-size:40px;letter-spacing:-1.5px;margi
 #results.thumb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;align-items:start}
 .thumb-grid .card{padding:14px}
 .card-group{display:contents}
+.group-heading{grid-column:1/-1;margin:26px 0 0;padding-top:18px;border-top:1px solid #dce1d8;font-size:17px;color:#214635}.group-heading span{font-weight:400;font-size:13px;color:#607267;margin-left:8px}
+.badge.gem{background:#fbecc8;color:#6d4b0b}
 .deep-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:2px 0 18px}.deep-row button{padding:10px 18px;font-size:13px}.deep-row .hint{flex:1 1 260px;max-width:560px;line-height:1.5}
 .thumb-wrap{position:relative;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:linear-gradient(135deg,#e4e9e0,#cfd8c8);margin:0 0 12px}
 .thumb-wrap img{width:100%;height:100%;object-fit:cover;display:block}

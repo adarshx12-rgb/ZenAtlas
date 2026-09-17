@@ -9,6 +9,7 @@ import {createApp} from '../src/app.js';
 import {contentInput,searchInput,type SourceAdapter} from '../src/types.js';
 import type {Planner} from '../src/planner.js';
 import type {Judge} from '../src/judge.js';
+import type {YouTubeClient} from '../src/youtube.js';
 
 const lead=(url:string,title:string,provider='searxng',position=0,description:string|null=null):DiscoveryCandidate=>
  ({item:contentInput.parse({url,title,description}),provider,position});
@@ -106,60 +107,95 @@ test('SearXNG sends each engine one request at a time, even from searches runnin
  const pages=await Promise.all(['aa','bb','cc'].map(q=>adapter.search(q,searchInput.parse({q}))));
  assert.equal(peak,1);assert.equal(asked.length,6);
  assert.ok(pages.every(p=>p.status.status==='ok'));
+ const late=await adapter.search('ee',searchInput.parse({q:'ee'}),'1',{deadline:Date.now()-1});
+ assert.deepEqual([asked.length,late.results.length,late.engines?.asked,late.status.status],[6,0,[],'ok'],'no engine is asked after the deadline');
+ const wide=adapter.forTarget('web','all');
+ assert.deepEqual(new SearXNG({...testConfig,SEARXNG_WEB_ENGINES:'bing, yep',SEARXNG_DEEP_WEB_ENGINES:'yep,hackernews'}).forTarget('web','all').engines,
+   ['bing','yep','hackernews'],'deep dives add their own engines once');
+ assert.deepEqual(wide.forTarget('videos','extra').engines,testConfig.SEARXNG_DEEP_ENGINES.split(','));
  const broken=new SearXNG({...testConfig,SEARXNG_BASE_URL:'http://lanes.example:8080',SEARXNG_ENGINES:'one,two,three'},async(url:string)=>{
    if(new URL(url).searchParams.get('engines')!=='one')throw new Error('down');return {results:[]};});
  const partial=await broken.search('dd',searchInput.parse({q:'dd'}));
  assert.deepEqual([partial.status.status,partial.status.message],['partial','1 of 3 search engines answered; Two (returned an error), Three (returned an error) did not.']);
 });
 
-test('dig deeper continues a finished quick search with planning and AI ranking, keeping what was already found',async()=>{
+test('a deep dive searches niche engines, later pages and leads, and adds ranked underrated finds after the quick results',async()=>{
  const db=await database();
- const config={...testConfig,SEARXNG_BASE_URL:'http://localhost:8080'};
+ // DEEP_RESULTS: the first searches find exactly four new results, so the lead found afterwards needs its round's own room.
+ const config={...testConfig,SEARXNG_BASE_URL:'http://deep.example:8080',SEARXNG_ENGINES:'std',SEARXNG_DEEP_ENGINES:'niche',DEEP_PAGES:2,DEEP_FOLLOW_UPS:2,DEEP_RESULTS:4};
  const app=await createApp(db,config);
  try{
-   const item=(n:number,title:string)=>contentInput.parse({url:`https://clips.example.org/watch/${n}`,title});
+   await db.query(`INSERT INTO sources(domain,display_name,status,policy,provenance) VALUES('www.youtube.com','YouTube','active',
+     '{"metadata":true,"viewer_signals":true,"retention_days":30}','{"fixture":true}')`);
+   const video=(id:string,title:string)=>({url:`https://www.youtube.com/watch?v=${id}`,title});
+   const answers:Record<string,{url:string;title:string}[]>={
+     'std:1:orbit scenes':[video('QUICKAAAAA1','Orbit scenes classic'),video('QUICKAAAAA2','Orbit scenes remastered')],
+     'std:2:orbit scenes':[{url:'https://small.example.org/orbit-scenes',title:'Orbit scenes from a small archive'}],
+     'niche:1:orbit scenes':[{url:'https://niche.example.net/v/1',title:'Orbit scenes fan edit'}],
+     'std:1:orbit scene compilation obscure':[video('DEEPAAAAAA1','Orbit scene compilation obscure cut')],
+     'niche:2:orbit scene compilation obscure':[{url:'https://niche.example.net/v/2',title:'Orbit scenes off-topic upload'}],
+     'niche:1:orbit scene lead':[{url:'https://lead.example.com/orbit',title:'Orbit scene lead from a forum'}],
+   };
    const asked:string[]=[];
-   const adapter:SourceAdapter={name:'mock',capabilities:{transcripts:false,comments:false,embeds:false,accessible_media:false},
-     async search(query){asked.push(query);
-       const results=query==='space scenes'?[item(1,'Space scenes in film'),item(2,'Space scenes ranked'),item(3,'Space scenes blooper')]
-         :[item(4,'Best space scenes in cinema history'),item(2,'Space scenes ranked')];
-       return {results,next_cursor:null,status:{provider:'mock',status:'ok',message:'Mocked provider'}};}};
-   let planned=0,judged=0,seen:string[]=[];
-   const planner:Planner={async plan(query){planned++;
-     return {kind:'videos',searches:[{query,target:'videos'},{query:'space movie scenes cinema',target:'videos'}],criteria:['Shows a space scene'],model:'test-planner'};}};
-   const relevance:Record<string,number>={'Space scenes in film':6,'Space scenes ranked':7,'Space scenes blooper':1,'Best space scenes in cinema history':9};
-   const judge:Judge={async judge(_q,candidates){judged++;seen=candidates.map(c=>c.title);
-     return {model:'test-judge',verdicts:new Map(candidates.map(c=>[c.key,{key:c.key,relevance:relevance[c.title],reason:`TEST ${c.title}`,momentKeys:[]}]))};}};
-   const started=await app.inject('/api/search?q=space%20scenes&mode=refresh');
+   const searxng=new SearXNG(config,async(url:string)=>{const p=new URL(url).searchParams;const key=`${p.get('engines')}:${p.get('pageno')}:${p.get('q')}`;
+     asked.push(key);return {results:answers[key]??[]};});
+   const plans:unknown[]=[];let material:string[]=[];
+   const planner:Planner={
+     async plan(query,options){plans.push(options??null);
+       return options?.deep?{kind:'videos',searches:[{query:'orbit scene compilation obscure',target:'videos'}],criteria:['Shows an orbit scene'],model:'m'}
+         :{kind:'videos',searches:[{query,target:'videos'}],criteria:[],model:'m'};},
+     async followUps(_q,lines){material=lines;return [{query:'orbit scene lead',target:'videos'}];}};
+   const commentsRead:string[]=[];
+   const youtube:YouTubeClient={async videos(ids){return new Map(ids.map(id=>[id,{id,title:'t',description:'',channelId:'UC',channelTitle:'Chan',
+     publishedAt:null,duration:300,live:'none' as const,wasLive:false,views:id.startsWith('DEEP')?1200:5000000,commentCount:id==='QUICKAAAAA2'?null:4}]));},
+     async comments(id){commentsRead.push(id);return [];}};
+   const judged:string[][]=[];
+   const relevance=(title:string)=>title.includes('off-topic')?1:title.includes('obscure')?9:title.includes('forum')?7:6;
+   const judge:Judge={async judge(_q,candidates){judged.push(candidates.map(c=>c.title));
+     return {model:'j',verdicts:new Map(candidates.map(c=>[c.key,{key:c.key,relevance:relevance(c.title),reason:`TEST ${c.title}`,momentKeys:[],
+       lesserKnown:!c.title.includes('archive')}]))};}};
+   const deps={planner,judge,youtube};
+
+   const started=await app.inject('/api/search?q=orbit%20scenes&mode=refresh');
    const cookie=String(started.headers['set-cookie']).split(';')[0];
-   const quickId=started.json().search_id;
-   await workOnce(db,config,[adapter],undefined,{planner,judge});
-   const quick=(await app.inject({url:`/api/search/${quickId}`,headers:{cookie}})).json();
-   assert.deepEqual([quick.depth,quick.status,planned,judged],['quick','complete',0,0],'a quick search neither plans nor judges');
-   assert.deepEqual(asked,['space scenes']);
-   assert.deepEqual(quick.discovered.map((r:any)=>r.title),['Space scenes in film','Space scenes ranked','Space scenes blooper']);
+   await workOnce(db,config,[searxng],undefined,deps);
+   const quick=(await app.inject({url:`/api/search/${started.json().search_id}`,headers:{cookie}})).json();
+   assert.deepEqual([quick.depth,quick.status,plans],['quick','complete',[null]],'a quick search plans with AI too');
+   assert.deepEqual(asked,['std:1:orbit scenes'],'and asks the standard engines for first pages');
+   assert.deepEqual(quick.discovered.map((r:any)=>[r.title,r.judgement.relevance,!!r.deep_find]),
+     [['Orbit scenes classic',6,false],['Orbit scenes remastered',6,false]],'and ranks its finds with AI');
+   assert.deepEqual([commentsRead,quick.status],[['QUICKAAAAA1'],'complete'],'a video with comments turned off is not asked for comments or counted as a failure');
 
-   const deepUrl=`/api/search/${quickId}/deep`,headers={cookie,'x-requested-with':'CreatorSearch'};
-   assert.equal((await app.inject({method:'POST',url:deepUrl,headers:{cookie}})).statusCode,403,'the request header is required');
-   assert.equal((await app.inject({method:'POST',url:deepUrl,headers:{'x-requested-with':'CreatorSearch'}})).statusCode,404,'another visitor cannot deepen it');
-   const begun=(await app.inject({method:'POST',url:deepUrl,headers})).json();
-   assert.notEqual(begun.search_id,quickId);
-   assert.deepEqual([begun.depth,begun.status,begun.stage,begun.discovered.length],['deep','discovering','queued',3],'what the quick search found stays listed');
-   assert.equal((await app.inject({method:'POST',url:deepUrl,headers})).json().discovery_job_id,begun.discovery_job_id,'asking again follows the same deep job');
-
-   await workOnce(db,config,[adapter],undefined,{planner,judge});
+   asked.length=0;
+   const begun=(await app.inject({method:'POST',url:`/api/search/${quick.search_id}/deep`,headers:{cookie,'x-requested-with':'CreatorSearch'}})).json();
+   await workOnce(db,config,[searxng],undefined,deps);
    const deep=(await app.inject({url:`/api/search/${begun.search_id}`,headers:{cookie}})).json();
-   assert.deepEqual([deep.status,deep.stage,planned,judged],['complete',null,1,1]);
-   assert.deepEqual(seen,['Best space scenes in cinema history','Space scenes in film','Space scenes ranked','Space scenes blooper'],
-     'the judge checks the new find and everything the quick search showed');
-   assert.deepEqual(deep.discovered.map((r:any)=>r.title),['Best space scenes in cinema history','Space scenes ranked','Space scenes in film'],
-     'the judge orders the discoveries and its rejected result disappears');
-   assert.equal(deep.discovered[1].judgement.reason,'TEST Space scenes ranked');
-   assert.ok(deep.providers.some((p:any)=>p.provider==='planner'&&p.status==='ok'));
+   assert.deepEqual([deep.depth,deep.status],['deep','complete']);
+   assert.deepEqual(plans[1],{deep:true,avoid:['orbit scenes']},'the deep plan avoids what the quick search ran');
+   assert.ok(!asked.includes('std:1:orbit scenes'),'first pages the quick search saw are not asked again');
+   for(const key of ['niche:1:orbit scenes','std:2:orbit scenes','niche:2:orbit scenes','std:1:orbit scene compilation obscure',
+     'niche:1:orbit scene compilation obscure','std:2:orbit scene compilation obscure','niche:2:orbit scene compilation obscure','niche:1:orbit scene lead'])
+     assert.ok(asked.includes(key),`asked ${key}`);
+   assert.ok(material.includes('niche.example.net: Orbit scenes fan edit'),'leads come from the first finds');
+   assert.deepEqual(judged.at(-1)!.sort(),['Orbit scene compilation obscure cut','Orbit scene lead from a forum','Orbit scenes fan edit',
+     'Orbit scenes from a small archive','Orbit scenes off-topic upload'],'the deep judge checks only new finds');
+   const titles=deep.discovered.map((r:any)=>r.title);
+   assert.deepEqual(titles.slice(0,4),['Orbit scenes classic','Orbit scenes remastered','Orbit scene compilation obscure cut','Orbit scene lead from a forum'],
+     'quick results keep their place, and the best new finds follow');
+   assert.deepEqual(titles.slice(4).sort(),['Orbit scenes fan edit','Orbit scenes from a small archive'],'the rejected find is removed');
+   const byTitle=(title:string)=>deep.discovered.find((r:any)=>r.title===title);
+   assert.equal(byTitle('Orbit scene compilation obscure cut').deep_find,true);
+   assert.deepEqual(byTitle('Orbit scene compilation obscure cut').badges,['Underrated find'],'a relevant video with few views');
+   assert.deepEqual(byTitle('Orbit scene lead from a forum').badges,['Underrated find'],'a relevant site the judge calls lesser-known');
+   assert.equal(byTitle('Orbit scenes from a small archive').badges,undefined,'a site the judge does not call lesser-known is not');
+   assert.equal(byTitle('Orbit scenes classic').badges,undefined,'nor is a widely watched video, whatever the judge says');
+   assert.deepEqual(deep.providers.filter((p:any)=>['planner','leads'].includes(p.provider)).map((p:any)=>[p.provider,p.status]),[['planner','ok'],['leads','ok']]);
 
-   const catalogue=(await app.inject({url:'/api/search?q=space%20scenes&mode=catalogue',headers:{cookie}})).json();
-   const refused=await app.inject({method:'POST',url:`/api/search/${catalogue.search_id}/deep`,headers});
+   const catalogue=(await app.inject({url:'/api/search?q=orbit%20scenes&mode=catalogue',headers:{cookie}})).json();
+   const refused=await app.inject({method:'POST',url:`/api/search/${catalogue.search_id}/deep`,headers:{cookie,'x-requested-with':'CreatorSearch'}});
    assert.deepEqual([refused.statusCode,refused.json().error.code],[400,'discovery_disabled']);
+   assert.equal((await app.inject({method:'POST',url:`/api/search/${quick.search_id}/deep`,headers:{'x-requested-with':'CreatorSearch'}})).statusCode,404,
+     'another visitor cannot deepen it');
  }finally{await app.close();await db.close();}
 });
 

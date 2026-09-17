@@ -6,7 +6,7 @@ import { discoveryQuery, sameWord, STOPWORDS, tokens } from './ranking.js';
 import { UpstreamError } from './http.js';
 import { takeBudget } from './budgets.js';
 import { YouTubeData, youtubeId, type VideoDetails, type ViewerComment, type YouTubeClient } from './youtube.js';
-import { GeminiJudge, type Judge, type JudgeCandidate, type JudgeContext, type Verdict } from './judge.js';
+import { GeminiJudge, type Judge, type JudgeCandidate, type JudgeContext, type JudgeResult, type Verdict } from './judge.js';
 import { PageChecker, type PageCheck, type PageEvidence } from './pages.js';
 import type { SearchTarget } from './planner.js';
 
@@ -20,7 +20,10 @@ export interface MomentCluster { start: number; end: number; score: number; ment
 export interface Discussion { title: string; url: string; snippet: string|null }
 export interface SignalDeps { youtube?: YouTubeClient; judge?: Judge; pages?: PageCheck; discussions?: (query: string) => Promise<Discussion[]> }
 // What the search plan wanted, and which kind of search found each result (by result id).
-export interface SignalContext extends JudgeContext { targets: Map<string,SearchTarget> }
+// underrated: rank relevant results from lesser-known sources higher.
+export interface SignalContext extends JudgeContext { targets: Map<string,SearchTarget>; underrated?: boolean }
+export const UNDERRATED_BADGE = 'Underrated find';
+const RETRY_BATCH = 10;
 
 // h:mm:ss or m:ss, not part of a longer number, ratio or clock time such as "10:30 pm".
 const STAMP = /(?<![\w:.])(?:(\d{1,2}):)?(\d{1,3}):([0-5]\d)(?![\w:])(?!\s*[ap]\.?m\b)/gi;
@@ -63,6 +66,10 @@ export function clusterMentions(mentions: TimestampMention[], duration: number, 
      end: Math.min(duration, last + WINDOW_SECONDS, Math.max(last, next - LEAD_IN_SECONDS)),
      score: distinct.reduce((sum, m) => sum + m.weight, 0), mentions: distinct.sort((a, b) => b.likes - a.likes).slice(0, 3)};
  }).sort((a, b) => b.score - a.score || a.start - b.start).slice(0, limit);
+}
+
+export function discussionsFor(db: DB, config: Config, deps: SignalDeps) {
+ return deps.discussions ?? (config.REDDIT_SIGNALS && config.SEARXNG_BASE_URL ? (q: string) => redditDiscussions(db, config, q) : undefined);
 }
 
 export async function redditDiscussions(db: DB, config: Config, query: string): Promise<Discussion[]> {
@@ -116,6 +123,10 @@ async function storeMoments(db: DB, contentId: string, duration: number, comment
 }
 
 interface Extra { details?: VideoDetails; page?: PageEvidence; stored: {cluster: MomentCluster; moment: Moment}[]; comments: string[]; discussions: Discussion[]; badges: string[] }
+// A structured worker log line with the upstream error code, never the raw error or request.
+export function logFailure(event: string, error: unknown) {
+ console.error(JSON.stringify({event, code: error instanceof UpstreamError ? error.code : 'error', status: (error as UpstreamError)?.status ?? null}));
+}
 const unavailable = (provider: string, error: unknown, message: string): ProviderStatus =>
  error instanceof UpstreamError && error.code === 'budget_exhausted'
    ? {provider, status: 'budget_exhausted', message: `The daily ${provider} limit has been reached.`}
@@ -136,7 +147,9 @@ export async function applySignals(db: DB, config: Config, query: string, result
  const info = (id: string) => extra.get(id) ?? extra.set(id, {stored: [], comments: [], discussions: [], badges: []}).get(id)!;
 
  const youtube = deps.youtube ?? (config.YOUTUBE_API_KEY ? new YouTubeData(db, config) : undefined);
- const eligible = results.filter(r => youtubeId(r.canonical_url) && stored.get(r.id)?.viewer_signals).slice(0, config.SIGNAL_VIDEOS);
+ // Details (one request per 50 videos) cover every permitted video; comments only the first SIGNAL_VIDEOS.
+ const eligible = results.filter(r => youtubeId(r.canonical_url) && stored.get(r.id)?.viewer_signals).slice(0, 50);
+ const commented = new Set(eligible.slice(0, config.SIGNAL_VIDEOS).map(r => r.id));
  const youtubeTask = async (): Promise<ProviderStatus|null> => {
    if (!youtube || !eligible.length) return null;
    try {
@@ -153,6 +166,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
        try {
          await db.query('UPDATE content SET duration=coalesce(duration,$2),published_at=coalesce(published_at,$3),creator=coalesce(creator,$4) WHERE id=$1',
            [r.id, d.duration, d.publishedAt, d.channelTitle || null]);
+         if (!commented.has(r.id) || d.commentCount === null || d.commentCount === 0) return;
          const comments = await youtube.comments(d.id, config.SIGNAL_COMMENTS);
          e.comments = [...comments].sort((a, b) => b.likes - a.likes).slice(0, 15).map(c => c.text.replace(/\s+/g, ' ').slice(0, 240));
          const duration = stored.get(r.id)?.duration ?? d.duration;
@@ -164,7 +178,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
        : {provider: 'youtube', status: 'ok', message: 'YouTube details and viewer comments checked.'};
    } catch (error) { return unavailable('youtube', error, 'YouTube details are unavailable right now.'); }
  };
- const discussions = deps.discussions ?? (config.REDDIT_SIGNALS && config.SEARXNG_BASE_URL ? (q: string) => redditDiscussions(db, config, q) : undefined);
+ const discussions = discussionsFor(db, config, deps);
  const redditTask = async (): Promise<{threads: Discussion[]; status: ProviderStatus|null}> => {
    if (!discussions) return {threads: [], status: null};
    try { return {threads: await discussions(query), status: {provider: 'reddit', status: 'ok', message: 'Reddit discussions checked.'}}; }
@@ -210,7 +224,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
        official: !!e?.badges.includes('Official channel'), duration: duration ? formatSeconds(duration) : null,
        live: e?.badges.find(b => /live/i.test(b)) ?? null,
        description: (d?.description || r.description || '').replace(/\s+/g, ' ').slice(0, 500) || null,
-       comments: e?.comments ?? [],
+       comments: e?.comments ?? [], views: d?.views ?? null,
        moments: (e?.stored ?? []).map((s, j) => ({key: `${key}m${j + 1}`,
          at: formatSeconds(Math.min(...s.cluster.mentions.map(m => m.seconds))), viewers_said: s.cluster.mentions.map(m => m.excerpt)})),
        discussions: (e?.discussions ?? []).map(t => t.title),
@@ -219,18 +233,27 @@ export async function applySignals(db: DB, config: Config, query: string, result
    });
    const screenshots = new Map([...previews].flatMap(([id, image]) => keys.has(id) ? [[keys.get(id)!, image] as const] : []));
    // Smaller batches in parallel answer faster, and a failed batch only leaves its own results unjudged.
-   const size = config.JUDGE_BATCH_SIZE;
-   const batches = Array.from({length: Math.ceil(candidates.length/size)}, (_, b) => candidates.slice(b*size, (b + 1)*size));
-   const settled = await Promise.allSettled(batches.map(batch =>
-     judge.judge(query, batch, context ? {kind: context.kind, criteria: context.criteria} : undefined, screenshots)));
+   const judgeAll = (list: JudgeCandidate[], size: number) => Promise.allSettled(
+     Array.from({length: Math.ceil(list.length/size)}, (_, b) => list.slice(b*size, (b + 1)*size)).map(batch =>
+       judge.judge(query, batch, context ? {kind: context.kind, criteria: context.criteria} : undefined, screenshots).then(out => ({batch, out}))));
    const byKey = new Map<string,Verdict>();
-   for (const s of settled) if (s.status === 'fulfilled') for (const [key, v] of s.value.verdicts) { byKey.set(key, v); modelOf.set(key, s.value.model); }
+   const collect = (settled: PromiseSettledResult<{batch: JudgeCandidate[]; out: JudgeResult}>[]) => {
+     for (const s of settled) if (s.status === 'fulfilled') for (const [key, v] of s.value.out.verdicts) { byKey.set(key, v); modelOf.set(key, s.value.out.model); }
+   };
+   const settled = await judgeAll(candidates, config.JUDGE_BATCH_SIZE);
+   collect(settled);
+   // Lighter fallback models often skip candidates in long batches; the skipped ones are asked once more in short batches.
+   const skipped = settled.flatMap(s => s.status === 'fulfilled' ? s.value.batch.filter(c => !byKey.has(c.key)) : []);
+   if (skipped.length) collect(await judgeAll(skipped, RETRY_BATCH));
    const failed = settled.flatMap(s => s.status === 'rejected' ? [s.reason] : []);
    if (failed.length < settled.length) {
      verdicts = new Map(pool.flatMap(r => { const v = byKey.get(keys.get(r.id)!); return v ? [[r.id, v] as const] : []; }));
      providers.push(failed.length ? {provider: 'judge', status: 'partial', message: 'Some results could not be checked by AI and are listed after checked ones.'}
        : {provider: 'judge', status: 'ok', message: 'Results were checked for relevance by AI.'});
-   } else providers.push(unavailable('judge', failed[0], 'AI relevance checking is unavailable right now; results use keyword ranking.'));
+   } else {
+     logFailure('judge_failed', failed[0]);
+     providers.push(unavailable('judge', failed[0], 'AI relevance checking is unavailable right now; results use keyword ranking.'));
+   }
  }
 
  const scored = results.map((r, i) => {
@@ -240,12 +263,16 @@ export async function applySignals(db: DB, config: Config, query: string, result
      : clusters.filter(s => terms.some(term => s.cluster.mentions.some(m => tokens(m.excerpt).some(t => sameWord(term, t))))))
      .map(s => s.moment);
    const base = 1/(1 + i/10);
-   const score = verdicts ? (v ? v.relevance/10*1.5 + base*0.3 : base*0.3 - 0.5)
-     : base + 0.1*chosen.length + (e?.discussions.length ? 0.1 : 0) + (e?.badges.includes('Official channel') ? 0.1 : 0);
+   // A clearly relevant result the judge places at a lesser-known source is an underrated find, unless its video is widely watched.
+   const underrated = !!v?.lesserKnown && v.relevance >= 7 && (d?.views ?? 0) < config.UNDERRATED_MAX_VIEWS;
+   const score = (verdicts ? (v ? v.relevance/10*1.5 + base*0.3 : base*0.3 - 0.5)
+     : base + 0.1*chosen.length + (e?.discussions.length ? 0.1 : 0) + (e?.badges.includes('Official channel') ? 0.1 : 0))
+     + (underrated && context?.underrated ? 0.3 : 0);
+   const badges = [...(e?.badges ?? []), ...(underrated ? [UNDERRATED_BADGE] : [])];
    return {score, dropped: !!v && v.relevance <= 2, result: {...r,
      duration: r.duration ?? d?.duration ?? null, published_at: r.published_at ?? d?.publishedAt ?? null, creator: r.creator ?? (d?.channelTitle || null),
      moments: [...r.moments, ...chosen].sort((a, b) => a.start_seconds - b.start_seconds),
-     badges: e?.badges.length ? [...new Set(e.badges)] : r.badges,
+     badges: badges.length ? [...new Set(badges)] : r.badges,
      ...(previews.has(r.id) ? {preview: true} : {}),
      judgement: v ? {relevance: v.relevance, reason: v.reason, model: modelOf.get(keys.get(r.id)!) ?? ''} : (r.judgement ?? null)}};
  });

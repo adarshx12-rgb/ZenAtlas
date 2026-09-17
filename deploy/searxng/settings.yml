@@ -18,6 +18,18 @@ use_default_settings:
       - bing
       - brave
       - yahoo
+      # Deep dives only (SEARXNG_DEEP_ENGINES, SEARXNG_DEEP_WEB_ENGINES): sources ordinary searches rarely reach.
+      # Checked with four test queries on 2026-09-17. Left out: niconico, vimeo, tusksearch (HTTP errors), mojeek,
+      # fireball, tootfinder (access denied), seznam, mwmbl (timeouts), ina, mediathekviewweb, lemmy communities
+      # (no results), boardreader, lemmy posts, media.ccc.de (off-topic results), sogou videos (links to its own
+      # redirect pages), iqiyi (weak matches) and yacy (adult results despite safe search).
+      - bilibili
+      - acfun
+      - privacywall videos
+      - yep
+      - resulthunter
+      - privacywall
+      - hackernews
 search:
   safe_search: 1
   formats:
@@ -39,4 +51,18 @@ engines:
   - name: bing
     disabled: false
   - name: yahoo
+    disabled: false
+  - name: bilibili
+    disabled: false
+  - name: acfun
+    disabled: false
+  - name: privacywall videos
+    disabled: false
+  - name: yep
+    disabled: false
+  - name: resulthunter
+    disabled: false
+  - name: privacywall
+    disabled: false
+  - name: hackernews
     disabled: false

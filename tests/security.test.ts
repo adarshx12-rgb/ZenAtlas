@@ -21,6 +21,8 @@ test('fixed internal providers reject redirects and bound response size/type',as
  const server=createServer((req,res)=>{
    if(req.url==='/redirect'){res.writeHead(302,{location:'http://169.254.169.254/latest/meta-data/'});res.end();}
    else if(req.url==='/big'){res.setHeader('content-type','application/json');res.end(JSON.stringify({value:'x'.repeat(10000)}));}
+   else if(req.url==='/quota'){res.writeHead(429,{'content-type':'application/json'});res.end(JSON.stringify({error:{status:'RESOURCE_EXHAUSTED',
+     details:[{violations:[{quotaId:'GenerateRequestsPerDayPerProjectPerModel-FreeTier'}]},{retryDelay:'17s'}]}}));}
    else {res.setHeader('content-type','text/html');res.end('<h1>Wrong format</h1>');}
  });
  await new Promise<void>(r=>server.listen(0,'127.0.0.1',r));
@@ -29,6 +31,8 @@ test('fixed internal providers reject redirects and bound response size/type',as
    await assert.rejects(fetchJSON(`${origin}/redirect`,{trustedOrigin:origin}),/redirect_blocked/);
    await assert.rejects(fetchJSON(`${origin}/big`,{trustedOrigin:origin,maxBytes:100}),/response_too_large/);
    await assert.rejects(fetchJSON(`${origin}/html`,{trustedOrigin:origin}),/unsupported_content/);
+   await assert.rejects(fetchJSON(`${origin}/quota`,{trustedOrigin:origin}),(e:any)=>e.code==='rate_limited'&&e.status===429&&
+     e.detail==='RESOURCE_EXHAUSTED,GenerateRequestsPerDayPerProjectPerModel-FreeTier,retry=17s','a trusted API names the exhausted quota');
    const probe=await fetchJSON(`${origin}/html`,{trustedOrigin:origin,method:'HEAD',probe:true});
    assert.equal(probe.status,200,'health probes read headers without parsing HTML as JSON');
  }finally{await new Promise<void>(r=>server.close(()=>r()));}

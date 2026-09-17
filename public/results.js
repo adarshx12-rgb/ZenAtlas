@@ -1,6 +1,7 @@
 import {SearchController} from './search-controller.js';
 const form=document.querySelector('#search-form'),status=document.querySelector('#status'),notices=document.querySelector('#notices');
 const catalogueBox=document.querySelector('#catalogue-results'),foundBox=document.querySelector('#found-results');
+const deepBox=document.querySelector('#deep-results'),deepHeading=document.querySelector('#deep-heading');
 const more=document.querySelector('#more'),retry=document.querySelector('#retry'),cancel=document.querySelector('#cancel');
 const deepRow=document.querySelector('#deep-row'),deep=document.querySelector('#deep');
 const controller=new SearchController();
@@ -8,8 +9,9 @@ let searchId=null,next=null,params=null,pollTimer=null,current=null,pageEnd=0,ca
 // Result id -> its card and the data it was drawn from, so a changed result is redrawn in place.
 const cards=new Map();
 const PAGE=20;
-// A little longer than the server's discovery windows, so the server reports a delay before the page gives up.
-const POLL_WINDOW_MS={quick:150000,deep:330000};
+// Longer than the server's discovery windows, so the server reports a delay before the page gives up.
+const POLL_WINDOW_MS={quick:240000,deep:900000};
+const UNDERRATED='Underrated find';
 // A failed session check is retried by the next search instead of failing every later one.
 let ready=null;
 function session(){return ready??=api('/api/session').catch(error=>{ready=null;throw error;});}
@@ -37,7 +39,7 @@ function card(item){
  const heading=node('h3');heading.append(link(item.canonical_url,item.title));article.append(heading);
  const details=[item.creator,item.duration?duration(item.duration):null,item.published_at?new Date(item.published_at).toLocaleDateString():null].filter(Boolean);
  if(details.length)article.append(node('div',details.join(' · '),'details'));
- for(const badge of item.badges??[])article.append(node('span',badge,'badge highlight'));
+ for(const badge of item.badges??[])article.append(node('span',badge,badge===UNDERRATED?'badge gem':'badge highlight'));
  article.append(node('span',item.evidence.replaceAll('_',' '),'badge'),node('span',`Rights: ${item.rights_status}`,'badge'));
  if(item.judgement)article.append(node('p',`Why this matches (${item.judgement.relevance}/10): ${item.judgement.reason}`,'why'));
  if(item.description)article.append(node('p',item.description));
@@ -77,22 +79,32 @@ function cardFor(item){
 function showCatalogue(items){
  for(const item of items)if(item.origin==='catalogue'){const el=cardFor(item);if(el&&!el.isConnected)catalogueBox.append(el);}
 }
-// Discovered results follow the server's order: new finds are added at the end, and a finished deep search may reorder them.
-function showFound(items){
+// Discovered results follow the server's order: new finds are added at the end, and a finished search reorders its own finds.
+function showIn(box,items){
  const keep=new Set();let previous=null;
  for(const item of items){
   const el=cardFor(item);if(!el)continue;keep.add(el);
-  const expected=previous?previous.nextElementSibling:foundBox.firstElementChild;
-  if(el!==expected)foundBox.insertBefore(el,expected);
+  const expected=previous?previous.nextElementSibling:box.firstElementChild;
+  if(el!==expected)box.insertBefore(el,expected);
   previous=el;
  }
- for(const el of [...foundBox.children])if(!keep.has(el))el.remove();
+ for(const el of [...box.children])if(!keep.has(el))el.remove();
+}
+function showFound(items){
+ showIn(foundBox,items.filter(item=>!item.deep_find));showIn(deepBox,items.filter(item=>item.deep_find));
  for(const [id,entry] of cards)if(!entry.el.isConnected)cards.delete(id);
 }
 function progressText(data){
- if(data.depth!=='deep')return 'Searching external sources…';
- return data.stage==='checking'?'Digging deeper: checking pages, viewer comments and Reddit, then ranking with AI…':'Digging deeper: searching from more angles…';
+ if(data.depth==='deep')return data.stage==='checking'?'Deep dive: checking its finds, viewer comments and Reddit, then ranking them with AI…'
+  :data.stage==='following'?'Deep dive: following leads from what it found…':'Deep dive: searching niche platforms and later result pages…';
+ return data.stage==='checking'?'Checking pages, viewer comments and Reddit, then ranking with AI…':'Searching external sources…';
 }
+function showDeepHeading(data,busy){
+ const count=deepBox.children.length,gems=deepBox.querySelectorAll('.badge.gem').length;
+ deepHeading.hidden=data.depth!=='deep'||(!busy&&!count);
+ deepHeading.replaceChildren('Deep dive finds',node('span',busy?`${count} so far`:count?`${count} new${gems?` · ${gems} underrated`:''}`:''));
+}
+const shownCount=()=>catalogueBox.children.length+foundBox.children.length+deepBox.children.length;
 function render(data){
  searchId=data.search_id;catalogueTotal=data.catalogue_total;
  showCatalogue(data.results);showFound(data.discovered);
@@ -101,14 +113,15 @@ function render(data){
  cancel.hidden=!busy;
  more.hidden=!(next&&pageEnd<catalogueTotal);
  deepRow.hidden=busy||deepDone||data.status==='cancelled'||params.get('mode')==='catalogue';
- const count=catalogueBox.children.length+foundBox.children.length;
+ showDeepHeading(data,busy);
+ const count=shownCount();
  const label=`${count} ${count===1?'result':'results'}`;
  status.textContent=busy?`${label} so far. ${progressText(data)}`
-  :count?`${label} · ${deepDone?(partial?'Deep search finished; some services were unavailable':'Deep search complete'):partial?'Some search services are unavailable':'Search complete'}`
+  :count?`${label} · ${deepDone?(partial?'Deep dive finished; some services were unavailable':'Deep dive complete'):partial?'Some search services are unavailable':'Search complete'}`
   :partial?'No catalogue matches. Discovery is unavailable or incomplete.':'No matching results. Try another query or broader filters.';
 }
 async function poll(token,deadline,misses=0){if(!controller.current(token.generation))return;
- if(Date.now()>deadline){cancel.hidden=true;retry.hidden=false;const count=catalogueBox.children.length+foundBox.children.length;
+ if(Date.now()>deadline){cancel.hidden=true;retry.hidden=false;const count=shownCount();
   status.textContent=`${count} ${count===1?'result':'results'} so far. External sources are taking longer than expected; retry to check again.`;return;}
  try{const data=await api(`/api/search/${searchId}`,{signal:token.signal});if(!controller.current(token.generation))return;
   // Polling reads the first page; once later pages are loaded, keep their cursor.
@@ -126,7 +139,7 @@ function follow(token,data){
 }
 async function search(){clearTimeout(pollTimer);const previous=searchId;current=controller.begin();const token=current;
  if(previous)void api(`/api/search/${previous}`,{method:'DELETE',headers:{'X-Requested-With':'CreatorSearch'}}).catch(()=>{});
- searchId=null;next=null;cards.clear();catalogueBox.replaceChildren();foundBox.replaceChildren();notices.replaceChildren();
+ searchId=null;next=null;cards.clear();catalogueBox.replaceChildren();foundBox.replaceChildren();deepBox.replaceChildren();deepHeading.hidden=true;notices.replaceChildren();
  more.hidden=true;retry.hidden=true;cancel.hidden=true;deepRow.hidden=true;status.textContent='Searching the catalogue…';
  params=new URLSearchParams([...new FormData(form)].filter(([,v])=>v!==''));params.set('limit',String(PAGE));
  try{await session();const data=await api(`/api/search?${params}`,{signal:token.signal});if(controller.current(token.generation))follow(token,data);}

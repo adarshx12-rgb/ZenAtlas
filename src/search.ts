@@ -9,8 +9,9 @@ import { RANKING_VERSION } from './ranking.js';
 import { takeBudget } from './budgets.js';
 import { configuredProviders } from './providers.js';
 
-// How long a search reports that discovery is still running before calling it delayed.
-const DISCOVERY_WINDOW_MS = {quick: 120000, deep: 300000};
+// How long a search reports that discovery is still running before calling it delayed: the checks and AI ranking
+// can take up to three minutes after a deep dive's search time.
+const CHECKING_WINDOW_MS = 180000;
 
 export class ApiError extends Error { constructor(public statusCode:number, public code:string, message:string) { super(message); } }
 export function queryKey(input: SearchInput) {
@@ -38,24 +39,26 @@ const withDetails = (item: Result, found: Result): Result => ({...item,
  ...(found.preview && found.id === item.id ? {preview: true} : {})});
 
 // Local results stay first in their frozen order and discoveries follow. While a job runs its new finds are appended.
-// Its final answer also updates entries already listed, and a deep job's ranking reorders the discoveries and removes
-// the ones its judge rejected.
-function merge(existing: Result[], found: Result[], filters: SearchInput, final: {dropped: string[]; ranked: boolean}|null) {
+// When it completes, its ranking reorders its own finds (all discoveries of a quick search, or a deep dive's finds)
+// within their places and removes the ones its judge rejected; other listed entries only take its details.
+function merge(existing: Result[], found: Result[], filters: SearchInput, final: {dropped: string[]; deep: boolean}|null) {
+ const own = (r: Result) => r.origin !== 'catalogue' && (!final?.deep || !!r.deep_find);
  const results = [...existing];
  const at = new Map(results.map((r, i) => [r.canonical_url, i]));
  for (const item of found) {
    if (!matchesFilters(item, filters)) continue;
    const i = at.get(item.canonical_url);
    if (i === undefined) { at.set(item.canonical_url, results.length); results.push(item); }
-   else if (final) results[i] = results[i].origin === 'catalogue' ? withDetails(results[i], item) : item;
+   else if (final) results[i] = own(results[i]) ? item : withDetails(results[i], item);
  }
- const start = results.findIndex(r => r.origin !== 'catalogue');
- if (!final?.ranked || start < 0) return results;
+ if (!final) return results;
  const dropped = new Set(final.dropped);
  const rank = new Map(found.map((r, i) => [r.canonical_url, i]));
- const discovered = results.slice(start).filter(r => !dropped.has(r.canonical_url))
+ const slots = results.flatMap((r, i) => own(r) ? [i] : []);
+ const ranked = results.filter(r => own(r) && !dropped.has(r.canonical_url))
    .sort((a, b) => (rank.get(a.canonical_url) ?? found.length) - (rank.get(b.canonical_url) ?? found.length));
- return [...results.slice(0, start), ...discovered];
+ const placed = new Map(ranked.map((r, k) => [slots[k], r]));
+ return results.flatMap((r, i) => !own(r) ? [r] : placed.has(i) ? [placed.get(i)!] : []);
 }
 
 export class SearchService {
@@ -141,7 +144,7 @@ export class SearchService {
      const current = (await tx.query('SELECT * FROM searches WHERE id=$1 FOR UPDATE',[initial.id])).rows[0];
      if (current.discovery_applied || current.cancelled) return current;
      const results = merge(current.results,found,current.filters,
-       final ? {dropped:job.result.dropped??[],ranked:current.filters.depth==='deep'} : null);
+       final ? {dropped:job.result.dropped??[],deep:current.filters.depth==='deep'} : null);
      const providers = final ? [...current.provider_status,...(job.result.providers??[])] : current.provider_status;
      return (await tx.query(`UPDATE searches SET results=$2,provider_status=$3,discovery_applied=$4 WHERE id=$1 RETURNING *`,
        [current.id,JSON.stringify(results.slice(0,250)),JSON.stringify(providers),final])).rows[0];
@@ -179,7 +182,8 @@ export class SearchService {
    const filters = snapshot.filters;
    const depth: SearchInput['depth'] = filters.depth ?? 'quick';
    const running = !!job && ['queued','running'].includes(job.status);
-   const waiting = running && Date.now()-new Date(snapshot.created_at).getTime()<=DISCOVERY_WINDOW_MS[depth];
+   const window = CHECKING_WINDOW_MS + (depth==='deep' ? this.config.DEEP_SEARCH_SECONDS*1000 : 0);
+   const waiting = running && Date.now()-new Date(snapshot.created_at).getTime()<=window;
    const providers: ProviderStatus[] = [...snapshot.provider_status];
    if (job?.status==='failed') providers.push({provider:'discovery',status:'unavailable',message:'External discovery failed. Catalogue results are still available.'});
    if (running && !waiting) providers.push({provider:'discovery',status:'unavailable',message:'Discovery is delayed. Try again later.'});

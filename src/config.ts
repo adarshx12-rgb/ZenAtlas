@@ -12,7 +12,13 @@ export const configSchema = z.object({
   SEARXNG_ENGINES: z.string().default('youtube,dailymotion,sepiasearch,odysee,bing videos,google videos,duckduckgo videos,brave.videos,wikicommons.videos'),
   SEARXNG_SOURCE_ENGINES: z.string().default('google,bing'),
   SEARXNG_WEB_ENGINES: z.string().default('google,bing,brave,yahoo'),
+  // Extra engines that only deep dives use, chosen because ordinary searches rarely reach their sources.
+  SEARXNG_DEEP_ENGINES: z.string().default('bilibili,acfun,privacywall videos'),
+  SEARXNG_DEEP_WEB_ENGINES: z.string().default('yep,resulthunter,privacywall,hackernews'),
   SEARXNG_DAILY_BUDGET: number(2000, 0, 100000),
+  DEEP_PLAN_SEARCHES: number(6, 1, 16), DEEP_PAGES: number(2, 1, 5), DEEP_FOLLOW_UPS: number(4, 0, 10), DEEP_ROUNDS: number(2, 1, 5),
+  DEEP_RESULTS: number(40, 1, 80), DEEP_SEARCH_SECONDS: number(120, 20, 600),
+  UNDERRATED_MAX_VIEWS: number(50000, 0, 1000000000),
   PLAN_SEARCHES: number(4, 1, 8), PAGE_CHECKS: number(20, 0, 40), PAGE_TIMEOUT_MS: number(6000, 1000, 20000),
   PAGE_RENDERS: number(0, 0, 20), PAGE_RENDER_TIMEOUT_MS: number(12000, 3000, 30000), PAGE_TEXT_PYTHON: optional,
   JUDGE_CANDIDATES: number(30, 1, 50),

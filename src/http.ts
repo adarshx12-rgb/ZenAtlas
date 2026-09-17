@@ -3,7 +3,17 @@ import http from 'node:http';
 import https from 'node:https';
 import { isPublicIP, publicURL } from './urls.js';
 
-export class UpstreamError extends Error { constructor(public code: string, public status?: number) { super(code); } }
+// detail: the reasons a trusted API gave for an error response (for example a quota name); never shown to users.
+export class UpstreamError extends Error { constructor(public code: string, public status?: number, public detail?: string) { super(code); } }
+function errorDetail(body: Buffer) {
+ try {
+   const error = JSON.parse(body.toString('utf8'))?.error ?? {};
+   const reasons = [error.status, ...(error.errors ?? []).map((e: any) => e?.reason),
+     ...(error.details ?? []).flatMap((d: any) => (d?.violations ?? []).map((v: any) => v?.quotaId)),
+     ...(error.details ?? []).flatMap((d: any) => typeof d?.retryDelay === 'string' ? [`retry=${d.retryDelay}`] : [])];
+   return reasons.filter((r): r is string => typeof r === 'string').join(',').slice(0, 300) || undefined;
+ } catch { return undefined; }
+}
 type Options = { timeoutMs?: number; maxBytes?: number; method?: 'GET'|'POST'|'HEAD'; body?: unknown;
  token?: string; trustedOrigin?: string; contentTypes?: string[]; redirects?: number;
  headers?: Record<string,string>; probe?: boolean; accept?: string };
@@ -51,7 +61,15 @@ async function request(input: string, options: Options, defaultTypes: string[]):
            res.destroy(); finish(undefined, {status, location: res.headers.location, contentType: '', data: Buffer.alloc(0)}); return;
          }
          if(options.probe){res.destroy();finish(undefined,{status,contentType:'',data:Buffer.alloc(0)});return;}
-         if (status !== 200) { res.destroy(); finish(new UpstreamError(status === 429 ? 'rate_limited' : 'upstream_failure', status)); return; }
+         if (status !== 200) {
+           const fail = (detail?: string) => finish(new UpstreamError(status === 429 ? 'rate_limited' : 'upstream_failure', status, detail));
+           if (!trusted) { res.destroy(); fail(); return; }
+           // A trusted API's error body names the limit or reason; up to 64 KiB of it is read.
+           const chunks: Buffer[] = []; let bytes = 0;
+           res.on('data', (chunk: Buffer) => { bytes += chunk.length; if (bytes > 65536) res.destroy(); else chunks.push(chunk); });
+           res.on('close', () => fail(errorDetail(Buffer.concat(chunks))));
+           return;
+         }
          const type = (res.headers['content-type'] ?? '').split(';')[0].trim().toLowerCase();
          if (!(options.contentTypes ?? defaultTypes).includes(type) ||
            (res.headers['content-encoding'] && res.headers['content-encoding'] !== 'identity')) {
