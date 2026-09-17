@@ -206,7 +206,7 @@ test('a confident anime match gives the planner and judge its official titles an
  try{
    const anime:AnimeMatch={id:16498,title:'Attack on Titan',romaji:'Shingeki no Kyojin',english:'Attack on Titan',native:'進撃の巨人',
      synonyms:['AoT'],genres:['Action','Drama'],format:'TV',episodes:25,status:'FINISHED',studios:['Wit Studio'],
-     seasonYear:2013,averageScore:84,siteUrl:'https://anilist.co/anime/16498'};
+     seasonYear:2013,averageScore:84,siteUrl:'https://anilist.co/anime/16498',episodeTitles:[]};
    const lookups:string[]=[];
    const anilist:AnimeClient={async lookup(query){lookups.push(query);return query.includes('titan')?anime:null;}};
    const adapter:SourceAdapter={name:'mock',capabilities:{transcripts:false,comments:false,embeds:false,accessible_media:false},

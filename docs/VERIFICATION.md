@@ -83,6 +83,19 @@ Actually run, against the real AniList API (no key needed) and the local PM2-sup
 
 Not verified: recognition of manga-only or non-anime AniList entries (only `type: ANIME` is queried), and behaviour when AniList itself is rate-limited or unreachable (covered only by the mocked tests).
 
+## Character-based anime recognition for scene queries (September 17, 2026, later still)
+
+Actually run, against the real AniList API (no key needed):
+
+- `npm run build` passed. `npm test`: **71 passed**, including the character-search convergence rule (two independently found characters must agree on the same anime; one coincidental hit alone, or two hits with too few favourites, must not be enough), and that a request naming the same query text is never searched twice as a title once nothing more can be trimmed from it.
+- Sending the query's own significant words to AniList's title search, as the earlier version did, cannot find a show a request never names by title: "gohan ssj2 vs cell" (the motivating example) matched nothing at any title-search stage, because "Dragon Ball Z" shares no words with it.
+- AniList's character search on its own is too noisy to use directly: of 16 plainly non-anime or generic single words tried (recipe, best, rocket, zero, fight, desert, water, and others), 11 coincidentally matched a real character, several with substantial favourites ("zero" → Lelouch Lamperouge, 28,226 favourites; "water" → Giyuu Tomioka, 12,474; "fight" → Gohan Son, 3,768), which would misidentify an unrelated request if a single hit were trusted. Requiring two independently searched words to each name a character best known for the *same* show, both clearing a modest favourites floor, is what makes this usable: "best fight scenes" (best → a "Jahy" character, fight → Gohan Son/Dragon Ball Z, different shows) and "a totally unrelated request" (two low-favourites coincidental hits on the same made-up show, in a dedicated unit test) both correctly found nothing this way.
+- Live character-based recognition, run once the AniList rate limit from this session's own heavy testing had cleared: "gohan ssj2 vs cell" → Dragon Ball Z; also "goku vs vegeta", "sasuke vs itachi", "eren vs reiner", "deku vs bakugo" and "edward elric vs father" each correctly resolved to their show. "luffy vs kaido" and "levi vs beast titan" did not: AniList's own character search did not return the *One Piece* Kaido or a "Beast Titan" character as the top hit for those exact search strings, so the two searched terms did not converge — a real coverage limitation of relying on AniList's own per-word search ranking, not a false positive.
+- For "gohan ssj2 vs cell" specifically, the matched show's episode titles were fetched and `matching_episode_titles` correctly included "Episode 186 - The Unstoppable Gohan" (episode 186 is in fact the episode in the original Funimation dub where this transformation occurs) alongside 14 other Gohan/Cell-related episodes, given to the planner and judge as a hint rather than a single decided answer, since fewer than half the episodes it names such a scene by title contain both character names together.
+- This stage adds up to five more sequential AniList round trips (run in parallel with each other, not one at a time) beyond the existing title-search stages, only when a query does not match by title at all; a title match, the common case, is unaffected.
+
+Not verified: recognition of a request naming only one character (by design, requires two for the reasons above), or the effect of the higher default daily budget on AniList's own goodwill/abuse expectations for a self-hosted public API with no key.
+
 ## Remaining integrations and boundaries
 
 | Milestone | Delivered | Remaining |

@@ -41,7 +41,9 @@ export const configSchema = z.object({
   // No key needed: a public AniList lookup gives the planner and judge an anime's official titles, synonyms and
   // details when the query confidently matches one, so search terms and relevance checks use the real title.
   ANILIST_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
-  ANILIST_DAILY_BUDGET: number(300, 0, 100000),
+  // A query naming only characters, not the show, can cost up to 7 AniList requests; a self-hosted, no-cost API
+  // budgets more generously than paid providers.
+  ANILIST_DAILY_BUDGET: number(2000, 0, 100000),
   GEMINI_API_KEY: optional, GEMINI_MODEL: z.string().regex(/^[\w.-]{1,100}$/).default('gemini-3.8-flash'),
   JUDGE_MODEL: z.string().regex(/^[\w.-]{0,100}$/).default(''),
   JUDGE_FALLBACK_MODELS: z.string().regex(/^[\w.,\s-]*$/).default(''),
