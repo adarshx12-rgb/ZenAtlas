@@ -148,6 +148,8 @@ export class AniListClient implements AnimeClient {
    if (core) { const viaCore = await this.search(core).catch(() => null); if (viaCore) return viaCore; }
    return this.byCharacters(query).catch(() => null);
  }
+ // One title search exactly as searches send it, for the watchdog: errors are thrown, not treated as a miss.
+ probe(title: string): Promise<AnimeMatch|null> { return this.search(title); }
  private async search(query: string): Promise<AnimeMatch|null> {
    if (!await takeBudget(this.db, 'anilist_calls', this.config.ANILIST_DAILY_BUDGET)) throw new UpstreamError('budget_exhausted');
    const payload = await this.transport(ORIGIN, {method: 'POST', trustedOrigin: ORIGIN,

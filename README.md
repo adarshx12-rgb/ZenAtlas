@@ -37,6 +37,8 @@ In another terminal in this directory:
 npm.cmd run worker
 ```
 
+Optionally, in a third terminal, start the watchdog (`npm.cmd run watchdog`). It checks the database, worker, SearXNG and its engines, Gemini models, YouTube and AniList APIs, Chromium, the page-text helper, Node and npm packages, and reports problems on the admin page. `npm.cmd run watchdog -- --once` runs every check once and prints the results; see [docs/WATCHDOG.md](docs/WATCHDOG.md). `ecosystem.config.cjs` runs all three processes under PM2.
+
 Browse http://127.0.0.1:3000. `GET /health/live` checks the process; `GET /health/ready` checks database/schema access. The runtime uses a bounded pool of ten connections with connection/query deadlines. Run migrations with the separate owner connection; the `search_app` role has table data privileges and no database/schema creation authority.
 
 ## External discovery
@@ -243,6 +245,8 @@ All names are in `.env.example` and parsed in `src/config.ts`:
 | `SCENE_MEDIA_ROOT`, `SCENE_MAX_MEDIA_SECONDS`, `SCENE_MAX_UPLOAD_BYTES` | Absolute authorised media directory; 2700 seconds; 2 GiB |
 | `SCENE_ANALYSIS_DAILY_BUDGET`, `SCENE_LEASE_SECONDS`, `SCENE_POLL_SECONDS` | 20 Gemini requests/day; 900-second job lease; 5-second polling |
 | `SCENE_TRANSCRIBE_FALLBACK`, `WHISPER_MODEL`, `WHISPER_DEVICE`, `WHISPER_COMPUTE_TYPE` | `false`; `small`; `cpu`; `int8` |
+| `WATCHDOG_API_URL`, `WATCHDOG_WEBHOOK_URL` | Empty (derived from `HOST`/`PORT`); optional Slack/Discord webhook for dependency status changes ([docs/WATCHDOG.md](docs/WATCHDOG.md)) |
+| `WATCHDOG_STALE_SECONDS`, `WATCHDOG_QUEUE_SECONDS`, `WATCHDOG_UPDATE_HOURS` | 90-second heartbeat limit; 300 seconds a search may wait for the worker; 24 hours between Node/package/SearXNG update checks |
 
 Additional fixed protections: 120 API requests/IP/minute, 30 writes/IP/minute, 20 discovery requests/session/day, 500 query characters, 50 results/page, at most 250 snapshot results, 1 MiB upstream responses, at most two public-fetch redirects, and 16 KiB API request bodies. IPs are HMAC-hashed in quota records. Query strings are not written to application logs. Database budgets expire after two days, feedback after 90 days, searches after their TTL, and completed job payloads after one hour when no live snapshot references them. The worker performs cleanup; operating without a worker does not physically purge expired data. At present query contents are retained in search/job records within those windows for retrieval/polling.
 

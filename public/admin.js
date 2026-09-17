@@ -7,7 +7,7 @@ try{token=sessionStorage.getItem(TOKEN_KEY);}catch{/* Storage can be unavailable
 
 function node(tag,text,className){const el=document.createElement(tag);if(text!==undefined&&text!==null)el.textContent=String(text);if(className)el.className=className;return el;}
 function button(text,onClick,className='secondary small'){const b=node('button',text,className);b.type='button';b.addEventListener('click',onClick);return b;}
-const plural=(n,word)=>`${n} ${word}${n===1?'':'s'}`;
+const plural=(n,word,many=`${word}s`)=>`${n} ${n===1?word:many}`;
 const date=value=>value?new Date(value).toLocaleDateString():'—';
 function ago(value){
  if(!value)return 'never';
@@ -181,13 +181,44 @@ function renderRules(rules){
  $('#rules-empty').hidden=rules.length>0;
 }
 
+const CHECK_LABEL={ok:'ok',warning:'warning',failing:'failing',disabled:'off'};
+const PROCESS={api:'zenatlas-api',worker:'zenatlas-worker',watchdog:'zenatlas-watchdog'};
+// report is null when the health report could not be loaded (for example before the database migration is applied).
+function renderHealth(report){
+ const line=$('#health-line');const body=$('#dependencies tbody');const services=$('#services');
+ body.replaceChildren();services.replaceChildren();
+ if(!report){line.textContent='The health report is unavailable. Apply the latest migration (npm run migrate, then npm run db:app-user).';line.className='health-line health-failing';return;}
+ const {counts}=report;
+ line.textContent=report.status==='unmonitored'?`The watchdog is not running, so these results may be out of date. Start it: pm2 start ecosystem.config.cjs --only ${PROCESS.watchdog}`
+   :counts.failing?`${plural(counts.failing,'dependency','dependencies')} failing${counts.warning?` and ${plural(counts.warning,'warning')}`:''}.`
+   :counts.warning?`Everything works; ${plural(counts.warning,'warning')} to look at.`:'Everything the search engine depends on is working.';
+ line.className=`health-line health-${report.status}`;
+ for(const name of Object.keys(PROCESS)){
+   const s=report.services.find(x=>x.service===name);
+   const chip=node('span',`${PROCESS[name]}: ${!s?'never reported':s.running?`running (pid ${s.pid})`:`stopped ${ago(s.beat_at)}`}`,`pill check-${s?.running?'ok':'failing'}`);
+   if(s)chip.title=`Started ${new Date(s.started_at).toLocaleString()} on ${s.host}`;
+   services.append(chip);
+ }
+ for(const check of report.checks){
+   const tr=node('tr');
+   const name=node('td');name.append(node('div',check.label),node('div',check.category,'hint'));
+   const status=node('td');status.append(node('span',CHECK_LABEL[check.status]??check.status,`pill check-${check.status}`));
+   if(check.observed!==check.status)status.append(node('div',`now ${CHECK_LABEL[check.observed]??check.observed}, rechecking`,'hint'));
+   const checked=node('td',ago(check.checked_at));checked.title=`${check.latency_ms} ms; status since ${new Date(check.changed_at).toLocaleString()}`;
+   tr.append(name,status,node('td',check.summary,'note'),checked);
+   body.append(tr);
+ }
+ if(!report.checks.length){const tr=node('tr'),td=node('td','No results yet. Start the watchdog.','hint');td.colSpan=4;tr.append(td);body.append(tr);}
+}
+
 async function refresh(){
  const params=new URLSearchParams({status:state.status,sort:state.sort,limit:String(PAGE),offset:String(state.offset)});
  if(state.q)params.set('q',state.q);
- const [summary,list,rules]=await Promise.all([api('/api/admin/sources/summary'),api(`/api/admin/sources?${params}`),api('/api/admin/rules')]);
+ const [summary,list,rules,health]=await Promise.all([api('/api/admin/sources/summary'),api(`/api/admin/sources?${params}`),api('/api/admin/rules'),
+   api('/api/admin/dependencies').catch(error=>{if(error instanceof AuthError)throw error;return null;})]);
  state.rows=list.data;state.total=Number(list.headers.get('X-Total-Count')??0);
  if(!state.rows.length&&state.offset>0){state.offset=Math.max(0,state.offset-PAGE);return refresh();}
- renderSummary(summary.data);renderRows();renderRules(rules.data);
+ renderSummary(summary.data);renderRows();renderRules(rules.data);renderHealth(health?.data??null);
 }
 const reload=()=>run(refresh);
 function setStatus(status){

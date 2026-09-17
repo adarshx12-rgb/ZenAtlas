@@ -20,6 +20,17 @@
   <div id="summary" class="summary"></div>
   <p id="flash" class="flash" role="status" aria-live="polite" hidden></p>
 
+  <h2>System health</h2>
+  <p class="hint">The watchdog checks the services, search engines, AI models, APIs, runtime tools and packages this site depends on. Run <code>npm run watchdog -- --once</code> for a fresh check.</p>
+  <p id="health-line" class="health-line"></p>
+  <div id="services" class="services"></div>
+  <div class="table-wrap">
+   <table id="dependencies">
+    <thead><tr><th>Dependency</th><th>Status</th><th>Details</th><th>Checked</th></tr></thead>
+    <tbody></tbody>
+   </table>
+  </div>
+
   <h2>Add a website</h2>
   <form id="add-form" class="row-form">
    <label>Website address<input name="url" required maxlength="2048" placeholder="www.example.org or https://www.example.org"></label>

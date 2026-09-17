@@ -3,8 +3,9 @@ import type { DB } from './db.js';
 import type { Config } from './config.js';
 import { fetchJSON, UpstreamError } from './http.js';
 import { takeBudget } from './budgets.js';
+import { providerHealth } from './health.js';
 
-const ORIGIN = 'https://generativelanguage.googleapis.com';
+export const ORIGIN = 'https://generativelanguage.googleapis.com';
 const response = z.object({
  candidates: z.array(z.object({
    finishReason: z.string().optional(),
@@ -13,14 +14,20 @@ const response = z.object({
  promptFeedback: z.object({blockReason: z.string().optional()}).optional(),
 });
 
-// Overload, rate limiting and timeouts are usually specific to one model, so the next configured model is tried.
+// Overload, rate limiting and timeouts are usually specific to one model, so the next configured model is tried. So is a
+// model Google no longer offers (404), which would otherwise switch AI off for every search despite working fallbacks.
 const retryable = (error: unknown) => error instanceof UpstreamError &&
- (['rate_limited', 'timeout'].includes(error.code) || error.code === 'upstream_failure' && (error.status ?? 0) >= 500);
+ (['rate_limited', 'timeout'].includes(error.code) || error.code === 'upstream_failure' && ((error.status ?? 0) >= 500 || error.status === 404));
 // An overloaded model often stays overloaded for minutes and can take the whole timeout to fail, so it is tried last for a while.
-// Most rate limits are per minute, so a rate-limited model is set aside for one minute; one whose daily quota is spent
-// is only tried again an hour later.
-const cooldown = (error: unknown) => !(error instanceof UpstreamError) || error.code !== 'rate_limited' ? 5 * 60_000
- : /PerDay/i.test(error.detail ?? '') ? 60 * 60_000 : 60_000;
+// Most rate limits are per minute, so a rate-limited model is set aside for one minute; one whose daily quota is spent,
+// or that no longer exists, is only tried again an hour later.
+const cooldown = (error: unknown) => !(error instanceof UpstreamError) ? 5 * 60_000
+ : error.status === 404 || error.code === 'rate_limited' && /PerDay/i.test(error.detail ?? '') ? 60 * 60_000
+ : error.code === 'rate_limited' ? 60_000 : 5 * 60_000;
+// Failures that say the model cannot be used right now (as opposed to an answer this app could not use), for the watchdog.
+const unavailable = (error: unknown) => error instanceof UpstreamError && ['rate_limited', 'timeout', 'upstream_failure', 'network_error'].includes(error.code);
+const failureCode = (error: UpstreamError) =>
+ `${error.code === 'rate_limited' && /PerDay/i.test(error.detail ?? '') ? 'rate_limited_daily' : error.code}${error.status && error.code !== 'rate_limited' ? `_${error.status}` : ''}${error.detail ? ` ${error.detail}` : ''}`;
 const coolingUntil = new Map<string,number>();
 const perMinuteLimit = (error: unknown) => error instanceof UpstreamError && error.code === 'rate_limited' && !/PerDay/i.test(error.detail ?? '');
 // The wait the API suggested, kept between 1 and 30 seconds; 10 seconds when it suggested none.
@@ -58,14 +65,21 @@ export class GeminiClient {
      try {
        const value = await this.ask(model, system, text, schema, images);
        coolingUntil.delete(model);
+       await this.record(model, null);
        return {model, value};
      } catch (error) {
        failures.set(model, error);
+       await this.record(model, error);
        if (retryable(error)) coolingUntil.set(model, Date.now() + cooldown(error));
        if (i === models.length - 1 || !retryable(error)) throw error;
      }
    }
    throw new UpstreamError('model_unavailable');
+ }
+ // Each model's run of failed calls, shown by the watchdog. A reply this app could not use still shows the model is up.
+ private async record(model: string, error: unknown) {
+   const down = unavailable(error);
+   await providerHealth(this.db, `gemini:${model}`, !down, down ? failureCode(error as UpstreamError) : undefined).catch(() => {});
  }
  private async ask(model: string, system: string, text: string, schema: object, images: InlineImage[]) {
    const url = new URL(`/v1beta/models/${encodeURIComponent(model)}:generateContent`, ORIGIN);

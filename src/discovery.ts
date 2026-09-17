@@ -14,7 +14,8 @@ import { queryKey } from './search.js';
 
 export interface DiscoveryDeps extends SignalDeps { planner?: Planner; anilist?: AnimeClient }
 export interface DiscoveryProgress { results: Result[]; providers: ProviderStatus[]; stage: 'searching'|'following'|'checking' }
-type Health = (provider: string, ok: boolean) => Promise<void>;
+// code: why it failed, such as an engine's "blocked by a CAPTCHA".
+type Health = (provider: string, ok: boolean, code?: string) => Promise<void>;
 type Progress = (update: DiscoveryProgress) => Promise<void>;
 type Outcome = {provider: SourceAdapter; page: DiscoveryPage|null; failure?: 'budget_exhausted'|'unavailable'};
 type Lead = DiscoveryCandidate & {target: SearchTarget};
@@ -160,11 +161,14 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
          page = await adapter.search(search.query, filters);
          arrived(page, search, provider.name, quota);
        }
-       await health(provider.name, page.status.status === 'ok');
-       for (const engine of page.engines?.asked ?? []) await health(`${provider.name}:${engine}`, !page.engines!.failed.some(f => f.engine === engine));
+       await health(provider.name, page.status.status === 'ok', page.status.status);
+       for (const engine of page.engines?.asked ?? []) {
+         const failed = page.engines!.failed.find(f => f.engine === engine);
+         await health(`${provider.name}:${engine}`, !failed, failed?.reason);
+       }
        return {provider, page};
-     } catch {
-       await health(provider.name, false);
+     } catch (error) {
+       await health(provider.name, false, error instanceof UpstreamError ? error.code : 'unavailable');
        return {provider, page: null, failure: 'unavailable'};
      }
    }))).flatMap(o => o ? [o] : []));

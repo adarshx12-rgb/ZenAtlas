@@ -11,14 +11,9 @@ import { ingest } from './catalogue.js';
 import { contentHash, enrichEmbedding } from './embeddings.js';
 import { canonicalize } from './urls.js';
 import { runDiscovery, type DiscoveryDeps } from './discovery.js';
+import { providerHealth } from './health.js';
 
-export async function providerHealth(db:DB,provider:string,ok:boolean) {
- await db.query(`INSERT INTO provider_health(provider,failure_count,last_success_at,last_error_code)
- VALUES($1,$2,CASE WHEN $3 THEN now() ELSE NULL END,CASE WHEN $3 THEN NULL ELSE 'unavailable' END)
- ON CONFLICT(provider) DO UPDATE SET failure_count=CASE WHEN $3 THEN 0 ELSE provider_health.failure_count+1 END,
- last_success_at=CASE WHEN $3 THEN now() ELSE provider_health.last_success_at END,
- last_error_code=CASE WHEN $3 THEN NULL ELSE 'unavailable' END,checked_at=now()`,[provider,ok?0:1,ok]);
-}
+export { providerHealth };
 export async function workOnce(db:DB,config:Config,adapters?:SourceAdapter[],probe?:typeof probeURL,deps?:DiscoveryDeps) {
  const job=await claim(db); if(!job) return false;
  let collectingDomain:string|undefined;
@@ -28,7 +23,7 @@ export async function workOnce(db:DB,config:Config,adapters?:SourceAdapter[],pro
    } else if(job.kind==='source_discovery') {
      await complete(db,job,await discoverAlternatives(db,config,job,adapters));
    } else if(job.kind==='discovery') {
-     const outcome=await runDiscovery(db,config,searchInput.parse(job.payload),adapters,deps??{},(name,ok)=>providerHealth(db,name,ok),
+     const outcome=await runDiscovery(db,config,searchInput.parse(job.payload),adapters,deps??{},(name,ok,code)=>providerHealth(db,name,ok,code),
        update=>progress(db,job,update));
      for(const result of outcome.ingested) await enqueueEnrichment(db,config,result);
      await storePreviews(db,job,outcome.previews);

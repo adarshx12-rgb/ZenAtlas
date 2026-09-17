@@ -93,8 +93,9 @@ test('quick discovery shows each engine’s best leads while slower engines stil
    assert.deepEqual(done.discovered.slice(0,4).map(r=>new URL(r.canonical_url).hostname),
      ['fast.example.org','fast.example.org','slow.example.org','slow.example.org'],'results already shown keep their place');
    assert.deepEqual(done.providers,[{provider:'searxng',status:'ok',message:'2 of 3 search engines answered; Blocked (blocked by a CAPTCHA) did not.'}]);
-   const health=(await db.query("SELECT provider,failure_count FROM provider_health WHERE provider LIKE 'searxng:%' ORDER BY provider")).rows;
-   assert.deepEqual(health.map(h=>[h.provider,h.failure_count]),[['searxng:blocked',1],['searxng:fast',0],['searxng:slow',0]]);
+   const health=(await db.query("SELECT provider,failure_count,last_error_code FROM provider_health WHERE provider LIKE 'searxng:%' ORDER BY provider")).rows;
+   assert.deepEqual(health.map(h=>[h.provider,h.failure_count,h.last_error_code]),
+     [['searxng:blocked',1,'blocked by a CAPTCHA'],['searxng:fast',0,null],['searxng:slow',0,null]],'the watchdog can say why an engine failed');
  }finally{await db.close();}
 });
 

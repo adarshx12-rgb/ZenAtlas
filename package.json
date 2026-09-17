@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "node --env-file-if-exists=.env --import tsx src/main.ts",
     "worker": "node --env-file-if-exists=.env --import tsx src/worker-main.ts",
+    "watchdog": "node --env-file-if-exists=.env --import tsx src/watchdog-main.ts",
     "admin": "node --env-file-if-exists=.env --import tsx src/cli.ts",
     "migrate": "node --env-file-if-exists=.env --import tsx src/migrate.ts",
     "seed": "node --env-file-if-exists=.env --import tsx src/seed.ts",

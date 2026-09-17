@@ -13,6 +13,7 @@ import { takeBudget } from './budgets.js';
 import { setSourcePolicy, sourcePolicy } from './admin.js';
 import {addSource,setAlternative} from './source-health.js';
 import { listPolicyRules, setPolicyRule } from './policy-rules.js';
+import { dependencyReport } from './watchdog.js';
 
 const sourceListQuery = z.object({
  status:z.enum(['all','candidate','active','paused','rejected']).default('all'),
@@ -147,7 +148,9 @@ export async function createApp(db:DB,config:Config) {
    jobs:(await db.query('SELECT kind,status,count(*)::int FROM jobs GROUP BY kind,status')).rows,
    scene_analysis:(await db.query(`SELECT analysis_status,analysis_code,count(*)::int FROM media_versions WHERE status='current' GROUP BY analysis_status,analysis_code`)).rows,
    oldest_queued:(await db.query(`SELECT min(created_at) AS since FROM jobs WHERE status='queued'`)).rows[0]?.since??null,
+   dependencies:Object.fromEntries((await db.query('SELECT status,count(*)::int AS n FROM dependency_checks GROUP BY status')).rows.map(r=>[r.status,r.n])),
  };});
+ app.get('/api/admin/dependencies',async req=>{admin(req);return dependencyReport(db,config);});
  app.get('/admin',async(_req,reply)=>reply.redirect('/admin.html'));
  await app.register(staticFiles,{root:resolve('public'),index:'index.html'});
  return app;

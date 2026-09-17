@@ -50,6 +50,12 @@ export const configSchema = z.object({
   JUDGE_BATCH_SIZE: number(30, 1, 50),
   JUDGE_THINKING_LEVEL: z.enum(['model_default', 'minimal', 'low', 'medium', 'high']).default('low'),
   JUDGE_DAILY_BUDGET: number(200, 0, 100000), JUDGE_TIMEOUT_MS: number(20000, 1000, 60000),
+  // Watchdog (src/watchdog-main.ts). Empty API URL: derived from HOST and PORT. The webhook receives a JSON POST
+  // ({text, content}, which Slack and Discord accept) whenever a dependency's status changes.
+  WATCHDOG_API_URL: z.union([z.literal(''), z.string().url()]).default(''),
+  WATCHDOG_WEBHOOK_URL: z.union([z.literal(''), z.string().url()]).default(''),
+  WATCHDOG_STALE_SECONDS: number(90, 30, 3600), WATCHDOG_QUEUE_SECONDS: number(300, 30, 3600),
+  WATCHDOG_UPDATE_HOURS: number(24, 1, 720),
 });
 export type Config = z.infer<typeof configSchema>;
 export function readConfig(): Config { return configSchema.parse(process.env); }

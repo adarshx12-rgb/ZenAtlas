@@ -11,6 +11,8 @@ main.wide{max-width:1240px}h1.compact{font-size:40px;letter-spacing:-1.5px;margi
 .actions{display:flex;gap:6px}button.small{padding:6px 10px;font-size:12px;margin:0}.danger{background:#9b3426}.danger:hover{background:#b8412f}.danger-text{color:#9b3426}
 .pill{display:inline-block;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:600}.status-active{background:#dcefd8;color:#1f5a33}.status-candidate{background:#fff1d9;color:#7a5412}.status-paused{background:#e6e9f2;color:#3b4a6b}.status-rejected{background:#fbe4e1;color:#8a2c20}
 .health-healthy{color:#2d6a3e}.health-degraded{color:#9a6a12}.health-down,.health-blocked{color:#9b3426}.health-unknown{color:#7b857f}
+.check-ok{background:#dcefd8;color:#1f5a33}.check-warning{background:#fff1d9;color:#7a5412}.check-failing{background:#fbe4e1;color:#8a2c20}.check-disabled{background:#eceeea;color:#5f6b65}
+.health-line{padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600;background:#e6f1e3;color:#1f5a33}.health-line.health-warning{background:#fff1d9;color:#7a5412}.health-line.health-failing,.health-line.health-unmonitored{background:#fbe4e1;color:#8a2c20}.services{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}#dependencies{margin-bottom:0}.table-wrap+h2{margin-top:36px}
 .pager{display:flex;gap:12px;align-items:center;justify-content:flex-end;margin:10px 0 36px;font-size:13px;color:#5c7069}.pager button{margin:0}
 #results.thumb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;align-items:start}
 .thumb-grid .card{padding:14px}

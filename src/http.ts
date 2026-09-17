@@ -8,7 +8,7 @@ export class UpstreamError extends Error { constructor(public code: string, publ
 function errorDetail(body: Buffer) {
  try {
    const error = JSON.parse(body.toString('utf8'))?.error ?? {};
-   const reasons = [error.status, ...(error.errors ?? []).map((e: any) => e?.reason),
+   const reasons = [error.status, ...(error.errors ?? []).map((e: any) => e?.reason), ...(error.details ?? []).map((d: any) => d?.reason),
      ...(error.details ?? []).flatMap((d: any) => (d?.violations ?? []).map((v: any) => v?.quotaId)),
      ...(error.details ?? []).flatMap((d: any) => typeof d?.retryDelay === 'string' ? [`retry=${d.retryDelay}`] : [])];
    return reasons.filter((r): r is string => typeof r === 'string').join(',').slice(0, 300) || undefined;
