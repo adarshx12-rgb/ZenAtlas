@@ -4,7 +4,14 @@ const catalogueBox=document.querySelector('#catalogue-results'),foundBox=documen
 const deepBox=document.querySelector('#deep-results'),deepHeading=document.querySelector('#deep-heading');
 const more=document.querySelector('#more'),retry=document.querySelector('#retry'),cancel=document.querySelector('#cancel');
 const deepRow=document.querySelector('#deep-row'),deep=document.querySelector('#deep');
+const videoGrid=document.querySelector('#results'),imageGrid=document.querySelector('#image-results');
+const imageMore=document.querySelector('#image-more'),resultsHeading=document.querySelector('#results-heading');
+const tabVideos=document.querySelector('#tab-videos'),tabImages=document.querySelector('#tab-images');
 const controller=new SearchController();
+// Images come from a separate discovery-only endpoint, so they keep their own paging state
+// rather than sharing the search snapshot's cursor.
+let imagePage=1,imageBusy=false;
+const IMAGE_PAGE=48;
 let searchId=null,next=null,params=null,pollTimer=null,current=null,pageEnd=0,catalogueTotal=0;
 // Result id -> its card and the data it was drawn from, so a changed result is redrawn in place.
 const cards=new Map();
@@ -156,13 +163,111 @@ async function digDeeper(){if(!searchId)return;
  finally{deep.disabled=false;}
 }
 function applyParamsFromURL(){for(const [key,value] of new URLSearchParams(window.location.search)){const field=form.elements.namedItem(key);if(field)field.value=value;}}
-function runFromURL(){applyParamsFromURL();if(form.elements.namedItem('q').value)void search();else status.textContent='Enter a query to search the catalogue.';}
+
+// ---- images ---------------------------------------------------------------------------------
+const tabOf=search=>new URLSearchParams(search).get('tab')==='images'?'images':'videos';
+const labelOf=field=>form.elements.namedItem(field)?.closest('label');
+
+// Keeps the tab links pointing at the current query, so they stay shareable and middle-clickable
+// instead of being buttons that only work through JavaScript.
+function syncTabs(tab){
+ const base=new URLSearchParams([...new FormData(form)].filter(([,v])=>v!==''));
+ base.delete('tab');
+ const videos=new URLSearchParams(base),images=new URLSearchParams(base);
+ images.set('tab','images');
+ tabVideos.href=`/results.html?${videos}`;tabImages.href=`/results.html?${images}`;
+ tabVideos.classList.toggle('tab--active',tab==='videos');
+ tabImages.classList.toggle('tab--active',tab==='images');
+ if(tab==='videos')tabVideos.setAttribute('aria-current','page');else tabVideos.removeAttribute('aria-current');
+ if(tab==='images')tabImages.setAttribute('aria-current','page');else tabImages.removeAttribute('aria-current');
+ // Catalogue mode, evidence and the deep dive are all properties of the video pipeline; images
+ // never touch it, so the controls would be inert.
+ const images_=tab==='images';
+ for(const field of ['mode','evidence'])labelOf(field)?.toggleAttribute('hidden',images_);
+ videoGrid.hidden=images_;imageGrid.hidden=!images_;
+ resultsHeading.textContent=images_?'Image results':'Search results';
+ if(images_){deepRow.hidden=true;cancel.hidden=true;more.hidden=true;}else{imageMore.hidden=true;}
+}
+
+function imageTile(item){
+ const page=safeURL(item.page_url),source=safeURL(item.thumbnail)??safeURL(item.image_url);
+ if(!page||!source)return null;
+ const tile=node('a',undefined,'image-tile');
+ tile.href=page.href;tile.target='_blank';tile.rel='noopener noreferrer';
+ const img=node('img');
+ img.src=`/api/thumbnail?${new URLSearchParams({url:source.href})}`;
+ img.alt=item.title||'';img.loading='lazy';
+ // A tile whose image will not load is worse than no tile: it leaves a caption over a gap.
+ img.addEventListener('error',()=>tile.remove());
+ if(item.width&&item.height)img.style.aspectRatio=`${item.width} / ${item.height}`;
+ tile.append(img);
+ const meta=node('span',undefined,'image-tile-meta');
+ // The server falls back to the hostname when an engine titles an image with its filename,
+ // so skip the title line when it would just repeat the host below it.
+ if(item.title&&item.title!==item.source_name)meta.append(node('span',item.title,'image-tile-title'));
+ meta.append(node('span',item.source_name,'image-tile-host'));
+ tile.append(meta);
+ return tile;
+}
+
+async function searchImagesPage(token,append){
+ const query=new URLSearchParams();
+ query.set('q',form.elements.namedItem('q').value);
+ query.set('limit',String(IMAGE_PAGE));query.set('page',String(imagePage));
+ const language=form.elements.namedItem('language')?.value;
+ if(language)query.set('language',language);
+ const data=await api(`/api/images?${query}`,{signal:token.signal});
+ if(!controller.current(token.generation))return;
+ if(!append)imageGrid.replaceChildren();
+ const tiles=data.results.map(imageTile).filter(Boolean);
+ imageGrid.append(...tiles);
+ notices.replaceChildren(...data.providers.filter(p=>p.status!=='ok').map(p=>node('p',p.message,'notice')));
+ imageMore.hidden=!data.next_cursor||!data.results.length;
+ const count=imageGrid.children.length;
+ status.textContent=count?`${count} ${count===1?'image':'images'}`:'No images found. Try another query.';
+}
+
+async function runImageSearch(){
+ clearTimeout(pollTimer);current=controller.begin();const token=current;
+ imagePage=1;imageGrid.replaceChildren();notices.replaceChildren();
+ imageMore.hidden=true;retry.hidden=true;status.textContent='Searching for images…';
+ try{await session();await searchImagesPage(token,false);}
+ catch(error){if(controller.current(token.generation)){status.textContent=error.message;retry.hidden=false;}}
+}
+
+function runFromURL(){
+ applyParamsFromURL();
+ const tab=tabOf(window.location.search);
+ syncTabs(tab);
+ if(!form.elements.namedItem('q').value){status.textContent=tab==='images'?'Enter a query to search for images.':'Enter a query to search the catalogue.';return;}
+ if(tab==='images')void runImageSearch();else void search();
+}
 form.addEventListener('submit',event=>{event.preventDefault();
+ const tab=tabOf(window.location.search);
  const query=new URLSearchParams([...new FormData(form)].filter(([,v])=>v!==''));
+ // A search typed while the Images tab is open stays on Images.
+ if(tab==='images')query.set('tab','images');
  window.history.pushState(null,'',`/results.html?${query}`);
- void search();
+ syncTabs(tab);
+ if(tab==='images')void runImageSearch();else void search();
 });
-retry.addEventListener('click',()=>void search());
+retry.addEventListener('click',()=>{if(tabOf(window.location.search)==='images')void runImageSearch();else void search();});
+// Tabs are real links, so let the browser handle modified clicks (new tab, new window) and only
+// take over the plain click to swap results without a reload.
+for(const tab of [tabVideos,tabImages])tab.addEventListener('click',event=>{
+ if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||event.button!==0)return;
+ event.preventDefault();
+ window.history.pushState(null,'',tab.href);
+ runFromURL();
+});
+imageMore.addEventListener('click',async()=>{
+ if(imageBusy)return;
+ imageBusy=true;imageMore.disabled=true;
+ const token=current;imagePage+=1;
+ try{await searchImagesPage(token,true);}
+ catch(error){if(controller.current(token.generation)){imagePage-=1;status.textContent=error.message;}}
+ finally{imageBusy=false;imageMore.disabled=false;}
+});
 deep.addEventListener('click',()=>void digDeeper());
 // A page can hold only results already on screen (for example after a deep search restarts paging), so keep going until something new appears.
 more.addEventListener('click',async()=>{if(!next)return;const token=current;more.disabled=true;

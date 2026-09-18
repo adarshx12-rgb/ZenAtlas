@@ -12,6 +12,9 @@ export const configSchema = z.object({
   SEARXNG_ENGINES: z.string().default('youtube,dailymotion,sepiasearch,odysee,bing videos,google videos,duckduckgo videos,brave.videos,wikicommons.videos'),
   SEARXNG_SOURCE_ENGINES: z.string().default('google,bing'),
   SEARXNG_WEB_ENGINES: z.string().default('google,bing,brave,yahoo'),
+  // Image search (see src/images.ts). Reddit and Pinterest have no SearXNG engine, but these
+  // four index both, so their images still come back.
+  SEARXNG_IMAGE_ENGINES: z.string().default('bing images,google images,duckduckgo images,brave.images'),
   // Extra engines that only deep dives use, chosen because ordinary searches rarely reach their sources.
   SEARXNG_DEEP_ENGINES: z.string().default('bilibili,acfun,privacywall videos'),
   SEARXNG_DEEP_WEB_ENGINES: z.string().default('yep,resulthunter,privacywall,hackernews'),

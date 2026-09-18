@@ -18,6 +18,14 @@ use_default_settings:
       - bing
       - brave
       - yahoo
+      # Image discovery (SEARXNG_IMAGE_ENGINES). Checked on 2026-09-18. Left out: qwant images
+      # (inherits a network from the base qwant engine, which is not kept — SearXNG refuses to
+      # boot with KeyError: 'qwant') and reddit (no engine module ships in this build). Reddit
+      # and Pinterest images still arrive through the general image engines, which index them.
+      - bing images
+      - google images
+      - duckduckgo images
+      - brave.images
       # Deep dives only (SEARXNG_DEEP_ENGINES, SEARXNG_DEEP_WEB_ENGINES): sources ordinary searches rarely reach.
       # Checked with four test queries on 2026-09-17. Left out: niconico, vimeo, tusksearch (HTTP errors), mojeek,
       # fireball, tootfinder (access denied), seznam, mwmbl (timeouts), ina, mediathekviewweb, lemmy communities
@@ -65,4 +73,12 @@ engines:
   - name: privacywall
     disabled: false
   - name: hackernews
+    disabled: false
+  - name: bing images
+    disabled: false
+  - name: google images
+    disabled: false
+  - name: duckduckgo images
+    disabled: false
+  - name: brave.images
     disabled: false

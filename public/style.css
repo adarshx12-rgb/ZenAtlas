@@ -94,6 +94,24 @@ button.small{padding:7px 11px;font-size:9px;margin:0}
 select{display:block;margin-top:8px;width:100%;background:var(--paper);border:1px solid var(--rule-soft);border-radius:var(--r-md);padding:10px 12px;color:var(--ink);font-family:var(--font-mono);font-size:11px;min-width:150px}
 select:hover{border-color:var(--ink-3)}
 
+/* ---- result-type tabs (Videos / Images) ------------------------------------- */
+.tabs-bar{display:flex;gap:28px;align-items:flex-end;border-bottom:1px solid var(--rule-soft);margin:28px 0 22px}
+.tab{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);text-decoration:none;padding:0 0 10px;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab:hover{color:var(--ink)}
+.tab--active{color:var(--ink);border-bottom-color:var(--ink)}
+
+/* ---- image grid -------------------------------------------------------------
+   Columns rather than grid: image results arrive at wildly different aspect ratios, and
+   masonry keeps each one uncropped instead of forcing a common box. */
+.image-grid{columns:5 200px;column-gap:14px;margin-top:4px}
+.image-grid:empty{display:none}
+.image-tile{display:block;break-inside:avoid;margin:0 0 14px;text-decoration:none;color:var(--ink);border:1px solid var(--rule-soft);border-radius:var(--r-md);overflow:hidden;background:var(--paper)}
+.image-tile:hover{border-color:var(--ink)}
+.image-tile img{display:block;width:100%;height:auto;background:var(--wash)}
+.image-tile-meta{display:block;padding:9px 11px 11px}
+.image-tile-title{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;font-family:var(--font-sans);font-size:12px;line-height:1.45}
+.image-tile-host{display:block;margin-top:5px;font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+
 /* ---- results --------------------------------------------------------------- */
 .results-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;border-top:1px solid var(--rule);padding-top:12px}
 h2{font-family:var(--font-display);font-size:26px;font-weight:400;letter-spacing:.01em;margin:0}
@@ -206,6 +224,9 @@ code,.mono{font-size:11px}
  footer{padding:20px}
  h1{font-size:clamp(30px,10vw,44px)}
  .filters{gap:16px}
+ .tabs-bar{gap:20px;margin:22px 0 18px}
+ .image-grid{columns:2 140px;column-gap:10px}
+ .image-tile{margin-bottom:10px}
  .searchbar input{padding:13px 14px;font-size:14px}
  .searchbar button{padding:0 18px}
  .card{padding:18px}

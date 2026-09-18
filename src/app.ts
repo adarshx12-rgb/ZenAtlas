@@ -14,6 +14,7 @@ import { setSourcePolicy, sourcePolicy } from './admin.js';
 import {addSource,setAlternative} from './source-health.js';
 import { listPolicyRules, setPolicyRule } from './policy-rules.js';
 import { dependencyReport } from './watchdog.js';
+import { imageSearchInput, searchImages } from './images.js';
 
 const sourceListQuery = z.object({
  status:z.enum(['all','candidate','active','paused','rejected']).default('all'),
@@ -35,7 +36,12 @@ export async function createApp(db:DB,config:Config) {
    if(!req.url.startsWith('/api/')) return;
    reply.header('Cache-Control','no-store');
    const ipHash=createHmac('sha256',config.SESSION_SECRET).update(req.ip).digest('hex');
-   if(!await takeBudget(db,`requests:${ipHash}`,120,'minute')) throw new ApiError(429,'rate_limit','Too many requests. Please wait a minute.');
+   // The thumbnail proxy is an asset route, not a search operation: one page of image results
+   // is ~48 of them and "load more" doubles it, which would exhaust the ordinary allowance in
+   // two page views and leave the grid full of holes. It gets its own, larger bucket.
+   const asset=req.url.startsWith('/api/thumbnail');
+   const [bucket,limit]=asset?[`thumbs:${ipHash}`,600]:[`requests:${ipHash}`,120];
+   if(!await takeBudget(db,bucket,limit,'minute')) throw new ApiError(429,'rate_limit','Too many requests. Please wait a minute.');
    const value=req.cookies.creator_session;
    const unsigned=value?req.unsignCookie(value):null;
    let owner=unsigned?.valid?unsigned.value:null;
@@ -76,6 +82,9 @@ export async function createApp(db:DB,config:Config) {
  });
  app.get('/api/session',async()=>({status:'ready'}));
  app.get('/api/search',async req=>service.start(req.query,owner(req)));
+ // Images are discovery-only, so they need none of the search service's snapshot, polling or
+ // deep-dive machinery — one request in, one page of results out.
+ app.get('/api/images',async req=>searchImages(db,config,imageSearchInput.parse(req.query)));
  app.get('/api/search/:id',async req=>service.poll(id(req.params),owner(req)));
  app.delete('/api/search/:id',async req=>service.cancel(id(req.params),owner(req)));
  app.post('/api/search/:id/deep',async req=>service.deepen(id(req.params),owner(req)));
