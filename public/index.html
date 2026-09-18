@@ -1,12 +1,22 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ZenAtlas · Search engine</title><meta name="description" content="ZenAtlas is a search engine for video links and evidence-backed moments."><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/style.css"><script type="module" src="/app.js"></script></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ZenAtlas · Search engine</title><meta name="description" content="ZenAtlas is a search engine for video links and evidence-backed moments."><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/style.css"><script type="module" src="/app.js"></script><script type="module" src="/home.js"></script></head>
 <body>
-<header><a href="/" class="brand">ZenAtlas</a><span>SEARCH ENGINE</span></header>
+<nav class="rail" aria-label="ZenAtlas">
+ <span class="rail-cell"><span class="rail-dot" aria-hidden="true"></span><a href="/">ZenAtlas</a></span>
+ <span class="rail-cell">Search engine</span>
+ <span class="rail-cell">Evidence-backed</span>
+ <span class="rail-cell">Video · Transcript · Moment</span>
+ <span class="rail-cell rail-cell--end"><span id="clock">—</span> UTC</span>
+</nav>
+<section class="hero">
+ <p class="eyebrow">( ZenAtlas )</p>
+ <!-- .san words switch to bold grotesk against the Didone caps, which is what gives the
+      line its rhythm. Full-bleed so the display size has room, but ragged-right. -->
+ <h1><span class="dot" aria-hidden="true"></span>A world to <span class="san">discover</span>, a clearer <span class="san">way</span> to search across an expanding <span class="san">catalogue</span> of video.</h1>
+ <p class="lede">Search an expanding catalogue of video links. Explore timestamped passages when source evidence is available.</p>
+</section>
 <main>
- <p class="eyebrow">YOUR NEXT STORY STARTS HERE</p>
- <h1>A world to discover.<br><span>A clearer way to search.</span></h1>
- <p class="intro">Search an expanding catalogue of video links. Explore timestamped passages when source evidence is available.</p>
  <form id="search-form">
   <label for="query">Describe what you’re looking for</label>
   <div class="searchbar"><input id="query" name="q" type="search" minlength="2" maxlength="500" required placeholder="Try Big Buck Bunny, or a scene you have in mind…"><button type="submit">Search ↗</button></div>
