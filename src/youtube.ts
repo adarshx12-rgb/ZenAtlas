@@ -12,6 +12,8 @@ export interface VideoDetails {
  publishedAt: string|null; duration: number|null; live: 'none'|'live'|'upcoming'; wasLive: boolean;
  // commentCount is null when the video's comments are turned off (YouTube then omits the count).
  views?: number|null; commentCount?: number|null;
+ // The spoken language, narrowed to its primary subtag, or null when the uploader declared none.
+ language?: string|null;
 }
 export interface ViewerComment { id: string; text: string; likes: number }
 export interface YouTubeClient {
@@ -24,6 +26,12 @@ export function youtubeId(url: string): string|null {
  const id = u.searchParams.get('v');
  return u.hostname === 'www.youtube.com' && u.pathname === '/watch' && id && /^[\w-]{11}$/.test(id) ? id : null;
 }
+// YouTube reports a BCP-47 tag, which may carry a region ("hi-IN") or a script. Searches filter by
+// language alone, so only the primary subtag is kept; anything that is not a language tag is dropped.
+export function primaryLanguage(tag: string|undefined): string|null {
+ const first = (tag ?? '').trim().toLowerCase().split('-')[0];
+ return /^[a-z]{2,3}$/.test(first) ? first : null;
+}
 export function isoSeconds(value: string|undefined): number|null {
  const m = /^P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$/.exec(value ?? '');
  if (!m) return null;
@@ -34,7 +42,8 @@ export function isoSeconds(value: string|undefined): number|null {
 const videoList = z.object({items: z.array(z.object({
  id: z.string(),
  snippet: z.object({title: z.string(), description: z.string().default(''), channelId: z.string(),
-   channelTitle: z.string().default(''), publishedAt: z.string().optional(), liveBroadcastContent: z.string().optional()}),
+   channelTitle: z.string().default(''), publishedAt: z.string().optional(), liveBroadcastContent: z.string().optional(),
+   defaultAudioLanguage: z.string().optional(), defaultLanguage: z.string().optional()}),
  contentDetails: z.object({duration: z.string().optional()}).optional(),
  liveStreamingDetails: z.object({actualStartTime: z.string().optional()}).optional(),
  statistics: z.object({viewCount: z.string().regex(/^\d{1,15}$/).optional(), commentCount: z.string().regex(/^\d{1,15}$/).optional()}).optional(),
@@ -64,6 +73,8 @@ export class YouTubeData implements YouTubeClient {
          channelTitle: v.snippet.channelTitle, publishedAt: published && Number.isFinite(published.getTime()) ? published.toISOString() : null,
          duration: isoSeconds(v.contentDetails?.duration), live: live === 'live' || live === 'upcoming' ? live : 'none',
          wasLive: !!v.liveStreamingDetails?.actualStartTime, views: v.statistics?.viewCount ? Number(v.statistics.viewCount) : null,
+         // The audio language is what a viewer hears; the title's own language is the weaker fallback.
+         language: primaryLanguage(v.snippet.defaultAudioLanguage ?? v.snippet.defaultLanguage),
          commentCount: v.statistics ? (v.statistics.commentCount ? Number(v.statistics.commentCount) : null) : undefined});
      }
    }

@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import { database, fixture, testConfig } from './helpers.js';
 import { SearchService } from '../src/search.js';
-import { ingest } from '../src/catalogue.js';
+import { ingest, matchesFilters } from '../src/catalogue.js';
 import { contentInput, searchInput, type SourceAdapter } from '../src/types.js';
 import { workOnce, schedule } from '../src/worker.js';
 import { enqueue, claim, complete } from '../src/queue.js';
@@ -26,6 +26,19 @@ test('PostgreSQL catalogue/API, ownership, filters, evidence and stable paginati
    await assert.rejects(service.poll(result.search_id,'bob'),/unavailable/);
    await assert.rejects(service.start({q:'different',mode:'catalogue',limit:1,cursor:result.next_cursor},'alice'),/original query/);
    assert.equal((await service.start({q:'bedroom',mode:'catalogue',language:'hi'},'alice')).results.length,0);
+   // A recorded language that differs is a mismatch; a language nobody recorded is not. Search
+   // providers almost never report one, so treating unknown as a mismatch made every language
+   // filter return nothing at all, whichever language was asked for.
+   const unknownLanguage=(await ingest(db,contentInput.parse({url:`https://videos.example.com/watch/${crypto.randomUUID()}`,
+     title:'Bedroom tour of unrecorded language',description:'A bedroom tour',duration:120,availability:'available'}),{fixture:true}))!;
+   assert.equal(unknownLanguage.language,null);
+   const hindi=await service.start({q:'bedroom',mode:'catalogue',language:'hi'},'alice');
+   assert.ok(hindi.results.some(r=>r.id===unknownLanguage.id),'an unrecorded language must pass a language filter');
+   assert.ok(!hindi.results.some(r=>r.id===first.id),'a recorded language that differs stays excluded');
+   // The same rule for discovery results, which are filtered in memory rather than by the query.
+   assert.equal(matchesFilters({...first,language:null},{language:'hi',evidence:'any'}),true);
+   assert.equal(matchesFilters(first,{language:'hi',evidence:'any'}),false);
+   assert.equal(matchesFilters({...first,language:'hi'},{language:'hi',evidence:'any'}),true);
    assert.equal((await service.start({q:'bedroom',mode:'catalogue',evidence:'video_analysed'},'alice')).results.length,0);
    await importTranscript(db,{content_id:first.id,language:'en',origin:'TEST FIXTURE',content_version:'1',timing_quality:'provided',retention_permitted:true,
      segments:[{start:0,end:10,text:'The kitchen has oak cabinets.'},{start:50,end:65,text:'The bright bedroom has a balcony.'}]});

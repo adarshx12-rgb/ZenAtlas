@@ -7,7 +7,8 @@ import { activeScene, sceneMoment, sceneSelect } from './scenes.js';
 
 const eligible = `s.status='active' AND s.health_status<>'down' AND split_part(split_part(c.canonical_url,'://',2),'/',1)=s.active_domain
  AND (s.policy->>'metadata')::boolean=true AND c.availability<>'unavailable'
- AND c.expires_at>now() AND ($2::text IS NULL OR c.language=$2) AND ($3::uuid IS NULL OR c.source_id=$3)
+ -- c.language IS NULL means nobody recorded one, which is not a mismatch; see matchesFilters.
+ AND c.expires_at>now() AND ($2::text IS NULL OR c.language IS NULL OR c.language=$2) AND ($3::uuid IS NULL OR c.source_id=$3)
  AND ($4::timestamptz IS NULL OR c.published_at>=$4)
  AND ($5='any' OR EXISTS(SELECT 1 FROM moments m WHERE m.content_id=c.id AND m.status='active' AND m.evidence_type=$5
    AND m.search_vector @@ websearch_to_tsquery('english',$1))

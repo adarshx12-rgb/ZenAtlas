@@ -66,7 +66,9 @@ export async function ingest(db: DB, raw: ContentInput, provenance: Record<strin
 }
 
 export function matchesFilters(item: Result, filters: {language?:string;source?:string;after?:string;evidence:string}): boolean {
- return item.availability !== 'unavailable' && (!filters.language || item.language === filters.language) &&
+ // An unrecorded language is unknown, not a mismatch. Search providers rarely report one, so
+ // excluding null here emptied every language-filtered search of its discovery results.
+ return item.availability !== 'unavailable' && (!filters.language || item.language === null || item.language === filters.language) &&
    (!filters.source || item.source_id === filters.source) &&
    (!filters.after || !!item.published_at && item.published_at >= filters.after) &&
    (filters.evidence === 'any' || item.moments.some(m => m.evidence_type === filters.evidence));

@@ -54,13 +54,13 @@ test('YouTube client uses the official API, parses details and comments, and sto
  try{
    const calls:any[]=[];
    const transport=async(url:string,options:any)=>{calls.push({url:new URL(url),options});
-     return new URL(url).pathname.endsWith('/videos')?{items:[{id:'AAAAAAAAAA1',snippet:{title:'T',channelId:'UC1',channelTitle:'Chan',publishedAt:'2025-01-02T03:04:05Z',liveBroadcastContent:'none'},
+     return new URL(url).pathname.endsWith('/videos')?{items:[{id:'AAAAAAAAAA1',snippet:{title:'T',channelId:'UC1',channelTitle:'Chan',publishedAt:'2025-01-02T03:04:05Z',liveBroadcastContent:'none',defaultAudioLanguage:'hi-IN'},
        contentDetails:{duration:'PT10M'},liveStreamingDetails:{actualStartTime:'2025-01-02T03:04:05Z'},statistics:{viewCount:'1234'}}]}
        :{items:[{id:'t1',snippet:{topLevelComment:{snippet:{textOriginal:'4:05 wow',likeCount:7}}}},{id:'t2',snippet:{topLevelComment:{snippet:{textOriginal:'  ',likeCount:0}}}}]};};
    const client=new YouTubeData(db,{...testConfig,YOUTUBE_API_KEY:'yt-key',YOUTUBE_DAILY_UNITS:2},transport as any);
    const video=(await client.videos(['AAAAAAAAAA1'])).get('AAAAAAAAAA1')!;
-   assert.deepEqual([video.duration,video.live,video.wasLive,video.publishedAt,video.channelTitle,video.views,video.commentCount],
-     [600,'none',true,'2025-01-02T03:04:05.000Z','Chan',1234,null],'no comment count means comments are turned off');
+   assert.deepEqual([video.duration,video.live,video.wasLive,video.publishedAt,video.channelTitle,video.views,video.commentCount,video.language],
+     [600,'none',true,'2025-01-02T03:04:05.000Z','Chan',1234,null,'hi'],'no comment count means comments are turned off; a regional tag narrows to its language');
    assert.match(calls[0].url.searchParams.get('part'),/statistics/);
    assert.deepEqual(await client.comments('AAAAAAAAAA1',50),[{id:'t1',text:'4:05 wow',likes:7}]);
    assert.equal(calls[0].url.origin,'https://www.googleapis.com');assert.equal(calls[0].options.trustedOrigin,'https://www.googleapis.com');
@@ -163,7 +163,7 @@ test('discovery uses viewer timestamps, Reddit and AI judgement to rank, explain
        next_cursor:null,status:{provider:'mock',status:'ok',message:'Mocked provider'}};}};
    const youtube:YouTubeClient={
      async videos(ids){return new Map(ids.map(id=>[id,{id,title:'ignored',description:`About ${id}`,channelId:id.endsWith('1')?'UCofficial':'UCother',
-       channelTitle:`Channel ${id.at(-1)}`,publishedAt:'2025-01-01T00:00:00.000Z',duration:600,live:'none' as const,wasLive:id.endsWith('2')}]));},
+       channelTitle:`Channel ${id.at(-1)}`,publishedAt:'2025-01-01T00:00:00.000Z',duration:600,live:'none' as const,wasLive:id.endsWith('2'),language:'hi'}]));},
      async comments(id){
        if(id.endsWith('3'))throw new UpstreamError('upstream_failure',403);
        return id.endsWith('1')?[comment('c1','The twist at 4:05 got me',120),comment('c2','4:10 no way!!',3),comment('c3','Chapters\n0:00 intro\n9:59 end'),comment('c4','see you at 10:30 pm',5)]:[];
@@ -188,6 +188,8 @@ test('discovery uses viewer timestamps, Reddit and AI judgement to rank, explain
    assert.deepEqual(first.judgement,{relevance:9,reason:'TEST reason for Horror story with a Twist ending',model:'test-model'});
    assert.deepEqual(first.badges,['Official channel']);
    assert.equal(first.evidence,'viewer_timestamp');assert.equal(first.duration,600);assert.equal(first.creator,'Channel 1');
+   // Recorded from the video's own details, so a language filter has something real to match on.
+   assert.equal(first.language,'hi');
    assert.deepEqual(first.moments.map(m=>[m.start_seconds,m.end_seconds,m.evidence_type]),[[240,280,'viewer_timestamp']]);
    assert.match(first.moments[0].summary,/The twist at 4:05 got me · 4:10 no way!!/);
    const second=done.results.find(r=>r.canonical_url===url(2))!;

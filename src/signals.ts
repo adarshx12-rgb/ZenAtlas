@@ -164,8 +164,9 @@ export async function applySignals(db: DB, config: Config, query: string, result
        else if (d.wasLive) e.badges.push('Livestream replay');
        if (official.has(d.channelId)) e.badges.push('Official channel');
        try {
-         await db.query('UPDATE content SET duration=coalesce(duration,$2),published_at=coalesce(published_at,$3),creator=coalesce(creator,$4) WHERE id=$1',
-           [r.id, d.duration, d.publishedAt, d.channelTitle || null]);
+         await db.query(`UPDATE content SET duration=coalesce(duration,$2),published_at=coalesce(published_at,$3),creator=coalesce(creator,$4),
+           language=coalesce(language,$5) WHERE id=$1`,
+           [r.id, d.duration, d.publishedAt, d.channelTitle || null, d.language ?? null]);
          if (!commented.has(r.id) || d.commentCount === null || d.commentCount === 0) return;
          const comments = await youtube.comments(d.id, config.SIGNAL_COMMENTS);
          e.comments = [...comments].sort((a, b) => b.likes - a.likes).slice(0, 15).map(c => c.text.replace(/\s+/g, ' ').slice(0, 240));
@@ -271,6 +272,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
    const badges = [...(e?.badges ?? []), ...(underrated ? [UNDERRATED_BADGE] : [])];
    return {score, dropped: !!v && v.relevance <= 2, result: {...r,
      duration: r.duration ?? d?.duration ?? null, published_at: r.published_at ?? d?.publishedAt ?? null, creator: r.creator ?? (d?.channelTitle || null),
+     language: r.language ?? d?.language ?? null,
      moments: [...r.moments, ...chosen].sort((a, b) => a.start_seconds - b.start_seconds),
      badges: badges.length ? [...new Set(badges)] : r.badges,
      ...(previews.has(r.id) ? {preview: true} : {}),
