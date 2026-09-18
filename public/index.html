@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ZenAtlas · Search engine</title><meta name="description" content="ZenAtlas is a search engine for video links and evidence-backed moments."><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/style.css"><script type="module" src="/app.js"></script><script type="module" src="/home.js"></script></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ZenAtlas · Search engine</title><meta name="description" content="ZenAtlas is a search engine for video links and evidence-backed moments."><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/style.css"><script type="module" src="/app.js"></script><script type="module" src="/home.js"></script><script type="module" src="/hand.js"></script></head>
 <body>
 <nav class="rail" aria-label="ZenAtlas">
  <span class="rail-cell"><span class="rail-dot" aria-hidden="true"></span><a href="/">ZenAtlas</a></span>
@@ -9,25 +9,40 @@
  <span class="rail-cell">Video · Transcript · Moment</span>
  <span class="rail-cell rail-cell--end"><span id="clock">—</span> UTC</span>
 </nav>
-<section class="hero">
- <p class="eyebrow">( ZenAtlas )</p>
- <!-- .san words switch to bold grotesk against the Didone caps, which is what gives the
-      line its rhythm. Full-bleed so the display size has room, but ragged-right. -->
- <h1><span class="dot" aria-hidden="true"></span>A world to <span class="san">discover</span>, a clearer <span class="san">way</span> to search across an expanding <span class="san">catalogue</span> of video.</h1>
- <p class="lede">Search an expanding catalogue of video links. Explore timestamped passages when source evidence is available.</p>
-</section>
-<main>
- <form id="search-form">
-  <label for="query">Describe what you’re looking for</label>
-  <div class="searchbar"><input id="query" name="q" type="search" minlength="2" maxlength="500" required placeholder="Try Big Buck Bunny, or a scene you have in mind…"><button type="submit">Search ↗</button></div>
-  <div class="filters">
-   <label>Search mode<select name="mode"><option value="auto">Catalogue + discovery</option><option value="catalogue">Catalogue only</option><option value="refresh">Fresh discovery</option></select></label>
-   <label>Evidence<select name="evidence"><option value="any">All evidence</option><option value="transcript_supported">Transcript supported</option><option value="video_analysed">Video analysed</option><option value="viewer_timestamp">Viewer timestamps</option></select></label>
-   <label>Language<select name="language"><option value="">Any language</option><option value="en">English</option><option value="hi">Hindi</option></select></label>
+<main class="bleed">
+ <!-- One form spanning the scene and the filters below it, so there is a single
+      #search-form for app.js to bind to and no duplicate field on the page. -->
+ <form id="search-form" class="hand-form">
+  <!-- The scene is inert markup until hand.js decides it can drive it; see that file for
+       the three states. Without JS this collapses to the hero and bar in normal flow. -->
+  <section class="hand-scene" id="hand-scene">
+   <div class="hand-pin">
+    <video class="hand-clip" aria-hidden="true" muted playsinline preload="auto"></video>
+    <div class="hand-hero">
+     <p class="eyebrow">( ZenAtlas )</p>
+     <!-- .san words switch to bold grotesk against the Didone caps, which is what gives the
+          line its rhythm. Full-bleed so the display size has room, but ragged-right. -->
+     <h1><span class="dot" aria-hidden="true"></span>A world to <span class="san">discover</span>, a clearer <span class="san">way</span> to search across an expanding <span class="san">catalogue</span> of video.</h1>
+     <p class="lede">Search an expanding catalogue of video links. Explore timestamped passages when source evidence is available.</p>
+    </div>
+    <div class="hand-bar">
+     <label for="query">Describe what you’re looking for</label>
+     <div class="searchbar"><input id="query" name="q" type="search" minlength="2" maxlength="500" required placeholder="Try Big Buck Bunny, or a scene you have in mind…"><button type="submit">Search ↗</button></div>
+    </div>
+   </div>
+  </section>
+  <div class="pad">
+   <div class="filters">
+    <label>Search mode<select name="mode"><option value="auto">Catalogue + discovery</option><option value="catalogue">Catalogue only</option><option value="refresh">Fresh discovery</option></select></label>
+    <label>Evidence<select name="evidence"><option value="any">All evidence</option><option value="transcript_supported">Transcript supported</option><option value="video_analysed">Video analysed</option><option value="viewer_timestamp">Viewer timestamps</option></select></label>
+    <label>Language<select name="language"><option value="">Any language</option><option value="en">English</option><option value="hi">Hindi</option></select></label>
+   </div>
   </div>
  </form>
- <p id="status" role="status" aria-live="polite" hidden></p>
- <aside><strong>Evidence matters.</strong> A metadata match is a lead. A transcript supports spoken content. Visual findings require inspected media. Check the source’s rights before reusing footage.</aside>
+ <div class="pad">
+  <p id="status" role="status" aria-live="polite" hidden></p>
+  <aside><strong>Evidence matters.</strong> A metadata match is a lead. A transcript supports spoken content. Visual findings require inspected media. Check the source’s rights before reusing footage.</aside>
+ </div>
 </main>
 <footer>ZenAtlas · Search with evidence</footer>
 </body></html>
