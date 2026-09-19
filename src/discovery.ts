@@ -8,7 +8,7 @@ import { rankDiscovery, type DiscoveryCandidate } from './ranking.js';
 import { ingest } from './catalogue.js';
 import { UpstreamError } from './http.js';
 import { applySignals, discussionsFor, logFailure, type Discussion, type SignalDeps } from './signals.js';
-import { GeminiPlanner, fallbackPlan, uniqueSearches, type PlannedSearch, type Planner, type SearchPlan, type SearchTarget } from './planner.js';
+import { makePlanner, fallbackPlan, uniqueSearches, type PlannedSearch, type Planner, type SearchPlan, type SearchTarget } from './planner.js';
 import { AniListClient, type AnimeClient, type AnimeMatch } from './anilist.js';
 import { queryKey } from './search.js';
 
@@ -92,7 +92,7 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
  providers: ProviderStatus[]; previews: Map<string,Buffer>; searches: PlannedSearch[]}> {
  const deep = input.depth === 'deep' && !input.source;
  const providers = (adapters ?? configuredProviders(config)).slice(0, 3);
- const planner = input.source ? undefined : deps.planner ?? (config.GEMINI_API_KEY ? new GeminiPlanner(db, config) : undefined);
+ const planner = input.source ? undefined : deps.planner ?? makePlanner(db, config);
  const anilist = input.source ? undefined : deps.anilist ?? (config.ANILIST_ENABLED ? new AniListClient(db, config) : undefined);
  let limit = deep ? config.DEEP_RESULTS : config.DISCOVERY_RESULTS;
  const deadline = deep ? Date.now() + config.DEEP_SEARCH_SECONDS*1000 : Infinity;

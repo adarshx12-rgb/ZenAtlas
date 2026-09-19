@@ -1,13 +1,15 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {database,testConfig} from './helpers.js';
-import {fallbackPlan,normalisePlan,GeminiPlanner,EnsemblePlanner,type Planner,type PlannedSearch,type SearchPlan} from '../src/planner.js';
+import {fallbackPlan,normalisePlan,GeminiPlanner,EnsemblePlanner,ModelPlanner,makePlanner,type Planner,type PlannedSearch,type SearchPlan} from '../src/planner.js';
+import {OpenAICompatibleClient} from '../src/openai-compatible.js';
 import {robotsAllows,extractPage,PageChecker,type PageCheck,type PageEvidence} from '../src/pages.js';
 import {rankDiscovery} from '../src/ranking.js';
 import {SearXNG} from '../src/providers.js';
 import {UpstreamError} from '../src/http.js';
 import {SearchService} from '../src/search.js';
 import {workOnce,schedule} from '../src/worker.js';
+import {runDiscovery} from '../src/discovery.js';
 import {createApp} from '../src/app.js';
 import type {Renderer} from '../src/render.js';
 import type {TextExtractor} from '../src/extract.js';
@@ -281,4 +283,38 @@ test('ensemble follow-ups merge and stay within DEEP_FOLLOW_UPS',async()=>{
  const follow=await new EnsemblePlanner(primary,[assist],config).followUps('orbit studio',['orbit.example: Orbit Studio'],['already run']);
  assert.deepEqual(follow,[{query:'Orbit Studio showreel',target:'videos'},{query:'orbit studio interview',target:'videos'},
    {query:'orbit studio webgl',target:'web'}]);
+});
+
+test('the planner is built from config, and a search still runs when every planner fails',async()=>{
+ const db=await database();
+ try{
+   assert.equal(makePlanner(db,testConfig),undefined,'no Gemini key and no assists means no planner');
+   assert.ok(makePlanner(db,{...testConfig,GEMINI_API_KEY:'k'}) instanceof GeminiPlanner,'Gemini alone stays a plain GeminiPlanner');
+   const both={...testConfig,GEMINI_API_KEY:'k',OPENROUTER_API_KEY:'or',PLANNER_ASSIST_MODELS:'vendor/one:free, vendor/two:free'};
+   assert.ok(makePlanner(db,both) instanceof EnsemblePlanner,'assists turn it into an ensemble');
+   assert.ok(makePlanner(db,{...testConfig,GEMINI_API_KEY:'k',PLANNER_ASSIST_MODELS:'vendor/one:free'}) instanceof GeminiPlanner,
+     'assists need an OpenRouter key to be used');
+
+   // When no planner can answer, discovery must still search the query as typed and say planning was unavailable.
+   const dead=new EnsemblePlanner(failing(new UpstreamError('timeout')),[failing(new UpstreamError('timeout'))],
+     {...testConfig,PLANNER_ASSIST_TIMEOUT_MS:100});
+   const run=await runDiscovery(db,testConfig,searchInput.parse({q:'3d sites'}),[],{planner:dead},async()=>{});
+   const status=run.providers.find(p=>p.provider==='planner');
+   assert.equal(status?.status,'unavailable');
+   assert.deepEqual(run.searches,fallbackPlan('3d sites').searches,'the query is searched as typed');
+ }finally{await db.close();}
+});
+
+test('each assist model spends its own budget bucket, so one running out does not stop the others',async()=>{
+ const db=await database();
+ try{
+   const config={...testConfig,OPENROUTER_API_KEY:'or-key'};
+   const transport=async()=>({choices:[{finish_reason:'stop',message:{content:JSON.stringify(
+     {kind:'videos',searches:[{query:'3d sites',target:'videos'}],criteria:['ok']})}}]});
+   const client=new OpenAICompatibleClient(db,config,['vendor/assist:free'],transport as any);
+   await new ModelPlanner(client,config,'planner_calls:vendor/assist:free').plan('3d sites');
+   const rows=(await db.query('SELECT bucket FROM budgets')).rows;
+   assert.ok(rows.some((r:any)=>r.bucket==='planner_calls:vendor/assist:free'),'the assist spent its own named bucket');
+   assert.ok(!rows.some((r:any)=>r.bucket==='planner_calls'),'the shared bucket was never touched');
+ }finally{await db.close();}
 });
