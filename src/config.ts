@@ -60,9 +60,9 @@ export const configSchema = z.object({
   OPENROUTER_API_KEY: optional,
   OPENROUTER_SITE_URL: z.string().url().or(z.literal('')).default(''),
   OPENROUTER_SITE_NAME: optional,
-  // Models that plan searches alongside the primary planner, on the OpenAI-compatible endpoint. Comma-separated
-  // OpenRouter ids, so slashes and colons are allowed. Empty means one planner, as before.
-  PLANNER_ASSIST_MODELS: z.string().regex(/^[\w.,\/:\s-]*$/).default(''),
+  // Models that plan searches, on the OpenAI-compatible endpoint: the first leads and the rest assist it.
+  // Comma-separated OpenRouter ids, so slashes and colons are allowed. Empty leaves planning to Gemini.
+  PLANNER_MODELS: z.string().regex(/^[\w.,\/:\s-]*$/).default(''),
   // An assist must not hold up a search, so it is dropped when it does not answer within this; well under
   // JUDGE_TIMEOUT_MS, because a free model can hang for a minute.
   PLANNER_ASSIST_TIMEOUT_MS: number(6000, 500, 30000),

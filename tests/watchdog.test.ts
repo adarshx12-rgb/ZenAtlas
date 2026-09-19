@@ -321,7 +321,7 @@ test('runtime tools and optional APIs report what broke and how to fix it',async
 test('each planning assist has its own watched budget',async()=>{
  const db=await database();
  try{
-   const config={...testConfig,GEMINI_API_KEY:'k',OPENROUTER_API_KEY:'or',PLANNER_ASSIST_MODELS:'vendor/one:free',JUDGE_DAILY_BUDGET:10};
+   const config={...testConfig,GEMINI_API_KEY:'k',OPENROUTER_API_KEY:'or',PLANNER_MODELS:'vendor/one:free',JUDGE_DAILY_BUDGET:10};
    await db.query(`INSERT INTO budgets(bucket,window_start,used) VALUES('planner_calls:vendor/one:free',date_trunc('day',now()),10)`);
    const result=await check('budgets').run(env(db,{config}));
    assert.equal(result.code,'budget_spent');

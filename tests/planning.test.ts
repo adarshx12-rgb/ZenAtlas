@@ -293,12 +293,14 @@ test('ensemble follow-ups merge and stay within DEEP_FOLLOW_UPS',async()=>{
 test('the planner is built from config, and a search still runs when every planner fails',async()=>{
  const db=await database();
  try{
-   assert.equal(makePlanner(db,testConfig),undefined,'no Gemini key and no assists means no planner');
-   assert.ok(makePlanner(db,{...testConfig,GEMINI_API_KEY:'k'}) instanceof GeminiPlanner,'Gemini alone stays a plain GeminiPlanner');
-   const both={...testConfig,GEMINI_API_KEY:'k',OPENROUTER_API_KEY:'or',PLANNER_ASSIST_MODELS:'vendor/one:free, vendor/two:free'};
-   assert.ok(makePlanner(db,both) instanceof EnsemblePlanner,'assists turn it into an ensemble');
-   assert.ok(makePlanner(db,{...testConfig,GEMINI_API_KEY:'k',PLANNER_ASSIST_MODELS:'vendor/one:free'}) instanceof GeminiPlanner,
-     'assists need an OpenRouter key to be used');
+   assert.equal(makePlanner(db,testConfig),undefined,'no Gemini key and no planner models means no planner');
+   assert.ok(makePlanner(db,{...testConfig,GEMINI_API_KEY:'k'}) instanceof GeminiPlanner,'with no PLANNER_MODELS, Gemini plans as before');
+   const both={...testConfig,GEMINI_API_KEY:'k',OPENROUTER_API_KEY:'or',PLANNER_MODELS:'vendor/one:free, vendor/two:free'};
+   assert.ok(makePlanner(db,both) instanceof EnsemblePlanner,'named models take over planning');
+   assert.ok(makePlanner(db,{...testConfig,GEMINI_API_KEY:'k',PLANNER_MODELS:'vendor/one:free'}) instanceof GeminiPlanner,
+     'planner models need an OpenRouter key to be used');
+   assert.ok(makePlanner(db,{...testConfig,OPENROUTER_API_KEY:'or',PLANNER_MODELS:'vendor/one:free'}) instanceof EnsemblePlanner,
+     'planning runs on OpenRouter with no Gemini key at all');
 
    // When no planner can answer, discovery must still search the query as typed and say planning was unavailable.
    const dead=new EnsemblePlanner(failing(new UpstreamError('timeout')),[failing(new UpstreamError('timeout'))],
@@ -321,5 +323,63 @@ test('each assist model spends its own budget bucket, so one running out does no
    const rows=(await db.query('SELECT bucket FROM budgets')).rows;
    assert.ok(rows.some((r:any)=>r.bucket==='planner_calls:vendor/assist:free'),'the assist spent its own named bucket');
    assert.ok(!rows.some((r:any)=>r.bucket==='planner_calls'),'the shared bucket was never touched');
+ }finally{await db.close();}
+});
+
+// The point of moving planning onto OpenRouter is that Gemini's quota is left for judging and
+// scene analysis. These three lock that in: the named models lead, Gemini is not touched on a
+// normal search, and it is still there when every OpenRouter model has failed.
+const orReply=(value:unknown)=>async()=>({choices:[{finish_reason:'stop',message:{content:JSON.stringify(value)}}]});
+const geminiReply=(value:unknown)=>async()=>({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify(value)}]}}]});
+const orPlanner=(db:any,config:any,model:string,transport:any)=>
+ new ModelPlanner(new OpenAICompatibleClient(db,config,[model],transport),config,`planner_calls:${model}`);
+
+test('the first planner model leads and the rest assist',async()=>{
+ const db=await database();
+ try{
+   const config={...testConfig,OPENROUTER_API_KEY:'or',PLAN_SEARCHES:4,PLANNER_ASSIST_TIMEOUT_MS:500};
+   const lead=orPlanner(db,config,'vendor/lead',orReply({kind:'websites',criteria:['from the lead'],
+     searches:[{query:'lead idea',target:'web'}]}) as any);
+   const helper=orPlanner(db,config,'vendor/helper',orReply({kind:'videos',criteria:['from the helper'],
+     searches:[{query:'helper idea',target:'videos'}]}) as any);
+   const plan=await new EnsemblePlanner(lead,[helper],config).plan('query');
+   assert.deepEqual([plan.kind,plan.criteria],['websites',['from the lead']],'kind and criteria come from the first model');
+   // Each model prepends the user's own query for its own kind, so 'q' appears for both targets.
+   assert.deepEqual(plan.searches.map(s=>s.query),['query','query','lead idea','helper idea'],'the lead is placed before the helper');
+   assert.deepEqual(plan.searches.map(s=>s.target),['web','videos','web','videos']);
+ }finally{await db.close();}
+});
+
+test('a normal search spends no Gemini quota at all',async()=>{
+ const db=await database();
+ try{
+   const config={...testConfig,OPENROUTER_API_KEY:'or',GEMINI_API_KEY:'k',PLANNER_ASSIST_TIMEOUT_MS:500};
+   const lead=orPlanner(db,config,'vendor/lead',orReply({kind:'videos',criteria:['c'],
+     searches:[{query:'openrouter idea',target:'videos'}]}) as any);
+   // Throws rather than answers: reaching Gemini at all is the failure this test exists to catch.
+   const gemini=new GeminiPlanner(db,config,(async()=>{throw new Error('Gemini was called on a healthy search');}) as any);
+   const plan=await new EnsemblePlanner(lead,[],config,gemini).plan('query');
+   assert.ok(plan.searches.some(s=>s.query==='openrouter idea'),'the OpenRouter plan was used');
+   const buckets=(await db.query('SELECT bucket FROM budgets')).rows.map((r:any)=>r.bucket);
+   assert.ok(buckets.includes('planner_calls:vendor/lead'),'the OpenRouter model spent its own bucket');
+   assert.ok(!buckets.includes('planner_calls'),'Gemini\'s planning bucket was never touched');
+ }finally{await db.close();}
+});
+
+test('Gemini still plans when every OpenRouter model has failed',async()=>{
+ const db=await database();
+ try{
+   const config={...testConfig,OPENROUTER_API_KEY:'or',GEMINI_API_KEY:'k',PLANNER_ASSIST_TIMEOUT_MS:100};
+   const down=(model:string)=>orPlanner(db,config,model,(async()=>{throw new UpstreamError('upstream_failure',500);}) as any);
+   const gemini=new GeminiPlanner(db,config,geminiReply({kind:'videos',criteria:['rescued'],
+     searches:[{query:'gemini idea',target:'videos'}]}) as any);
+   const plan=await new EnsemblePlanner(down('vendor/lead'),[down('vendor/helper')],config,gemini).plan('query');
+   assert.deepEqual([plan.criteria,plan.model],[['rescued'],'gemini-3.8-flash'],'the last resort answered');
+   assert.ok(plan.searches.some(s=>s.query==='gemini idea'),'its searches were used');
+   assert.ok((await db.query('SELECT bucket FROM budgets')).rows.some((r:any)=>r.bucket==='planner_calls'),
+     'and only then did Gemini spend its bucket');
+   // With no last resort configured, total failure must still surface the primary's error so
+   // discovery.ts can tell the user why planning was skipped.
+   await assert.rejects(new EnsemblePlanner(down('vendor/lead'),[],config).plan('query'),/upstream_failure/);
  }finally{await db.close();}
 });

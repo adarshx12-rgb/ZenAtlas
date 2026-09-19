@@ -11,7 +11,7 @@ import { AniListClient } from './anilist.js';
 import { embed } from './embeddings.js';
 import { Trafilatura, type TextExtractor } from './extract.js';
 import { compareVersions, newer, parseVersion, satisfies } from './versions.js';
-import { assistModels } from './planner.js';
+import { plannerModels } from './planner.js';
 
 // Everything the search engine needs from outside its own code, each with a check the watchdog runs on a schedule.
 // A check reports what it observed and, when something is wrong, what it breaks and how to fix it.
@@ -200,7 +200,7 @@ const FIXED_BUDGETS: {bucket: string; label: string; setting: keyof Config; esse
 // Each planning assist spends its own bucket (see makePlanner), so each is watched separately; otherwise a model
 // quietly reaching its limit would look like it was simply not contributing.
 const dailyBudgets = (config: Config) => [...FIXED_BUDGETS,
- ...assistModels(config).map(model => ({bucket: `planner_calls:${model}`, label: `AI planning calls (${model})`, setting: 'JUDGE_DAILY_BUDGET' as keyof Config, essential: false}))];
+ ...plannerModels(config).map(model => ({bucket: `planner_calls:${model}`, label: `AI planning calls (${model})`, setting: 'JUDGE_DAILY_BUDGET' as keyof Config, essential: false}))];
 
 const budgets: Check = {name: 'budgets', label: 'Daily budgets', category: 'services', every: () => 5, confirm: 1,
  async run({db, config}) {
@@ -370,7 +370,7 @@ function modelFailure(code: string|null) {
 const gemini: Check = {name: 'gemini', label: 'Gemini models', category: 'ai', every: () => 30,
  async run(env) {
    const {db, config} = env;
-   if (!config.GEMINI_API_KEY) return disabled(config.OPENROUTER_API_KEY && assistModels(config).length ? 'GEMINI_API_KEY is empty; planning runs on PLANNER_ASSIST_MODELS instead of Gemini, but AI relevance checks are off.' : 'GEMINI_API_KEY is empty; searches run without AI planning or AI relevance checks.');
+   if (!config.GEMINI_API_KEY) return disabled(config.OPENROUTER_API_KEY && plannerModels(config).length ? 'GEMINI_API_KEY is empty; planning runs on PLANNER_MODELS instead, but AI relevance checks are off.' : 'GEMINI_API_KEY is empty; searches run without AI planning or AI relevance checks.');
    const planning = new GeminiClient(db, config).models;
    const [primary, ...fallbacks] = planning;
    let available: Set<string>;
