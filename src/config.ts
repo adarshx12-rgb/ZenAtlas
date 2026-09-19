@@ -53,6 +53,13 @@ export const configSchema = z.object({
   JUDGE_BATCH_SIZE: number(30, 1, 50),
   JUDGE_THINKING_LEVEL: z.enum(['model_default', 'minimal', 'low', 'medium', 'high']).default('low'),
   JUDGE_DAILY_BUDGET: number(200, 0, 100000), JUDGE_TIMEOUT_MS: number(20000, 1000, 60000),
+  // An OpenAI-compatible model endpoint (OpenRouter by default), used alongside Gemini. Nothing calls it until a
+  // model names it, so an empty OPENROUTER_API_KEY leaves behaviour unchanged. An empty base URL means the default.
+  OPENROUTER_BASE_URL: z.string().url().or(z.literal('')).default('https://openrouter.ai/api/v1')
+    .transform(v => v || 'https://openrouter.ai/api/v1'),
+  OPENROUTER_API_KEY: optional,
+  OPENROUTER_SITE_URL: z.string().url().or(z.literal('')).default(''),
+  OPENROUTER_SITE_NAME: optional,
   // Watchdog (src/watchdog-main.ts). Empty API URL: derived from HOST and PORT. The webhook receives a JSON POST
   // ({text, content}, which Slack and Discord accept) whenever a dependency's status changes.
   WATCHDOG_API_URL: z.union([z.literal(''), z.string().url()]).default(''),
