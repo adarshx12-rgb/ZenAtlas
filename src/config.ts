@@ -60,6 +60,12 @@ export const configSchema = z.object({
   OPENROUTER_API_KEY: optional,
   OPENROUTER_SITE_URL: z.string().url().or(z.literal('')).default(''),
   OPENROUTER_SITE_NAME: optional,
+  // Models that plan searches alongside the primary planner, on the OpenAI-compatible endpoint. Comma-separated
+  // OpenRouter ids, so slashes and colons are allowed. Empty means one planner, as before.
+  PLANNER_ASSIST_MODELS: z.string().regex(/^[\w.,\/:\s-]*$/).default(''),
+  // An assist must not hold up a search, so it is dropped when it does not answer within this; well under
+  // JUDGE_TIMEOUT_MS, because a free model can hang for a minute.
+  PLANNER_ASSIST_TIMEOUT_MS: number(6000, 500, 30000),
   // Watchdog (src/watchdog-main.ts). Empty API URL: derived from HOST and PORT. The webhook receives a JSON POST
   // ({text, content}, which Slack and Discord accept) whenever a dependency's status changes.
   WATCHDOG_API_URL: z.union([z.literal(''), z.string().url()]).default(''),

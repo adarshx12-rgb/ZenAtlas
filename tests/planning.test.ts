@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {database,testConfig} from './helpers.js';
-import {fallbackPlan,normalisePlan,GeminiPlanner,type Planner} from '../src/planner.js';
+import {fallbackPlan,normalisePlan,GeminiPlanner,EnsemblePlanner,type Planner,type PlannedSearch,type SearchPlan} from '../src/planner.js';
 import {robotsAllows,extractPage,PageChecker,type PageCheck,type PageEvidence} from '../src/pages.js';
 import {rankDiscovery} from '../src/ranking.js';
 import {SearXNG} from '../src/providers.js';
@@ -232,4 +232,52 @@ test('a website request is planned, searched on several angles, page-checked and
    assert.deepEqual(calls,[`${q} again`]);
    assert.ok(fallback.providers.some(p=>p.provider==='planner'&&p.status==='unavailable'));
  }finally{await db.close();}
+});
+
+const stubPlanner=(plan:Partial<SearchPlan>,follow:PlannedSearch[]=[]):Planner=>({
+ async plan(){return {kind:'videos',searches:[],criteria:[],model:'stub',...plan};},
+ async followUps(){return follow;},
+});
+const failing=(error:unknown,after=0):Planner=>({
+ async plan(){await new Promise(r=>setTimeout(r,after));throw error;},
+ async followUps(){await new Promise(r=>setTimeout(r,after));throw error;},
+});
+
+test('an ensemble merges its planners round-robin, keeps the user query first and honours the search limit',async()=>{
+ const config={...testConfig,PLAN_SEARCHES:4,PLANNER_ASSIST_TIMEOUT_MS:500};
+ // Each planner has already normalised its own plan, so each list starts with the user's own query.
+ const primary=stubPlanner({kind:'websites',criteria:['uses 3D'],model:'gemini-3.6-flash',
+   searches:[{query:'3d sites',target:'web'},{query:'site:awwwards.com three.js',target:'web'},{query:'webgl showcase',target:'web'}]});
+ const assist=stubPlanner({kind:'videos',criteria:['is a video'],model:'vendor/assist:free',
+   searches:[{query:'3d sites',target:'web'},{query:'site:codrops.com webgl',target:'web'},{query:'3D SITES',target:'web'}]});
+ const plan=await new EnsemblePlanner(primary,[assist],config).plan('3d sites');
+ assert.deepEqual(plan.searches,[{query:'3d sites',target:'web'},{query:'site:awwwards.com three.js',target:'web'},
+   {query:'site:codrops.com webgl',target:'web'},{query:'webgl showcase',target:'web'}],
+   'the user query leads, the planners alternate, duplicates go, and the union stops at PLAN_SEARCHES');
+ assert.deepEqual([plan.kind,plan.criteria,plan.model],['websites',['uses 3D'],'gemini-3.6-flash'],'kind and criteria come from the primary');
+});
+
+test('an ensemble survives a failing or slow planner and only gives up when they all fail',async()=>{
+ const config={...testConfig,PLAN_SEARCHES:4,PLANNER_ASSIST_TIMEOUT_MS:100};
+ const good=stubPlanner({kind:'videos',criteria:['is a clip'],model:'vendor/assist:free',
+   searches:[{query:'query',target:'videos'},{query:'assist idea',target:'videos'}]});
+ const promoted=await new EnsemblePlanner(failing(new UpstreamError('upstream_failure',500)),[good],config).plan('query');
+ assert.deepEqual([promoted.kind,promoted.model,promoted.searches],['videos','vendor/assist:free',
+   [{query:'query',target:'videos'},{query:'assist idea',target:'videos'}]],'a working assist is promoted when the primary fails');
+
+ const primary=stubPlanner({kind:'websites',criteria:[],model:'gemini-3.6-flash',searches:[{query:'query',target:'web'}]});
+ const slow=await new EnsemblePlanner(primary,[failing(new UpstreamError('timeout'),500)],config).plan('query');
+ assert.deepEqual([slow.model,slow.searches],['gemini-3.6-flash',[{query:'query',target:'web'}]],'an assist past its deadline is left out');
+
+ await assert.rejects(new EnsemblePlanner(failing(new UpstreamError('budget_exhausted')),[failing(new UpstreamError('timeout'))],config).plan('query'),
+   /budget_exhausted/,'when every planner fails the primary error is raised, so discovery can fall back and say why');
+});
+
+test('ensemble follow-ups merge and stay within DEEP_FOLLOW_UPS',async()=>{
+ const config={...testConfig,DEEP_FOLLOW_UPS:3,PLANNER_ASSIST_TIMEOUT_MS:500};
+ const primary=stubPlanner({},[{query:'Orbit Studio showreel',target:'videos'},{query:'orbit studio webgl',target:'web'}]);
+ const assist=stubPlanner({},[{query:'orbit studio interview',target:'videos'},{query:'ORBIT STUDIO WEBGL',target:'web'},{query:'one too many',target:'web'}]);
+ const follow=await new EnsemblePlanner(primary,[assist],config).followUps('orbit studio',['orbit.example: Orbit Studio'],['already run']);
+ assert.deepEqual(follow,[{query:'Orbit Studio showreel',target:'videos'},{query:'orbit studio interview',target:'videos'},
+   {query:'orbit studio webgl',target:'web'}]);
 });
