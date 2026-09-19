@@ -53,6 +53,10 @@ export const configSchema = z.object({
   JUDGE_BATCH_SIZE: number(30, 1, 50),
   JUDGE_THINKING_LEVEL: z.enum(['model_default', 'minimal', 'low', 'medium', 'high']).default('low'),
   JUDGE_DAILY_BUDGET: number(200, 0, 100000), JUDGE_TIMEOUT_MS: number(20000, 1000, 60000),
+  // Models that rank results, on the OpenAI-compatible endpoint, tried in order. Comma-separated
+  // OpenRouter ids. They must accept images: website candidates are judged partly on a screenshot.
+  // Empty leaves judging to Gemini.
+  JUDGE_MODELS: z.string().regex(/^[\w.,\/:\s-]*$/).default(''),
   // An OpenAI-compatible model endpoint (OpenRouter by default), used alongside Gemini. Nothing calls it until a
   // model names it, so an empty OPENROUTER_API_KEY leaves behaviour unchanged. An empty base URL means the default.
   OPENROUTER_BASE_URL: z.string().url().or(z.literal('')).default('https://openrouter.ai/api/v1')

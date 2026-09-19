@@ -3,6 +3,8 @@ import type { DB } from './db.js';
 import type { Config } from './config.js';
 import { fetchJSON, UpstreamError } from './http.js';
 import { GeminiClient } from './gemini.js';
+import type { ModelClient } from './model-client.js';
+import { OpenAICompatibleClient } from './openai-compatible.js';
 import { animeSummary, type AnimeMatch } from './anilist.js';
 
 export interface JudgeCandidate {
@@ -43,9 +45,9 @@ const verdicts = z.object({verdicts: z.array(z.object({
  lesser_known: z.boolean().default(false),
 }))});
 
-export class GeminiJudge implements Judge {
- private client: GeminiClient;
- constructor(db: DB, config: Config, transport = fetchJSON) { this.client = new GeminiClient(db, config, transport); }
+// Ranks candidates with any model client. The bucket is the daily budget it spends.
+export class ModelJudge implements Judge {
+ constructor(protected client: ModelClient, protected config: Config, protected bucket = 'judge_calls') {}
  async judge(query: string, candidates: JudgeCandidate[], context?: JudgeContext, screenshots?: Map<string,Buffer>): Promise<JudgeResult> {
    if (!candidates.length) return {model: this.client.models[0], verdicts: new Map()};
    const shown = new Set(candidates.filter(c => c.page?.screenshot && screenshots?.has(c.key)).map(c => c.key));
@@ -55,7 +57,7 @@ export class GeminiJudge implements Judge {
      ...(context ? [`Wanted: ${context.kind}`, `Criteria: ${JSON.stringify(context.criteria)}`] : []),
      ...(context?.anime ? [`Known anime match: ${JSON.stringify(animeSummary(context.anime, query))}`] : []),
      'Candidates follow, one JSON object per line.', '<candidates>', ...listed.map(c => JSON.stringify(c)), '</candidates>'].join('\n');
-   const reply = await this.client.json('judge_calls', SYSTEM_INSTRUCTION, text, RESPONSE_SCHEMA, images);
+   const reply = await this.client.json(this.bucket, SYSTEM_INSTRUCTION, text, RESPONSE_SCHEMA, images);
    const parsed = verdicts.safeParse(reply.value);
    if (!parsed.success) throw new UpstreamError('malformed_response');
    const byKey = new Map(candidates.map(c => [c.key, c]));
@@ -69,4 +71,34 @@ export class GeminiJudge implements Judge {
    }
    return {model: reply.model, verdicts: result};
  }
+}
+
+export class GeminiJudge extends ModelJudge {
+ constructor(db: DB, config: Config, transport = fetchJSON) { super(new GeminiClient(db, config, transport), config); }
+}
+
+// Judging falls back to Gemini only once every configured model has failed, so a provider outage
+// leaves results ranked rather than unranked. When it fails too, the configured models' error is
+// raised, because that is the failure worth reporting.
+export class FallbackJudge implements Judge {
+ constructor(private primary: Judge, private fallback: Judge) {}
+ async judge(query: string, candidates: JudgeCandidate[], context?: JudgeContext, screenshots?: Map<string,Buffer>): Promise<JudgeResult> {
+   try { return await this.primary.judge(query, candidates, context, screenshots); }
+   catch (error) {
+     try { return await this.fallback.judge(query, candidates, context, screenshots); } catch { throw error; }
+   }
+ }
+}
+
+export const judgeModels = (config: Config): string[] => [...new Set(config.JUDGE_MODELS.split(',').map(m => m.trim()).filter(Boolean))];
+
+// JUDGE_MODELS decides what ranks results: one client holding the whole list, so ModelClient's own
+// chain tries them in order with per-model cooldowns and health. Gemini judges only when no models
+// are named, or as a last resort when they have all failed, leaving its quota for scene analysis.
+export function makeJudge(db: DB, config: Config): Judge|undefined {
+ const models = config.OPENROUTER_API_KEY ? judgeModels(config) : [];
+ const gemini = config.GEMINI_API_KEY ? new GeminiJudge(db, config) : undefined;
+ if (!models.length) return gemini;
+ const judge = new ModelJudge(new OpenAICompatibleClient(db, config, models), config);
+ return gemini ? new FallbackJudge(judge, gemini) : judge;
 }

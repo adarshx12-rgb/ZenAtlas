@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {database,testConfig} from './helpers.js';
 import {timestampMentions,clusterMentions,matchDiscussions,applySignals} from '../src/signals.js';
 import {YouTubeData,isoSeconds,type YouTubeClient} from '../src/youtube.js';
-import {GeminiJudge,type Judge} from '../src/judge.js';
+import {GeminiJudge,ModelJudge,FallbackJudge,makeJudge,type Judge} from '../src/judge.js';
+import {OpenAICompatibleClient} from '../src/openai-compatible.js';
 import {UpstreamError} from '../src/http.js';
 import {SearchService} from '../src/search.js';
 import {workOnce} from '../src/worker.js';
@@ -254,5 +255,60 @@ test('without keys or with a failing judge, discovery keeps its keyword order an
    const failed=await applySignals(db,testConfig,'result',results,{judge:failing});
    assert.deepEqual(failed.results.map(r=>r.title),['Result 1','Result 2']);
    assert.deepEqual(failed.providers.map(p=>[p.provider,p.status]),[['judge','unavailable']]);
+ }finally{await db.close();}
+});
+
+// Judging moves onto OpenRouter so Gemini's quota is left for scene analysis. These lock in the
+// three things that must hold: the configured models do the judging, Gemini is not touched on a
+// healthy judgement, and it is still there when every configured model has failed.
+const orVerdicts=(value:unknown)=>async()=>({choices:[{finish_reason:'stop',message:{content:JSON.stringify(value)}}]});
+const geminiVerdicts=(value:unknown)=>async()=>({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify(value)}]}}]});
+const oneCandidate=[{key:'r1',kind:'video' as const,site:'youtube.com',title:'A clip',channel:'Chan',official:false,
+ duration:'1:00',live:null,description:null,comments:[],moments:[],discussions:[]}];
+
+test('the configured judge models do the judging and Gemini is not touched',async()=>{
+ const db=await database();
+ try{
+   const config={...testConfig,OPENROUTER_API_KEY:'or',GEMINI_API_KEY:'k',JUDGE_MODELS:'vendor/judge'};
+   const client=new OpenAICompatibleClient(db,config,['vendor/judge'],
+     orVerdicts({verdicts:[{key:'r1',relevance:7,reason:'judged by openrouter',moment_keys:[],lesser_known:false}]}) as any);
+   // Throws rather than answers: reaching Gemini at all is the failure this test exists to catch.
+   const gemini=new GeminiJudge(db,config,(async()=>{throw new Error('Gemini was called on a healthy judgement');}) as any);
+   const out=await new FallbackJudge(new ModelJudge(client,config),gemini).judge('q',oneCandidate);
+   assert.equal(out.verdicts.get('r1')?.reason,'judged by openrouter');
+   assert.equal(out.model,'vendor/judge');
+   const buckets=(await db.query('SELECT bucket,used FROM budgets')).rows.map((r:any)=>r.bucket);
+   assert.ok(buckets.includes('judge_calls'),'the judge spent the judging bucket');
+   assert.equal((await db.query("SELECT count(*)::int n FROM provider_health WHERE provider LIKE 'gemini:%'")).rows[0].n,0,
+     'Gemini was never called, so it recorded no health row');
+ }finally{await db.close();}
+});
+
+test('Gemini still judges when every configured model has failed',async()=>{
+ const db=await database();
+ try{
+   const config={...testConfig,OPENROUTER_API_KEY:'or',GEMINI_API_KEY:'k',JUDGE_MODELS:'vendor/down'};
+   const down=new OpenAICompatibleClient(db,config,['vendor/down'],
+     (async()=>{throw new UpstreamError('upstream_failure',500);}) as any);
+   const gemini=new GeminiJudge(db,config,
+     geminiVerdicts({verdicts:[{key:'r1',relevance:4,reason:'rescued by gemini',moment_keys:[],lesser_known:false}]}) as any);
+   const out=await new FallbackJudge(new ModelJudge(down,config),gemini).judge('q',oneCandidate);
+   assert.equal(out.verdicts.get('r1')?.reason,'rescued by gemini');
+   assert.ok((await db.query("SELECT count(*)::int n FROM provider_health WHERE provider LIKE 'gemini:%'")).rows[0].n>0,
+     'and only then did Gemini run');
+   // With no Gemini configured, total failure must still surface the model error to the caller.
+   await assert.rejects(new ModelJudge(down,config).judge('q',oneCandidate),/upstream_failure/);
+ }finally{await db.close();}
+});
+
+test('makeJudge picks the configured models over Gemini',async()=>{
+ const db=await database();
+ try{
+   assert.equal(makeJudge(db,testConfig),undefined,'no keys means no judge');
+   assert.ok(makeJudge(db,{...testConfig,GEMINI_API_KEY:'k'}) instanceof GeminiJudge,'with no JUDGE_MODELS, Gemini judges as before');
+   assert.ok(makeJudge(db,{...testConfig,GEMINI_API_KEY:'k',JUDGE_MODELS:'vendor/a'}) instanceof GeminiJudge,
+     'judge models need an OpenRouter key to be used');
+   const both=makeJudge(db,{...testConfig,GEMINI_API_KEY:'k',OPENROUTER_API_KEY:'or',JUDGE_MODELS:'vendor/a,vendor/b'});
+   assert.ok(both && !(both instanceof GeminiJudge),'configured models take over judging');
  }finally{await db.close();}
 });

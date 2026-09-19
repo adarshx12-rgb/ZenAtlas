@@ -12,6 +12,7 @@ import { embed } from './embeddings.js';
 import { Trafilatura, type TextExtractor } from './extract.js';
 import { compareVersions, newer, parseVersion, satisfies } from './versions.js';
 import { plannerModels } from './planner.js';
+import { judgeModels } from './judge.js';
 
 // Everything the search engine needs from outside its own code, each with a check the watchdog runs on a schedule.
 // A check reports what it observed and, when something is wrong, what it breaks and how to fix it.
@@ -370,7 +371,14 @@ function modelFailure(code: string|null) {
 const gemini: Check = {name: 'gemini', label: 'Gemini models', category: 'ai', every: () => 30,
  async run(env) {
    const {db, config} = env;
-   if (!config.GEMINI_API_KEY) return disabled(config.OPENROUTER_API_KEY && plannerModels(config).length ? 'GEMINI_API_KEY is empty; planning runs on PLANNER_MODELS instead, but AI relevance checks are off.' : 'GEMINI_API_KEY is empty; searches run without AI planning or AI relevance checks.');
+   // Planning and judging each run on OpenRouter when configured, so name only what a missing key actually stops.
+   if (!config.GEMINI_API_KEY) {
+     const onOpenRouter = (models: string[]) => !!config.OPENROUTER_API_KEY && models.length > 0;
+     const off = [!onOpenRouter(plannerModels(config)) && 'AI planning', !onOpenRouter(judgeModels(config)) && 'AI relevance checks'].filter(Boolean);
+     return disabled(off.length
+       ? `GEMINI_API_KEY is empty, so ${off.join(' and ')} ${off.length > 1 ? 'are' : 'is'} off. Scene analysis needs a key too.`
+       : 'GEMINI_API_KEY is empty; planning and judging run on OpenRouter instead, but scene analysis still needs a key.');
+   }
    const planning = new GeminiClient(db, config).models;
    const [primary, ...fallbacks] = planning;
    let available: Set<string>;

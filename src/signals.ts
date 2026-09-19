@@ -6,7 +6,7 @@ import { discoveryQuery, sameWord, STOPWORDS, tokens } from './ranking.js';
 import { UpstreamError } from './http.js';
 import { takeBudget } from './budgets.js';
 import { YouTubeData, youtubeId, type VideoDetails, type ViewerComment, type YouTubeClient } from './youtube.js';
-import { GeminiJudge, type Judge, type JudgeCandidate, type JudgeContext, type JudgeResult, type Verdict } from './judge.js';
+import { makeJudge, type Judge, type JudgeCandidate, type JudgeContext, type JudgeResult, type Verdict } from './judge.js';
 import { PageChecker, type PageCheck, type PageEvidence } from './pages.js';
 import type { SearchTarget } from './planner.js';
 
@@ -213,7 +213,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
    if (matched.length) { const e = info(r.id); e.discussions = matched.slice(0, 3); e.badges.push('Discussed on Reddit'); }
  }
 
- const judge = deps.judge ?? (config.GEMINI_API_KEY ? new GeminiJudge(db, config) : undefined);
+ const judge = deps.judge ?? makeJudge(db, config);
  let verdicts: Map<string,Verdict>|null = null;
  const modelOf = new Map<string,string>();
  if (judge) {
