@@ -370,7 +370,7 @@ function modelFailure(code: string|null) {
 const gemini: Check = {name: 'gemini', label: 'Gemini models', category: 'ai', every: () => 30,
  async run(env) {
    const {db, config} = env;
-   if (!config.GEMINI_API_KEY) return disabled('GEMINI_API_KEY is empty; searches run without AI planning or AI relevance checks.');
+   if (!config.GEMINI_API_KEY) return disabled(config.OPENROUTER_API_KEY && assistModels(config).length ? 'GEMINI_API_KEY is empty; planning runs on PLANNER_ASSIST_MODELS instead of Gemini, but AI relevance checks are off.' : 'GEMINI_API_KEY is empty; searches run without AI planning or AI relevance checks.');
    const planning = new GeminiClient(db, config).models;
    const [primary, ...fallbacks] = planning;
    let available: Set<string>;

@@ -8,8 +8,9 @@ const response = z.object({choices: z.array(z.object({
  finish_reason: z.string().nullish(),
  message: z.object({content: z.string().nullish()}),
 })).min(1)});
-// Strict structured output rejects an object schema that does not forbid extra keys, at any depth. The judge's and
-// planner's schemas predate it, so the requirement is added on the way out rather than in every caller.
+// Strict structured output rejects an object schema that does not forbid extra keys, at any depth. Only the planner's
+// schemas reach this client today (the judge's uses minimum/maximum, which strict mode has historically rejected), but
+// the requirement is added on the way out rather than in the caller so any future caller gets it for free.
 const strict = (node: any): any => !node || typeof node !== 'object' ? node
  : {...node, ...(node.type === 'object' ? {additionalProperties: false} : {}),
    ...(node.properties ? {properties: Object.fromEntries(Object.entries(node.properties).map(([k, v]) => [k, strict(v)]))} : {}),

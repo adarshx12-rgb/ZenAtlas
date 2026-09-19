@@ -269,8 +269,13 @@ test('an ensemble survives a failing or slow planner and only gives up when they
    [{query:'query',target:'videos'},{query:'assist idea',target:'videos'}]],'a working assist is promoted when the primary fails');
 
  const primary=stubPlanner({kind:'websites',criteria:[],model:'gemini-3.6-flash',searches:[{query:'query',target:'web'}]});
- const slow=await new EnsemblePlanner(primary,[failing(new UpstreamError('timeout'),500)],config).plan('query');
- assert.deepEqual([slow.model,slow.searches],['gemini-3.6-flash',[{query:'query',target:'web'}]],'an assist past its deadline is left out');
+ const slowGood:Planner={async plan(){await new Promise(r=>setTimeout(r,500));
+   return {kind:'videos',searches:[{query:'late idea',target:'videos'}],criteria:[],model:'slow'};}};
+ const started=Date.now();
+ const slow=await new EnsemblePlanner(primary,[slowGood],config).plan('query');
+ assert.ok(Date.now()-started<400,'the ensemble returned without waiting for the slow assist');
+ assert.ok(!slow.searches.some(s=>s.query==='late idea'),'an answer that arrived after the deadline is not merged');
+ assert.deepEqual([slow.model,slow.searches],['gemini-3.6-flash',[{query:'query',target:'web'}]],'the primary plan stands alone');
 
  await assert.rejects(new EnsemblePlanner(failing(new UpstreamError('budget_exhausted')),[failing(new UpstreamError('timeout'))],config).plan('query'),
    /budget_exhausted/,'when every planner fails the primary error is raised, so discovery can fall back and say why');

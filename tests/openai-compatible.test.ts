@@ -8,6 +8,8 @@ const config={...testConfig,OPENROUTER_API_KEY:'or-key',OPENROUTER_SITE_URL:'htt
 const SCHEMA={type:'object',properties:{ok:{type:'boolean'},items:{type:'array',items:{type:'object',
  properties:{name:{type:'string'}},required:['name']}}},required:['ok','items']};
 const answer=(value:unknown)=>({choices:[{finish_reason:'stop',message:{role:'assistant',content:JSON.stringify(value)}}]});
+// Each test below uses its own model name: coolingUntil in model-client.ts is module-level state shared for the whole
+// file, so reusing a name would leak one test's rate-limit or cooldown into another.
 
 test('the OpenAI-compatible client sends a strict schema, images and the OpenRouter headers',async()=>{
  const db=await database();
