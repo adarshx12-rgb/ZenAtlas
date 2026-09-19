@@ -11,6 +11,7 @@ import { AniListClient } from './anilist.js';
 import { embed } from './embeddings.js';
 import { Trafilatura, type TextExtractor } from './extract.js';
 import { compareVersions, newer, parseVersion, satisfies } from './versions.js';
+import { assistModels } from './planner.js';
 
 // Everything the search engine needs from outside its own code, each with a check the watchdog runs on a schedule.
 // A check reports what it observed and, when something is wrong, what it breaks and how to fix it.
@@ -183,7 +184,7 @@ const queue: Check = {name: 'job_queue', label: 'Job queue', category: 'services
    return verdict(issues, ok('flowing', q.queued || q.running ? `${q.queued} queued, ${q.running} running.` : 'Idle; nothing is waiting.', q));
  }};
 
-const DAILY_BUDGETS: {bucket: string; label: string; setting: keyof Config; essential?: boolean}[] = [
+const FIXED_BUDGETS: {bucket: string; label: string; setting: keyof Config; essential?: boolean}[] = [
  {bucket: 'discovery_jobs', label: 'discovery searches', setting: 'DISCOVERY_DAILY_BUDGET', essential: true},
  {bucket: 'discovery:searxng', label: 'SearXNG requests', setting: 'SEARXNG_DAILY_BUDGET', essential: true},
  {bucket: 'discovery:google', label: 'Google requests', setting: 'DISCOVERY_DAILY_BUDGET', essential: true},
@@ -196,11 +197,17 @@ const DAILY_BUDGETS: {bucket: string; label: string; setting: keyof Config; esse
  {bucket: 'embeddings', label: 'embeddings', setting: 'EMBEDDING_DAILY_BUDGET'},
  {bucket: 'source_health_probes', label: 'source health probes', setting: 'SOURCE_HEALTH_DAILY_BUDGET'},
 ];
+// Each planning assist spends its own bucket (see makePlanner), so each is watched separately; otherwise a model
+// quietly reaching its limit would look like it was simply not contributing.
+const dailyBudgets = (config: Config) => [...FIXED_BUDGETS,
+ ...assistModels(config).map(model => ({bucket: `planner_calls:${model}`, label: `AI planning calls (${model})`, setting: 'JUDGE_DAILY_BUDGET' as keyof Config, essential: false}))];
+
 const budgets: Check = {name: 'budgets', label: 'Daily budgets', category: 'services', every: () => 5, confirm: 1,
  async run({db, config}) {
+   const watched = dailyBudgets(config);
    const used = new Map((await db.query<{bucket: string; used: number}>(`SELECT bucket,used FROM budgets
-     WHERE window_start=date_trunc('day',now()) AND bucket=ANY($1::text[])`, [DAILY_BUDGETS.map(b => b.bucket)])).rows.map(r => [r.bucket, r.used]));
-   const rows = DAILY_BUDGETS.flatMap(b => {
+     WHERE window_start=date_trunc('day',now()) AND bucket=ANY($1::text[])`, [watched.map(b => b.bucket)])).rows.map(r => [r.bucket, r.used]));
+   const rows = watched.flatMap(b => {
      const limit = Number(config[b.setting]), n = used.get(b.bucket);
      return n !== undefined && limit > 0 ? [{...b, n, limit, share: n/limit}] : [];
    }).sort((a, b) => b.share - a.share);
