@@ -249,11 +249,12 @@ test('an ensemble merges its planners round-robin, keeps the user query first an
  const primary=stubPlanner({kind:'websites',criteria:['uses 3D'],model:'gemini-3.6-flash',
    searches:[{query:'3d sites',target:'web'},{query:'site:awwwards.com three.js',target:'web'},{query:'webgl showcase',target:'web'}]});
  const assist=stubPlanner({kind:'videos',criteria:['is a video'],model:'vendor/assist:free',
-   searches:[{query:'3d sites',target:'web'},{query:'site:codrops.com webgl',target:'web'},{query:'3D SITES',target:'web'}]});
+   searches:[{query:'3d sites',target:'web'},{query:'site:codrops.com webgl',target:'web'},{query:'3D SITES',target:'web'},{query:'site:dribbble.com webgl',target:'web'}]});
  const plan=await new EnsemblePlanner(primary,[assist],config).plan('3d sites');
  assert.deepEqual(plan.searches,[{query:'3d sites',target:'web'},{query:'site:awwwards.com three.js',target:'web'},
    {query:'site:codrops.com webgl',target:'web'},{query:'webgl showcase',target:'web'}],
    'the user query leads, the planners alternate, duplicates go, and the union stops at PLAN_SEARCHES');
+ assert.ok(!plan.searches.some(s=>s.query==='site:dribbble.com webgl'),'the query past PLAN_SEARCHES is dropped, so the cap is doing the work and not deduplication alone');
  assert.deepEqual([plan.kind,plan.criteria,plan.model],['websites',['uses 3D'],'gemini-3.6-flash'],'kind and criteria come from the primary');
 });
 
