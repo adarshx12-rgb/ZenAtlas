@@ -15,6 +15,7 @@ import {addSource,setAlternative} from './source-health.js';
 import { listPolicyRules, setPolicyRule } from './policy-rules.js';
 import { dependencyReport } from './watchdog.js';
 import { imageSearchInput, searchImages } from './images.js';
+import { verifyMedia } from './signing.js';
 
 const sourceListQuery = z.object({
  status:z.enum(['all','candidate','active','paused','rejected']).default('all'),
@@ -100,7 +101,9 @@ export async function createApp(db:DB,config:Config) {
    return reply.header('Cache-Control','private, max-age=1800').header('Content-Type','image/jpeg').send(Buffer.from(row.image));
  });
  app.get('/api/thumbnail',async(req,reply)=>{
-   const input=z.object({url:z.string().url().max(2048)}).strict().parse(req.query);
+   // sig is optional in the schema so that a missing one is refused as 403, like a wrong one, and not as a malformed request.
+   const input=z.object({url:z.string().url().max(2048),sig:z.string().max(128).optional()}).strict().parse(req.query);
+   if(!verifyMedia(config,input.url,input.sig)) throw new ApiError(403,'invalid_signature','This image link is not valid.');
    try {
      const image=await fetchImage(input.url,{timeoutMs:4000});
      return reply.header('Cache-Control','public, max-age=86400').header('Content-Type',image.contentType).send(image.data);

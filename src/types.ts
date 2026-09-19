@@ -63,6 +63,8 @@ export interface Result {
  preview?: boolean;
  // Found by a deep dive rather than by the search it continued.
  deep_find?: boolean;
+ // Lets /api/thumbnail fetch `thumbnail`. Added as a result leaves the server, so a stored snapshot never holds one.
+ thumbnail_sig?: string;
 }
 export type DiscoveryStage = 'queued'|'searching'|'following'|'checking';
 export interface SearchResponse {

@@ -8,6 +8,7 @@ import { matchesFilters } from './catalogue.js';
 import { RANKING_VERSION } from './ranking.js';
 import { takeBudget } from './budgets.js';
 import { configuredProviders } from './providers.js';
+import { signMedia } from './signing.js';
 
 // How long a search reports that discovery is still running before calling it delayed: the checks and AI ranking
 // can take up to three minutes after a deep dive's search time.
@@ -174,7 +175,9 @@ export class SearchService {
      [ids])).rows.map(r=>[r.content_id,sceneAnalysisStatus(r)]));
    return new Map(items.filter(r=>allowed.includes(r.id) || r.origin==='discovery' && candidateSources.includes(r.source_id))
      .map(r=>{const moments=r.moments.filter(m=>activeMoments.includes(m.id));
-       return {...r,moments,evidence:moments[0]?.evidence_type??'metadata_match' as const,scene_analysis:analyses.get(r.id)??null};})
+       // Every result the client receives passes through here, so signing here covers catalogue and discovery results alike.
+       return {...r,moments,evidence:moments[0]?.evidence_type??'metadata_match' as const,scene_analysis:analyses.get(r.id)??null,
+         ...(r.thumbnail ? {thumbnail_sig:signMedia(this.config,r.thumbnail)} : {})};})
      .filter(r=>matchesFilters(r,snapshot.filters)).map(r=>[r.id,r]));
  }
  private async page(initial:any, offset:number): Promise<SearchResponse> {

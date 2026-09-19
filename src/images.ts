@@ -7,6 +7,7 @@ import { fetchJSON, UpstreamError } from './http.js';
 import { takeBudget } from './budgets.js';
 import { publicURL } from './urls.js';
 import { engineStatus } from './providers.js';
+import { signMedia } from './signing.js';
 
 // Image search is discovery-only: results are returned straight from the engines and never
 // enter the catalogue. The evidence pipeline — transcripts, moments, scene analysis — is
@@ -26,6 +27,8 @@ export type ImageSearchInput = z.infer<typeof imageSearchInput>;
 
 export interface ImageResult {
  id: string; title: string; image_url: string; thumbnail: string;
+ // Lets /api/thumbnail fetch `thumbnail`.
+ thumbnail_sig: string;
  page_url: string; source_name: string;
  width: number | null; height: number | null; engine: string;
 }
@@ -104,11 +107,12 @@ export async function searchImages(db: DB, config: Config, input: ImageSearchInp
      seen.add(image);
      const host = new URL(page).hostname.replace(/^www\./, '');
      const [width, height] = resolution(row.resolution);
+     const thumbnail = mediaURL(row.thumbnail_src) ?? mediaURL(row.thumbnail) ?? image;
      results.push({
        id: createHash('sha1').update(image).digest('hex'),
        title: displayTitle(row.title, host),
        image_url: image,
-       thumbnail: mediaURL(row.thumbnail_src) ?? mediaURL(row.thumbnail) ?? image,
+       thumbnail, thumbnail_sig: signMedia(config, thumbnail),
        page_url: page, source_name: host, width, height,
        engine: typeof row.engine === 'string' ? row.engine.slice(0, 60) : 'searxng',
      });

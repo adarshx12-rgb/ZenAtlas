@@ -33,8 +33,9 @@ async function api(url,options={}){let response;
 function duration(seconds){const s=Math.round(seconds),h=Math.floor(s/3600),m=Math.floor(s%3600/60),r=String(s%60).padStart(2,'0');return h?`${h}:${String(m).padStart(2,'0')}:${r}`:`${m}:${r}`;}
 function thumbnail(item){
  const wrap=node('div',undefined,'thumb-wrap');
- const source=safeURL(item.thumbnail);
- const src=source?`/api/thumbnail?${new URLSearchParams({url:source.href})}`:item.preview&&searchId?`/api/search/${encodeURIComponent(searchId)}/previews/${encodeURIComponent(item.id)}`:null;
+ // The signature covers the exact string the server sent, so that string goes back, not the parser's normalised href.
+ const source=item.thumbnail_sig&&safeURL(item.thumbnail);
+ const src=source?`/api/thumbnail?${new URLSearchParams({url:item.thumbnail,sig:item.thumbnail_sig})}`:item.preview&&searchId?`/api/search/${encodeURIComponent(searchId)}/previews/${encodeURIComponent(item.id)}`:null;
  if(src){const img=node('img');img.src=src;img.alt='';img.loading='lazy';img.addEventListener('error',()=>img.remove());wrap.append(img);}
  if(item.duration)wrap.append(node('span',duration(item.duration),'badge duration'));
  return wrap;
@@ -190,12 +191,13 @@ function syncTabs(tab){
 }
 
 function imageTile(item){
- const page=safeURL(item.page_url),source=safeURL(item.thumbnail)??safeURL(item.image_url);
+ // Only the thumbnail is signed, so the full image is no fallback: the server already uses it as the thumbnail when an engine gives none.
+ const page=safeURL(item.page_url),source=item.thumbnail_sig&&safeURL(item.thumbnail);
  if(!page||!source)return null;
  const tile=node('a',undefined,'image-tile');
  tile.href=page.href;tile.target='_blank';tile.rel='noopener noreferrer';
  const img=node('img');
- img.src=`/api/thumbnail?${new URLSearchParams({url:source.href})}`;
+ img.src=`/api/thumbnail?${new URLSearchParams({url:item.thumbnail,sig:item.thumbnail_sig})}`;
  img.alt=item.title||'';img.loading='lazy';
  // A tile whose image will not load is worse than no tile: it leaves a caption over a gap.
  img.addEventListener('error',()=>tile.remove());

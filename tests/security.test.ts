@@ -8,6 +8,14 @@ import { testConfig } from './helpers.js';
 import { createServer, request as httpRequest } from 'node:http';
 import { publicDestination, startEgress } from '../src/egress.js';
 import { reciprocalRankFusion } from '../src/ranking.js';
+import { signMedia, verifyMedia } from '../src/signing.js';
+import { createApp } from '../src/app.js';
+import { SearchService } from '../src/search.js';
+import { ingest } from '../src/catalogue.js';
+import { workOnce } from '../src/worker.js';
+import { imageSearchInput, searchImages } from '../src/images.js';
+import { contentInput, type SourceAdapter } from '../src/types.js';
+import { database, fixture } from './helpers.js';
 
 test('URL validation blocks private, metadata and unsafe schemes while preserving content identity',async()=>{
  for(const address of ['127.0.0.1','10.0.0.1','169.254.169.254','172.16.1.2','192.168.1.2','100.64.0.1','::1','::ffff:127.0.0.1','fe80::1','fc00::1','0.0.0.0'])assert.equal(isPublicIP(address),false,address);
@@ -88,4 +96,72 @@ test('superseded browser requests cannot commit old results',async()=>{
  await Promise.all([new Promise<void>(r=>setTimeout(()=>{if(controller.current(old.generation))commits.push('old');r();},20)),
    Promise.resolve().then(()=>{if(controller.current(current.generation))commits.push('current');})]);
  assert.deepEqual(commits,['current']);
+});
+test('a media signature verifies only for the exact URL it was issued for, under this secret',()=>{
+ const url='https://cdn.example.org/a/thumb.jpg';const sig=signMedia(testConfig,url);
+ assert.match(sig,/^[A-Za-z0-9_-]{43}$/,'base64url of a SHA-256 MAC');
+ assert.equal(verifyMedia(testConfig,url,sig),true,'a valid signature passes');
+ assert.equal(verifyMedia(testConfig,`${url}?x=1`,sig),false,'a changed URL fails');
+ assert.equal(verifyMedia({...testConfig,SESSION_SECRET:'rotated-session-secret-32-characters!'},url,sig),false,'a rotated secret invalidates it');
+ // timingSafeEqual throws on unequal lengths, so a malformed signature must be turned away before the comparison.
+ for(const bad of [undefined,'','short',`${sig}A`,sig.slice(1),'!'.repeat(43)])assert.equal(verifyMedia(testConfig,url,bad),false,String(bad));
+});
+test('the thumbnail proxy only fetches URLs this server signed',async()=>{
+ const db=await database();const app=await createApp(db,testConfig);
+ try{
+   const get=(query:Record<string,string>)=>app.inject(`/api/thumbnail?${new URLSearchParams(query)}`);
+   const url='https://cdn.example.org/a/thumb.jpg';
+   const missing=await get({url});
+   assert.equal(missing.statusCode,403,'an unsigned request is refused');assert.equal(missing.json().error.code,'invalid_signature');
+   const tampered=await get({url:'https://cdn.example.org/a/other.jpg',sig:signMedia(testConfig,url)});
+   assert.equal(tampered.statusCode,403,'a well-formed signature for a different URL is refused');
+   assert.equal((await get({url,sig:'not-a-signature'})).statusCode,403);
+   // A valid signature gets past the gate; the egress guard still sits behind it, so it is refused there and not as a 403.
+   const internal='http://127.0.0.1/x.jpg';
+   const signedInternal=await get({url:internal,sig:signMedia(testConfig,internal)});
+   assert.equal(signedInternal.statusCode,400);assert.equal(signedInternal.json().error.code,'unsafe_url');
+ }finally{await app.close();await db.close();}
+});
+test('every result sent to the client carries a signature for its exact thumbnail URL',async()=>{
+ const db=await database();
+ try{
+   const config={...testConfig,SEARXNG_BASE_URL:'http://localhost:8080'};const service=new SearchService(db,config);
+   const plain=await fixture(db,'Bedroom footage','A bright bedroom');
+   // Stored as given, so the emitted string is not the URL parser's normalised form; the signature has to cover what is sent.
+   const stored='https://Cdn.Example.org';
+   await ingest(db,contentInput.parse({url:`https://videos.example.com/watch/${crypto.randomUUID()}`,title:'Bright bedroom with a picture',
+     description:'Bright bedroom tour',duration:60,availability:'available',thumbnail:stored}),{fixture:true});
+   const adapter:SourceAdapter={name:'mock',capabilities:{transcripts:false,comments:false,embeds:false,accessible_media:false},
+     async search(){return {results:[contentInput.parse({url:'https://videos.example.com/watch/discovered?id=2',title:'Bright bedroom discovery',
+       description:'Bright bedroom tour',thumbnail:'https://cdn.example.org/found.jpg'})],next_cursor:null,status:{provider:'mock',status:'ok',message:'Mocked provider'}};}};
+   const started=await service.start({q:'bedroom',mode:'auto'},'alice');
+   await workOnce(db,config,[adapter]);
+   const finished=await service.poll(started.search_id,'alice');
+   const catalogue=finished.results.filter(r=>r.origin==='catalogue');const found=finished.discovered;
+   assert.equal(catalogue.length,2);assert.equal(found.length,1);
+   for(const r of [...catalogue,...found]){
+     if(r.thumbnail===null){assert.equal(r.thumbnail_sig,undefined,'no thumbnail, no signature');continue;}
+     assert.equal(verifyMedia(config,r.thumbnail,r.thumbnail_sig),true,r.thumbnail);
+   }
+   assert.equal(catalogue.find(r=>r.id===plain.id)!.thumbnail_sig,undefined);
+   assert.equal(catalogue.find(r=>r.thumbnail===stored)!.thumbnail,stored,'the catalogue row is emitted as stored');
+   assert.equal(found[0].thumbnail,'https://cdn.example.org/found.jpg');
+   assert.equal(verifyMedia(config,found[0].thumbnail!,catalogue.find(r=>r.thumbnail===stored)!.thumbnail_sig),false,'a signature does not carry over to another URL');
+ }finally{await db.close();}
+});
+test('image results are emitted with a signature for their thumbnail',async()=>{
+ const db=await database();
+ const searxng=createServer((_req,res)=>{res.setHeader('content-type','application/json');res.end(JSON.stringify({results:[
+   {url:'https://example.org/page',title:'Cat',img_src:'https://cdn.example.org/full.jpg',thumbnail_src:'https://cdn.example.org/thumb.jpg',engine:'bing images'},
+   {url:'https://example.net/other',title:'Dog',img_src:'https://cdn.example.net/only.jpg',engine:'bing images'}]}));});
+ await new Promise<void>(r=>searxng.listen(0,'127.0.0.1',r));
+ const config={...testConfig,SEARXNG_BASE_URL:`http://127.0.0.1:${(searxng.address() as any).port}`};
+ try{
+   const {results}=await searchImages(db,config,imageSearchInput.parse({q:'pets'}));
+   assert.equal(results.length,2);
+   assert.equal(results[0].thumbnail,'https://cdn.example.org/thumb.jpg');
+   assert.equal(results[1].thumbnail,results[1].image_url,'an image with no thumbnail of its own is proxied from the full image');
+   for(const image of results)assert.equal(verifyMedia(config,image.thumbnail,image.thumbnail_sig),true,image.thumbnail);
+   assert.equal(verifyMedia(config,results[1].thumbnail,results[0].thumbnail_sig),false);
+ }finally{await new Promise<void>(r=>{searxng.closeAllConnections();searxng.close(()=>r());});await db.close();}
 });
