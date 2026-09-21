@@ -19,7 +19,7 @@
  </nav>
  <div class="results-heading"><h2 id="results-heading">Search results</h2><button id="cancel" class="secondary" hidden>Stop discovery updates</button></div>
  <p id="status" role="status" aria-live="polite">Enter a query to search the catalogue.</p>
- <div id="deep-row" class="deep-row" hidden><button id="deep" type="button">Dig deeper ↓</button><span class="hint">Deep dive, 2–3 minutes: goes down the rabbit hole through niche platforms, later result pages and leads from what was found, to surface underrated sources that ordinary searches miss.</span></div>
+ <div id="deep-row" class="deep-row" hidden><button id="deep" type="button">Dig deeper ↓</button><span class="hint">Search specialist sites, archive catalogues and references. When sources finish, all finds are checked and ranked together by relevance.</span></div>
  <div id="notices"></div>
  <section id="results" class="thumb-grid" aria-label="Search results"><div id="catalogue-results" class="card-group"></div><div id="found-results" class="card-group"></div>
   <h3 id="deep-heading" class="group-heading" hidden>Deep dive finds</h3><div id="deep-results" class="card-group"></div></section>
@@ -27,6 +27,9 @@
  <button id="image-more" class="secondary" hidden>Load more images</button>
  <button id="more" class="secondary" hidden>Load more results</button>
  <button id="retry" class="secondary" hidden>Retry search</button>
+ <form id="missing" class="missing" hidden><label for="missing-note">Missing something? Name a site, creator or video this search should have found.</label>
+  <div class="searchbar"><input id="missing-note" minlength="3" maxlength="500" required placeholder="For example: nothing from r/OSINT"><button type="submit" class="secondary">Tell the engine</button></div>
+  <p id="missing-status" class="hint" role="status" aria-live="polite"></p></form>
  <aside><strong>Evidence matters.</strong> A metadata match is a lead. A transcript supports spoken content. Visual findings require inspected media. Check the source’s rights before reusing footage.</aside>
 </main>
 <footer>ZenAtlas · Search with evidence</footer>

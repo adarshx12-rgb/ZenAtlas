@@ -161,6 +161,9 @@ def test_local_version_is_analysed_stored_and_served_by_the_search_api(database,
     assert [(s["dialogue"], s["dialogue_source"]) for s in scenes] == [
         ("Welcome aboard the night ferry.", "sidecar_file"), ("Lights on the harbour wall.", "sidecar_file")]
     assert scenes[0]["tags"] == ["ferry", "night"]
+    assert rows(owner, "SELECT start_seconds,end_seconds,timing_quality,origin FROM transcript_segments WHERE content_id=%s ORDER BY start_seconds", (content_id,)) == [
+        {"start_seconds": 5.5, "end_seconds": 7.5, "timing_quality": "provided", "origin": "scene-worker:sidecar_file"},
+        {"start_seconds": 11.5, "end_seconds": 13.5, "timing_quality": "provided", "origin": "scene-worker:sidecar_file"}]
     [analysis] = rows(owner, "SELECT subtitle_source,rejection_codes,inspected_ranges,model FROM scene_analyses WHERE media_version_id=%s", (version["id"],))
     assert analysis == {"subtitle_source": "sidecar_file", "rejection_codes": {"outside_timeline": 1},
                         "inspected_ranges": [[4, round(min(duration + 4, 20), 3)]], "model": MODEL}

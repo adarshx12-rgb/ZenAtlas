@@ -9,6 +9,15 @@ from zenatlas_scenes.gemini import (FRAME_SAMPLING_FPS, AnalysisRequest, GeminiS
 from zenatlas_scenes.media import MediaInaccessible
 from zenatlas_scenes.subtitles import Cue
 from zenatlas_scenes.validation import RESPONSE_JSON_SCHEMA
+from zenatlas_scenes.gemini import focus_ranges, provider_schema
+
+
+def test_caption_focus_keeps_absolute_timing_and_does_not_claim_clipped_inspection():
+    cues = [Cue(1, 100, 110, "A ghost reveal"), Cue(2, 115, 125, "The ghost returns"), Cue(3, 240, 250, "End credits")]
+    assert focus_ranges("ghost reveal", cues, 300) == [[85, 140]]
+    prompt = build_prompt(300, cues, "ghost reveal")
+    assert "Segment the whole video" in prompt
+    assert "not verified matches" in prompt
 
 EMPTY = '{"media_viewable":true,"scenes":[]}'
 
@@ -73,7 +82,7 @@ def test_youtube_request_uses_the_url_explicit_sampling_and_the_json_schema():
     assert video.file_data.file_uri == "https://www.youtube.com/watch?v=aqz-KE-bpKQ" and video.video_metadata.fps == FRAME_SAMPLING_FPS
     assert "10:34 (634.500 seconds)" in prompt.text and '"text": "Hello"' in prompt.text
     config = call["config"]
-    assert config.response_mime_type == "application/json" and config.response_json_schema == RESPONSE_JSON_SCHEMA
+    assert config.response_mime_type == "application/json" and config.response_schema == provider_schema(RESPONSE_JSON_SCHEMA)
     assert config.media_resolution == types.MediaResolution.MEDIA_RESOLUTION_LOW and "Never invent" in config.system_instruction
 
 

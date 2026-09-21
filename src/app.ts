@@ -15,6 +15,21 @@ import {addSource,setAlternative} from './source-health.js';
 import { listPolicyRules, setPolicyRule } from './policy-rules.js';
 import { dependencyReport } from './watchdog.js';
 import { imageSearchInput, searchImages } from './images.js';
+import { auditReport } from './learning.js';
+
+// Learning-loop feedback on a search: a vote on one of its results (with an optional reason), opening a result,
+// or a note on what was missing. Unlike /api/feedback it works for every result, retained in the catalogue or not.
+const searchFeedback = z.object({
+ kind:z.enum(['vote','open','missing']).default('vote'),
+ url:z.string().url().max(2048).optional(),
+ useful:z.boolean().optional(),
+ reason:z.enum(['off_topic','low_quality','wrong_format','duplicate']).optional(),
+ note:z.string().trim().min(3).max(500).optional(),
+}).strict()
+ .refine(v=>(v.kind==='missing')===!v.url,'A result address is required, except for a missing-result note')
+ .refine(v=>v.kind!=='missing'||!!v.note,'Say what was missing')
+ .refine(v=>v.kind!=='vote'||typeof v.useful==='boolean','A vote needs useful true or false')
+ .refine(v=>!v.reason||v.useful===false,'A reason goes with a not-useful vote');
 
 const sourceListQuery = z.object({
  status:z.enum(['all','candidate','active','paused','rejected']).default('all'),
@@ -120,6 +135,24 @@ export async function createApp(db:DB,config:Config) {
      ON CONFLICT(owner,content_id) DO UPDATE SET useful=$3,updated_at=now()`,[owner(req),input.content_id,input.useful]);
    return reply.code(204).send();
  });
+ app.post('/api/search/:id/feedback',async(req,reply)=>{
+   const input=searchFeedback.parse(req.body);
+   const snapshot=await service.owned(id(req.params),owner(req));
+   const item=input.url?(snapshot.results as Result[]).find(r=>r.canonical_url===input.url):undefined;
+   if(input.url&&!item) throw new ApiError(403,'result_required','Feedback requires a result from your search.');
+   const trace=snapshot.job_id?(await db.query('SELECT id FROM search_traces WHERE job_id=$1',[snapshot.job_id])).rows[0]?.id??null:null;
+   const values=[owner(req),snapshot.id,trace,snapshot.query,input.kind,input.url??null,input.useful??null,input.reason??null,input.note??null];
+   if(input.kind==='missing') await db.query(`INSERT INTO result_feedback(owner,search_id,trace_id,query,kind,url,useful,reason,note)
+     VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)`,values);
+   else await db.query(`INSERT INTO result_feedback(owner,search_id,trace_id,query,kind,url,useful,reason,note) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)
+     ON CONFLICT(owner,search_id,kind,url) WHERE kind IN ('vote','open') DO UPDATE SET useful=excluded.useful,reason=excluded.reason,updated_at=now()`,values);
+   // A vote on a retained catalogue record also feeds the searcher's bounded personal ranking, as /api/feedback does.
+   if(input.kind==='vote'&&item&&(await db.query(`SELECT 1 FROM content c JOIN sources s ON s.id=c.source_id WHERE c.id=$1
+     AND s.status='active' AND c.expires_at>now() AND c.availability<>'unavailable'`,[item.id])).rows.length)
+     await db.query(`INSERT INTO feedback(owner,content_id,useful) VALUES($1,$2,$3)
+       ON CONFLICT(owner,content_id) DO UPDATE SET useful=$3,updated_at=now()`,[owner(req),item.id,input.useful]);
+   return reply.code(204).send();
+ });
  app.get('/api/feedback',async req=>(await db.query('SELECT content_id,useful,updated_at FROM feedback WHERE owner=$1 ORDER BY updated_at DESC LIMIT 100',[owner(req)])).rows);
  app.delete('/api/feedback',async(req,reply)=>{await db.query('DELETE FROM feedback WHERE owner=$1',[owner(req)]);return reply.code(204).send();});
  app.get('/api/admin/sources',async(req,reply)=>{admin(req);
@@ -160,6 +193,8 @@ export async function createApp(db:DB,config:Config) {
    dependencies:Object.fromEntries((await db.query('SELECT status,count(*)::int AS n FROM dependency_checks GROUP BY status')).rows.map(r=>[r.status,r.n])),
  };});
  app.get('/api/admin/dependencies',async req=>{admin(req);return dependencyReport(db,config);});
+ app.get('/api/admin/audits',async req=>{admin(req);
+   return auditReport(db,z.object({limit:z.coerce.number().int().min(1).max(200).default(50)}).strict().parse(req.query).limit);});
  app.get('/admin',async(_req,reply)=>reply.redirect('/admin.html'));
  await app.register(staticFiles,{root:resolve('public'),index:'index.html'});
  return app;

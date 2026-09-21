@@ -33,11 +33,12 @@ interface SearchResponse {
   status: 'complete' | 'discovering' | 'partial' | 'cancelled';
   depth: 'quick' | 'deep';
   stage: 'queued' | 'searching' | 'following' | 'checking' | null; // set while status is 'discovering'
-  results: Result[];                // one page, catalogue results first, then discoveries
+  results: Result[];                // one page of the current snapshot order
+  ranked: Result[];                 // complete visible snapshot, checked matches first
   next_cursor: string | null;
   has_more: boolean;
   discovered: Result[];             // every discovered result so far, in display order
-  catalogue_total: number;          // catalogue results in the snapshot; later positions are discoveries
+  catalogue_total: number;          // catalogue count, not a boundary in the ranked list
   discovery_job_id: string | null;
   providers: {
     provider: string;
@@ -62,11 +63,11 @@ An unapproved candidate result has a temporary ID that does not correspond to pe
 
 Poll the owning session's search to retrieve its first page, its discovered results and discovery status. It is also the job-progress endpoint; the shared job itself has no public unowned route. The reference client polls every 1.5 seconds while `status` is `discovering` (at most 4 minutes for a quick search and 15 for a deep one), and keeps polling through up to five failed requests in a row. Resume manually while the search is unexpired if necessary. Discovery is labelled delayed after three minutes (plus `DEEP_SEARCH_SECONDS` for a deep search); lack of an active worker cannot leave the UI claiming an empty successful search.
 
-While discovery runs, `discovered` grows as the worker stores the best leads of each engine's answer; new unique results are appended after the frozen local ranking and after earlier discoveries. `stage` is `searching` while engines answer, `following` while a deep dive follows leads from its finds, and `checking` while pages and comments are checked and the finds are ranked with AI. When a search completes, its own finds (a quick search's discoveries, or a deep dive's `deep_find` results) are reordered by its ranking within their places and the ones its judge rejected are removed; other listed entries only take its judgement, badges and moments, and catalogue results keep their place. Render `discovered` in the given order and update cards whose data changed. To retrieve later catalogue pages, use `/api/search` with its original parameters and the returned cursor, while `catalogue_total` exceeds what is loaded. Client code should preserve the current page cursor across first-page polls, retain displayed cards and ignore stale query responses. New searches can rank newly retained content normally.
+While discovery runs, existing catalogue or quick-search results remain visible. `stage` is `searching` while sources answer, `following` during reference searches, and `checking` during evidence checks and AI ranking. New discoveries are published after all launched requests and checks finish. At completion, render `ranked` in its given order: it combines catalogue, quick and deep results, placing checked matches first in descending relevance order and removing rejected candidates. Update existing card positions as well as their details. `discovered` is the discovery-only subset. Paginated consumers can still use `results` and signed cursors, but must refresh their first page at completion because the order may change. Catalogue-only pagination is stable. See [coverage and limits](DISCOVERY_QUALITY.md).
 
 ## POST /api/search/:id/deep
 
-Continues the owner's search as a deep dive and returns a new search (a `SearchResponse` with a new `search_id` and `depth: "deep"`). The new search starts with every result of the original, including discoveries, and follows a deep discovery job for the same query and filters, which adds only results the quick search for that query did not find (marked `deep_find`) after them; asking again reuses that job while it runs and for the discovery cache period. Poll the new ID. Deepening a deep search returns it unchanged. A `catalogue`-mode search returns 400 `discovery_disabled`. The request needs the `X-Requested-With` header, counts as a write, and uses the same discovery budgets as `/api/search`; when a budget is exhausted the response is `partial` with a notice and keeps the original results. Page the new search with `depth=deep` added to the original parameters.
+Continues the owner's search as a deep dive and returns a new search with a new `search_id` and `depth: "deep"`. Existing results remain visible while specialist searches run. The completed job rechecks its previous quick discoveries and new finds together; a new result marked `deep_find` can take the first position when it is more relevant. Asking again reuses the job within the discovery cache period. Poll the new ID. Deepening a deep search returns it unchanged. Catalogue-only searches return 400 `discovery_disabled`. The request needs `X-Requested-With`, counts as a write, and respects the normal discovery budgets. Exhausted budgets preserve existing results and return a partial status. Page the new search with `depth=deep` added to its original parameters.
 
 Search snapshots expire after `SEARCH_TTL_SECONDS`; another session or expired ID receives 404. Invalid/tampered/mismatched cursors return 400. Revoked/deleted content is removed from API results; source-policy changes invalidate snapshots. Therefore a page may contain fewer than `limit` results after revocation.
 
@@ -84,8 +85,21 @@ Stops the owner's subscription to discovery updates, returning `{"status":"cance
 
 The IDs above are placeholders. Feedback requires a result in the caller's active search and an eligible retained content record. Repeated votes update one `(owner, content_id)` row, returning 204. Personal ranking impact is bounded; there is no anonymous global learning signal. `GET /api/feedback` returns only the caller's last 100 records. `DELETE /api/feedback` deletes their feedback, returning 204. Account authentication and anti-Sybil controls are required before adding global learned signals.
 
+## Search feedback (learning loop)
+
+`POST /api/search/:id/feedback` records the owner's feedback on a search for the learning loop ([LEARNING.md](LEARNING.md)). Needs the session cookie and `X-Requested-With`, returns 204.
+
+```json
+{"url":"RESULT_CANONICAL_URL","useful":false,"reason":"off_topic"}
+{"kind":"open","url":"RESULT_CANONICAL_URL"}
+{"kind":"missing","note":"Nothing from r/OSINT"}
+```
+
+`kind` defaults to `vote`, which needs `useful`; `reason` (`off_topic`, `low_quality`, `wrong_format`, `duplicate`) only goes with `useful:false`. A vote or open replaces the previous one for that result. `missing` takes a 3–500 character `note` and no `url`. The URL must be a result of that search (otherwise 403); another session's search is 404. Unlike `/api/feedback`, any result can be rated, retained or not; a vote on a retained record also updates the personal `feedback` row.
+
 ## Administration
 
+- `GET /api/admin/audits`: the learning loop's report (bearer token required; optional `limit`, 1–200, default 50). `summary` covers searcher feedback and the last 7 days of audits (averages, depth verdicts, missing-source probe outcomes, reviewer agreement); `audits` lists recent audited searches with metrics, findings, probes, review and feedback.
 - `GET /api/admin/sources`: sources including candidates and policies, each with `saved_videos` (retained content count); bearer token required. Optional query: `status` (`all` default, `candidate`, `active`, `paused`, `rejected`), `q` (case-insensitive substring of the domain or name), `sort` (`newest` default, `seen` for most discovery appearances, `domain`), `limit` (1–500, default 200) and `offset`. The `X-Total-Count` response header gives the number of matching sources.
 - `GET /api/admin/sources/summary`: `{statuses:{active,candidate,...},rules,saved_videos}` counts.
 - `POST /api/admin/sources/bulk`: `{ids:[up to 100 source IDs],policy}` applies one `examples/source-policy.json`-shaped policy to each source through the same path as `PATCH`; returns `{updated}`.
@@ -101,6 +115,8 @@ The health endpoint also returns source health states, original and active domai
 Collection imports, transcript imports, embedding requests and content deletion are available through the server-side CLI; there is no public arbitrary-fetch or arbitrary-analysis route. `GET /health/live` and `GET /health/ready` return minimal process/database readiness status.
 
 ## Error envelope
+
+Discovery results may include `evidence_coverage`: comment/caption availability, counts of retained transcript passages and analysed scenes, and `basis` (`metadata`, `viewer_claims`, or `direct_evidence`). This describes evidence coverage, not a probability of correctness. Pending scene work appears as a partial `scene_analysis` provider status and is not used as completed evidence. See [VIDEO_EVIDENCE.md](VIDEO_EVIDENCE.md).
 
 ```json
 {"error":{"code":"service_unavailable","message":"Search is temporarily unavailable. Please retry."}}

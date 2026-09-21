@@ -1,0 +1,9 @@
+{
+  "queries": [
+    {"q":"ghost videos with insane plot twist","criteria":"A serious ghost story with an actual major narrative reveal. Fictional and supposedly real stories are both eligible. Funny sketches, horror-comedy and parody are unrelated. Generic scary clips and clickbait twist claims are weak matches."},
+    {"q":"fight club reveal scene","criteria":"The actual identity reveal scene from Fight Club; distinguish the scene from reviews, recaps and unrelated fights."},
+    {"q":"underrated github repos to earn money","criteria":"Usable GitHub repositories with a concrete plausible way to build a paid product or service. No guaranteed-income claims; inspect license and maintenance separately."},
+    {"q":"wwe commentators gone crazy moments","criteria":"WWE clips with clearly excited or shocked commentator reactions, preferably with exact moments. Crowd-only reactions and generic match highlights are weaker."}
+  ],
+  "grading": "Human review only: 0 unrelated, 1 weak or partial, 2 relevant, 3 strong exact match. Leave null if not reviewed. Assess observed content, not model score or site fame."
+}

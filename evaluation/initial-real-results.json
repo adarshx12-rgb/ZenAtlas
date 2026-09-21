@@ -1,0 +1,2751 @@
+{
+  "ranking_version": "relevance-v2",
+  "generated_at": "2026-09-20T20:29:01.183Z",
+  "human_judged": false,
+  "queries": [
+    {
+      "q": "ghost videos with insane plot twist",
+      "criteria": "A ghost or supernatural story with an actual major narrative reveal. Generic scary clips and clickbait twist claims are weak matches.",
+      "elapsed_ms": 107098,
+      "providers": [
+        {
+          "provider": "brave",
+          "status": "ok",
+          "message": "Brave discovery completed."
+        },
+        {
+          "provider": "searxng",
+          "status": "ok",
+          "message": "Discovery completed."
+        },
+        {
+          "provider": "internet_archive",
+          "status": "ok",
+          "message": "Internet Archive film catalogue searched directly."
+        },
+        {
+          "provider": "planner",
+          "status": "ok",
+          "message": "AI planned 6 searches for lesser-known sources."
+        },
+        {
+          "provider": "leads",
+          "status": "ok",
+          "message": "AI followed 8 leads from what it found, in 2 rounds."
+        },
+        {
+          "provider": "candidate_pool",
+          "status": "partial",
+          "message": "1735 candidates found; the best 160 keyword matches were selected for checking after all sources answered."
+        },
+        {
+          "provider": "youtube",
+          "status": "ok",
+          "message": "YouTube details and viewer comments checked."
+        },
+        {
+          "provider": "reddit",
+          "status": "ok",
+          "message": "Reddit discussions checked."
+        },
+        {
+          "provider": "pages",
+          "status": "ok",
+          "message": "12 of 20 result pages were checked, 5 in a browser."
+        },
+        {
+          "provider": "archive_evidence",
+          "status": "partial",
+          "message": "0 comment/review samples and 0 caption tracks available across 3 checked results."
+        },
+        {
+          "provider": "judge",
+          "status": "ok",
+          "message": "Results were checked for relevance by AI."
+        },
+        {
+          "provider": "scene_analysis",
+          "status": "partial",
+          "message": "1 videos queued for scene analysis; these pending analyses are not evidence in this ranking."
+        }
+      ],
+      "candidates": [
+        {
+          "url": "https://www.youtube.com/watch?v=m3c4pF7lHkw",
+          "title": "The Funniest Ghost Plot Twist Ever! 💀🤣#Shorts #YouTubeShorts #Ghosts #Horror #Comedy #Funny #Scary #",
+          "description": "What if ghosts were the ones terrified of humans? 👻💀 This hilarious AI-generated horror comedy flips the story upside down with a crazy plot twist you won't see coming! 👍 Like if you laughed 💬 Comment: Team Ghost 👻 or Team Human 😎 🔔 Subscribe for more viral AI comedy & horror shorts! #cursed #robbinhood #supernaturally",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 10,
+            "reason": "A horror-comedy ghost short featuring a supernatural narrative and a surprise plot twist.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=J4WXop9q1lU",
+          "title": "1976: Lost HEXHAM HEADS Werewolf Report REDISCOVERED",
+          "description": "31 Oct 2024 · The footage in this notorious report about werewolves conjured up by two mysterious Celtic stone heads ... 'Hexham Heads' on Nationwide has been ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "The video features a supernatural/werewolf news investigation report, but lacks a narrative plot twist.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "c919ff69-5086-497e-b4c5-8dbe61b7b878",
+              "start_seconds": 84,
+              "end_seconds": 141,
+              "summary": "The scream at 1:29 is myself stepping barefoot on a plug 🤣 · 1:51 - Hugh Laurie",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "74a61f98-0769-44b6-96cd-136e8078cf38",
+                "f06e9f53-5769-4bc3-aeb4-e90ecba64434"
+              ]
+            },
+            {
+              "id": "e8b35fcf-ac7e-4daf-a464-75c15f899914",
+              "start_seconds": 473,
+              "end_seconds": 510,
+              "summary": "I recall being utterly spooked by this in '76.  But! The werewolf you glimpse @ 7:58 looks a lot like Oliver Reed in \"Curse of the Werewolf\" movie from 1961. · 8:00 😂😂😂",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "4193581f-264e-4206-943a-37d68a5cb673",
+                "00054fdd-ffb6-4aa7-9e3c-1f13b4497440"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://vimeo.com/1052860714",
+          "title": "Ghost | Short Film",
+          "description": "This is \"Ghost | Short Film\" by Jonathan Lau on Vimeo, the home for high quality videos and the people who love them.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "A short film titled Ghost, but no evidence of a supernatural narrative with a plot twist.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://vimeo.com/235818122",
+          "title": "Ghosted 2017 - Short Film Trailer | Videos & Movies on Vimeo",
+          "description": "When an attractive woman visits a therapist to rid herself of the love-sick ghost that&#x27;s haunting her, she realizes she&#x27;s going to have to take matters into her own hands.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "This is a short film trailer about a ghost and a therapist, but lacks evidence of a plot twist.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://vimeo.com/24349738",
+          "title": "One Winter's night - an animated short film and gothic ghost story | Videos & Movies on Vimeo",
+          "description": "My first short film based on a rhyme i wrote back in 2008 - inspired by a love of gothic literature, ghost stories, horror fiction and movies (in general)....more",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "This is an animated gothic ghost story short film, but there is no evidence of an insane plot twist.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://web.archive.org/all/20181018003754/http://www.filmsite.org/horrorfilms.html",
+          "title": "Horror Films",
+          "description": "100 Most Iconic Film Images · Greatest Movie Props of All-Time · Movie Title Screens · Plot Twists, Spoilers, Surprise Endings · Robots in Film · Sexiest Films of All-Time · War Films · OSCARS · Awards History - By Year · Most Awards Winners · Best Picture ·",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "An archive page mentioning film lists and plot twists, but not a ghost video.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://spectra.video/videos/watch/18248de0-8115-4d76-8678-e703b93224a6",
+          "title": "Dark Blue Sky (2021) | Experimental Short Film",
+          "description": "A short film that only uses photos and intertitles, this visual scenario depicts the sky as the sun sets. Picture yourself as the sunset leads into night. Writer, Producer, and Editor: Cristobal Martinez Music: YouTube Audio Library Genre(s):...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "An experimental short film about a sunset, not ghost-themed.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.bfi.org.uk/lists/10-great-found-footage-films",
+          "title": "10 great found-footage films | BFI",
+          "description": "October 31, 2024 — Twenty-five years after The Blair Witch Project arrived in the UK, we take a Halloween dive into the faked realities of the found-footage movie, from Cannibal Holocaust to Creep.\"As their house becomes the site of paranormal activity, eldest son Mathew sets up cameras to determine whether Alice’s spirit has returned home. Alongside talking-head interviews, Lake Mungo shows us security camera footage that may have captured Alice’s ghost, but whether this is the family’s manifestation or a real spectre is left for the viewer to decide. Turning the story of a drowned girl into a mockumentary film examining the supernatural events following her death, Lake Mungo questions why we are fascinated by the suffering of others, bringing us uncomfortably close to a family’s grief and forcing us to question our voyeuristic impulses.\"\"Long before we picked up film cameras to tell stories, gothic literature employed the trope of the found document to imply a validity to their terrifying narratives. Often regarded as the first gothic novel, Horace Walpole’s 1764 book The Castle of Otranto is written in the form of a 16th-century manuscript – purporting to be a rediscovered …",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "An article discussing found-footage films like Lake Mungo and paranormal security camera footage, but not a video itself.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=7T-JNX5yoaU",
+          "title": "[NO MID-ROLL ADS] 5 More INSANE True Crime Plot Twists | MrBallen Fan Favorites Vol. 3",
+          "description": "Welcome back to Midnight Mystery Station, your premium broadcast for the strange, dark, and mysterious. You asked, and we delivered. This compilation is entirely dedicated to the stories that broke the internet. We have gathered the highest-rated, most requested MrBallen episodes featuring the most insane, unpredictable true crime plot twists ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Compilation of true crime plot twists (MrBallen), but focuses on true crime rather than supernatural/ghost stories.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.vulture.com/article/ghosts-season-2-episode-13-recap-ghost-hunter.html",
+          "title": "‘Ghosts’ Season 2, Episode 13 Recap: ‘Ghost Hunter’",
+          "description": "Freddie has special-ordered a Latvian ghost-hunting machine called the Ghost Trap 2000. When the ghosts notice a little sticker on it that says “two and under,” they assume it’s some toy that Freddie got tricked into buying.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "This is a TV recap about a ghost hunter episode, lacking evidence of a video with a plot twist.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        }
+      ]
+    },
+    {
+      "q": "fight club reveal scene",
+      "criteria": "The actual identity reveal scene from Fight Club; distinguish the scene from reviews, recaps and unrelated fights.",
+      "elapsed_ms": 104909,
+      "providers": [
+        {
+          "provider": "brave",
+          "status": "ok",
+          "message": "Brave discovery completed."
+        },
+        {
+          "provider": "searxng",
+          "status": "ok",
+          "message": "18 of 20 search engines answered; Brave Videos (rate-limited), Brave (rate-limited) did not."
+        },
+        {
+          "provider": "internet_archive",
+          "status": "ok",
+          "message": "Internet Archive film catalogue searched directly."
+        },
+        {
+          "provider": "planner",
+          "status": "ok",
+          "message": "AI planned 6 searches for lesser-known sources."
+        },
+        {
+          "provider": "leads",
+          "status": "ok",
+          "message": "AI followed 8 leads from what it found, in 2 rounds."
+        },
+        {
+          "provider": "candidate_pool",
+          "status": "partial",
+          "message": "1408 candidates found; the best 160 keyword matches were selected for checking after all sources answered."
+        },
+        {
+          "provider": "youtube",
+          "status": "ok",
+          "message": "YouTube details and viewer comments checked."
+        },
+        {
+          "provider": "reddit",
+          "status": "ok",
+          "message": "Reddit discussions checked."
+        },
+        {
+          "provider": "pages",
+          "status": "ok",
+          "message": "12 of 20 result pages were checked, 5 in a browser."
+        },
+        {
+          "provider": "archive_evidence",
+          "status": "partial",
+          "message": "0 comment/review samples and 0 caption tracks available across 3 checked results."
+        },
+        {
+          "provider": "judge",
+          "status": "ok",
+          "message": "Results were checked for relevance by AI."
+        },
+        {
+          "provider": "scene_analysis",
+          "status": "partial",
+          "message": "3 videos queued for scene analysis; these pending analyses are not evidence in this ranking."
+        }
+      ],
+      "candidates": [
+        {
+          "url": "https://www.youtube.com/watch?v=WKVxKrrbz1E",
+          "title": "Fight Club 1999: Jack finds out the truth.",
+          "description": "Enjoy the videos and music you love, upload original content, and share it all with friends, family, and the world on YouTube.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 9,
+            "reason": "Video clip featuring the exact Fight Club reveal scene with comments discussing the twist and analysis.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "2a55e626-b270-48bb-be6d-7138ce6108c4",
+              "start_seconds": 1,
+              "end_seconds": 36,
+              "summary": "guys please catch the flash thing and type the second like 00:06 or something im obsessed with it, i can't stop it there",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "195fe0b3-d833-4e52-a527-c78d21babe21"
+              ]
+            },
+            {
+              "id": "1143e839-d069-428c-b21f-dd32fa771c11",
+              "start_seconds": 38,
+              "end_seconds": 90,
+              "summary": "0:43 the subtle swoosh followed by '' We have just lost cabin pressure \" is just perfection!!! · 0:43 tyler durden tyler durden · 0:44 cabin pressure",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "88694faf-fef4-40cf-8cd6-0ac258532610",
+                "f299a6e4-f2ba-4e02-a59f-8c4a224d8276",
+                "ff57c713-4507-43b0-b407-28a0b33dadfc"
+              ]
+            },
+            {
+              "id": "63da0f0f-595a-4ea4-9da2-6c15c9cc4cda",
+              "start_seconds": 90,
+              "end_seconds": 153,
+              "summary": "1:35 Once we realize what's going on, Brad subtly shifts to being a villain, and his mannerisms actually start to resemble Jeffrey Goines, his crazy antagonist from \"12 Monkeys.\" · 2:03 a friend of mine on acid.",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "c1529570-be72-498f-a29e-73fb9d71f117",
+                "05548c7c-1eac-4619-a1ec-38d2cf447093"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=5KiLVOAK7U0",
+          "title": "Fight Club frame splice scene",
+          "description": "not even a hummingbird could catch tyler's handywork SUBSCRIZZLE: https://bit.ly/2UH7uwp MY OTHER \"works\" ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 9,
+            "reason": "Video focuses specifically on the single-frame splice scene of Tyler Durden with viewer analysis.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "c0964a5b-87f1-4f90-a6ab-6fc0ab9656c7",
+              "start_seconds": 12,
+              "end_seconds": 22,
+              "summary": "0:17 \"Nobody knows that they saw it, but they did.\" · 0:17 The way the mother and son slowly turn to look at each other always gets me.... Neither want to be the one to SAY what they think they saw. The parent/child dynamic will not allow either to confirm such things. · 0:17 a-",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "5a1f791e-0d74-40b3-b5ac-842909e0b3c8",
+                "358601e9-2e64-4ab3-bd13-13684171c158",
+                "0b574ac2-d49c-4f4a-a9ca-a24fc7a8fbcd"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=USWVa3_GEtM",
+          "title": "CRAZY \"TYLER DURDEN TWIST\" REACTIONS! *FIGHT CLUB* REVEAL SCENE! BRAD PITT! FIRST TIME WATCHING!",
+          "description": "2.5K views - 8 months ago - YouTube - CineMash",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Reaction compilation focusing specifically on the Tyler Durden reveal scene.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.threads.com/@early.man_256/post/DaFurnoDAVP/video-in-fight-club-tyler-durden-secretly-appears-in-single-frame-flashes-before-the/",
+          "title": "️ In Fight Club, Tyler Durden secretly appears in single-frame ...",
+          "description": null,
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Short clip focusing on Tyler Durden's hidden single-frame appearances in Fight Club.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.facebook.com/100071131374238/videos/your-subconscious-already-met-tyler-durden-before-the-narrator-didin-fight-club-/1409391061028360/",
+          "title": "Fight Club's Hidden Tyler Durden Hotel Waiter Flash Explained",
+          "description": null,
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 7,
+            "reason": "Short clip explaining the hidden Tyler Durden hotel waiter flash scene.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=iJXIWJnXtQ8",
+          "title": "Fight Club - What it all Meant",
+          "description": "A thematic analysis of Fight Club. If you have a question please ask below and I will get back to you as soon as possible.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Thematic and narrative analysis video of Fight Club discussing its self-discovery journey and ending.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "937bbb6d-47b9-4a75-a1f2-3e49d34ab6d9",
+              "start_seconds": 151,
+              "end_seconds": 186,
+              "summary": "2:36 no his breakfast will taste better than any they have ever had because he thought he was going to die the night before. having survived a very near-death experience the little things in life become so much sweeter.",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "db7c14a1-103a-479c-b07b-07134b0f8c4d"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.reddit.com/r/todayilearned/comments/ig96f/til_tyler_durden_brad_pitt_was_inserted_into/",
+          "title": "r/todayilearned on Reddit: TIL Tyler Durden (Brad Pitt) was inserted into certain scenes of Fight Club for a single frame",
+          "description": "... Isn&#x27;t funny that Brad Pitt is very different than Tyler Durden. ... In the movie Fight Club, during the scene about Tyler Durden splicing single frames of pornography into family friendly films, children are seen watching a movie.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Reddit thread discussing Tyler Durden being inserted into single frames in Fight Club.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.instagram.com/reel/DXoKLDMkQj7/",
+          "title": "In Fight Club, the single-frame flashes of Tyler Durden appear ...",
+          "description": null,
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "This is a short video clip showing the single-frame flashes of Tyler Durden.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://fediverse.tv/videos/watch/36ca2737-dbea-4440-a078-eeda1cdbfc07",
+          "title": "Retro-crítica: 'El Club de la lucha' ('Fight Club')",
+          "description": "Una de las películas más importantes de la década de los noventa, mirando a la sociedad de consumo y la violencia de una manera impactante. La película de David Fincher merece análisis por cómo sigue sorprendiendo a generaciones de cinéfilos.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Foreign language video review discussing the film generally.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://m.youtube.com/playlist?list=PLPV3nUyTvwwq5HWVV69K6UHzRVVtmvbRv",
+          "title": "Fight Club Audio Commentary (director & cast)",
+          "description": "Share your videos with friends, family, and the world",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Playlist page for the director and cast audio commentary.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "not_permitted",
+            "captions": "not_permitted",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=vh6SDvDhDN4",
+          "title": "Fight Club 1999 - Tyler's Ending Scene HD",
+          "description": "1M views - Aug 16, 2020 - YouTube - Havik",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Shows the ending scene of Fight Club featuring Tyler and the Narrator, but lacks technical analysis.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "996569fd-a2c1-4001-bd12-476e039bea4d",
+              "start_seconds": 104,
+              "end_seconds": 139,
+              "summary": "1:49 This has been (and always will be) a moment of wonder for almost 20 years of my life. Try to come up with a better ending scene",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "e69511f3-f9bd-410d-9361-473726cfdb93"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.facebook.com/screenmovieco/videos/director-david-fincher-is-known-for-his-obsession-with-realism-and-this-scene-fr/2038364263623217/",
+          "title": "Director David Fincher is known for his obsession with realism, and this scene from Fight Club is the ultimate proof. Before filming, Fincher pulled Edward Norton aside and told him to actually hit …",
+          "description": "21.7K views - 8 months ago - Facebook - Go Screenmovie",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Short Facebook video clip discussing David Fincher directing Edward Norton in Fight Club.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.instagram.com/reel/DaFMc7wPMO_/",
+          "title": "In Fight Club, Tyler Durden secretly appears in single-frame ...",
+          "description": null,
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Instagram clip showing single-frame appearances of Tyler Durden in Fight Club.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unsupported",
+            "captions": "unsupported",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=QbsoUNb5tEg",
+          "title": "FIGHT CLUB | SCENEPACK | 4K 60 FPS | ALL MOMENTS",
+          "description": "1.4M views - Jul 16, 2024 - YouTube - hell.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "A 36-minute scene pack containing various moments from Fight Club rather than a dedicated analysis.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=Hzox6ea78vs",
+          "title": "Every time Tyler flashes in Fight Club (1999)",
+          "description": "There it is !",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "This video compiles the single-frame appearances of Tyler Durden before the reveal, but does not analyze the main reveal sequence itself.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.tumblr.com/thedirectorscommentary/158814984430/fight-club-1999-directors-commentary-with",
+          "title": "Fight Club (1999) Director’s Commentary with director David Fincher Cast Commentary with director David Fincher, stars Brad... – @thedirectorscommentary on Tumblr",
+          "description": "Cast Commentary with director David Fincher, stars Brad Pitt, Edward Norton and Helena Bonham Carter · Writers Commentary with screenwriter Jim Uhls and novelist Chuck Palahniuk · Crew Commentary with director of photography Jeff Cronenweth, costume designer Michael Kaplan, production designer Alex McDowell, visual effects supervisor Kevin Haug and digital animator Richard &quot;Dr.&quot; Baily · https://mega.nz/#F!KV0zQTQb!L8DefL9w5E1bZiQf_P7fxA · #audio commentary#director&#x27;s commentary#cast commentary#cast and crew commentary#writer&#x27;s commentary#crew commentary#fight club#brad pitt#edward norton#david fincher#helena bonham carter#jim uhls#chuck palahniuk#1999#tyler lives#project mayhem#rize or die",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Tumblr link for audio commentary files.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://www.radiotimes.com/movies/fight-club-ending-explained/",
+          "title": "Fight Club ending explained | Alternate endings and book ending | Radio Times",
+          "description": "The ending to Fight Club includes one of the most memorable twists in cinema – when it is revealed that Brad Pitt&#x27;s character Tyler Durden is, in fact, nothing more than the imaginary alter ego of the narrator (Edward Norton), and as such, ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Radio Times article explaining the ending twist and alternate endings of Fight Club.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://nofilmschool.com/fight-club-dvd-20th-anniversary",
+          "title": "Why The 'Fight Club' Special Edition DVD Is Almost Better Than the Movie | No Film School",
+          "description": "Fincher and his cast and crew are very candid and precise with their remarks regarding the making of this modern classic; listening to Fincher, who appears on two separate commentary tracks, break down the minutiae of his choices -- and offer making-of trivia -- is the equivalent of having him do a frame-by-frame analysis at a classroom screening.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "No Film School article discussing the detailed director and cast commentaries on the Fight Club DVD.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://screenrant.com/fight-club-ending-explained-meaning/",
+          "title": "Fight Club Ending Explained (In Detail)",
+          "description": "In the twist, Fight Club reveals Tyler Durden is a manifestation of the Narrator&#x27;s inner conflict. This re-frames Fight Club&#x27;s entire narrative, but it also makes its ending scenes and climax somewhat ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "ScreenRant article providing a detailed explanation of the Fight Club ending twist.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://flickdirect.com/4k-review/3337/fight-club/4k.ashx",
+          "title": "Fight Club SteelBook Delivers a Stunning New Presentation 4K Review | FlickDirect",
+          "description": "The extras are Commentary by Director David Fincher, Commentary by David Fincher, Brad Pitt, Edward Norton &amp; Helena Bonham Carter, Writers&#x27; Commentary by Chuck Palahniuk and Jim Uhls, Technical Commentary by Alex McDowell, Jeff Cronenweth, Michael Kaplan &amp; Kevin Haug, A Hit in the Ear: Ren Klyce and the Sound Design of Fight Club, Flogging Fight Club Featurette, Insomniac Mode: I Am Jack&#x27;s Search Index, Work Behind-the-Scenes Vignettes with Multiple, Angles and Commentary, Deleted and Alternate Scenes, Publicity Material Trailers, TV and Internet Spots, PSAs, Music Video, Promotional Galleries, and Art Galleries.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Review mentioning various special features and commentaries, but not a dedicated scene analysis.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.tumblr.com/thedirectorscommentary/tagged/fight%20club",
+          "title": "fight club - The Director's Commentary",
+          "description": "Cast Commentary with director David Fincher, stars Brad Pitt, Edward Norton and Helena Bonham Carter",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Mentions director commentary on the cast, but lacks specific visual analysis of the reveal.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=QUyUdHRs3CY",
+          "title": "Fight Club Commentary (Fincher, Norton, Pitt, Carter) - YouTube",
+          "description": null,
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Full feature commentary track where viewers discuss various scenes, but not a focused breakdown of the reveal.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.instagram.com/p/DNwuQaq5CGB/",
+          "title": "Deep-Ocean of films on Instagram: \"In Fight Club (1999), David Fincher sneaks in single-frame flashes of Tyler Durden before he \"officially\" appears. These flashes happen four times. 👉 These flashes …",
+          "description": "55K likes, 62 comments - ocean.of.films on August 23, 2025: \"In Fight Club (1999), David Fincher sneaks in single-frame flashes of Tyler Durden before he \"officially\" appears. These flashes happen four times.👉 These flashes hint that Tyler isn't real but a projection of the Narrator's mind.#cinema #film #fightclub #davidfincher # ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Short clip pointing out single-frame flashes of Tyler Durden, touching on foreshadowing elements of the reveal.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unsupported",
+            "captions": "unsupported",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "http://www.bilibili.com/video/av116628209536959",
+          "title": "搏击俱乐部 Fight Club (1999) 【主演：爱德华·诺顿 布拉德•皮特】",
+          "description": "杰克（爱德华•诺顿 饰）是一个大汽车公司的职员，患有严重的失眠症，对周围的一切充满危机和憎恨。 一个偶然的机会，杰克遇上了卖肥皂的商人泰勒（布拉德•皮特），一个浑身充满叛逆、残酷和暴烈的痞子英雄，并因为自己公寓失火而住进了泰勒破旧不堪的家中。两人因缘际会地成为了好朋友，并创立了“搏击俱乐部”：一个让人们不戴护具而徒手搏击，宗旨在于发泄情绪的地下组织。 俱乐部吸引了越来越多的人，逐渐发展成为一个全国性的地下组织，而泰勒也以自己个人的魅力，吸引着那些盲目的信徒。俱乐部的成员们到处滋事打架、大肆破坏，泰勒本",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Full film upload of Fight Club without specific focus on the reveal scene.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=hHPAKXl1c8c",
+          "title": "The Most Powerful Scene In Fight Club (Analysis + Covert Meaning + Application) Raymond K Hessel",
+          "description": "23.9K views - Nov 16, 2022 - YouTube - Bizarre Breakdowns",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Focuses on the Raymond K Hessel scene instead of the main reveal sequence.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.ladbible.com/entertainment/film/fight-club-brad-pitt-tyler-flash-plot-twist-220046-20240429",
+          "title": "Fight Club fans stunned after noticing Tyler 'flash' early in film which gives away entire plot twist",
+          "description": "Fight Club fans are only just realising that Brad Pitt made sneaky appearances in a range of scenes which hint at the epic plot twist in the 1999 film.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Article and video snippet discussing clues leading up to the reveal.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.threads.com/@borninfluenced/post/DOpeAxOgP8I/in-fight-club-tyler-durden-appears-4-times-before-he-is-properly-introduced-by-f?hl=en",
+          "title": "In Fight Club, Tyler Durden appears 4 times before he is properly introduced by flash frames lasting only fractions of a second. Later in the film, Tyler is seen doing this exact same thing whilst working in the movie theatre.",
+          "description": "In Fight Club, Tyler Durden appears 4 times before he is properly introduced by flash frames lasting only fractions of a second. Later in the film, Tyler is seen doing this exact same thing whilst working in the movie theatre.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Video clip pointing out early Tyler Durden flashes before the reveal.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.wikihow.com/Fight-Club-Explained",
+          "title": "Fight Club Explained: The Film's Final Twist & More",
+          "description": "Moreover, the iconic final scene ... place in the book.[10] X Research source · The book’s ending features the Narrator waking up in a hospital....",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Text-based WikiHow guide explaining the final twist of Fight Club.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.businessinsider.com/fight-club-details-mistakes-you-missed-easter-eggs-photos",
+          "title": "'Fight Club' Details, Subtle Mistakes You Probably Missed + Photos - Business Insider",
+          "description": "&quot;Fight Club,&quot; starring Brad Pitt and Edward Norton, is full of sneaky details, including a pre-movie warning and Norton actually punching Pitt.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Business Insider article discussing subtle details and mistakes in Fight Club.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.slashfilm.com/557935/three-great-david-fincher-audio-commentaries/",
+          "title": "Three Great David Fincher Audio Commentaries - Slash Film",
+          "description": "Fincher: The British film sensors came back and said, &quot;We find the scene Angel Face gets beaten up goes on a little too long.&quot; Well, that&#x27;s the point. The point of the scene is you set up the rules of Fight Club, set up how people are supposed ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "SlashFilm article mentioning David Fincher audio commentaries.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.rogerebert.com/scanners/opening-shots-fight-club",
+          "title": "Opening Shots: 'Fight Club'",
+          "description": "“Fight Club” opens from remote darkness into unrestrained chaos, the camera pulling back at near-breakneak speed out of an unknown quarter through various layers of strangely textured substances, the frantic nature compounded by the Dust Brothers’ pulse-techno soundtrack. Ultimately, the microscopic journey reveals itself to have been taking place within the brain of the film’s unnamed main character (Edward Norton).",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Roger Ebert website review focusing on the opening shots of Fight Club.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.esquire.com/uk/culture/a32206341/fight-club-easter-eggs/",
+          "title": "Recommended Re-Viewing: 'Fight Club' Is A Much Better Film The Second Time Around",
+          "description": "The film&#x27;s mantra that “You do ... that Fincher doesn&#x27;t want you to let on. Fight Club hinges on the big reveal about Tyler, but watching it knowing the final twist proves ......",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Esquire article discussing why Fight Club is better on a second viewing knowing the twist.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "http://www.dvdbeaver.com/film/DVDCompare6/fightclub.htm",
+          "title": "Fight Club Blu-ray - Brad Pitt Edward Norton",
+          "description": "Most (maybe all?) of the shorter ... &#x27;deleted scenes&#x27; and 2 Public Service Announcements (in SD). Within a labyrinth of menu options we get Insomniac Mode: I Am Jack&#x27;s Search Index is a viewing option accessing a &#x27;Commentray Guide&#x27; which allows you to view the topics being discussed in each of the four featurette commentaries in &#x27;real time&#x27; You can then switch between commentary tracks during the film to pursue the discussion topics that most interest you. Ex. for the &#x27;Behind the Scenes&#x27; ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "DVD Beaver review detailing the special features and commentary guides on the Fight Club Blu-ray.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://tomdavidson92.medium.com/david-fincher-has-lots-of-ideas-fight-club-352cce8749fc",
+          "title": "David Fincher has lots of ideas — Fight Club | by Tom Davidson | Medium",
+          "description": "Since then he has made 9 feature length films, each one released with a director’s commentary. ... Listening to Fincher’s commentaries one thing is clear — he loves his films bristling with ideas. With almost every scene, even with some specific shots, he is trying to present an idea.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Medium article discussing David Fincher's director commentaries and filmmaking ideas.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://biffbampop.com/2014/11/21/leiki-veskimets-on-the-fight-club-dvd-commentary/",
+          "title": "Leiki Veskimets On…the Fight Club DVD Commentary",
+          "description": "But a rare few are the gems that are the “Fight Club” DVD commentary, narrated primarily by leads Brad Pitt and Edward Norton along with director David Fincher, with the addition of a few bits (recorded separately) by Helena Bonham Carter.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Review article discussing the Fight Club DVD commentary tracks.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://web.archive.org/web/20141002232826/http:/www.theguardian.com/film/2007/mar/04/3",
+          "title": "DVD club: Fight Club | Film | The Observer",
+          "description": "Apart from being bizarrely funny, Fight Club is a morally and visually complex work featuring two young actors who have been unafraid of playing lunatics, fascists and psychopaths and it was the subject of considerable critical abuse and even demands for a ban. This definitive two-disc edition features four different audio commentaries and restores two scenes cut by the BBFC.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Archived Observer review discussing the complexities and special edition of Fight Club.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://movieweb.com/exclusive-video-first-look-at-a-fight-club-blu-ray-commentary-clip/",
+          "title": "EXCLUSIVE VIDEO: First Look at a Fight Club Blu-ray Commentary Clip!",
+          "description": "We have a brand new exclusive clip from the upcoming Fight Club 10th Anniversary Blu-ray disc, which hits the shelves on November 17. Click below for our exclusive clip featuring Tyler Durden&#x27;s incarnation with commentary by director David Fincher.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Movieweb clip featuring a Blu-ray commentary preview for Fight Club.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://thefincheranalyst.com/tag/audio-commentary/",
+          "title": "Audio commentary – The Fincher Analyst",
+          "description": "The second was David Fincher’s Fight Club. Fincher has lived inside my ear for most of my life. Thanks to a superfan known as The Fincher Analyst, who maintains a thorough database of pretty much anything and everything related to Fincher and his work, I have the audio from the director’s available commentary tracks, plus a few of his interviews, downloaded onto my iPod.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Mentions Fight Club audio commentary but contains no video or analysis of the reveal scene.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://medium.com/@brooksreynolds/fight-club-scene-breakdown-96c208212d23",
+          "title": "Fight Club: Scene Breakdown. One of the reasons Fight Club is my… | by Brooks Reynolds | Medium",
+          "description": "This time just watching the members of Project Mayhem walk through the bathroom. It seems obvious but it’s good to let the whole scene play out in whatever angle covers it, setting up the camera and lighting takes a while and having a few dudes walk through can help immensely in the edit.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Written text discussing a Project Mayhem scene, not a video analysis of the reveal.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://theasc.com/article/flashback-fight-club/",
+          "title": "Fight Club: Anarchy in the U.S.A.",
+          "description": "Fincher has worked with a score of prominent cinematographers on commercials, music videos and feature films. Interestingly, he began shooting Alien3 with the late Jordan Cronenweth, ASC — who left the production due to his battle with Parkinson’s disease, and was replaced by Alex Thomson, BSC. For Fight Club, Fincher enlisted Jordan’s son, Jeff Cronenweth [ASC], to realize his uniquely dystopian vision. Cronenweth (wearing cap, just behind the camera on left) and his crew set up double coverage for a conversation scene between Tyler Durden (Brad Pitt) and the film’s nameless narrator (Edward Norton).",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Cinematography article discussing the production of Fight Club generally.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        }
+      ]
+    },
+    {
+      "q": "underrated github repos to earn money",
+      "criteria": "Usable GitHub repositories with a concrete plausible way to build a paid product or service. No guaranteed-income claims; inspect license and maintenance separately.",
+      "elapsed_ms": 89802,
+      "providers": [
+        {
+          "provider": "brave",
+          "status": "ok",
+          "message": "Brave discovery completed."
+        },
+        {
+          "provider": "searxng",
+          "status": "ok",
+          "message": "Discovery completed."
+        },
+        {
+          "provider": "internet_archive",
+          "status": "ok",
+          "message": "Internet Archive film catalogue searched directly."
+        },
+        {
+          "provider": "planner",
+          "status": "ok",
+          "message": "AI planned 6 searches for lesser-known sources."
+        },
+        {
+          "provider": "leads",
+          "status": "ok",
+          "message": "AI followed 8 leads from what it found, in 2 rounds."
+        },
+        {
+          "provider": "candidate_pool",
+          "status": "partial",
+          "message": "1213 candidates found; the best 160 keyword matches were selected for checking after all sources answered."
+        },
+        {
+          "provider": "youtube",
+          "status": "ok",
+          "message": "YouTube details and viewer comments checked."
+        },
+        {
+          "provider": "reddit",
+          "status": "ok",
+          "message": "Reddit discussions checked."
+        },
+        {
+          "provider": "pages",
+          "status": "ok",
+          "message": "15 of 20 result pages were checked, 5 in a browser."
+        },
+        {
+          "provider": "judge",
+          "status": "ok",
+          "message": "Results were checked for relevance by AI."
+        }
+      ],
+      "candidates": [
+        {
+          "url": "https://github.com/The-Swarm-Corporation/AutoHedge",
+          "title": "GitHub - The-Swarm-Corporation/AutoHedge: Build your autonomous hedge fund in minutes. AutoHedge harnesses the power of swarm intelligence and AI agents to automate market analysis, risk management, and trade execution. · GitHub",
+          "description": "Fork the repository · Create a feature branch (git checkout -b feature/AmazingFeature) Commit changes (git commit -m &#x27;Add some AmazingFeature&#x27;) Push to the branch (git push origin feature/AmazingFeature) Open a Pull Request · MIT License. See LICENSE for details. Swarms for the AI agent framework · Issue Tracker: GitHub Issues · Community: Discord · AutoHedge by The Swarm Corporation",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 9,
+            "reason": "Provides AutoHedge, a functional niche open-source GitHub repo for autonomous AI trading.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "not_permitted",
+            "captions": "not_permitted",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://www.buildmvpfast.com/blog/github-repos-making-money-open-source-profitable-2026",
+          "title": "GitHub Repos Making Money Open Source Profitable 2026",
+          "description": "It’s one of the most underrated self-hosted tools for client work, largely because the chatbot-builder market looks crowded until you realize how few options are self-hostable. How people monetize: Lead-gen bot agency for local businesses. Embedded chatbots in client websites. Managed hosting with monthly retainers. GitHub: knadh/listmonk | Stars: 16k+ | License: AGPL-3.0",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 9,
+            "reason": "Details specific open-source GitHub repositories powering profitable businesses and services.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://nitingavhane.medium.com/10-github-repos-quietly-making-developers-rich-while-they-sleep-156430c8fc7e",
+          "title": "10 GitHub Repos Quietly Making Developers Rich While They Sleep | by Nitin Gavhane | May, 2026 | Medium",
+          "description": "Hi everyone, I am Nitin Gavhane and in this blog I’m going to show you 10 open-source GitHub repos that smart developers are turning into real recurring income — some charging $2,000/month, some doing six-figure exits — without writing a single line of core product code. The repos do the heavy lifting. The money is in what you do with them.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 9,
+            "reason": "Directly focuses on open-source GitHub repositories that developers can monetize into recurring income.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://agentbreaking.com/blog/10-github-repos-passive-income-ai/",
+          "title": "10 Open-Source GitHub Repos That Can Earn You Money While You Sleep — AgentBreaking Blog",
+          "description": "The Swarm Corporation operates swarms.xyz as their SaaS platform. The repo itself is open source under MIT, but the commercial play is clear: premium agent orchestration, AUM-based fees, or subscription tiers for autonomous trading. The repo&#x27;s tagline — &quot;Goldman Sachs but open source&quot; — signals serious ambition. Verdict: High potential. Autonomous trading is the holy grail of passive income, and AutoHedge has the most complete architecture of the bunch.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Lists 10 open-source GitHub repos aimed at passive income including AutoHedge.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://www.sourcepulse.org/projects/2315995",
+          "title": "AutoHedge by The-Swarm-Corporation - SourcePulse",
+          "description": "Structured Output: Generates trade recommendations and analysis in JSON format using Pydantic models. Extensible Framework: Designed for customization and extension with new capabilities.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Mentions AutoHedge, an open source project for autonomous trading and financial generation.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://x.com/ihtesham2005/status/2043674753979052389",
+          "title": "Ihtesham Ali on X: \"this feels like cheating. Someone built an autonomous hedge fund in Python and open sourced the whole thing. It's called AutoHedge. The pipeline runs 4 specialized AI agents back to back: - Director Agent: generates trading strategy and thesis - Quant Agent: validates it with\" / X",
+          "description": "Most people spending $500/month on trading tools don&#x27;t have risk architecture this clean. 1.1K stars. MIT License. 100% Opensource. GitHub - The-Swarm-Corporation/AutoHedge: Build your autonomous hedge fund in minutes.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Highlights AutoHedge by The-Swarm-Corporation, an open source autonomous hedge fund repository.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://medium.com/coding-nexus/10-github-repos-that-print-money-while-you-sleep-ca297456862c",
+          "title": "10 GitHub Repos that Print Money While You Sleep | by Code Coup | Coding Nexus | Medium",
+          "description": "These ten repositories automate money-related tasks such as trading, advertising, lead generation, content creation, and video production using AI, agents, and open infrastructure.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Covers GitHub repos that automate money-related tasks such as trading and lead generation.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://tom-doerr.github.io/repo_posts/2025/11/10/The-Swarm-Corporation-AutoHedge.html",
+          "title": "The Swarm Corporation Autohedge | MAGI//ARCHIVE",
+          "description": "MAGI//ARCHIVE // SURVEILLANCE FEED Discovered repositories from the open source frontier View the Project on GitHub The-Swarm-Corporation/AutoHedge Autonomous hedge fund using swarm intelligence and AI agents View on index · View in 3D MapMAGI//ARCHIVE // SURVEILLANCE FEED Discovered repositories from the open source frontier View the Project on GitHub The-Swarm-Corporation/AutoHedge Autonomous hedge fund using swarm intelligence and AI agents View on index · View in 3D Map",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Presents AutoHedge, an open source autonomous hedge fund repository.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://siva1331.wordpress.com/2026/06/05/github-repositories-making-developers-rich/",
+          "title": "10 GitHub Repositories That Are Making Developers Rich in 2026 (Without Building a Product) – AI Dev Journal",
+          "description": "GitHub SaaS businesses work exactly the same way. ... An open-source workflow automation tool. ... Zapier + Make.com that you own. Connect different systems together. ... Imagine your Laravel site receives loan applications. ... No additional backend coding required. ... Learning n8n would probably take only a few days. The money is usually not in creating software.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Explores GitHub repositories and workflow tools like n8n used to generate recurring developer income.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://themenonlab.blog/blog/ai-finance-github-repos-march-2026",
+          "title": "The 5 GitHub Repos Rewriting How AI Trades Money",
+          "description": "Mar 30, 2026 · This week, five repos in the AI finance space exploded in stars — and they tell a coherent story about where the industry is heading. Here’s what they are, why they matter, and what the pattern means.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Reviews five trending GitHub repositories in the AI finance and automated trading space.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://zhuo7.cn/en/resources/the-swarm-corporation-autohedge",
+          "title": "The-Swarm-Corporation / AutoHedge - AI Tools - DevRadar",
+          "description": "Build your autonomous hedge fund in minutes. AutoHedge harnesses the power of swarm intelligence and AI agents to automate market analysis, risk management, ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Presents AutoHedge, a GitHub-backed AI tool for running an autonomous hedge fund to earn money.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://x.com/KyeGomezB/status/1866733825008734437",
+          "title": "Kye Gomez (swarms) on X: \"2 / Github: https://t.co/lCaicG4kZh\" / X",
+          "description": "10 Dec 2024 · Just pushed a new update to the autonomous hedge fund! ⎆ Fixed a context issue with Tickr Agent ⎆ Outputs JSON files with logs of all trading ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Social post highlighting the AutoHedge GitHub repository for automated crypto trading.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=RegzpFdW8pM",
+          "title": "10 GitHub Repos So Good They Shouldn't Be Free — And the Paid Tools They Kill",
+          "description": "Right now there's a free, open-source GitHub repo that does the exact job you're paying a monthly bill for. Probably six of them. This is a tour of 10 repositories so good they genuinely shouldn't be free — and for each one, the exact paid product it replaces. Every number in this video was fact-checked before publishing. Where a viral claim ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Video showcases powerful GitHub repos including financial and automation tools.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://osrepos.com/repo/the-swarm-corporation-autohedge",
+          "title": "AutoHedge: Build Your Autonomous AI Hedge Fund with Swarm Intelligence - OSRepos",
+          "description": "GitHub Repository: https://github.com/The-Swarm-Corporation/AutoHedge",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 7,
+            "reason": "OSRepos summary page detailing AutoHedge autonomous AI hedge fund repository.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://www.blog.brightcoding.dev/2025/11/26/autohedge-build-your-autonomous-ai-hedge-fund-in-minutes-2025-guide",
+          "title": "AutoHedge: Build Your Autonomous AI Hedge Fund in Minutes (2025 Guide) | Bright Coding",
+          "description": "Multi-agent swarm intelligence Institutional-grade risk management Open-source &amp; free Game-changer for quant devs 👇 https://github.com/The-Swarm-Corporation/AutoHedge #Python #AlgoTrading #AI",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 7,
+            "reason": "Blog guide covering AutoHedge setup for automated trading.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=9xY3gi7bWrE",
+          "title": "Introducing AutoHedge: A Fully Autonomous Hedge Fund Operated by Swarms of Agents 🤖📈🤖",
+          "description": "4K views - Dec 11, 2024 - YouTube - Kye Gomez",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 7,
+            "reason": "Video review introducing AutoHedge open-source trading framework repository.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.opensourcealternatives.to/blog/open-source-self-hosting-stack",
+          "title": "The Best Open Source Developer Tools for Building a Self-Hosted Indie Stack in 2026",
+          "description": "May 19, 2026 — 8 tools evaluated, covering every layer of a production indie dev stack · Every tool is Docker-based with active GitHub maintenance · Self-hosting cuts a typical $150-200/month SaaS bill to $10-20/month VPS cost plus your time · Most tools run on a 4 GB RAM VPS; Nextcloud and Supabase benefit from dedicated resources · *n8n uses a Sustainable Use License: self-hosted version is free for personal and small commercial use.\"Deploy any Dockerfile, Docker Compose stack, or Git repository (GitHub, GitLab, Gitea, Bitbucket) One-click templates for Supabase, n8n, WordPress, Plausible Analytics, Minio, Ghost, and 60+ more · Automatic SSL via Let's Encrypt (Traefik handles certificate provisioning behind the scenes) Multi-server support: manage multiple VPS instances from one dashboard · Preview deployments: spin up a test environment per pull request ... Indie devs and small teams paying $20-100/month on Railway, Render, or Heroku who want to move to a VPS without a DevOps hire.\"\"8 tools evaluated, covering every layer of a production indie dev stack · Every tool is Docker-based with active GitHub maintenance · Self-hosting cuts a typical $150-200/month SaaS bill to …",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 7,
+            "reason": "Curated list of developer tools for building an indie tech stack.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.toolkitly.com/bountyhub",
+          "title": "BountyHub: Place & Solve GitHub Bounties | Toolkitly",
+          "description": "Jun 8, 2025 · BountyHub is a platform that connects GitHub issues with monetary rewards, allowing project maintainers to place bounties and developers to earn money by solving them. Whether you're a maintainer looking for contributions or a developer aiming to get paid, BountyHub makes the process seamless. The platform provides a clean, dedicated UI for managing GitHub bounties, eliminating the need for ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 7,
+            "reason": "Discusses BountyHub, a repository-related platform connecting GitHub issues with monetary rewards.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.aiclarity.me/repos/index.html",
+          "title": "Best GitHub Repos for Building AI Trading Agents",
+          "description": "A curated list of the best open-source repos for building and backtesting AI trading agents, reviewed from a trader's seat.A curated list of the best open-source repos for building and backtesting AI trading agents, reviewed from a trader's seat.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 7,
+            "reason": "Curated list focused on open-source repositories for building AI trading agents.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.bountyhub.dev/",
+          "title": "BountyHub",
+          "description": "TURN GITHUB ISSUES INTO BOUNTIES, GET PAID TO SOLVE THEM BountyHub lets you place bounties on any GitHub repository and rewards developers for solving them. Whether you're a maintainer looking for contributions or a developer looking to get paid, we make it easy.TURN GITHUB ISSUES INTO BOUNTIES, GET PAID TO SOLVE THEM BountyHub lets you place bounties on any GitHub repository and rewards developers for solving them. Whether you're a maintainer looking for contributions or a developer looking to get paid, we make it easy.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 7,
+            "reason": "References BountyHub, letting developers earn money by solving GitHub repository issues.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://gitpay.me/",
+          "title": "Gitpay - The payment platform for work delivered",
+          "description": "Attach bounties and get work done. Let contributors pick tasks and submit pull requests. The contributor claims the bounty when the work is merged.Learn more · Get paid for work delivered on Git repositories. Browse issues and work on what you like. Submit pull requests and get your work accepted. Claim the bounty and receive payment through Gitpay in your bank account.Learn more ... Send a simple payment link and get paid by clients worldwide — no setup required on their side and no back-and-forth about how to pay.\"Whether you want to charge customers, fund open-source work, or get paid for your contributions, Gitpay offers a clear payment flow for real work. ... Get paid by clients anywhere — no setup required on their side. Set up payout schedules and get daily, weekly, or monthly payouts directly on your account. This works for developers, consultants, freelancers, and service providers who want a simple way to request payment.Learn more · Attach bounties and get work done.\"\"Attach bounties and get work done. Let contributors pick tasks and submit pull requests. The contributor claims the bounty when the work is merged.Learn more · Get paid for work delivered on Git …",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 7,
+            "reason": "Gitpay platform that attaches bounties to GitHub repositories for developers to earn money.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.instagram.com/reel/Dc-o4hHAVRD/",
+          "title": "The-Swarm-Corporation/AutoHedge You might ... - Instagram",
+          "description": null,
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 7,
+            "reason": "Short video showcasing the AutoHedge repository.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unsupported",
+            "captions": "unsupported",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://codertoentrepreneurs.substack.com/p/9-underrated-github-repositories",
+          "title": "9 Underrated Github Repositories I Wish I Had Known Earlier as a Programmer",
+          "description": "In this list I have included nine repositories that I wish I had known about earlier as a developer. I&#x27;m sure these GitHub repositories will help you get your work done quickly.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 7,
+            "reason": "Highlights underrated GitHub repositories for developer productivity.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://findarepo.com/repo/The-Swarm-Corporation/AutoHedge/",
+          "title": "The-Swarm-Corporation/AutoHedge — Stats, Growth ...",
+          "description": "Dec 10, 2024 · AutoHedge, from The-Swarm-Corporation, is an AI agent framework built in Python; it was in development for over a year and was last pushed a few months back. On GitHub, the project describes itself as \"Build your autonomous hedge fund in minutes. AutoHedge harnesses the power of swarm intelligence….\"",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 7,
+            "reason": "Highlights AutoHedge, an AI agent framework on GitHub for building autonomous hedge funds.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://githot.dev/en/repo/The-Swarm-Corporation/AutoHedge",
+          "title": "The-Swarm-Corporation/AutoHedge — Githot",
+          "description": "Sep 7, 2026 · Build your autonomous hedge fund in minutes. AutoHedge harnesses the power of swarm intelligence and AI agents to automate market analysis, risk management, and trade execution.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 7,
+            "reason": "Profiles the AutoHedge GitHub repository for automated crypto or stock trading.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.remio.ai/post/swarm-corporation-autohedge-is-trending-but-its-biggest-claim-needs-proof",
+          "title": "Swarm Corporation AutoHedge Is Trending, but Its Biggest ...",
+          "description": "7 Sept 2026 · The repository promises an autonomous hedge fund that analyzes markets, manages risk, and executes trades through specialized AI agents. Its ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 7,
+            "reason": "Discusses Swarm Corporation's AutoHedge GitHub repository for automated trading.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.kdnuggets.com/10-github-repositories-to-master-quant-trading",
+          "title": "10 GitHub Repositories to Master Quant Trading - KDnuggets",
+          "description": "In this article, we review 10 GitHub repositories that cover strategies, frameworks, coding examples, research tools, interview questions, curated resources, and practical guides.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 7,
+            "reason": "Lists 10 GitHub repositories for quantitative trading strategies and frameworks.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.threads.com/@quantscience_/post/DRPtyWoDvsH/what-is-auto-hedge-auto-hedge-harnesses-the-power-of-swarm-intelligence-and-ai",
+          "title": "1. What is AutoHedge? AutoHedge harnesses the power of swarm intelligence and AI agents to automate market analysis, risk management, and trade execution. It does all of this in Python.",
+          "description": "I have one more thing before you go. If you want to become an algorithmic trader in 2026, then I&#x27;d like to help. ... GitHub - The-Swarm-Corporation/AutoHedge: Build your autonomous hedge fund in minutes.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 7,
+            "reason": "Covers the AutoHedge GitHub repository for algorithmic and automated trading.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=tQVH9aMd_fg",
+          "title": "GitHub Trending Repositories: The-Swarm-Corporation/AutoHedge 🇬🇧",
+          "description": "Automate your hedge fund strategy with AI agent swarms Autonomous AI Swarm Trading Platform for Solana - Automates ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 7,
+            "reason": "Short video showcasing the AutoHedge GitHub repository for automated trading strategies.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://pypi.org/project/autohedge/",
+          "title": "autohedge · PyPI",
+          "description": "AutoHedge AutoHedge is an enterprise-grade autonomous agent hedge fund that trades on your behalf. It combines swarm intelligence and specialized AI agents to perform end-to-end market analysis, risk management, and execution with minimal human intervention. Current support: Full autonomous trading on Solana.AutoHedge AutoHedge is an enterprise-grade autonomous agent hedge fund that trades on your behalf. It combines swarm intelligence and specialized AI agents to perform end-to-end market analysis, risk management, and execution with minimal human intervention. Current support: Full autonomous trading on Solana.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 7,
+            "reason": "PyPI listing for AutoHedge, an enterprise autonomous agent hedge fund tool.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.indiehackers.com/post/0-to-1000-github-stars-for-your-open-source-projects-db2efb62f1",
+          "title": "0 to 1000 GitHub Stars for Your Open Source Projects - Indie Hackers",
+          "description": "February 27, 2026 — Use your GitHub Stars as a form of currency to buy things that will help you monetize - whether it is legitimacy to sell hosting, or entry into pitch competitions, or cross marketing your other products.\"Use your GitHub Stars as a form of currency to buy things that will help you monetize - whether it is legitimacy to sell hosting, or entry into pitch competitions, or cross marketing your other products.\"\"Stars shouldn’t be a metric you optimize for - no amount of GitHub Stars are worth a single paying user. Regardless, if your business model is based around selling hosting for your dev tool, stars can help establish legitimacy and social proof that you can then convert to sales. I’m the creator of Open Interface which is an open source computer use app (much like Claude’s Computer Use but it preceded it by almost a year).\"\"As someone working to build a digital presence and attract collaborators for a few open-source side projects, I found those tips invaluable. Just embedded a star count graph in one of my repos! ... Wonderful article. Thanks man ... A quick question: how do you strike the balance between growing the user base and addressing feature requests …",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Discusses using GitHub stars for monetization but lacks a direct repository tool.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://github.com/AmberSahdev/Open-Interface",
+          "title": "GitHub - AmberSahdev/Open-Interface: Control Any Computer Using LLMs. · GitHub",
+          "description": "Control Any Computer Using LLMs. Contribute to AmberSahdev/Open-Interface development by creating an account on GitHub.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Presents Open-Interface GitHub repository for LLM computer control, but monetization is indirect.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "not_permitted",
+            "captions": "not_permitted",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://trendshift.io/repositories/25842",
+          "title": "The-Swarm-Corporation/AutoHedge — GitHub trending stats ...",
+          "description": "AutoHedge harnesses the power of swarm intelligence and AI agents to automate market analysis, risk management, and trade execution.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Trendshift stats for AutoHedge repository on GitHub trending lists.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://context7.com/the-swarm-corporation/autohedge",
+          "title": "AutoHedge (the-swarm-corporation/autohedge) | Context7",
+          "description": "https://github.com/the-swarm-corporation/autohedge · Admin · Tokens:8,739 · Snippets:65 · Trust Score:9 · License:MIT · Update:1 week ago · ContextChat · Benchmark · Latest · Show doc for... CodeInfoShow Results ·",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Context7 documentation page for AutoHedge repository.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://catchthesignal.com/github-opportunities",
+          "title": "GitHub Bounties & Good First Issues — $100+ Open Source Tasks | Catch The Signal",
+          "description": "Track projects with GitHub Sponsors, companies funding open source, and maintainers earning $1k-$20k/month. We show you which projects are actively seeking contributors and which companies sponsor developers.\"Paid GitHub bounties and good first issues from $100 to $5K. IssueHunt-style payouts across trending repos, updated hourly. Start earning from open source today.\"\"Track paid GitHub issues, good first issues, bounties, and open source job opportunities. Build your portfolio, earn money, and land your dream developer job through strategic open source contributions.\"\"Track projects with GitHub Sponsors, companies funding open source, and maintainers earning $1k-$20k/month. We show you which projects are actively seeking contributors and which companies sponsor developers.\"\"Open source contributions have launched countless developer careers. Here's what's possible: ... \"Earned $15k from paid GitHub issues while learning React.\"",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Tracks paid GitHub issues and bounties to earn money from open source.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://www.indiehackers.com/post/how-to-monetize-your-open-source-project-and-not-get-your-code-jacked-marko-saric-of-plausible-97-000-mrr-3d7afd8275",
+          "title": "How to monetize your open-source project (and not get your code jacked) — Marko Saric of Plausible ($97,000 MRR) - Indie Hackers",
+          "description": "All of our website stats are open to the public too. Looking at the last 12 months, GitHub sent more than 18,000 visitors to our site which makes it our fourth best traffic source behind Google, Hacker News and Twitter. In terms of sources of trial signups, it is the third best. Marko: We&#x27;ve tried to do monetization with donations, which seems like one of the more common ways people in the open-source world fund their projects.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Indie Hackers interview on monetizing open-source projects like Plausible.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://blog.stackademic.com/10-github-repos-that-are-embarrassingly-good-at-making-money-c9063f7a1316?gi=23b3faee00bc",
+          "title": "10 GitHub Repos That Are Embarrassingly Good at Making Money | by Usman Writes | Stackademic",
+          "description": "github.com/The-Swarm-Corporation/AutoHedge ⭐ 1.9k stars",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Stackademic article listing GitHub repos for making money featuring AutoHedge.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://github.com/topics/passive-income",
+          "title": "passive-income · GitHub Topics · GitHub",
+          "description": "It runs popular apps like Honeygain, EarnApp, and more, automatically earning you USD or crypto while at work or play. monetization cryptocurrency grass data-sharing side-hustle passive-income free-money honeygain earn-money-online earnapp ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "GitHub topic page aggregating passive income and data-sharing earning scripts.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "not_permitted",
+            "captions": "not_permitted",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://aiinsider.in/money-with-ai/open-source-github-repos-make-money-2026/",
+          "title": "10 GitHub Repos That Actually Make Money (2026)",
+          "description": "Cal.com, Ghost, n8n, Supabase — these 10 repos have built-in business models. Fork → brand → charge. Real income, verified. Updated 2026.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Lists repos with built-in business models, though they are well-known commercial open core projects.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://javascript.plainenglish.io/how-i-built-5-passive-income-streams-using-javascript-in-2025-7addfe700e71?gi=b90ae8dbea5b",
+          "title": "javascript-passive-income-automation-2025 | JavaScript in Plain English",
+          "description": "Instead of starting from scratch for each project, I maintain a private GitHub repo of templates — custom dashboards, REST APIs, and automation snippets.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Discusses maintaining private repository templates for custom dashboards and APIs.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        }
+      ]
+    },
+    {
+      "q": "wwe commentators gone crazy moments",
+      "criteria": "WWE clips with clearly excited or shocked commentator reactions, preferably with exact moments. Crowd-only reactions and generic match highlights are weaker.",
+      "elapsed_ms": 82101,
+      "providers": [
+        {
+          "provider": "brave",
+          "status": "ok",
+          "message": "Brave discovery completed."
+        },
+        {
+          "provider": "searxng",
+          "status": "ok",
+          "message": "17 of 20 search engines answered; Brave Videos (rate-limited), Brave (rate-limited), Resulthunter (rate-limited) did not."
+        },
+        {
+          "provider": "internet_archive",
+          "status": "ok",
+          "message": "Internet Archive film catalogue searched directly."
+        },
+        {
+          "provider": "planner",
+          "status": "ok",
+          "message": "AI planned 6 searches for lesser-known sources."
+        },
+        {
+          "provider": "leads",
+          "status": "ok",
+          "message": "AI followed 8 leads from what it found, in 2 rounds."
+        },
+        {
+          "provider": "candidate_pool",
+          "status": "partial",
+          "message": "1589 candidates found; the best 160 keyword matches were selected for checking after all sources answered."
+        },
+        {
+          "provider": "youtube",
+          "status": "ok",
+          "message": "YouTube details and viewer comments checked."
+        },
+        {
+          "provider": "reddit",
+          "status": "ok",
+          "message": "Reddit discussions checked."
+        },
+        {
+          "provider": "pages",
+          "status": "ok",
+          "message": "10 of 20 result pages were checked, 5 in a browser."
+        },
+        {
+          "provider": "archive_evidence",
+          "status": "partial",
+          "message": "0 comment/review samples and 0 caption tracks available across 3 checked results."
+        },
+        {
+          "provider": "judge",
+          "status": "ok",
+          "message": "Results were checked for relevance by AI."
+        },
+        {
+          "provider": "scene_analysis",
+          "status": "partial",
+          "message": "2 videos queued for scene analysis; these pending analyses are not evidence in this ranking."
+        }
+      ],
+      "candidates": [
+        {
+          "url": "https://www.wwe.com/videos/joey-styles-quits-wwe-raw-may-1-2006",
+          "title": "Joey Styles quits WWE: Raw, May 1, 2006 | WWE",
+          "description": "Joey Styles voices his frustrations with WWE.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 9,
+            "reason": "WWE.com page featuring the video of Joey Styles quitting on Raw.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=E0vaOC1sXnA",
+          "title": "WWE Monday Night Raw - Joey Styles & Jerry Lawler Altercation (2006-05-01)",
+          "description": "World Wrestling Entertainment https://www.facebook.com/NostalgiaManiaQc https://www.youtube.com/NostalgiaManiaQc.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 9,
+            "reason": "Video clip featuring Joey Styles and Jerry Lawler altercation and commentary freakout.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "7345e75e-b77b-4ba2-92bc-b3f32edb6bfe",
+              "start_seconds": 41,
+              "end_seconds": 78,
+              "summary": "0:46 Jerry Lawler’s “OW MY GAWD!!” freakout was both hilarious and worth pure commentary gold!! 😂 · 0:48 You gotta love Jerry Lawler impersonating Joey Styles 🤣",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "0bb05691-63f9-4ada-aa93-0437721dd69c",
+                "3f2e2889-1b56-4f4d-b4a5-b89bc08472b9"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=PSvOzJWaVXs",
+          "title": "Joey Styles quits WWE: Raw, May 1, 2006",
+          "description": "529.4K views - Aug 20, 2011 - YouTube - WWE",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 9,
+            "reason": "Official WWE YouTube channel upload of Joey Styles losing composure and quitting on air.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=Z0LlYwOJR3A",
+          "title": "Joey Styles Quits WWE | May 1, 2006 Raw - YouTube",
+          "description": "AboutPressCopyrightContact usCreatorsAdvertiseDevelopersTermsPrivacyPolicy &amp; SafetyHow YouTube worksTest new features · © 2024 Google LLC",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 9,
+            "reason": "Original broadcast footage of Joey Styles quitting WWE RAW with an explosive, erratic worked-shoot rant.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.facebook.com/AEWBlogg/videos/20-years-ago-on-an-episode-of-monday-night-raw-joey-styles-announced-he-was-quit/682228994883973/",
+          "title": "20 years ago on an episode of Monday Night Raw, Joey Styles announced he was quitting with a work shoot promo. THE First person to do a pipe-bomb live on TV. #ECW Legend with a #PipeBomb LIVE on …",
+          "description": "AEWBlog. . 20 years ago on an episode of Monday Night Raw, Joey Styles announced he was quitting with a work shoot promo. THE First person to do a pipe-bomb live on TV. #ECW Legend with a #PipeBomb LIVE on Monday Night Raw. #WWE | #WWERaw | #RawOnNetflix",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 9,
+            "reason": "Original broadcast footage capturing Joey Styles losing composure and quitting WWE live on air.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.dailymotion.com/video/xfrbdg",
+          "title": "CM Punk on Commentary (WWE RAW 11/22/10)",
+          "description": "http://1bettingedge.com/ All rights Reserved by WWE No copyright infringement intended. All pictures and videos are copyright of the WWE and / or their respective owners. WWE Entertainment TM (c) 2010 All Rights Reserved",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Features CM Punk on commentary providing memorable erratic and authentic commentary reactions.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.pwtorch.com/artman2/publish/wadekellerdotcom/50056.shtml",
+          "title": "WK FLASHBACK (5 Yrs. Ago): Joey Styles rips on WWE, quits Raw, set stage for ECW revival",
+          "description": "WWE News, Pro Wrestling News, Raw Spoilers, Smackdown Spoilers",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Flashback report covering Joey Styles quitting Raw with an authentic, erratic worked-shoot rant.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.facebook.com/anthony.alimondo/videos/today-in-wrestling-history-may-1-2006-joey-styles-quit-as-play-by-play-commentat/544629145353652/",
+          "title": "Today In Wrestling History May 1, 2006 - Joey Styles 'quit' as play by play commentator on Monday Night Raw with one of the most effective 'worked shoot' promos in WWE history. After targeting Vince …",
+          "description": "Anthony Alimondo. . Today In Wrestling History May 1, 2006 - Joey Styles 'quit' as play by play commentator on Monday Night Raw with one of the most effective 'worked shoot' promos in WWE history. After targeting Vince McMahon and others with a scathing speech, Styles pulled the WWE branded collar off his microphone and resigned. The ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Facebook post discussing Joey Styles quitting commentary.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.dailymotion.com/video/x27dhi",
+          "title": "RAW - Joey Styles quits the WWE",
+          "description": "Joey Styles tell it like it is",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Features Joey Styles quitting WWE, but lacks direct confirmation of a commentary freakout moment.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.facebook.com/WrestlingFrom80s90s/videos/never-forget-that-joey-styles-shoot-promo-where-he-quit-wwe-after-being-told-to-/640584518331570/",
+          "title": "Never forget that Joey Styles shoot promo where he quit WWE ...",
+          "description": null,
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Shows Joey Styles' famous shoot promo, but is not a compilation of commentators losing composure.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://fanbuzz.com/fights/watch-the-full-shoot-interview-that-might-have-gotten-joey-styles-fired-from-wwe/",
+          "title": "Watch the full \"shoot\" interview that might have gotten Joey Styles fired from WWE",
+          "description": "Was there anything in here worth getting fired over?",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Shows the full Joey Styles shoot interview video.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://x.com/FadeAwayMedia/status/2050079692493816076",
+          "title": "FADE (@FadeAwayMedia) on X",
+          "description": "Joey Styles \"quitting\" Monday Night Raw was one of WWE's best worked shoot promos of all time. 20 years ago today. (2006)",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "X post sharing the Joey Styles worked-shoot promo clip.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://x.com/GTXShrestha13/status/2050084599225893071",
+          "title": "On this day in 2006, Joey Styles gave a worked shoot promo and announced that he has \"quitted\" WWEThis promo is so real that no one could tell that if this was work or shootIn reality, he remained …",
+          "description": "Gaurav ️‍🔥🇳🇵 (@GTXShrestha13). 20 views. On this day in 2006, Joey Styles gave a worked shoot promo and announced that he has \"quitted\" WWEThis promo is so real that no one could tell that if this was work or shootIn reality, he remained with the company for 10 more years",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "This video features Joey Styles' famous worked-shoot promo, though it focuses on his resignation speech rather than general commentary meltdowns.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.thesportster.com/wwe-commentary-ruined-great-moments/",
+          "title": "10 Times WWE Commentary Ruined Great Moments",
+          "description": "It was clear that WWE had spoonfed him this line, as they were trying to push Sheamus down the fans&#x27; throats. Jonathan Coachman had a forgettable run as a commentator when he returned to the company in 2018.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "This video covers times WWE commentary ruined great moments, touching upon announcer reactions.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.thesportster.com/wwe-commentaries-ruined-talked-over-big-moment/",
+          "title": "10 Times WWE Commentary Talked Over A Major Moment",
+          "description": "RELATED: 7 Dumb Things That Got Wrestling Commentators In Trouble · The match was exciting, and the stakes made for some very exciting near-falls. The result of the match saw Randy retaining despite The Nexus, and Cena was to be fired. As the implication of a WWE without John Cena set in, it was utterly ruined by Matt Striker enthusiastically calling &quot;CENA&#x27;S FREE!&quot; The call confused everybody, and it took Michael Cole correcting him, but by then the moment was already ruined.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Discusses times WWE commentary talked over major moments, touching on bad commentary, but not specifically commentators going crazy.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://podcasts.apple.com/ca/podcast/revisiting-wwe-raw-2006-joey-styles-quits-fallout-from/id1478660220?i=1000767480654",
+          "title": "Revisiting WWE RAW 2006 - Joey Styles QUITS, Fallout From WWE Backlash",
+          "description": "This, combined with Jerry Lawler poking his buttons, sets Joey Styles off, which leads to one of the most infamous &#x27;worked-shoot&#x27; promos in the history of WWE, leading to some very memorable lines. We also have Chris Masters&#x27; Masterlock Challenge, a Divas Cheerleader Tag Team Match involving Mickie James, Victoria, Maria, and Torrie Wilson, and the biggest match of the night; Rob Conway takes on KANE, who is being haunted by the mysterious &#x27;May 19th&#x27; date.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Apple Podcast episode about Joey Styles quitting Raw.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=HhfHDpwNH84",
+          "title": "Joey Styles QUITS During WWE RAW - DEADLOCK Podcast ...",
+          "description": null,
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Podcast episode discussing Joey Styles quitting.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://vimeo.com/1114712095",
+          "title": "WWE.Monday.Night.Raw.2004.09.06.720p.WEB.h264-HEEL | Videos & Movies on Vimeo",
+          "description": "This is &quot;WWE.Monday.Night.Raw.2004.09.06.720p.WEB.h264-HEEL&quot; by Kyle Byrd on Vimeo, the home for high quality videos and the people who love them.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "This is a full episode file of Monday Night Raw from 2004 rather than a curated compilation of commentary moments.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.pinterest.com/pin/10-funniest-cm-punk-moments-and-memes--171418329560148757/",
+          "title": "10 Funniest CM Punk Moments and Memes",
+          "description": "Skip to content · When autocomplete results are available use up and down arrows to review and enter to select. Touch device users, explore by touch or with swipe gestures · Log in · Sign up",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "This video features CM Punk moments and memes, but lacks direct focus on commentators going crazy.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://copyright-certificate.byu.edu/news/wwes-craziest-moments-you-wont",
+          "title": "WWE's Craziest Moments: You Won't Believe These!",
+          "description": "The first fall, an unplanned plummet through the announcer&#x27;s table, is one of the most iconic and replayed moments in wrestling history. But he wasn&#x27;t done there! After somehow managing to climb back to the top, he was chokeslammed through the ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "This video highlights craziest WWE moments like the announcer's table fall, but focuses primarily on the spots rather than commentator meltdowns.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://vimeo.com/1135652683",
+          "title": "WWE Raw April 21 2005 | Videos & Movies on Vimeo",
+          "description": "This is &quot;WWE Raw April 21 2005&quot; by Dale Martin on Vimeo, the home for high quality videos and the people who love them.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Vimeo link for a full episode of WWE Raw, too broad for a specific commentary moment.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.wrestlezone.com/news/478909-unedited-wwe-smackdown-leaks-online",
+          "title": "Unedited Version of WWE Smackdown Leaks Online, Includes Commentary",
+          "description": "An unedited version of WWE Smackdown leaks online today, including commentary from Michael Cole and JBL. Very funny part where Cole interacts with Vince.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Article mentioning unedited SmackDown commentary with Michael Cole and JBL, but it is a text article rather than a video.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.pwtorch.com/site/2026/05/11/20-yrs-ago-kellers-wwe-raw-report-5-1-2006-the-episode-with-joey-styles-ranting-and-quitting-after-lamenting-sports-entertainment-and-a-chairman-who-talks-about-his-own-sem/",
+          "title": "20 YRS AGO – Keller’s WWE Raw Report (5/1/2006): The episode with Joey Styles ranting and quitting after lamenting “sports entertainment” and “a chairman who talks about his own semen”",
+          "description": "4 months ago - pwtorch.com",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Wrestling newsletter report covering the 2006 Raw episode.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://wwebrady.fandom.com/wiki/Joey_Styles",
+          "title": "Joey Styles | WWE Wiki | Fandom",
+          "description": "On the May 1, 2006 episode of Raw, Styles &quot;quit&quot; after a worked shoot, in which he ranted about the lack of &quot;wrestling&quot; and his dislike of &quot;sports entertainment&quot; and even WWE Chairman, Vince McMahon.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Wiki page summarizing Joey Styles' career and Raw quit incident.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://thearmbarexpress.wordpress.com/2015/10/01/wrestling-flashback-joey-styles-raw-shoot-promo-in-2006/",
+          "title": "Wrestling Flashback – Joey Styles’ RAW Shoot Promo In 2006",
+          "description": "Joey Styles returned to commentary as Jerry Lawler also urged Joey to show some spirit. Joey finally decided that he had enough, calling Jerry a hack and slapping him. Jerry pushed him over and Joey ran to the back. Jerry Lawler apologised and wanted Joey to come back out. Joey came back out and the speech he gave was nothing short of fantastic. Below is the full transcript of what was an incredible “worked shoot” promo cut live on WWE RAW by the voice of ECW…",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Wrestling blog flashback article reviewing Joey Styles' 2006 shoot promo.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://www.facebook.com/WWEonAE/videos/jerry-the-king-lawler-becomes-the-undisputed-king-of-commentary-biography-wwe-le/894961855779474/",
+          "title": "Jerry \"The King\" Lawler Becomes King of Commentary in WWE ...",
+          "description": "29 Aug 2024 · See how Jerry \"The King\" Lawler became the UNDISPUTED \"king of commentary,\" in this scene from Biography: WWE Legends.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Facebook post featuring a video about Jerry Lawler's commentary career.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://en.namu.wiki/w/%EC%A1%B0%EC%9D%B4%20%EC%8A%A4%ED%83%80%EC%9D%BC%EC%8A%A4",
+          "title": "Joey Styles - NamuWiki",
+          "description": "He reports to Vince that his idea of ​​commentating an ECW-style hardcore match at WrestleMania is great. On May 1, when he made the remark that WWE was &quot;purchasing crap&quot; in public because he didn&#x27;t like it, he lashed out at Vince and quit RAW.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "NamuWiki article detailing Joey Styles quitting WWE.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://prowrestling.fandom.com/wiki/Joey_Styles",
+          "title": "Joey Styles | Pro Wrestling | Fandom",
+          "description": "On the May 1, 2006 edition of RAW, Styles announced that he was quitting by delivering a worked shoot promo, in which he bashed Vince McMahon, WWE, sports entertainment, and the fact that people &quot;buy into this crap&quot;.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Pro Wrestling Fandom wiki entry on Joey Styles.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://bwwe.fandom.com/wiki/Joey_Styles",
+          "title": "Joey Styles | BWWE Wiki | Fandom",
+          "description": "On the May 1, 2006 edition of Raw, Styles announced that he was quitting by delivering a worked shoot promo, in which he bashed Vince McMahon, WWE, sports entertainment, and the fact that people &quot;buy into this crap&quot;.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Fandom wiki entry mentioning Joey Styles' Raw quit incident.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.dailymotion.com/video/xg121j",
+          "title": "CM Punk on Commentary (WWE Raw 11/29/10)",
+          "description": "http://1bettingedge.com/ All rights Reserved by WWE No copyright infringement intended. All pictures and videos are copyright of the WWE and / or their respective owners. WWE Entertainment TM (c) 2010 All Rights Reserved",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "This video features CM Punk on commentary, but is an unedited segment rather than crazy moments.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=beoW3yghzbE",
+          "title": "Jonathan Coachman Is Back In Wrestling, Michael Cole’s Commentary, Stone Cold Stunner - YouTube",
+          "description": "Morgan and Morgan is a proud partner of the WWE, and are giving away two tickets to the Royal Rumble, plus $2000. Enter to win at https://morganwwe.comVUORI:...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "This is a long interview with Jonathan Coachman discussing his time in WWE, not a clip reel of crazy commentary moments.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://tvtropes.org/pmwiki/pmwiki.php/YMMV/JoeyStyles",
+          "title": "YMMV / Joey Styles - TV Tropes",
+          "description": "His &quot;The Reason You Suck&quot; Speech Worked Shoot, which is easily one of the best in the business. On the May 1 2006 edition of Raw, Joey Styles took then-announce partner Jerry Lawler, Jim Ross, Vince McMahon, WWE, and practically the entire American ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "This TV Tropes page describes Joey Styles' famous shoot promo, but it is text rather than the requested video.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=GdxmfU4cQ8k",
+          "title": "Jonathan Coachman Would Never Go Back To WWE, The Rock's Promos, Heel Commentary, MJF",
+          "description": "Jonathan Coachman (@thecoachrules) is a broadcaster and commentator known for his time in WWE and also ESPN's SportsCenter, the PGA Tour and CBS Sports. He sits down with Chris Van Vliet in Aliso Viejo, CA to talk about his stints in WWE as a backstage interviewer, commentator and on-air personality, turning heel, his hilarious promos with The ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "An interview with Jonathan Coachman discussing his WWE career rather than a commentary freakout moment.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=qevDfpV_4Mg",
+          "title": "WWE Home Video - ECW Extreme Rules - Clips Hosted by Joey Styles & Tazz (2006)",
+          "description": null,
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Features ECW commentators Joey Styles and Tazz hosting a video, but does not capture them going crazy.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        }
+      ]
+    }
+  ]
+}

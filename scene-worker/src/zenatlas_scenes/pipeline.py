@@ -14,7 +14,7 @@ from .subtitles import MAX_SUBTITLE_BYTES, Cue, SubtitleError, cues_sha256, medi
 from .transcribe import transcribe, transcription_installed
 from .validation import ModelOutputRejected, validate_scenes
 
-PIPELINE_VERSION = "gemini-scenes-v1"
+PIPELINE_VERSION = "gemini-scenes-v2"
 DIALOGUE_SOURCES = frozenset({"database_transcript", "sidecar_file", "faster_whisper"})
 Heartbeat = Callable[[], None]
 Transcriber = Callable[[Path, Heartbeat], list[tuple[float, float, str]]]
@@ -123,7 +123,7 @@ class ScenePipeline:
         if cached:
             store.cached(self.conn, job, version_id, cached)
             return Outcome("cached", analysis_id=cached)
-        cues = self._transcribe(context, local, heartbeat) if plan.source == "faster_whisper" else plan.cues
+        cues = self._transcribe(context, local, heartbeat) if plan.source == "faster_whisper" and not plan.cues else plan.cues
 
         if not store.take_budget(self.conn, "scene_analysis_requests", self.settings.daily_request_budget):
             store.defer_for_budget(self.conn, job, version_id)
@@ -132,7 +132,8 @@ class ScenePipeline:
             model=model, media_kind=context.media_kind,
             youtube_url=context.media_reference if context.media_kind == "youtube" else None,
             local_path=local.path if local else None, mime_type=local.mime_type if local else None,
-            media_duration=context.duration, cues=cues), heartbeat)
+            media_duration=context.duration, cues=cues,
+            focus_query=job.get("payload", {}).get("query", "") if isinstance(job.get("payload", {}).get("query", ""), str) else ""), heartbeat)
         validated = validate_scenes(text, media_duration=context.duration, timeline_offset=context.timeline_offset,
                                     content_duration=context.content_duration, cues=cues)
         analysis_id = store.store_analysis(self.conn, job, context, store.AnalysisRecord(
@@ -140,7 +141,8 @@ class ScenePipeline:
             subtitle_sha256=cues_sha256(cues) if cues else None,
             dialogue_source=plan.source if plan.source in DIALOGUE_SOURCES else None,
             inspected_ranges=inspected_ranges(context), frame_sampling_fps=FRAME_SAMPLING_FPS,
-            media_resolution=MEDIA_RESOLUTION, validated=validated))
+            media_resolution=MEDIA_RESOLUTION, validated=validated,
+            retained_cues=tuple(cues) if plan.source in ("sidecar_file", "faster_whisper") else ()))
         return Outcome("complete", analysis_id=analysis_id, scenes=len(validated.scenes))
 
     def _subtitle_plan(self, context: store.JobContext, local: LocalMedia | None) -> SubtitlePlan:
@@ -153,6 +155,13 @@ class ScenePipeline:
             cues = media_cues(((r["start_seconds"] - context.timeline_offset, r["end_seconds"] - context.timeline_offset, r["text"], r["id"])
                                for r in rows), offset=0.0, media_duration=context.duration)
             prompt_block(cues)
+            origins = {r.get("origin") for r in rows}
+            # Persisting local evidence must not change its cache identity on the next analysis.
+            if origins == {"scene-worker:sidecar_file"}:
+                neutral = [Cue(c.id, c.start, c.end, c.text) for c in cues]
+                return SubtitlePlan("sidecar_file", f"sidecar:{cues_sha256(neutral)[:16]}", tuple(cues))
+            if origins == {"scene-worker:faster_whisper"}:
+                return SubtitlePlan("faster_whisper", f"asr:{self.settings.whisper_model}", tuple(cues))
             return SubtitlePlan("database_transcript", f"db:{cues_sha256(cues)[:16]}", tuple(cues))
         if context.subtitle_reference:
             path = resolve_under_root(self.settings.media_root, context.subtitle_reference)

@@ -7,7 +7,7 @@ export async function migrate(db: DB, vectors = false) {
     await tx.query('SELECT pg_advisory_xact_lock(746219)');
     await tx.query('CREATE TABLE IF NOT EXISTS schema_migrations (name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())');
     const files = (await readdir('migrations')).filter(f => f.endsWith('.sql')).sort();
-    if (vectors) files.push('optional/002_vectors.sql');
+    if (vectors) files.push(...(await readdir('migrations/optional')).filter(f=>f.endsWith('.sql')).sort().map(f=>`optional/${f}`));
     for (const file of files) {
       if ((await tx.query('SELECT 1 FROM schema_migrations WHERE name=$1', [file])).rows.length) continue;
       await tx.query(await readFile(`migrations/${file}`, 'utf8'));

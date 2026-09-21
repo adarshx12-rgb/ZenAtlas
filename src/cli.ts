@@ -7,6 +7,7 @@ import { contentInput } from './types.js';
 import { enqueue } from './queue.js';
 import {addSource,setAlternative} from './source-health.js';
 import {setPolicyRule,listPolicyRules,deletePolicyRule,reviewQueue} from './policy-rules.js';
+import {auditReport} from './learning.js';
 const [command,arg,file]=process.argv.slice(2);
 if(!process.env.DATABASE_URL) throw new Error('Set DATABASE_URL to an administrative service connection');
 const db=connect(process.env.DATABASE_URL);
@@ -29,5 +30,6 @@ try {
  else if(command==='policy-rules') console.log(JSON.stringify(await listPolicyRules(db),null,2));
  else if(command==='policy-rule-delete' && arg) console.log(await deletePolicyRule(db,arg)?'Rule deleted':'Rule not found');
  else if(command==='review-queue') console.log(JSON.stringify(await reviewQueue(db,arg?Number(arg):undefined),null,2));
- else throw new Error('Usage: npm run admin -- sources | add-source <https-url> [name] | alternative <source-id> <review.json> | alternatives <source-id> | check-source <source-id> | policy <source-id> <policy.json> | import <items.json> | transcript <transcript.json> | enrich <content-id> | delete-content <content-id> | policy-rule <pattern> <rule.json> | policy-rules | policy-rule-delete <pattern> | review-queue [min-appearances]');
+ else if(command==='audits') console.log(JSON.stringify(await auditReport(db,arg?Number(arg):10),null,2));
+ else throw new Error('Usage: npm run admin -- sources | add-source <https-url> [name] | alternative <source-id> <review.json> | alternatives <source-id> | check-source <source-id> | policy <source-id> <policy.json> | import <items.json> | transcript <transcript.json> | enrich <content-id> | delete-content <content-id> | policy-rule <pattern> <rule.json> | policy-rules | policy-rule-delete <pattern> | review-queue [min-appearances] | audits [limit]');
 } finally {await db.close();}

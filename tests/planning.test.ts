@@ -119,7 +119,7 @@ test('page checks merge browser evidence, prefer main-content text and cap brows
  const checker=new PageChecker(testConfig,transport as any,{renderer,extractor,renders:2});
  const first=await checker.check('http://a.example/');
  assert.deepEqual({...first,screenshot:first.screenshot?.toString()},{status:'checked',title:'Nova — WebGL studio',description:'Live 3D',
-   text:'We build real-time worlds.',libraries:['three.js','WebGL','GSAP','Canvas'],badges:['3D: three.js, WebGL','Motion: GSAP'],rendered:true,screenshot:'jpeg'});
+   text:'We build real-time worlds.',libraries:['three.js','WebGL','GSAP','Canvas'],badges:['3D: three.js, WebGL','Motion: GSAP'],rendered:true,screenshot:'jpeg',links:[]});
  const broken=await checker.check('http://b.example/broken');
  assert.deepEqual([broken.status,broken.title,broken.text,broken.rendered,broken.screenshot],['checked','Shell','Shell',false,null],
    'a failed render keeps the plain check and its visible text');
@@ -211,18 +211,19 @@ test('a website request is planned, searched on several angles, page-checked and
    const done=await service.poll(started.search_id,'alice');
 
    assert.deepEqual(calls.sort(),['3d motion website examples','site:showcase.example.com three.js portfolio',q].sort());
-   assert.deepEqual(done.providers.map(p=>[p.provider,p.status]),[['mock','ok'],['planner','ok'],['pages','ok'],['judge','ok']]);
-   assert.deepEqual(done.results.map(r=>new URL(r.canonical_url).hostname),['studio.example.net','showcase.example.com','blog.example.org']);
+   assert.deepEqual(done.providers.map(p=>[p.provider,p.status]),[['mock','ok'],['planner','ok'],['pages','ok'],['judge','ok'],['relevance_filter','ok']]);
+   assert.deepEqual(done.results.map(r=>new URL(r.canonical_url).hostname),['studio.example.net','showcase.example.com']);
    assert.deepEqual(done.results[0].badges,['3D: three.js','Motion: GSAP']);
    assert.equal(done.results[0].judgement?.model,'test-judge');
-   assert.deepEqual(checked.sort(),['https://blog.example.org/what-is-motion-graphics','https://showcase.example.com/sites/three-js','https://studio.example.net/'],
-     'only leads from web searches are page-checked');
+   assert.deepEqual(checked.sort(),['https://blog.example.org/what-is-motion-graphics','https://showcase.example.com/sites/three-js','https://studio.example.net/','https://video.example.com/watch/1'],
+     'specialist video pages also supply evidence');
    const studio=judged.find(c=>c.site==='studio.example.net')!;
    assert.equal(studio.kind,'website');assert.deepEqual(studio.page?.libraries,['three.js','GSAP']);
    assert.equal(judged.find(c=>c.site==='showcase.example.com')!.page?.status,'robots_disallowed');
    const video=judged.find(c=>c.site==='video.example.com')!;
-   assert.equal(video.kind,'video');assert.equal(video.page,undefined);
-   assert.deepEqual(context,{kind:'websites',criteria:['Uses 3D graphics','Uses motion graphics'],anime:null});
+   assert.equal(video.kind,'video');assert.equal(video.page?.status,'checked');
+   // The planner's websites guess reaches the judge as mixed, so videos presenting such sites are not rejected outright.
+   assert.deepEqual(context,{kind:'mixed',criteria:['Uses 3D graphics','Uses motion graphics'],anime:null});
    const provenance=JSON.stringify((await db.query('SELECT provenance FROM sources')).rows);
    assert.ok(!provenance.includes('three.js portfolio'),'planned queries are not stored with sources');
 

@@ -1,5 +1,5 @@
 import type { ContentInput, Result } from './types.js';
-export const RANKING_VERSION = 'rules-v1';
+export const RANKING_VERSION = 'relevance-v5-soft-intent';
 // RRF combines ordinal ranks, never incomparable raw lexical/cosine scores.
 export function reciprocalRankFusion(lists: string[][], k = 60): Map<string,number> {
  const scores = new Map<string,number>();
@@ -42,12 +42,19 @@ export function discoveryQuery(q: string) {
 // catalogue search. Results with no query word at all are dropped only when other results do match, so a
 // provider's own semantic matches survive queries whose words never appear literally. minCoverage additionally
 // drops leads that match less of their query than that share (a title word counts fully, a description word half).
-export function rankDiscovery<T extends DiscoveryCandidate>(q: string, candidates: T[], limit: number, minCoverage = 0): T[] {
+export function rankDiscovery<T extends DiscoveryCandidate>(q: string, candidates: T[], limit: number, minCoverage = 0, keepSemantic = false): T[] {
  const query = discoveryQuery(q);
  const termsOf = new Map<string,string[]>([[q, query.terms]]);
  const terms = (text: string) => termsOf.get(text) ?? termsOf.set(text, discoveryQuery(text).terms).get(text)!;
  const unique = new Map<string,{candidate:T;providers:Set<string>;queries:Set<string>;position:number}>();
- for (const candidate of candidates) {
+ const metadataMatch = (c: T) => {
+   const title = tokens(c.item.title), detail = tokens(`${c.item.description ?? ''} ${c.item.creator ?? ''}`);
+   return query.terms.reduce((sum,t) => sum + (title.some(w => sameWord(t,w)) ? 2 : detail.some(w => sameWord(t,w)) ? 1 : 0), 0);
+ };
+ // Stable input makes deduplication and score ties independent of network completion order.
+ for (const candidate of [...candidates].sort((a,b) => a.item.url.localeCompare(b.item.url) ||
+   metadataMatch(b) - metadataMatch(a) || a.position - b.position ||
+   a.provider.localeCompare(b.provider) || (a.query ?? q).localeCompare(b.query ?? q))) {
    const found = `${candidate.provider}:${candidate.searchIndex ?? 0}`, asked = candidate.query ?? q;
    const seen = unique.get(candidate.item.url);
    if (!seen) unique.set(candidate.item.url,{candidate,providers:new Set([found]),queries:new Set([asked]),position:candidate.position});
@@ -67,7 +74,7 @@ export function rankDiscovery<T extends DiscoveryCandidate>(q: string, candidate
      score:coverage + exact + 0.3/(1 + position/10) + 0.1*(providers.size - 1)});
  }
  const strong = scored.some(s => s.coverage >= 0.5);
- const remaining = scored.filter(s => s.coverage >= minCoverage && (!strong || s.coverage > 0));
+ const remaining = scored.filter(s => s.coverage >= minCoverage && (keepSemantic || !strong || s.coverage > 0));
  const counts = new Map<string,number>(); const result: T[] = [];
  while (remaining.length && result.length < limit) {
    let best = 0, bestValue = -Infinity;

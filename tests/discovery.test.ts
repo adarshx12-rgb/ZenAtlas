@@ -11,10 +11,57 @@ import type {Planner} from '../src/planner.js';
 import type {Judge} from '../src/judge.js';
 import type {YouTubeClient} from '../src/youtube.js';
 import type {AnimeClient, AnimeMatch} from '../src/anilist.js';
+import {runDiscovery} from '../src/discovery.js';
 
 const lead=(url:string,title:string,provider='searxng',position=0,description:string|null=null):DiscoveryCandidate=>
  ({item:contentInput.parse({url,title,description}),provider,position});
 const urls=(list:DiscoveryCandidate[])=>list.map(c=>c.item.url);
+
+test('late specialist semantic matches compete before the display limit, regardless of arrival order',async()=>{
+ const db=await database();
+ try{
+   const config={...testConfig,DISCOVERY_RESULTS:2};
+   const judge:Judge={async judge(_q,candidates){return {model:'test',verdicts:new Map(candidates.map(c=>[c.key,
+     {key:c.key,relevance:c.site==='specialist.example.org'?9:4,reason:'TEST supporting evidence',momentKeys:[]}]))};}};
+   const run=async(slowSpecialist:boolean,checking=judge)=>{
+     let release!:()=>void,started!:()=>void;
+     const waiting=new Promise<void>(r=>{started=r;}),gate=new Promise<void>(r=>{release=r;});
+     const provider=(specialist:boolean):SourceAdapter=>({name:specialist?'specialist':'general',capabilities:{transcripts:false,comments:false,embeds:false,accessible_media:false},
+       async search(){if(specialist===slowSpecialist){started();await gate;}
+         return {results:specialist?[contentInput.parse({url:'https://specialist.example.org/orbit',title:'Orbital ascent',description:'Original recording'})]
+           :Array.from({length:12},(_,i)=>contentInput.parse({url:`https://general.example.org/${i}`,title:`Moon launch ${i}`})),
+           next_cursor:null,status:{provider:specialist?'specialist':'general',status:'ok',message:'TEST'}};}});
+     let done=false;const updates:number[]=[];
+     const working=runDiscovery(db,config,searchInput.parse({q:'moon launch'}),[provider(false),provider(true)],{judge:checking},async()=>{},async u=>{updates.push(u.results.length);}).then(r=>{done=true;return r;});
+     await waiting;
+     assert.equal(done,false);assert.ok(updates.every(n=>n===0));release();
+     return working;
+   };
+   const first=await run(true),second=await run(false);
+   assert.equal(first.results[0].canonical_url,'https://specialist.example.org/orbit');
+   assert.equal(first.ingested.length,13,'display limit does not restrict admission before relevance checks');
+   assert.deepEqual(first.results.map(r=>r.canonical_url),second.results.map(r=>r.canonical_url));
+   assert.deepEqual(first.results.map(r=>r.judgement?.relevance),[9],'weak earlier candidates cannot fill spare display slots');
+   const failed=await run(true,{async judge(){throw Error('unavailable');}});
+   assert.ok(failed.results.every(r=>r.canonical_url.startsWith('https://general.example.org/')),
+     'when checking fails, semantic-only guesses cannot displace actual keyword matches');
+ }finally{await db.close();}
+});
+
+test('clear keyword matches fill the checking pool before loosely related leads, whatever their position',async()=>{
+ const db=await database();
+ try{
+   const all:Judge={async judge(_q,candidates){return {model:'test',verdicts:new Map(candidates.map(c=>[c.key,{key:c.key,relevance:8,reason:'TEST',momentKeys:[]}]))};}};
+   const provider:SourceAdapter={name:'general',capabilities:{transcripts:false,comments:false,embeds:false,accessible_media:false},
+     async search(){return {results:[
+       ...['a','b','c'].map(d=>contentInput.parse({url:`https://${d}.example.org/best-tools`,title:'Best tools of the year'})),
+       ...Array.from({length:7},(_,i)=>contentInput.parse({url:`https://www.youtube.com/watch?v=osint00000${i}`,title:`Hidden OSINT tools ${i}`})),
+     ].map((item,i)=>i<3?item:item),next_cursor:null,status:{provider:'general',status:'ok',message:'TEST'}};}};
+   const out=await runDiscovery(db,{...testConfig,DISCOVERY_CANDIDATES:3},searchInput.parse({q:'underrated osint tools'}),[provider],{judge:all},async()=>{});
+   assert.equal(out.ingested.length,3);
+   assert.ok(out.ingested.every(r=>r.title.startsWith('Hidden OSINT tools')),out.ingested.map(r=>r.title).join(', '));
+ }finally{await db.close();}
+});
 
 test('discovery ranking drops unrelated leads only when related ones exist, and stems simple plurals',()=>{
  const ranked=rankDiscovery('pasta recipe',[
@@ -68,7 +115,7 @@ test('SearXNG keeps usable video metadata, drops unsafe values, and bounds its o
  assert.equal(third.duration,null);assert.equal(third.published_at,null);assert.equal(third.thumbnail,null);
 });
 
-test('quick discovery shows each engine’s best leads while slower engines still search, and names engines that failed',async()=>{
+test('quick discovery waits for slow engines before selection and names engines that failed',async()=>{
  const db=await database();
  try{
    let release!:()=>void;const gate=new Promise<void>(r=>{release=r;});
@@ -84,14 +131,14 @@ test('quick discovery shows each engine’s best leads while slower engines stil
    const started=await service.start({q:'orbit launch',mode:'refresh'},'alice');
    const working=workOnce(db,config,[new SearXNG(config,transport)]);
    let early=await service.poll(started.search_id,'alice');
-   for(let i=0;i<300&&early.discovered.length<2;i++){await new Promise(r=>setTimeout(r,10));early=await service.poll(started.search_id,'alice');}
+   await new Promise(r=>setTimeout(r,100));early=await service.poll(started.search_id,'alice');
    assert.deepEqual([early.status,early.stage],['discovering','searching']);
-   assert.deepEqual(early.discovered.map(r=>new URL(r.canonical_url).hostname),['fast.example.org','fast.example.org'],'the first answer adds its best two leads');
+   assert.deepEqual(early.discovered,[],'fast answers cannot fill the display before slow sources finish');
    release();await working;
    const done=await service.poll(started.search_id,'alice');
    assert.deepEqual([done.status,done.stage,done.catalogue_total,done.discovered.length],['complete',null,0,6]);
    assert.deepEqual(done.discovered.slice(0,4).map(r=>new URL(r.canonical_url).hostname),
-     ['fast.example.org','fast.example.org','slow.example.org','slow.example.org'],'results already shown keep their place');
+     ['fast.example.org','slow.example.org','fast.example.org','slow.example.org'],'all answers share the final candidate ranking');
    assert.deepEqual(done.providers,[{provider:'searxng',status:'ok',message:'2 of 3 search engines answered; Blocked (blocked by a CAPTCHA) did not.'}]);
    const health=(await db.query("SELECT provider,failure_count,last_error_code FROM provider_health WHERE provider LIKE 'searxng:%' ORDER BY provider")).rows;
    assert.deepEqual(health.map(h=>[h.provider,h.failure_count,h.last_error_code]),
@@ -121,7 +168,7 @@ test('SearXNG sends each engine one request at a time, even from searches runnin
  assert.deepEqual([partial.status.status,partial.status.message],['partial','1 of 3 search engines answered; Two (returned an error), Three (returned an error) did not.']);
 });
 
-test('a deep dive searches niche engines, later pages and leads, and adds ranked underrated finds after the quick results',async()=>{
+test('a deep dive searches niche engines, later pages and leads, and reranks quick and deep results together',async()=>{
  const db=await database();
  // DEEP_RESULTS: the first searches find exactly four new results, so the lead found afterwards needs its round's own room.
  const config={...testConfig,SEARXNG_BASE_URL:'http://deep.example:8080',SEARXNG_ENGINES:'std',SEARXNG_DEEP_ENGINES:'niche',DEEP_PAGES:2,DEEP_FOLLOW_UPS:2,DEEP_RESULTS:4};
@@ -179,12 +226,13 @@ test('a deep dive searches niche engines, later pages and leads, and adds ranked
      'niche:1:orbit scene compilation obscure','std:2:orbit scene compilation obscure','niche:2:orbit scene compilation obscure','niche:1:orbit scene lead'])
      assert.ok(asked.includes(key),`asked ${key}`);
    assert.ok(material.includes('niche.example.net: Orbit scenes fan edit'),'leads come from the first finds');
-   assert.deepEqual(judged.at(-1)!.sort(),['Orbit scene compilation obscure cut','Orbit scene lead from a forum','Orbit scenes fan edit',
-     'Orbit scenes from a small archive','Orbit scenes off-topic upload'],'the deep judge checks only new finds');
+   assert.deepEqual(judged.at(-1)!.sort(),['Orbit scene compilation obscure cut','Orbit scene lead from a forum','Orbit scenes classic','Orbit scenes fan edit',
+     'Orbit scenes from a small archive','Orbit scenes off-topic upload','Orbit scenes remastered'],'the deep judge checks old and new finds together');
    const titles=deep.discovered.map((r:any)=>r.title);
-   assert.deepEqual(titles.slice(0,4),['Orbit scenes classic','Orbit scenes remastered','Orbit scene compilation obscure cut','Orbit scene lead from a forum'],
-     'quick results keep their place, and the best new finds follow');
-   assert.deepEqual(titles.slice(4).sort(),['Orbit scenes fan edit','Orbit scenes from a small archive'],'the rejected find is removed');
+   assert.deepEqual(titles.slice(0,2),['Orbit scene compilation obscure cut','Orbit scene lead from a forum'],
+     'more relevant deep results outrank quick results');
+   assert.deepEqual(titles.slice(2).sort(),['Orbit scenes classic','Orbit scenes fan edit','Orbit scenes from a small archive','Orbit scenes remastered'],'the rejected find is removed');
+   assert.deepEqual(deep.ranked.map((r:any)=>r.title),titles,'the browser receives the same combined ranking');
    const byTitle=(title:string)=>deep.discovered.find((r:any)=>r.title===title);
    assert.equal(byTitle('Orbit scene compilation obscure cut').deep_find,true);
    assert.deepEqual(byTitle('Orbit scene compilation obscure cut').badges,['Underrated find'],'a relevant video with few views');
@@ -193,6 +241,16 @@ test('a deep dive searches niche engines, later pages and leads, and adds ranked
    assert.equal(byTitle('Orbit scenes classic').badges,undefined,'nor is a widely watched video, whatever the judge says');
    assert.deepEqual(deep.providers.filter((p:any)=>['planner','leads'].includes(p.provider)).map((p:any)=>[p.provider,p.status]),[['planner','ok'],['leads','ok']]);
 
+   const traces=(await db.query('SELECT query,depth,trace,metrics FROM search_traces ORDER BY created_at')).rows;
+   assert.deepEqual(traces.map((t:any)=>[t.query,t.depth]),[['orbit scenes','quick'],['orbit scenes','deep']],'every discovery search leaves a record');
+   const trace=traces[1].trace,entry=(title:string)=>trace.pool.find((p:any)=>p.title===title);
+   assert.deepEqual([trace.plan.kind,trace.plan.criteria,trace.rounds],['videos',['Shows an orbit scene'],1]);
+   assert.deepEqual([entry('Orbit scene lead from a forum').round,entry('Orbit scenes classic').round],[1,0],'each find keeps the round that first found it');
+   assert.deepEqual([entry('Orbit scenes off-topic upload').relevance,entry('Orbit scenes off-topic upload').shown],[1,false],'rejected candidates keep their scores');
+   assert.deepEqual([entry('Orbit scene compilation obscure cut').rank,entry('Orbit scene compilation obscure cut').shown],[1,true]);
+   assert.ok(trace.searches.some((s:any)=>s.query==='orbit scene lead'&&s.round===1));
+   assert.equal(traces[1].metrics.last_round_share,1/6,'one of the six shown results came from the last follow-up round');
+   assert.equal((await db.query("SELECT count(*)::int n FROM jobs WHERE kind='audit'")).rows[0].n,0,'no audit is queued while the critic is off');
    const catalogue=(await app.inject({url:'/api/search?q=orbit%20scenes&mode=catalogue',headers:{cookie}})).json();
    const refused=await app.inject({method:'POST',url:`/api/search/${catalogue.search_id}/deep`,headers:{cookie,'x-requested-with':'CreatorSearch'}});
    assert.deepEqual([refused.statusCode,refused.json().error.code],[400,'discovery_disabled']);

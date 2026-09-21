@@ -21,6 +21,14 @@ export const configSchema = z.object({
   SEARXNG_DAILY_BUDGET: number(2000, 0, 100000),
   DEEP_PLAN_SEARCHES: number(6, 1, 16), DEEP_PAGES: number(2, 1, 5), DEEP_FOLLOW_UPS: number(4, 0, 10), DEEP_ROUNDS: number(2, 1, 5),
   DEEP_RESULTS: number(40, 1, 80), DEEP_SEARCH_SECONDS: number(120, 20, 600),
+  // Shared candidate pool, selected only after all launched providers finish. Display limits apply after judging.
+  DISCOVERY_CANDIDATES: number(60, 50, 250),
+  SPECIALIST_SEARCHES: number(3, 0, 6),
+  ARCHIVE_DISCOVERY: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
+  ARCHIVE_COLLECTIONS: z.string().default('prelinger,ephemera').refine(v =>
+    v.split(',').length <= 20 && v.split(',').every(s => /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,99}$/.test(s.trim())), 'Use comma-separated archive collection identifiers'),
+  LIBRARY_OF_CONGRESS_DISCOVERY: z.enum(['true', 'false']).default('false').transform(v => v === 'true'),
+  ARCHIVE_DAILY_BUDGET: number(200, 0, 10000),
   UNDERRATED_MAX_VIEWS: number(50000, 0, 1000000000),
   PLAN_SEARCHES: number(4, 1, 8), PAGE_CHECKS: number(20, 0, 40), PAGE_TIMEOUT_MS: number(6000, 1000, 20000),
   PAGE_RENDERS: number(0, 0, 20), PAGE_RENDER_TIMEOUT_MS: number(12000, 3000, 30000), PAGE_TEXT_PYTHON: optional,
@@ -38,7 +46,10 @@ export const configSchema = z.object({
   EMBEDDING_DIMENSIONS: number(384, 1, 2000), EMBEDDING_DAILY_BUDGET: number(100, 0, 10000),
   SEMANTIC_ENABLED: z.enum(['true', 'false']).default('false').transform(v => v === 'true'),
   YOUTUBE_API_KEY: optional, YOUTUBE_DAILY_UNITS: number(3000, 0, 1000000),
-  SIGNAL_VIDEOS: number(10, 1, 25), SIGNAL_COMMENTS: number(100, 1, 100),
+  SIGNAL_VIDEOS: number(25, 1, 100), SIGNAL_COMMENTS: number(100, 1, 300),
+  VIDEO_EVIDENCE_CHECKS: number(12, 0, 40),
+  SCENE_AUTO_QUEUE: z.enum(['true','false']).default('true').transform(v => v === 'true'),
+  SCENE_SHORTLIST: number(3, 0, 10),
   OFFICIAL_YOUTUBE_CHANNELS: optional,
   REDDIT_SIGNALS: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
   // No key needed: a public AniList lookup gives the planner and judge an anime's official titles, synonyms and
@@ -57,6 +68,13 @@ export const configSchema = z.object({
   // OpenRouter ids. They must accept images: website candidates are judged partly on a screenshot.
   // Empty leaves judging to Gemini.
   JUDGE_MODELS: z.string().regex(/^[\w.,\/:\s-]*$/).default(''),
+  // Learning loop: after each discovery search a critic model audits it (on the OpenRouter key), and once a week a
+  // reviewer re-checks a sample of those audits. An audit spends at most two critic calls; the budget counts calls.
+  CRITIC_ENABLED: z.enum(['true', 'false']).default('false').transform(v => v === 'true'),
+  CRITIC_MODEL: z.string().regex(/^[\w.\/:-]{1,100}$/).default('anthropic/claude-sonnet-5'),
+  CRITIC_REVIEW_MODEL: z.string().regex(/^[\w.\/:-]{1,100}$/).default('anthropic/claude-sonnet-5'),
+  CRITIC_DAILY_BUDGET: number(40, 0, 10000), CRITIC_TIMEOUT_MS: number(120000, 10000, 600000),
+  CRITIC_PROBES: number(3, 0, 5), TRACE_RETENTION_DAYS: number(90, 1, 3650),
   // An OpenAI-compatible model endpoint (OpenRouter by default), used alongside Gemini. Nothing calls it until a
   // model names it, so an empty OPENROUTER_API_KEY leaves behaviour unchanged. An empty base URL means the default.
   OPENROUTER_BASE_URL: z.string().url().or(z.literal('')).default('https://openrouter.ai/api/v1')

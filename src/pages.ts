@@ -2,6 +2,7 @@ import type { Config } from './config.js';
 import { fetchText, UpstreamError, type TextResponse } from './http.js';
 import { BrowserRenderer, type Renderer } from './render.js';
 import { Trafilatura, type TextExtractor } from './extract.js';
+import { publicURL } from './urls.js';
 
 const AGENT = 'zenatlas';
 const TEXT_CHARS = 800;
@@ -9,6 +10,7 @@ export interface PageEvidence {
  status: 'checked'|'robots_disallowed'|'unavailable';
  title: string|null; description: string|null; text: string|null; libraries: string[]; badges: string[];
  rendered?: boolean; screenshot?: Buffer|null;
+ links?: {url: string; title: string}[];
 }
 export interface PageCheck { check(url: string): Promise<PageEvidence> }
 // renders: at most this many pages per checker are opened in the browser (default PAGE_RENDERS).
@@ -63,6 +65,25 @@ const clean = (text: string|undefined|null, max: number) => {
  const value = decode((text ?? '').replace(/\s+/g, ' ')).trim();
  return value ? value.slice(0, max) : null;
 };
+
+// Bounded references for follow-up planning, not an unrestricted recursive crawler.
+export function pageReferences(html: string, base: string): {url: string; title: string}[] {
+ const found = new Map<string,{url: string; title: string}>();
+ for (const match of html.matchAll(/<a\b[^>]*\bhref\s*=\s*(?:"([^"]*)"|'([^']*)')[^>]*>([\s\S]*?)<\/a>/gi)) {
+   if (found.size >= 8) break;
+   try {
+     const raw = decode(match[1] ?? match[2]);
+     if (!raw || raw.startsWith('#')) continue;
+     const link = publicURL(new URL(raw, base).href);
+     link.hash = '';
+     const title = clean(match[3].replace(/<[^>]*>/g, ' '), 120);
+     if (!title || title.length < 4 || /^(?:home|login|sign in|register|privacy|terms|share|contact|next|previous)$/i.test(title)) continue;
+     if (link.href === base) continue;
+     if (!found.has(link.href)) found.set(link.href, {url: link.href, title});
+   } catch { /* Ignore non-public and non-HTTP references. */ }
+ }
+ return [...found.values()];
+}
 
 const badgesFor = (names: string[]) => (['3D', 'Motion', 'Video'] as const).flatMap(group => {
  const found = LIBRARIES.filter(l => l.group === group && names.includes(l.name)).map(l => l.name);
@@ -145,7 +166,8 @@ export class PageChecker implements PageCheck {
      const main = await this.tools.extractor?.text(rendered?.html ?? page.text) ?? null;
      return {status: 'checked', title: live?.title ?? source.title, description: live?.description ?? source.description,
        text: clean(main, TEXT_CHARS) ?? live?.text ?? source.text, libraries, badges: badgesFor(libraries),
-       rendered: !!rendered, screenshot: rendered?.screenshot ?? null};
+       rendered: !!rendered, screenshot: rendered?.screenshot ?? null,
+       links: pageReferences(rendered?.html ?? page.text, page.url)};
    } catch { return {status: 'unavailable', ...empty}; }
  }
  // Only pages that robots.txt allows and that answered a plain request are opened in the browser.

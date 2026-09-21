@@ -272,3 +272,8 @@ code,.mono{font-size:11px}
  .searchbar button{padding:0 18px}
  .card{padding:18px}
 }
+
+/* Learning-loop feedback: reasons after a "Not useful" vote, and the note on what a search missed. */
+.reasons{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.missing{display:grid;gap:8px;margin:28px 0 12px}
+.missing label{font-size:13px;color:var(--ink-2,inherit)}

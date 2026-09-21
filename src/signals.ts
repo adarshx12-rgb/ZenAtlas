@@ -6,9 +6,12 @@ import { discoveryQuery, sameWord, STOPWORDS, tokens } from './ranking.js';
 import { UpstreamError } from './http.js';
 import { takeBudget } from './budgets.js';
 import { YouTubeData, youtubeId, type VideoDetails, type ViewerComment, type YouTubeClient } from './youtube.js';
-import { makeJudge, type Judge, type JudgeCandidate, type JudgeContext, type JudgeResult, type Verdict } from './judge.js';
+import { makeJudge, TANGENTIAL, type Judge, type JudgeCandidate, type JudgeContext, type JudgeResult, type Verdict } from './judge.js';
 import { PageChecker, type PageCheck, type PageEvidence } from './pages.js';
 import type { SearchTarget } from './planner.js';
+import {PublicVideoEvidence,selectComments,type VideoEvidenceAdapter,type VideoEvidence} from './video-evidence.js';
+import {importTranscript} from './moments.js';
+import {retainedEvidence,queueSceneShortlist} from './retained-evidence.js';
 
 export const VIEWER_ANALYSIS_VERSION = 'viewer-comments-v1';
 const MOMENTS_PER_VIDEO = 3;
@@ -18,11 +21,17 @@ const LEAD_IN_SECONDS = 5;
 export interface TimestampMention { commentId: string; seconds: number; excerpt: string; likes: number; weight: number }
 export interface MomentCluster { start: number; end: number; score: number; mentions: TimestampMention[] }
 export interface Discussion { title: string; url: string; snippet: string|null }
-export interface SignalDeps { youtube?: YouTubeClient; judge?: Judge; pages?: PageCheck; discussions?: (query: string) => Promise<Discussion[]> }
+export interface SignalDeps { youtube?: YouTubeClient; judge?: Judge; pages?: PageCheck; videoEvidence?:VideoEvidenceAdapter; discussions?: (query: string) => Promise<Discussion[]> }
 // What the search plan wanted, and which kind of search found each result (by result id).
-// underrated: rank relevant results from lesser-known sources higher.
+// underrated is retained for callers; obscurity is a badge, never a ranking boost.
 export interface SignalContext extends JudgeContext { targets: Map<string,SearchTarget>; underrated?: boolean }
 export const UNDERRATED_BADGE = 'Underrated find';
+export const CLOSEST_BADGE = 'Closest match';
+const CLOSEST_MATCHES = 5;
+// Verified matches always show. Unverified ones (the judge's plausible-but-unquoted 5) only fill a short list.
+export const POSSIBLE_BADGE = 'Possible match';
+const POSSIBLE_FILL = 10;
+const UNVERIFIED_SCORE = 5;
 const RETRY_BATCH = 10;
 
 // h:mm:ss or m:ss, not part of a longer number, ratio or clock time such as "10:30 pm".
@@ -122,7 +131,7 @@ async function storeMoments(db: DB, contentId: string, duration: number, comment
  });
 }
 
-interface Extra { details?: VideoDetails; page?: PageEvidence; stored: {cluster: MomentCluster; moment: Moment}[]; comments: string[]; discussions: Discussion[]; badges: string[] }
+interface Extra { details?: VideoDetails; page?: PageEvidence; video?:VideoEvidence; stored: {cluster: MomentCluster; moment: Moment}[]; comments: string[]; discussions: Discussion[]; badges: string[] }
 // A structured worker log line with the upstream error code, never the raw error or request.
 export function logFailure(event: string, error: unknown) {
  console.error(JSON.stringify({event, code: error instanceof UpstreamError ? error.code : 'error', status: (error as UpstreamError)?.status ?? null}));
@@ -135,12 +144,16 @@ const unavailable = (provider: string, error: unknown, message: string): Provide
 // Enriches ranked discovery results with YouTube details and viewer timestamps, Reddit mentions and an AI relevance
 // judgement, then re-orders them. Every step is optional and a failing step leaves the others' results intact.
 // previews: first-screen captures of checked web pages by result id, kept only as long as the searches that show them.
+export interface Judged { id: string; relevance: number|null; reason: string|null; basis: 'metadata'|'viewer_claims'|'direct_evidence'|null }
 export async function applySignals(db: DB, config: Config, query: string, results: Result[], deps: SignalDeps = {}, context?: SignalContext) {
  const providers: ProviderStatus[] = [];
  const previews = new Map<string,Buffer>();
- if (!results.length) return {results, providers, previews};
- const rows = (await db.query(`SELECT c.id,c.duration,(s.policy->>'viewer_signals')::boolean AS viewer_signals FROM content c
-   JOIN sources s ON s.id=c.source_id WHERE c.id=ANY($1::uuid[]) AND s.status='active'`, [results.map(r => r.id)])).rows;
+ if (!results.length) return {results, providers, previews, judged: [] as Judged[]};
+ const rows = (await db.query(`SELECT c.id,c.duration,(s.policy->>'viewer_signals')::boolean AS viewer_signals,
+   (s.policy->>'transcripts')::boolean AS transcripts FROM content c
+   JOIN sources s ON s.id=c.source_id WHERE c.id=ANY($1::uuid[]) AND s.status='active' AND s.health_status<>'down'
+   AND c.expires_at>now() AND c.availability<>'unavailable'
+   AND split_part(split_part(c.canonical_url,'://',2),'/',1)=s.active_domain`, [results.map(r => r.id)])).rows;
  const stored = new Map(rows.map(r => [r.id, r]));
  const official = new Set(config.OFFICIAL_YOUTUBE_CHANNELS.split(',').map(s => s.trim()).filter(Boolean));
  const extra = new Map<string,Extra>();
@@ -148,7 +161,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
 
  const youtube = deps.youtube ?? (config.YOUTUBE_API_KEY ? new YouTubeData(db, config) : undefined);
  // Details (one request per 50 videos) cover every permitted video; comments only the first SIGNAL_VIDEOS.
- const eligible = results.filter(r => youtubeId(r.canonical_url) && stored.get(r.id)?.viewer_signals).slice(0, 50);
+ const eligible = results.filter(r => youtubeId(r.canonical_url) && stored.get(r.id)?.viewer_signals);
  const commented = new Set(eligible.slice(0, config.SIGNAL_VIDEOS).map(r => r.id));
  const youtubeTask = async (): Promise<ProviderStatus|null> => {
    if (!youtube || !eligible.length) return null;
@@ -169,7 +182,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
            [r.id, d.duration, d.publishedAt, d.channelTitle || null, d.language ?? null]);
          if (!commented.has(r.id) || d.commentCount === null || d.commentCount === 0) return;
          const comments = await youtube.comments(d.id, config.SIGNAL_COMMENTS);
-         e.comments = [...comments].sort((a, b) => b.likes - a.likes).slice(0, 15).map(c => c.text.replace(/\s+/g, ' ').slice(0, 240));
+         e.comments = selectComments(comments,query);
          const duration = stored.get(r.id)?.duration ?? d.duration;
          // Without a known length, a moment could later conflict with the real duration, so none is stored.
          if (duration) e.stored = await storeMoments(db, r.id, duration, comments);
@@ -186,12 +199,13 @@ export async function applySignals(db: DB, config: Config, query: string, result
    catch (error) { return {threads: [], status: unavailable('reddit', error, 'Reddit discussions are unavailable right now.')}; }
  };
  const pages = config.PAGE_CHECKS > 0 ? (deps.pages ?? new PageChecker(config)) : undefined;
- const webResults = context ? results.filter(r => context.targets.get(r.id) === 'web' && !youtubeId(r.canonical_url)).slice(0, config.PAGE_CHECKS) : [];
+ const webResults = context ? results.filter(r => !youtubeId(r.canonical_url)).slice(0, config.PAGE_CHECKS) : [];
  const pageTask = async (): Promise<ProviderStatus|null> => {
    if (!pages || !webResults.length) return null;
    let checked = 0, rendered = 0;
    await mapLimit(webResults, 8, async r => {
-     const evidence = await pages.check(r.canonical_url);
+     const evidence = await pages.check(r.canonical_url).catch((): PageEvidence =>
+       ({status: 'unavailable', title: null, description: null, text: null, libraries: [], badges: []}));
      const e = info(r.id); e.page = evidence; e.badges.push(...evidence.badges);
      if (evidence.status === 'checked') checked++;
      if (evidence.rendered) rendered++;
@@ -201,8 +215,29 @@ export async function applySignals(db: DB, config: Config, query: string, result
    return checked ? {provider: 'pages', status: 'ok', message: `${checked} of ${webResults.length} result pages were checked${rendered ? `, ${rendered} in a browser` : ''}.`}
      : {provider: 'pages', status: 'unavailable', message: 'Result pages could not be checked; websites are ranked from search snippets.'};
  };
- const [youtubeStatus, reddit, pageStatus] = await Promise.all([youtubeTask(), redditTask(), pageTask()]);
+ const adapter=deps.videoEvidence??new PublicVideoEvidence();
+ const adapterTask=async()=>{
+   const candidates=results.filter(r=>!youtubeId(r.canonical_url)&&stored.has(r.id)).slice(0,config.VIDEO_EVIDENCE_CHECKS);
+   await mapLimit(candidates,4,async r=>{
+     const policy=stored.get(r.id)!;
+     const evidence=await adapter.check(r.canonical_url,{viewer_signals:policy.viewer_signals===true,transcripts:policy.transcripts===true},r.language).catch(()=>null);
+     if(!evidence) return;
+     const e=info(r.id); e.video=evidence; e.comments=selectComments(evidence.comments,query);
+     if(evidence.caption && policy.transcripts===true) {
+       try {await importTranscript(db,{content_id:r.id,language:evidence.caption.language,origin:evidence.caption.origin,
+         content_version:evidence.caption.version,timing_quality:'provided',retention_permitted:true,segments:evidence.caption.segments});}
+       catch {evidence.captionStatus='unavailable';}
+     }
+   });
+ };
+ const [youtubeStatus, reddit, pageStatus] = await Promise.all([youtubeTask(), redditTask(), pageTask(),adapterTask()]);
  for (const status of [youtubeStatus, reddit.status, pageStatus]) if (status) providers.push(status);
+ const retained=await retainedEvidence(db,results.map(r=>r.id),query);
+ for(const provider of ['peertube','archive']) {
+   const checks=[...extra.values()].flatMap(e=>e.video?.provider===provider?[e.video]:[]);
+   if(checks.length) providers.push({provider:`${provider}_evidence`,status:checks.some(e=>e.commentStatus==='available'||e.captionStatus==='available')?'ok':'partial',
+     message:`${checks.filter(e=>e.commentStatus==='available').length} comment/review samples and ${checks.filter(e=>e.captionStatus==='available').length} caption tracks available across ${checks.length} checked results.`});
+ }
 
  const terms = discoveryQuery(query).terms;
  const pool = results.slice(0, config.JUDGE_CANDIDATES);
@@ -220,28 +255,37 @@ export async function applySignals(db: DB, config: Config, query: string, result
    const candidates: JudgeCandidate[] = pool.map(r => {
      const e = extra.get(r.id), d = e?.details, key = keys.get(r.id)!, duration = d?.duration ?? r.duration;
      const page = e?.page;
-     return {key, kind: youtubeId(r.canonical_url) || context?.targets.get(r.id) !== 'web' ? 'video' : 'website',
-       site: new URL(r.canonical_url).hostname, title: r.title, channel: d?.channelTitle || r.creator,
+     return {key, kind: youtubeId(r.canonical_url) || context?.kind==='videos' || context?.targets.get(r.id) !== 'web' ? 'video' : 'website',
+       site: new URL(r.canonical_url).hostname, url:r.canonical_url, title: r.title, channel: d?.channelTitle || r.creator,
        official: !!e?.badges.includes('Official channel'), duration: duration ? formatSeconds(duration) : null,
        live: e?.badges.find(b => /live/i.test(b)) ?? null,
        description: (d?.description || r.description || '').replace(/\s+/g, ' ').slice(0, 500) || null,
        comments: e?.comments ?? [], views: d?.views ?? null,
+       transcripts:retained.get(r.id)?.transcripts??[],
+       scenes:(retained.get(r.id)?.scenes??[]).map(s=>({start:s.start_seconds,end:s.end_seconds,description:s.summary,inspected_ranges:s.inspected_ranges})),
+       ...(e?.video?{evidence_status:{comments:e.video.commentStatus,captions:e.video.captionStatus}}:{}),
        moments: (e?.stored ?? []).map((s, j) => ({key: `${key}m${j + 1}`,
          at: formatSeconds(Math.min(...s.cluster.mentions.map(m => m.seconds))), viewers_said: s.cluster.mentions.map(m => m.excerpt)})),
        discussions: (e?.discussions ?? []).map(t => t.title),
        ...(page ? {page: {status: page.status, title: page.title, description: page.description, text: page.text, libraries: page.libraries,
          screenshot: previews.has(r.id)}} : {})};
    });
+   // The planner's "websites" is a guess, and told as such to a judge it rejects every video, even ones presenting the
+   // requested tools or sites. Mixed keeps the websites preference without excluding them.
+   const wanted = context?.kind === 'websites' ? 'mixed' as const : context?.kind ?? 'videos';
    const screenshots = new Map([...previews].flatMap(([id, image]) => keys.has(id) ? [[keys.get(id)!, image] as const] : []));
    // Smaller batches in parallel answer faster, and a failed batch only leaves its own results unjudged.
    const judgeAll = (list: JudgeCandidate[], size: number) => Promise.allSettled(
      Array.from({length: Math.ceil(list.length/size)}, (_, b) => list.slice(b*size, (b + 1)*size)).map(batch =>
-       judge.judge(query, batch, context ? {kind: context.kind, criteria: context.criteria, anime: context.anime} : undefined, screenshots).then(out => ({batch, out}))));
+       judge.judge(query, batch, context ? {kind: wanted, criteria: context.criteria, anime: context.anime} : undefined, screenshots).then(out => ({batch, out}))));
    const byKey = new Map<string,Verdict>();
    const collect = (settled: PromiseSettledResult<{batch: JudgeCandidate[]; out: JudgeResult}>[]) => {
-     for (const s of settled) if (s.status === 'fulfilled') for (const [key, v] of s.value.out.verdicts) { byKey.set(key, v); modelOf.set(key, s.value.out.model); }
+     for (const s of settled) if (s.status === 'fulfilled') for (const [key, v] of s.value.out.verdicts) {
+       if (!s.value.batch.some(c => c.key === key)) continue;
+       byKey.set(key, v); modelOf.set(key, s.value.out.model);
+     }
    };
-   const settled = await judgeAll(candidates, config.JUDGE_BATCH_SIZE);
+   const settled = await judgeAll(candidates, Math.min(config.JUDGE_BATCH_SIZE,12));
    collect(settled);
    // Lighter fallback models often skip candidates in long batches; the skipped ones are asked once more in short batches.
    const skipped = settled.flatMap(s => s.status === 'fulfilled' ? s.value.batch.filter(c => !byKey.has(c.key)) : []);
@@ -249,7 +293,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
    const failed = settled.flatMap(s => s.status === 'rejected' ? [s.reason] : []);
    if (failed.length < settled.length) {
      verdicts = new Map(pool.flatMap(r => { const v = byKey.get(keys.get(r.id)!); return v ? [[r.id, v] as const] : []; }));
-     providers.push(failed.length ? {provider: 'judge', status: 'partial', message: 'Some results could not be checked by AI and are listed after checked ones.'}
+     providers.push(byKey.size < candidates.length ? {provider: 'judge', status: 'partial', message: 'Some results could not be checked by AI and are listed after checked ones.'}
        : {provider: 'judge', status: 'ok', message: 'Results were checked for relevance by AI.'});
    } else {
      logFailure('judge_failed', failed[0]);
@@ -266,21 +310,47 @@ export async function applySignals(db: DB, config: Config, query: string, result
    const base = 1/(1 + i/10);
    // A clearly relevant result the judge places at a lesser-known source is an underrated find, unless its video is widely watched.
    const underrated = !!v?.lesserKnown && v.relevance >= 7 && (d?.views ?? 0) < config.UNDERRATED_MAX_VIEWS;
-   const score = (verdicts ? (v ? v.relevance/10*1.5 + base*0.3 : base*0.3 - 0.5)
-     : base + 0.1*chosen.length + (e?.discussions.length ? 0.1 : 0) + (e?.badges.includes('Official channel') ? 0.1 : 0))
-     + (underrated && context?.underrated ? 0.3 : 0);
+   // Integer relevance dominates every tie-break. Arrival order, popularity and obscurity never
+   // promote a weaker match. Unjudged candidates retain the deterministic lexical fallback order.
+   const score = v ? v.relevance : -1;
+   const evidence = e?.page?.status === 'checked' || chosen.length || r.evidence !== 'metadata_match' ? 1 : 0;
    const badges = [...(e?.badges ?? []), ...(underrated ? [UNDERRATED_BADGE] : [])];
-   return {score, dropped: !!v && v.relevance <= 2, result: {...r,
+   const evidenceData=retained.get(r.id);
+   const basis:'metadata'|'viewer_claims'|'direct_evidence'=evidenceData?.transcripts.length||evidenceData?.scenes.length||e?.page?.status==='checked'?'direct_evidence':e?.comments.length?'viewer_claims':'metadata';
+   return {score, evidence, base, dropped: !!v && v.relevance <= TANGENTIAL, result: {...r,
+     evidence_coverage:{comments:e?.video?.commentStatus??(e?.comments.length?'available':'unavailable'),
+       captions:e?.video?.captionStatus??(evidenceData?.transcripts.length?'available':'unavailable'),
+       transcript_passages:evidenceData?.transcripts.length??0,analysed_scenes:evidenceData?.scenes.length??0,basis},
      duration: r.duration ?? d?.duration ?? null, published_at: r.published_at ?? d?.publishedAt ?? null, creator: r.creator ?? (d?.channelTitle || null),
      language: r.language ?? d?.language ?? null,
      moments: [...r.moments, ...chosen].sort((a, b) => a.start_seconds - b.start_seconds),
      badges: badges.length ? [...new Set(badges)] : r.badges,
      ...(previews.has(r.id) ? {preview: true} : {}),
-     judgement: v ? {relevance: v.relevance, reason: v.reason, model: modelOf.get(keys.get(r.id)!) ?? ''} : (r.judgement ?? null)}};
+     judgement: v ? {relevance: v.relevance, reason: v.reason, model: modelOf.get(keys.get(r.id)!) ?? '',
+       ...(v.intentChecks?{intent_checks:v.intentChecks}:{})} : null}};
  });
- const kept = scored.filter(s => !s.dropped);
- const ranked = (kept.length ? kept : scored).sort((a, b) => b.score - a.score).map(s => s.result);
+ const order = (a: typeof scored[number], b: typeof scored[number]) => b.score - a.score || (a.score >= 0 ? b.evidence - a.evidence : 0) || b.base - a.base;
+ let kept = scored.filter(s => !s.dropped);
+ const verified = kept.filter(s => s.score > UNVERIFIED_SCORE).length;
+ const possible = kept.filter(s => s.score === UNVERIFIED_SCORE).sort(order).slice(0, Math.max(0, POSSIBLE_FILL - verified));
+ const guesses = kept.filter(s => s.score === UNVERIFIED_SCORE).length - possible.length;
+ kept = [...kept.filter(s => s.score !== UNVERIFIED_SCORE),
+   ...possible.map(s => ({...s, result: {...s.result, badges: [...new Set([...(s.result.badges ?? []), POSSIBLE_BADGE])]}}))];
+ const rejected=scored.filter(s=>s.dropped).length+guesses;
+ // An empty page hides whether nothing matched or the checks were too strict. When every candidate was rejected,
+ // the few that were at least tangential are shown and labelled; contradicted ones never are.
+ const closest = kept.length ? [] : scored.filter(s => s.dropped && s.score > 2).sort(order).slice(0, CLOSEST_MATCHES);
+ if(closest.length) {
+   kept = closest.map(s => ({...s, result: {...s.result, badges: [...new Set([...(s.result.badges ?? []), CLOSEST_BADGE])]}}));
+   providers.push({provider:'relevance_filter',status:'partial',message:`No result was confirmed as a strong match; showing the ${closest.length} closest.`});
+ } else if(rejected) providers.push({provider:'relevance_filter',status:'ok',message:`${rejected} weak or insufficiently supported candidates were excluded. Fewer results may be shown.`});
+ const ranked = kept.sort(order).map(s => s.result);
  const shown = new Set(ranked.map(r => r.id));
  for (const id of previews.keys()) if (!shown.has(id)) previews.delete(id);
- return {results: ranked, providers, previews};
+ const queued=await queueSceneShortlist(db,config,ranked,query).catch(()=>0);
+ if(queued) providers.push({provider:'scene_analysis',status:'partial',message:`${queued} videos queued for scene analysis; these pending analyses are not evidence in this ranking.`});
+ // Every candidate's verdict, rejected ones included, for the search's learning trace.
+ const judged: Judged[] = scored.map(s => ({id: s.result.id, relevance: s.result.judgement?.relevance ?? null, reason: s.result.judgement?.reason ?? null,
+   basis: s.result.judgement ? s.result.evidence_coverage?.basis ?? null : null}));
+ return {results: ranked, providers, previews, judged};
 }

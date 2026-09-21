@@ -25,7 +25,14 @@ export async function importTranscript(db:DB,raw:unknown) {
  return db.transaction(async tx=>{
    const content=(await tx.query(`SELECT c.*,s.policy,s.status FROM content c JOIN sources s ON s.id=c.source_id WHERE c.id=$1 FOR UPDATE OF c`,[input.content_id])).rows[0];
    if(!content || content.status!=='active' || content.policy.transcripts!==true) throw new Error('Source does not permit transcript retention');
-   await tx.query('DELETE FROM moments WHERE content_id=$1',[input.content_id]);
+   if(content.duration && input.segments.some(s=>s.end>content.duration)) throw new Error('Caption exceeds video duration');
+   const existing=(await tx.query('SELECT * FROM transcript_segments WHERE content_id=$1 ORDER BY start_seconds,end_seconds,id',[input.content_id])).rows;
+   if(existing.length===input.segments.length && existing.every((s,i)=>s.content_version===input.content_version && s.origin===input.origin &&
+     s.language===input.language && s.start_seconds===input.segments[i].start && s.end_seconds===input.segments[i].end && s.text===input.segments[i].text)) {
+     return {segments:existing.length,moments:(await tx.query("SELECT count(*)::int AS n FROM moments WHERE content_id=$1 AND evidence_type='transcript_supported'",[input.content_id])).rows[0].n,
+       analysis_version:`transcript-extractive-v1:${input.content_version}`};
+   }
+   await tx.query("DELETE FROM moments WHERE content_id=$1 AND evidence_type='transcript_supported'",[input.content_id]);
    await tx.query('DELETE FROM transcript_segments WHERE content_id=$1',[input.content_id]);
    const segments:Segment[]=[];
    for(const segment of input.segments) segments.push((await tx.query(`INSERT INTO transcript_segments

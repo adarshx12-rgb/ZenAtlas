@@ -10,6 +10,7 @@ from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
 from .validation import ValidatedScenes
+from .subtitles import Cue
 
 Row = dict[str, Any]
 
@@ -66,6 +67,7 @@ class AnalysisRecord:
     frame_sampling_fps: float
     media_resolution: str
     validated: ValidatedScenes
+    retained_cues: tuple[Cue, ...] = ()
 
 
 # Mirrors the catalogue eligibility used by search, plus the source's explicit video-analysis permission.
@@ -188,7 +190,7 @@ def take_budget(conn: psycopg.Connection[Row], bucket: str, limit: int) -> bool:
 
 
 def transcript_segments(conn: psycopg.Connection[Row], content_id: str, version_key: str) -> list[Row]:
-    return conn.execute("""SELECT id::text AS id,start_seconds,end_seconds,text FROM transcript_segments
+    return conn.execute("""SELECT id::text AS id,start_seconds,end_seconds,text,origin FROM transcript_segments
         WHERE content_id=%s AND content_version=%s ORDER BY start_seconds,end_seconds,id""", (content_id, version_key)).fetchall()
 
 
@@ -218,6 +220,36 @@ def store_analysis(conn: psycopg.Connection[Row], job: Row, context: JobContext,
             raise ContextChanged(current.ineligible)
         if current.identity() != context.identity():
             raise ContextChanged("version_changed")
+        if record.retained_cues and current.policy.get("transcripts") is True and record.subtitle_source in ("sidecar_file", "faster_whisper"):
+            # Do not replace publisher transcripts. Persist authorised local captions/ASR on the registered timeline.
+            if conn.execute("SELECT 1 FROM transcript_segments WHERE content_id=%s LIMIT 1", (context.content_id,)).fetchone() is None:
+                group: list[dict[str, Any]] = []
+
+                def save_window() -> None:
+                    if not group:
+                        return
+                    conn.execute("""INSERT INTO moments(content_id,start_seconds,end_seconds,summary,evidence_refs,
+                        evidence_type,analysis_method,analysis_version,inspected_ranges)
+                        VALUES(%s,%s,%s,%s,%s,'transcript_supported','extractive_windows',%s,%s)""",
+                        (context.content_id, group[0]["start"], max(c["end"] for c in group), " ".join(c["text"] for c in group),
+                         [uuid.UUID(c["id"]) for c in group], f"transcript-extractive-v1:{context.version_key}",
+                         Jsonb([[c["start"], c["end"]] for c in group])))
+                    group.clear()
+
+                for cue in record.retained_cues:
+                    start = max(0.0, cue.start + context.timeline_offset)
+                    end = min(cue.end + context.timeline_offset, context.content_duration or float("inf"))
+                    if end <= start:
+                        continue
+                    body = cue.text[:4000]
+                    if sum(len(c["text"]) for c in group) + len(body) > 6000:
+                        save_window()
+                    row = conn.execute("""INSERT INTO transcript_segments(content_id,start_seconds,end_seconds,text,language,origin,
+                        content_version,timing_quality) VALUES(%s,%s,%s,%s,'und',%s,%s,%s) RETURNING id::text AS id""",
+                        (context.content_id, start, end, body, f"scene-worker:{record.subtitle_source}", context.version_key,
+                         "aligned" if record.subtitle_source == "faster_whisper" else "provided")).fetchone()
+                    group.append({"id": row["id"], "start": start, "end": end, "text": body})
+                save_window()
         conn.execute("DELETE FROM scene_analyses WHERE media_version_id=%s AND analysis_version=%s", (context.version_id, record.analysis_version))
         conn.execute("UPDATE video_scenes SET status='stale' WHERE media_version_id=%s AND status='active'", (context.version_id,))
         analysis_id = conn.execute("""INSERT INTO scene_analyses(media_version_id,content_id,analysis_version,model,subtitle_source,
@@ -236,6 +268,8 @@ def store_analysis(conn: psycopg.Connection[Row], job: Row, context: JobContext,
                                  [uuid.UUID(ref) for ref in s.segment_ids]) for s in scenes])
         record_access(conn, context.version_id, None)
         _set_analysis(conn, context.version_id, "complete", None)
+        conn.execute("""INSERT INTO jobs(kind,dedupe_key,payload) VALUES('enrich',%s,%s) ON CONFLICT DO NOTHING""",
+                     (f"scene-evidence:{analysis_id}", Jsonb({"content_id": context.content_id})))
         _finish(conn, job, "complete", {"status": "complete", "analysis_id": analysis_id, "scenes": len(scenes), "rejected": rejected}, None)
     return analysis_id
 

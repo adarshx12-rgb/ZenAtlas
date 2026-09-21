@@ -211,14 +211,52 @@ function renderHealth(report){
  if(!report.checks.length){const tr=node('tr'),td=node('td','No results yet. Start the watchdog.','hint');td.colSpan=4;tr.append(td);body.append(tr);}
 }
 
+const pct=v=>v===null||v===undefined?'–':`${Math.round(v*100)}%`;
+const conf=c=>` (confidence ${pct(c)})`;
+function renderAudits(report){
+ const line=$('#audit-line'),body=$('#audits tbody');body.replaceChildren();
+ if(!report){line.textContent='Audits are unavailable. Apply the latest migration (npm run migrate).';line.className='health-line health-failing';return;}
+ const {summary:s}=report,f=s.feedback,m=s.missing_sources;
+ line.textContent=`Last 7 days: ${s.audits.complete} audited${s.audits.skipped?`, ${s.audits.skipped} skipped (budget)`:''}${s.audits.failed?`, ${s.audits.failed} failed`:''}. `
+   +`Average best results ${pct(s.best_results)}, quality ${pct(s.quality)}. Depth: ${s.depth.too_shallow} too shallow, ${s.depth.enough} enough, ${s.depth.too_deep} too deep. `
+   +`Missing sources tested: ${m.confirmed} confirmed, ${m.weak} weak, ${m.refuted+m.no_results} not borne out. `
+   +`Reviewer agreement ${pct(s.review.agreement)} over ${s.review.reviewed}. Your feedback: ${f.useful} useful, ${f.not_useful} not useful, ${f.opens} opened, ${f.missing} missing notes.`;
+ line.className='health-line';
+ for(const a of report.audits){
+   const tr=node('tr'),search=node('td');
+   search.append(node('div',a.query),node('div',`${a.depth} · ${ago(a.created_at)}${a.audit?` · ${a.audit.topic}`:''}`,'hint'));
+   const results=node('td',`${a.metrics.shown} shown, ${a.metrics.verified} verified${a.metrics.possible?`, ${a.metrics.possible} possible`:''}`);
+   if(a.status!=='complete'){const td=node('td',`Not audited: ${a.code??a.status}`,'hint');td.colSpan=4;tr.append(search,results,td);}
+   else{
+     const best=node('td',pct(a.audit.best_results.score)+conf(a.audit.best_results.confidence),'note');best.title=a.audit.best_results.summary;
+     for(const x of a.audit.best_results.misranked.slice(0,3))best.append(node('div',`${x.action}: ${x.url}`,'hint'));
+     const quality=node('td',pct(a.audit.quality.score),'note');
+     for(const i of a.audit.quality.issues.slice(0,3))quality.append(node('div',`${i.kind}: ${i.note}`,'hint'));
+     const depth=node('td',a.audit.search_depth.verdict.replace('_',' ')+conf(a.audit.search_depth.confidence),'note');depth.title=a.audit.search_depth.why;
+     const missing=node('td','','note');
+     for(const p of a.probes??[])missing.append(node('div',`${p.domain}: ${p.status}${p.checked?` (${p.relevant}/${p.checked} relevant)`:''}`));
+     if(!(a.probes??[]).length)missing.textContent='None claimed';
+     if(a.audit.lessons.length)missing.append(...a.audit.lessons.map(l=>node('div',`Lesson (${l.applies_to}): ${l.lesson}`,'hint')));
+     if(a.review)missing.append(node('div',`Reviewer agreed with ${pct(a.review.agreement)} of findings`,'hint'));
+     tr.append(search,results,best,quality,depth,missing);
+   }
+   const fb=a.feedback??{useful:0,not_useful:0,missing:[]};
+   const feedback=node('td',`${fb.useful} useful, ${fb.not_useful} not`,'note');
+   for(const note of fb.missing??[])feedback.append(node('div',`Missing: ${note}`,'hint'));
+   tr.append(feedback);body.append(tr);
+ }
+ if(!report.audits.length){const tr=node('tr'),td=node('td','No audits yet. Set CRITIC_ENABLED=true and run a search.','hint');td.colSpan=7;tr.append(td);body.append(tr);}
+}
+
 async function refresh(){
  const params=new URLSearchParams({status:state.status,sort:state.sort,limit:String(PAGE),offset:String(state.offset)});
  if(state.q)params.set('q',state.q);
  const [summary,list,rules,health]=await Promise.all([api('/api/admin/sources/summary'),api(`/api/admin/sources?${params}`),api('/api/admin/rules'),
    api('/api/admin/dependencies').catch(error=>{if(error instanceof AuthError)throw error;return null;})]);
+ const audits=await api('/api/admin/audits').catch(error=>{if(error instanceof AuthError)throw error;return null;});
  state.rows=list.data;state.total=Number(list.headers.get('X-Total-Count')??0);
  if(!state.rows.length&&state.offset>0){state.offset=Math.max(0,state.offset-PAGE);return refresh();}
- renderSummary(summary.data);renderRows();renderRules(rules.data);renderHealth(health?.data??null);
+ renderSummary(summary.data);renderRows();renderRules(rules.data);renderHealth(health?.data??null);renderAudits(audits?.data??null);
 }
 const reload=()=>run(refresh);
 function setStatus(status){

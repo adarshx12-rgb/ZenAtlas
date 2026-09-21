@@ -1,6 +1,10 @@
 module.exports = {
   apps: [
     {
+      name: 'zenatlas-scenes', script: 'scripts/scene-worker.cjs', interpreter: 'node', cwd: __dirname,
+      autorestart: true, restart_delay: 5000, max_restarts: 10, watch: false,
+    },
+    {
       name: 'zenatlas-api',
       script: 'src/main.ts',
       interpreter: 'node',

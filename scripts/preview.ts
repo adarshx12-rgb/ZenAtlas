@@ -8,7 +8,7 @@ import {configSchema} from '../src/config.js';
 await mkdir('.data',{recursive:true});
 const db=embedded('.data/preview');
 await migrate(db);await seed(db);
-const config=configSchema.parse({DATABASE_URL:'embedded-development',SESSION_SECRET:randomBytes(32).toString('hex'),ADMIN_TOKEN:randomBytes(32).toString('hex')});
+const config=configSchema.parse({DATABASE_URL:'embedded-development',SESSION_SECRET:randomBytes(32).toString('hex'),ADMIN_TOKEN:randomBytes(32).toString('hex'),ARCHIVE_DISCOVERY:'false'});
 const app=await createApp(db,config);await app.listen({host:'127.0.0.1',port:3000});
 console.log('Development preview: http://127.0.0.1:3000 — real curated links, embedded PostgreSQL, discovery disabled.');
 for(const signal of ['SIGINT','SIGTERM'])process.on(signal,()=>void app.close().then(()=>db.close()));

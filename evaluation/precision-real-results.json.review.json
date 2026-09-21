@@ -1,0 +1,184 @@
+{
+  "reviewer": "",
+  "queries": [
+    {
+      "q": "ghost videos with insane plot twist",
+      "criteria": "A serious ghost story with an actual major narrative reveal. Fictional and supposedly real stories are both eligible. Funny sketches, horror-comedy and parody are unrelated. Generic scary clips and clickbait twist claims are weak matches.",
+      "candidates": []
+    },
+    {
+      "q": "fight club reveal scene",
+      "criteria": "The actual identity reveal scene from Fight Club; distinguish the scene from reviews, recaps and unrelated fights.",
+      "candidates": [
+        {
+          "url": "https://www.youtube.com/watch?v=eCKRI2wEw7I",
+          "title": "Fight Club (5/5) Movie CLIP - Letting Yourself Become Tyler Durden (1999) HD",
+          "grade": null,
+          "notes": ""
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=WKVxKrrbz1E",
+          "title": "Fight Club 1999: Jack finds out the truth.",
+          "grade": null,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "q": "underrated github repos to earn money",
+      "criteria": "Usable GitHub repositories with a concrete plausible way to build a paid product or service. No guaranteed-income claims; inspect license and maintenance separately.",
+      "candidates": [
+        {
+          "url": "https://blog.stackademic.com/10-github-repos-that-are-embarrassingly-good-at-making-money-c9063f7a1316?gi=23b3faee00bc",
+          "title": "10 GitHub Repos That Are Embarrassingly Good at Making Money | by Usman Writes | Stackademic",
+          "grade": null,
+          "notes": ""
+        },
+        {
+          "url": "https://githot.dev/en/repo/The-Swarm-Corporation/AutoHedge",
+          "title": "The-Swarm-Corporation/AutoHedge — Githot",
+          "grade": null,
+          "notes": ""
+        },
+        {
+          "url": "https://github.com/mrjoelkemp/awesome-paid-open-source",
+          "title": "GitHub - mrjoelkemp/awesome-paid-open-source: Collection of ...",
+          "grade": null,
+          "notes": ""
+        },
+        {
+          "url": "https://github.com/The-Swarm-Corporation/AutoHedge",
+          "title": "GitHub - The-Swarm-Corporation/AutoHedge: Build your ...",
+          "grade": null,
+          "notes": ""
+        },
+        {
+          "url": "https://medium.com/coding-nexus/10-github-repos-that-print-money-while-you-sleep-ca297456862c",
+          "title": "10 GitHub Repos that Print Money While You Sleep | by Code Coup | Coding Nexus | Medium",
+          "grade": null,
+          "notes": ""
+        },
+        {
+          "url": "https://repodepot.quetzals.ai/repo/The-Swarm-Corporation/AutoHedge",
+          "title": "The-Swarm-Corporation/AutoHedge — Orchestration — RepoDepot",
+          "grade": null,
+          "notes": ""
+        },
+        {
+          "url": "https://www.indiehackers.com/product/repoaccess",
+          "title": "RepoAccess - Indie Hackers",
+          "grade": null,
+          "notes": ""
+        },
+        {
+          "url": "https://x.com/RodmanAi/status/2061798362798768628?lang=bn",
+          "title": "X-এ Leonard Rodman: \"10 GitHub repos so good they shouldn't ...",
+          "grade": null,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "q": "wwe commentators gone crazy moments",
+      "criteria": "WWE clips with clearly excited or shocked commentator reactions, preferably with exact moments. Crowd-only reactions and generic match highlights are weaker.",
+      "candidates": [
+        {
+          "url": "https://www.facebook.com/wwe/videos/coreygraves-wadebarrett-couldnt-hold-back-their-laughter-on-smackdown-therock/3708120666086412/",
+          "title": "#CoreyGraves & #WadeBarrett couldn't hold back their laughter on #SmackDown 😂 #TheRock | WWE",
+          "grade": null,
+          "notes": ""
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=1YmLB58q_ms",
+          "title": "WWE: Booker T Funny Commentary Moments Part 3 (Try Not To Laugh)",
+          "grade": null,
+          "notes": ""
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=2W8QBttzf_0",
+          "title": "Booker T WWE NXT Funny Commentary Moments Part 18",
+          "grade": null,
+          "notes": ""
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=4oe9799XYoU",
+          "title": "Craziest announcer reactions of the year so far: WWE Top 10, June 2, 2024",
+          "grade": null,
+          "notes": ""
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=4ZMNiJU_i9M",
+          "title": "25 Minutes Of WWE Announcing Bloopers - YouTube",
+          "grade": null,
+          "notes": ""
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=5NDBTUrQcTI",
+          "title": "Greatest announcer calls: WWE Top 10, June 30, 2018",
+          "grade": null,
+          "notes": ""
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=dAsviMzcyAs",
+          "title": "Booker T WWE NXT Funny Commentary Moments Part 1",
+          "grade": null,
+          "notes": ""
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=eL17Y3W57os",
+          "title": "WWE Announcers Who ABSOLUTELY HATED Wrestlers On Commentary",
+          "grade": null,
+          "notes": ""
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=f57c60oik3w",
+          "title": "WWE Commentator's Bathroom Blunder LIVE 😂🚨",
+          "grade": null,
+          "notes": ""
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=gjkfDtgmTAY",
+          "title": "Booker T WWE NXT Funny Commentary Moments Part 22",
+          "grade": null,
+          "notes": ""
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=jrRfU_5icsY",
+          "title": "9 minutes of The funniest WWE commentary Moments",
+          "grade": null,
+          "notes": ""
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=MRi2x8OZhC0",
+          "title": "Booker T WWE Smackdown 9/12/25 Funny Commentary Moments",
+          "grade": null,
+          "notes": ""
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=n8Ho6WBYzRo",
+          "title": "Booker T WWE NXT Funny Commentary Moments Part 17",
+          "grade": null,
+          "notes": ""
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=spIUGTvygR0",
+          "title": "WWE: Booker T Funny Commentary Moments Part One. (TRY NOT TO LAUGH).",
+          "grade": null,
+          "notes": ""
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=VeE2s3BsN5g",
+          "title": "Booker T WWE NXT Funny Commentary Moments Part 19",
+          "grade": null,
+          "notes": ""
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=WVveBpMKnao",
+          "title": "Booker T WWE NXT Funny Commentary Moments Part 16",
+          "grade": null,
+          "notes": ""
+        }
+      ]
+    }
+  ]
+}

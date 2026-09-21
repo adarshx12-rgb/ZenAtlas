@@ -19,7 +19,8 @@ const strict = (node: any): any => !node || typeof node !== 'object' ? node
 // Any endpoint speaking OpenAI's chat-completions API, such as OpenRouter. Models are given by whoever builds it:
 // their ids carry slashes and colons, which the Gemini model settings do not allow.
 export class OpenAICompatibleClient extends ModelClient {
- constructor(db: DB, config: Config, private modelList: string[], transport = fetchJSON) { super(db, config, transport); }
+ // maxTokens caps the reply, thinking included: models that reason by default can spend a small cap before answering.
+ constructor(db: DB, config: Config, private modelList: string[], transport = fetchJSON, private maxTokens = 8192) { super(db, config, transport); }
  protected get provider() { return 'openrouter'; }
  get models() { return this.modelList; }
  protected async ask(model: string, system: string, text: string, schema: object, images: InlineImage[]) {
@@ -32,7 +33,7 @@ export class OpenAICompatibleClient extends ModelClient {
        ...(this.config.OPENROUTER_SITE_NAME ? {'X-Title': this.config.OPENROUTER_SITE_NAME} : {})},
      body: {model, messages: [{role: 'system', content: system}, {role: 'user', content: images.length ? parts : text}],
        response_format: {type: 'json_schema', json_schema: {name: 'reply', schema: strict(schema), strict: true}},
-       max_tokens: 8192}}));
+       max_tokens: this.maxTokens}}));
    // A 200 carrying an error object, or anything else that is not a completion, is not an answer this app can use.
    if (!raw.success) throw new UpstreamError('malformed_response');
    const first = raw.data.choices[0];

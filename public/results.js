@@ -4,6 +4,7 @@ const catalogueBox=document.querySelector('#catalogue-results'),foundBox=documen
 const deepBox=document.querySelector('#deep-results'),deepHeading=document.querySelector('#deep-heading');
 const more=document.querySelector('#more'),retry=document.querySelector('#retry'),cancel=document.querySelector('#cancel');
 const deepRow=document.querySelector('#deep-row'),deep=document.querySelector('#deep');
+const missing=document.querySelector('#missing'),missingNote=document.querySelector('#missing-note'),missingStatus=document.querySelector('#missing-status');
 const videoGrid=document.querySelector('#results'),imageGrid=document.querySelector('#image-results');
 const imageMore=document.querySelector('#image-more'),resultsHeading=document.querySelector('#results-heading');
 const tabVideos=document.querySelector('#tab-videos'),tabImages=document.querySelector('#tab-images');
@@ -21,6 +22,7 @@ const POLL_WINDOW_MS={quick:240000,deep:900000};
 const UNDERRATED='Underrated find';
 // A failed session check is retried by the next search instead of failing every later one.
 let ready=null;
+function learn(id,body){return api(`/api/search/${id}/feedback`,{method:'POST',headers:{'Content-Type':'application/json','X-Requested-With':'CreatorSearch'},body:JSON.stringify(body)});}
 function session(){return ready??=api('/api/session').catch(error=>{ready=null;throw error;});}
 session().catch(()=>{});
 function node(tag,text,className){const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(className)el.className=className;return el;}
@@ -43,12 +45,15 @@ function card(item){
  const article=node('article',undefined,'card');article.dataset.id=item.id;
  article.append(thumbnail(item));
  article.append(node('div',`${item.source_name} · ${item.origin==='catalogue'?'Catalogue':'External discovery'}`,'meta'));
- const heading=node('h3');heading.append(link(item.canonical_url,item.title));article.append(heading);
+ const heading=node('h3'),title=link(item.canonical_url,item.title);heading.append(title);article.append(heading);
+ const cardSearchId=searchId;
+ title.addEventListener('click',()=>{learn(cardSearchId,{kind:'open',url:item.canonical_url}).catch(()=>{});});
  const details=[item.creator,item.duration?duration(item.duration):null,item.published_at?new Date(item.published_at).toLocaleDateString():null].filter(Boolean);
  if(details.length)article.append(node('div',details.join(' · '),'details'));
  for(const badge of item.badges??[])article.append(node('span',badge,badge===UNDERRATED?'badge gem':'badge highlight'));
  article.append(node('span',item.evidence.replaceAll('_',' '),'badge'),node('span',`Rights: ${item.rights_status}`,'badge'));
  if(item.judgement)article.append(node('p',`Why this matches (${item.judgement.relevance}/10): ${item.judgement.reason}`,'why'));
+ else if(item.origin==='discovery')article.append(node('p','Relevance has not been checked.','hint'));
  if(item.description)article.append(node('p',item.description));
  for(const moment of item.moments){
   const passage=node('div',undefined,'moment');
@@ -69,10 +74,14 @@ function card(item){
   article.append(passage);
  }
  if(item.scene_analysis&&item.scene_analysis.status!=='complete')article.append(node('p',item.scene_analysis.message,'notice'));
- const message=node('span','');
+ // Votes and reasons teach the engine's learning loop; they work on every result, saved in the catalogue or not.
+ const message=node('span',''),reasons=node('div',undefined,'reasons');reasons.hidden=true;
+ const vote=async(body,done)=>{try{await learn(cardSearchId,{url:item.canonical_url,...body});message.textContent=done;}catch(error){message.textContent=error.message;}};
  for(const [text,useful] of [['Useful',true],['Not useful',false]]){const button=node('button',text,'secondary');
-  const cardSearchId=searchId;button.addEventListener('click',async()=>{button.disabled=true;try{await api('/api/feedback',{method:'POST',headers:{'Content-Type':'application/json','X-Requested-With':'CreatorSearch'},body:JSON.stringify({search_id:cardSearchId,content_id:item.id,useful})});message.textContent='Feedback saved';}catch(error){message.textContent=error.message;}finally{button.disabled=false;}});article.append(button);}
- article.append(message);return article;
+  button.addEventListener('click',async()=>{button.disabled=true;await vote({useful},useful?'Thanks, noted':'Noted. Why? (optional)');reasons.hidden=useful;button.disabled=false;});article.append(button);}
+ for(const [text,reason] of [['Off-topic','off_topic'],['Low quality','low_quality'],['Wrong format','wrong_format'],['Duplicate','duplicate']]){
+  const chip=node('button',text,'secondary small');chip.addEventListener('click',async()=>{await vote({useful:false,reason},`Noted: ${text.toLowerCase()}`);reasons.hidden=true;});reasons.append(chip);}
+ article.append(message,reasons);return article;
 }
 // Returns the card for a result, redrawing it in place when the result changed. Results with unsafe links get no card.
 function cardFor(item){
@@ -86,7 +95,7 @@ function cardFor(item){
 function showCatalogue(items){
  for(const item of items)if(item.origin==='catalogue'){const el=cardFor(item);if(el&&!el.isConnected)catalogueBox.append(el);}
 }
-// Discovered results follow the server's order: new finds are added at the end, and a finished search reorders its own finds.
+// Keep every card in the server's combined rank order, including on completion of a deep search.
 function showIn(box,items){
  const keep=new Set();let previous=null;
  for(const item of items){
@@ -98,7 +107,7 @@ function showIn(box,items){
  for(const el of [...box.children])if(!keep.has(el))el.remove();
 }
 function showFound(items){
- showIn(foundBox,items.filter(item=>!item.deep_find));showIn(deepBox,items.filter(item=>item.deep_find));
+ showIn(foundBox,items);deepBox.replaceChildren();
  for(const [id,entry] of cards)if(!entry.el.isConnected)cards.delete(id);
 }
 function progressText(data){
@@ -107,18 +116,17 @@ function progressText(data){
  return data.stage==='checking'?'Checking pages, viewer comments and Reddit, then ranking with AI…':'Searching external sources…';
 }
 function showDeepHeading(data,busy){
- const count=deepBox.children.length,gems=deepBox.querySelectorAll('.badge.gem').length;
- deepHeading.hidden=data.depth!=='deep'||(!busy&&!count);
- deepHeading.replaceChildren('Deep dive finds',node('span',busy?`${count} so far`:count?`${count} new${gems?` · ${gems} underrated`:''}`:''));
+ deepHeading.hidden=true;
 }
 const shownCount=()=>catalogueBox.children.length+foundBox.children.length+deepBox.children.length;
 function render(data){
  searchId=data.search_id;catalogueTotal=data.catalogue_total;
- showCatalogue(data.results);showFound(data.discovered);
- notices.replaceChildren(...data.providers.filter(p=>p.status!=='ok').map(p=>node('p',p.message,'notice')));
+ catalogueBox.replaceChildren();showFound(data.ranked??[...data.results.filter(r=>r.origin==='catalogue'),...data.discovered]);
+ notices.replaceChildren(...data.providers.filter(p=>p.status!=='ok'||p.message.includes('did not')).map(p=>node('p',p.message,'notice')));
  const busy=data.status==='discovering',partial=data.status==='partial',deepDone=data.depth==='deep';
  cancel.hidden=!busy;
- more.hidden=!(next&&pageEnd<catalogueTotal);
+ missing.hidden=busy;if(missing.dataset.search!==data.search_id){missing.dataset.search=data.search_id;missingStatus.textContent='';}
+ more.hidden=!!data.ranked||!(next&&pageEnd<catalogueTotal);
  deepRow.hidden=busy||deepDone||data.status==='cancelled'||params.get('mode')==='catalogue';
  showDeepHeading(data,busy);
  const count=shownCount();
@@ -152,7 +160,7 @@ async function search(){clearTimeout(pollTimer);const previous=searchId;current=
  try{await session();const data=await api(`/api/search?${params}`,{signal:token.signal});if(controller.current(token.generation))follow(token,data);}
  catch(error){if(controller.current(token.generation)){status.textContent=error.message;retry.hidden=false;}}
 }
-// The deep search starts from everything already shown and keeps adding to the same grid.
+// The deep search starts from existing results and replaces their order when its checks finish.
 async function digDeeper(){if(!searchId)return;
  clearTimeout(pollTimer);current=controller.begin();const token=current;
  deep.disabled=true;retry.hidden=true;status.textContent='Starting a deep search…';
@@ -186,7 +194,7 @@ function syncTabs(tab){
  for(const field of ['mode','evidence'])labelOf(field)?.toggleAttribute('hidden',images_);
  videoGrid.hidden=images_;imageGrid.hidden=!images_;
  resultsHeading.textContent=images_?'Image results':'Search results';
- if(images_){deepRow.hidden=true;cancel.hidden=true;more.hidden=true;}else{imageMore.hidden=true;}
+ if(images_){deepRow.hidden=true;cancel.hidden=true;more.hidden=true;missing.hidden=true;}else{imageMore.hidden=true;}
 }
 
 function imageTile(item){
@@ -284,3 +292,9 @@ more.addEventListener('click',async()=>{if(!next)return;const token=current;more
 cancel.addEventListener('click',()=>{clearTimeout(pollTimer);controller.stop();cancel.hidden=true;status.textContent='Discovery updates stopped. Your current results remain available.';if(searchId)void api(`/api/search/${searchId}`,{method:'DELETE',headers:{'X-Requested-With':'CreatorSearch'}}).catch(()=>{});});
 window.addEventListener('popstate',runFromURL);
 runFromURL();
+
+// A note on what a search missed goes to the learning loop; the next audit tests the sources it names.
+missing.addEventListener('submit',async event=>{event.preventDefault();if(!searchId)return;
+ const note=missingNote.value.trim();if(note.length<3)return;
+ try{await learn(searchId,{kind:'missing',note});missingNote.value='';missingStatus.textContent='Thanks. This is recorded with the search for the engine to learn from.';}
+ catch(error){missingStatus.textContent=error.message;}});

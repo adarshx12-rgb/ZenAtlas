@@ -8,6 +8,7 @@ import { matchesFilters } from './catalogue.js';
 import { RANKING_VERSION } from './ranking.js';
 import { takeBudget } from './budgets.js';
 import { configuredProviders } from './providers.js';
+import { configuredArchives } from './specialists.js';
 
 // How long a search reports that discovery is still running before calling it delayed: the checks and AI ranking
 // can take up to three minutes after a deep dive's search time.
@@ -15,7 +16,7 @@ const CHECKING_WINDOW_MS = 180000;
 
 export class ApiError extends Error { constructor(public statusCode:number, public code:string, message:string) { super(message); } }
 export function queryKey(input: SearchInput) {
- const key = [input.q,input.language,input.source,input.after,input.evidence];
+ const key = [RANKING_VERSION,input.q,input.language,input.source,input.after,input.evidence];
  return createHash('sha256').update(JSON.stringify(input.depth==='deep' ? [...key,'deep'] : key)).digest('hex');
 }
 function encodeCursor(config: Config, id: string, offset: number) {
@@ -35,30 +36,27 @@ function decodeCursor(config: Config, cursor: string) {
 const withDetails = (item: Result, found: Result): Result => ({...item,
  duration: item.duration ?? found.duration, published_at: item.published_at ?? found.published_at, creator: item.creator ?? found.creator,
  badges: found.badges ?? item.badges, judgement: found.judgement ?? item.judgement,
+ evidence_coverage: found.evidence_coverage ?? item.evidence_coverage,
  moments: [...item.moments, ...found.moments.filter(m => !item.moments.some(o => o.id === m.id))].sort((a, b) => a.start_seconds - b.start_seconds),
  ...(found.preview && found.id === item.id ? {preview: true} : {})});
 
-// Local results stay first in their frozen order and discoveries follow. While a job runs its new finds are appended.
-// When it completes, its ranking reorders its own finds (all discoveries of a quick search, or a deep dive's finds)
-// within their places and removes the ones its judge rejected; other listed entries only take its details.
-function merge(existing: Result[], found: Result[], filters: SearchInput, final: {dropped: string[]; deep: boolean}|null) {
- const own = (r: Result) => r.origin !== 'catalogue' && (!final?.deep || !!r.deep_find);
+// Completion replaces provisional ordering across quick, deep and catalogue results. A slower
+// source can take the first position. Unjudged catalogue entries follow the ranked discovery pool.
+function merge(existing: Result[], found: Result[], filters: SearchInput, final: {dropped: string[]; deep: boolean; checked:boolean}|null) {
  const results = [...existing];
  const at = new Map(results.map((r, i) => [r.canonical_url, i]));
  for (const item of found) {
    if (!matchesFilters(item, filters)) continue;
    const i = at.get(item.canonical_url);
    if (i === undefined) { at.set(item.canonical_url, results.length); results.push(item); }
-   else if (final) results[i] = own(results[i]) ? item : withDetails(results[i], item);
+   else if (final) results[i] = results[i].origin === 'catalogue' ? {...withDetails(results[i], item), judgement: item.judgement ?? null} : item;
  }
  if (!final) return results;
  const dropped = new Set(final.dropped);
  const rank = new Map(found.map((r, i) => [r.canonical_url, i]));
- const slots = results.flatMap((r, i) => own(r) ? [i] : []);
- const ranked = results.filter(r => own(r) && !dropped.has(r.canonical_url))
-   .sort((a, b) => (rank.get(a.canonical_url) ?? found.length) - (rank.get(b.canonical_url) ?? found.length));
- const placed = new Map(ranked.map((r, k) => [slots[k], r]));
- return results.flatMap((r, i) => !own(r) ? [r] : placed.has(i) ? [placed.get(i)!] : []);
+ return results.filter(r => !dropped.has(r.canonical_url) && (!final.checked || rank.has(r.canonical_url))).sort((a, b) =>
+   (b.judgement?.relevance ?? -1) - (a.judgement?.relevance ?? -1) ||
+   (rank.get(a.canonical_url) ?? found.length) - (rank.get(b.canonical_url) ?? found.length));
 }
 
 export class SearchService {
@@ -75,6 +73,7 @@ export class SearchService {
    }
    const local = await retrieve(this.db,this.config,input,owner);
    let job: any = null; const providers = [...local.providers];
+   // Discovery costs a shared daily job and provider budget, so auto mode spends it only when the catalogue is thin.
    if (input.mode !== 'catalogue' && (input.mode==='refresh' || input.depth==='deep' || local.strong<this.config.COVERAGE_MIN_RESULTS
      || local.strongSources<this.config.COVERAGE_MIN_SOURCES)) {
      const discovery = await this.discover(input,owner);
@@ -105,7 +104,8 @@ export class SearchService {
    return {status:'cancelled'};
  }
  private async discover(input: SearchInput, owner: string): Promise<{job: any; providers: ProviderStatus[]}> {
-   if (!configuredProviders(this.config).length) return {job:null,providers:[{provider:'discovery',status:'disabled',message:'External discovery is not configured.'}]};
+   if (!configuredProviders(this.config).length && !(input.depth === 'deep' && !input.source && configuredArchives(this.config, input.q).length))
+     return {job:null,providers:[{provider:'discovery',status:'disabled',message:'External discovery is not configured.'}]};
    if (!await takeBudget(this.db,`discovery-user:${owner}`,20,'day')) {
      return {job:null,providers:[{provider:'discovery',status:'budget_exhausted',message:'Your daily discovery limit has been reached.'}]};
    }
@@ -144,7 +144,8 @@ export class SearchService {
      const current = (await tx.query('SELECT * FROM searches WHERE id=$1 FOR UPDATE',[initial.id])).rows[0];
      if (current.discovery_applied || current.cancelled) return current;
      const results = merge(current.results,found,current.filters,
-       final ? {dropped:job.result.dropped??[],deep:current.filters.depth==='deep'} : null);
+       final ? {dropped:job.result.dropped??[],deep:current.filters.depth==='deep',
+         checked:(job.result.providers??[]).some((p:ProviderStatus)=>p.provider==='judge'&&(p.status==='ok'||p.status==='partial'))} : null);
      const providers = final ? [...current.provider_status,...(job.result.providers??[])] : current.provider_status;
      return (await tx.query(`UPDATE searches SET results=$2,provider_status=$3,discovery_applied=$4 WHERE id=$1 RETURNING *`,
        [current.id,JSON.stringify(results.slice(0,250)),JSON.stringify(providers),final])).rows[0];
@@ -190,13 +191,14 @@ export class SearchService {
    const all: Result[] = snapshot.results;
    const slice = all.slice(offset,offset+filters.limit);
    const found = all.filter(r=>r.origin!=='catalogue');
-   const shown = await this.visible(snapshot,[...slice,...found]);
+   const shown = await this.visible(snapshot,all);
    const more = offset+filters.limit<all.length;
    return {query:snapshot.query,search_id:snapshot.id,status:snapshot.cancelled?'cancelled':waiting?'discovering':
      providers.some(p=>['partial','unavailable','budget_exhausted','disabled'].includes(p.status))?'partial':'complete',
      depth,stage:waiting?(job.status==='queued'?'queued':job.result?.stage??'searching'):null,
      results:slice.flatMap(r=>shown.get(r.id)??[]),has_more:more,next_cursor:more?encodeCursor(this.config,snapshot.id,offset+filters.limit):null,
      discovered:found.flatMap(r=>shown.get(r.id)??[]),catalogue_total:all.length-found.length,
+     ranked:all.flatMap(r=>shown.get(r.id)??[]),
      discovery_job_id:snapshot.job_id,providers,ranking_version:snapshot.ranking_version};
  }
 }

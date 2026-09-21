@@ -45,7 +45,8 @@ export interface SceneAnalysisStatus {
  status: 'pending'|'complete'|'inaccessible'|'failed'|'not_permitted'; media_version: string; message: string;
 }
 export type EvidenceType = 'transcript_supported'|'video_analysed'|'viewer_timestamp';
-export interface Judgement { relevance: number; reason: string; model: string }
+export interface Judgement { relevance: number; reason: string; model: string;
+ intent_checks?:{dimension:'subject'|'intent'|'format';status:'supported'|'unknown'|'mismatch';field:string;quote:string}[] }
 export interface Moment {
  id: string; start_seconds: number; end_seconds: number; summary: string;
  evidence_type: EvidenceType; analysis_version: string;
@@ -59,6 +60,7 @@ export interface Result {
  evidence: 'metadata_match'|EvidenceType; moments: Moment[];
  origin: 'catalogue'|'discovery'; verified_at: string|null; scene_analysis?: SceneAnalysisStatus|null;
  badges?: string[]; judgement?: Judgement|null;
+ evidence_coverage?: {comments:string;captions:string;transcript_passages:number;analysed_scenes:number;basis:'metadata'|'viewer_claims'|'direct_evidence'};
  // A first-screen capture of the page is available from /api/search/:id/previews/:result while the search lasts.
  preview?: boolean;
  // Found by a deep dive rather than by the search it continued.
@@ -71,5 +73,7 @@ export interface SearchResponse {
  results: Result[]; next_cursor: string|null; has_more: boolean;
  // Every discovered result in the snapshot, in display order, including ones found while discovery is still running.
  discovered: Result[]; catalogue_total: number;
+ // Complete visible snapshot in final rank order, across catalogue, quick and deep finds.
+ ranked?: Result[];
  discovery_job_id: string|null; providers: ProviderStatus[]; ranking_version: string;
 }

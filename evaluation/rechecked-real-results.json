@@ -1,0 +1,1783 @@
+{
+  "ranking_version": "relevance-v4-intent",
+  "kind": "same_candidate_pool_fresh_evidence_recheck",
+  "human_judged": false,
+  "queries": [
+    {
+      "q": "ghost videos with insane plot twist",
+      "previous_count": 40,
+      "providers": [
+        {
+          "provider": "youtube",
+          "status": "ok",
+          "message": "YouTube details and viewer comments checked."
+        },
+        {
+          "provider": "reddit",
+          "status": "ok",
+          "message": "Reddit discussions checked."
+        },
+        {
+          "provider": "pages",
+          "status": "ok",
+          "message": "15 of 20 result pages were checked, 6 in a browser."
+        },
+        {
+          "provider": "archive_evidence",
+          "status": "partial",
+          "message": "0 comment/review samples and 0 caption tracks available across 2 checked results."
+        },
+        {
+          "provider": "judge",
+          "status": "ok",
+          "message": "Results were checked for relevance by AI."
+        },
+        {
+          "provider": "relevance_filter",
+          "status": "ok",
+          "message": "35 weak or insufficiently supported candidates were excluded. Fewer results may be shown."
+        },
+        {
+          "provider": "scene_analysis",
+          "status": "partial",
+          "message": "1 videos queued for scene analysis; these pending analyses are not evidence in this ranking."
+        }
+      ],
+      "candidates": [
+        {
+          "url": "https://www.youtube.com/watch?v=aP4CL4GSIAE",
+          "title": "One Winter's Night (a gothic animated short) - YouTube",
+          "description": "My first short and animated film, based on a rhyme I wrote back in 2008. Anyone who really loves ghost stories, gothic tales, horror stories, Halloween, scar...",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Viewers say the channel always has a good plot twist in its gothic ghost stories.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "description",
+                "quote": "Anyone who really loves ghost stories, gothic tales, horror stories"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "comments",
+                "quote": "I love how you always have a good plot twist"
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "title",
+                "quote": "One Winter's Night (a gothic animated short)"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=EQ-FARjhHwQ",
+          "title": "रुह | Horror Short Film | Unexpected Twist Ending | GLIMSFLIMS",
+          "description": "A haunted haveli. A lonely photographer. A mysterious girl in white. What starts as a casual meeting inside an abandoned mansion slowly turns into a chilling psychological nightmare. But when reality starts breaking apart, Watch till the end for the shocking twist ending. 🎬 Short Film: The Real Ghost 🎭 Genre: Horror | Psychological ...",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Viewers explicitly praise the unexpected twist ending of this horror short film. Supporting evidence only; exact match unverified.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "description",
+                "quote": "A haunted haveli. A lonely photographer. A mysterious girl in white. What starts as a casual meeting inside an abandoned mansion slowly turns into a chilling psychological nightmare."
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "comments",
+                "quote": "it was really really really unexpected......for all of us .....such a short shocking sweet scarry movie"
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "title",
+                "quote": "रुह | Horror Short Film | Unexpected Twist Ending | GLIMSFLIMS"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://filminvasionla.com/koreatown-ghost-story/",
+          "title": "Koreatown Ghost Story – Film Invasion Los Angeles",
+          "description": "Director(s): Minsun Park &amp; Teddy Tenenbaum Writer(s): Minsun Park &amp; Teddy Tenenbaum Producer(s): Minsun Park &amp; Teddy Tenenbaum, Jim Wedaa.",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Page confirms supernatural horror tale based on a Korean ritual with a twist offer. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "page",
+                "quote": "In this supernatural horror tale based on a Korean ritual starring Margaret Cho and Lyrica Okano"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "page",
+                "quote": "a woman entertains a macabre offer that would let her pursue her dreams, for better or for much much worse."
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "page",
+                "quote": "2021 Official Selection: Short Film – Horror"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=XoVVWzg1RLA",
+          "title": "वो मेरे पीछे है | Hindi Horror Short Film | GLIMS FILMS",
+          "description": "245 views - 1 month ago - YouTube - GLIMSFILMS",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Hindi horror short film featuring psychological horror and a twist ending description.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "description",
+                "quote": "एक मासूम बच्ची की यह बात उसके पिता की ज़िंदगी बदल देती है। क्या यह सिर्फ़ उसकी कल्पना है... या कोई ऐसा सच जो वर्षों से उसका पीछा कर रहा है?"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "description",
+                "quote": "अगर आपको Indian Horror, Hindi Ghost Story, Psychological Thriller, Supernatural Horror और ट्विस्ट एंडिंग वाली शॉर्ट फ़िल्में पसंद हैं"
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "title",
+                "quote": "वो मेरे पीछे है | Hindi Horror Short Film | GLIMS FILMS"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=ITlk30pgVH0",
+          "title": "Koreatown Ghost Story Trailer Directed by Minsun Park, Teddy ...",
+          "description": null,
+          "judgement": {
+            "relevance": 6,
+            "reason": "Trailer for the supernatural horror tale with a dark narrative setup. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "description",
+                "quote": "In this supernatural horror tale based on a Korean ritual starring legendary Margaret Cho and Lyrica Okano"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "description",
+                "quote": "a woman entertains a macabre offer that would let her pursue her dreams, for better or for much much worse."
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "title",
+                "quote": "Koreatown Ghost Story Trailer Directed by Minsun Park, Teddy ..."
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        }
+      ],
+      "excluded": [
+        {
+          "url": "https://www.youtube.com/watch?v=TEmwbgcWrpw",
+          "title": "Horror Short Film \"Pleasant Inn\" | ALTER"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=OFYDiMe8wSo",
+          "title": "\"Double Vision\" | Independent Horror Short Film - YouTube"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=_q3nOwYQod8",
+          "title": "The Numismatist - A Ghost Story - Short Film - YouTube"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=vmsmBgTIpYg",
+          "title": "SHABNAM: Raat Abhi Baki Hai | Indian Rural Horror Short Film | GLIMS FILMS"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=xyobyrpHgFY",
+          "title": "उसने सड़क से सिक्का उठाया… फिर घर में ये हुआ | Horror Short Film | Glims Films"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=qcu9LydQPo4",
+          "title": "A Terrifying Call You Can't Ignore | Horror Short Film"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=hs3paMLb9Qg",
+          "title": "Ignore It - Short Horror Film ( Award Winning )"
+        },
+        {
+          "url": "https://vurchel.com/v/31982/koreatown-ghost-story-https-www.instagram.com-koreatownghoststory-minsun-park-teddy-tenenbaum",
+          "title": "Koreatown Ghost Story - short film by Minsun Park, Teddy Tenenbaum | Watch full film online!"
+        },
+        {
+          "url": "https://vimeo.com/552700510",
+          "title": "Koreatown Ghost Story Short Film, Audience Feedback from June 2021 HORROR Festival | Videos & Movies on Vimeo"
+        },
+        {
+          "url": "http://www.bilibili.com/video/av117302821456422",
+          "title": "Elevator Ghost Story 午夜神秘电梯"
+        },
+        {
+          "url": "https://vimeo.com/474315292",
+          "title": "Michael Jackson - Ghosts (Official Full-Length Short Film)"
+        },
+        {
+          "url": "https://www.facebook.com/WatchALTER/posts/the-hidebehind-horror-short-filmlost-deep-in-the-forest-a-lone-backpacker-encoun/1034771482390064/",
+          "title": "“The Hidebehind” | Horror Short Film Lost deep in the forest, a ..."
+        },
+        {
+          "url": "https://vimeo.com/324205600",
+          "title": "The Monkey&#039;s Paw by W. W. Jacobs Ghost Story Short Student Film 1984"
+        },
+        {
+          "url": "http://www.bilibili.com/video/av50719775",
+          "title": "【中文字幕】精彩恐怖短片 特殊的日子 Horror Short Film _Special Day_ _ Presented by ALTER"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=z7ccTlVXYzI",
+          "title": "Midnight Horror \"Camera Chalu Hai Na?\" | POV Horror Short Film | Glims Films"
+        },
+        {
+          "url": "https://www.dailymotion.com/video/xj55oi",
+          "title": "One Winter's Night - an animated short film and gothic ghost story"
+        },
+        {
+          "url": "https://www.shortoftheweek.com/2024/10/28/koreatown-ghost-story/",
+          "title": "Koreatown Ghost Story by Minsun Park & Teddy Tenenbaum"
+        },
+        {
+          "url": "https://www.dailymotion.com/video/x8ln7jy",
+          "title": "The Numismatist - A Ghost Story - Short Film"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=tP7imEcclVk",
+          "title": "Horror Short Film \"The Hidebehind\" | ALTER"
+        },
+        {
+          "url": "https://longislandfilm.com/films/koreatown-ghost-story/",
+          "title": "Koreatown Ghost Story – The Long Island International Film Expo"
+        },
+        {
+          "url": "https://geektyrant.com/news/trailer-for-the-supernatural-horror-short-film-koreatown-ghost-story",
+          "title": "Trailer For The Supernatural Horror Short Film KOREATOWN GHOST STORY — GeekTyrant"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=D_pZ5_jyVgs",
+          "title": "Top 75 Mind-Blowing Horror Movie Plot Twists - YouTube"
+        },
+        {
+          "url": "https://archive.org/details/a-ghost-story-for-christmas-1971",
+          "title": "A Ghost Story for Christmas (1971 - 78, 2005 - 13, 18 -) Complete Series inc. Whistle and I'll Come to You (1968)"
+        },
+        {
+          "url": "https://www.facebook.com/WatchALTER/posts/the-hidebehind-horror-short-film/977455971454949/",
+          "title": "“The Hidebehind” | Horror Short Film - Facebook"
+        },
+        {
+          "url": "https://www.dailymotion.com/video/x9nkmym",
+          "title": "🏨 Night Shift Movie Explained – Haunted Motel, Ghosts & Gwen’s Twisted Truth 👻🌙 #NightShiftMovie"
+        },
+        {
+          "url": "https://www.instagram.com/reel/DYJINhDP8en/",
+          "title": "The Hidebehind (2018) short film - Full Movie Genre - Instagram"
+        },
+        {
+          "url": "https://vimeo.com/652367569",
+          "title": "Horror Short Film - PLATFORM | Videos & Movies on Vimeo"
+        },
+        {
+          "url": "https://www.indieshortsmag.com/articles/2015/08/top-10-thriller-short-films-thatll-completely-blow-your-mind-with-its-clever-climax-twists/",
+          "title": "Top 10 Thriller Short Films That’ll Completely Blow Your Mind With It’s Clever Climax Twists - Indie Shorts Mag"
+        },
+        {
+          "url": "https://archive.org/details/ghost-story-circle-of-fear-complete",
+          "title": "Ghost Story-Circle of Fear (1972-1973)"
+        },
+        {
+          "url": "https://www.imdb.com/list/ls061601909/",
+          "title": "Short Horror Films"
+        },
+        {
+          "url": "https://www.imdb.com/title/tt9340734/",
+          "title": "The Numismatist (Short 2018) | Short, Horror"
+        },
+        {
+          "url": "https://www.imdb.com/title/tt10868986/",
+          "title": "One Winter's Night (Short 2011) ⭐ 5.4 | Animation, Short, Horror"
+        },
+        {
+          "url": "http://www.bilibili.com/video/av117277924005496",
+          "title": "CATIVO | Trailer Oficial | Short Horror Film | 官方预告片"
+        },
+        {
+          "url": "https://www.facebook.com/thehidebehindmovie/",
+          "title": "The Hidebehind (@thehidebehindmovie)"
+        },
+        {
+          "url": "https://deadline.com/2021/09/paramount-players-short-film-koreatown-ghost-story-teddy-tenenbaum-minsun-park-1234829428/",
+          "title": "Paramount Players Lands Rights To The Short Film ‘Koreatown Ghost Story’ With Teddy Tenenbaum And Minsun Park Directing"
+        }
+      ]
+    },
+    {
+      "q": "fight club reveal scene",
+      "previous_count": 20,
+      "providers": [
+        {
+          "provider": "youtube",
+          "status": "ok",
+          "message": "YouTube details and viewer comments checked."
+        },
+        {
+          "provider": "reddit",
+          "status": "ok",
+          "message": "Reddit discussions checked."
+        },
+        {
+          "provider": "pages",
+          "status": "ok",
+          "message": "6 of 11 result pages were checked, 5 in a browser."
+        },
+        {
+          "provider": "archive_evidence",
+          "status": "partial",
+          "message": "0 comment/review samples and 0 caption tracks available across 1 checked results."
+        },
+        {
+          "provider": "judge",
+          "status": "ok",
+          "message": "Results were checked for relevance by AI."
+        },
+        {
+          "provider": "relevance_filter",
+          "status": "ok",
+          "message": "18 weak or insufficiently supported candidates were excluded. Fewer results may be shown."
+        }
+      ],
+      "candidates": [
+        {
+          "url": "https://www.youtube.com/watch?v=WKVxKrrbz1E",
+          "title": "Fight Club 1999: Jack finds out the truth.",
+          "description": "Enjoy the videos and music you love, upload original content, and share it all with friends, family, and the world on YouTube.",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Viewers discuss Jack finding out the truth in the comments, confirming this clip captures the Fight Club identity reveal scene. Supporting evidence only; exact match unverified.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "Fight Club 1999: Jack finds out the truth."
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "comments",
+                "quote": "Once we realize what's going on, Brad subtly shifts to being a villain"
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "url",
+                "quote": "https://www.youtube.com/watch?v=WKVxKrrbz1E"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=USWVa3_GEtM",
+          "title": "CRAZY \"TYLER DURDEN TWIST\" REACTIONS! *FIGHT CLUB* REVEAL SCENE! BRAD PITT! FIRST TIME WATCHING!",
+          "description": "2.5K views - 8 months ago - YouTube - CineMash",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Reaction mashup featuring creators watching and discussing the Tyler Durden twist reveal scene in Fight Club.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "CRAZY \"TYLER DURDEN TWIST\" REACTIONS! *FIGHT CLUB* REVEAL SCENE!"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "scenes",
+                "quote": "reacts to the iconic hotel room scene in Fight Club where the narrator discovers Tyler Durden is his alter ego."
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "url",
+                "quote": "https://www.youtube.com/watch?v=USWVa3_GEtM"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 3,
+            "basis": "direct_evidence"
+          }
+        }
+      ],
+      "excluded": [
+        {
+          "url": "https://www.youtube.com/watch?v=e4vB16ZFXUk",
+          "title": "Final Fight With Tyler Scene | FIGHT CLUB (1999) Movie CLIP HD"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=Hzox6ea78vs",
+          "title": "Every time Tyler flashes in Fight Club (1999) - YouTube"
+        },
+        {
+          "url": "https://player.vimeo.com/video/304662327",
+          "title": "Devolving Masculinity in Fight Club - FINAL CUT (Brian Morales) from Brian Morales on Vimeo"
+        },
+        {
+          "url": "https://archive.org/details/fight-club_202006",
+          "title": "Fight Club FULL MOVIE : Free Download, Borrow, and Streaming : Internet Archive"
+        },
+        {
+          "url": "http://www.bilibili.com/video/av116628209536959",
+          "title": "搏击俱乐部 Fight Club (1999) 【主演：爱德华·诺顿 布拉德•皮特】"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=5KiLVOAK7U0",
+          "title": "Fight Club frame splice scene"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=QbsoUNb5tEg",
+          "title": "FIGHT CLUB | SCENEPACK | 4K 60 FPS | ALL MOMENTS"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=BdDnT7jSAYA",
+          "title": "The Bizarre Ending Of Fight Club Explained"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=bYd97Z09LEk",
+          "title": "FIGHT CLUB | SCENEPACK | 4K 60 FPS"
+        },
+        {
+          "url": "https://www.facebook.com/writeseen/videos/this-behind-the-scenes-footage-from-fight-club-1999-captures-the-filming-of-one-/1717532749562332/",
+          "title": "This behind-the-scenes footage from Fight Club (1999 ..."
+        },
+        {
+          "url": "https://movies.stackexchange.com/questions/89050/how-did-david-fincher-splice-brad-pitt-into-multiple-frames",
+          "title": "film techniques - How did David Fincher splice Brad Pitt into multiple frames? - Movies & TV Stack Exchange"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=vh6SDvDhDN4",
+          "title": "Fight Club 1999 - Tyler's Ending Scene HD"
+        },
+        {
+          "url": "https://www.dailymotion.com/video/x8xhjgg",
+          "title": "Best fight club movie scene"
+        },
+        {
+          "url": "https://screenrant.com/fight-club-final-scene-real-meaning/",
+          "title": "The Real Meaning Of Fight Club's Final Scene Explained"
+        },
+        {
+          "url": "https://vimeo.com/43177217",
+          "title": "Fight Club - Homework scene | Videos & Movies on Vimeo"
+        },
+        {
+          "url": "https://www.cinemablend.com/new/See-How-Fight-Club-Scene-Looks-With-Tyler-Durden-Digitally-Removed-41209.html",
+          "title": "See How A Fight Club Scene Looks With Tyler Durden Digitally Removed | Cinemablend"
+        },
+        {
+          "url": "https://whatwouldbaledo.com/2012/08/25/i-am-jacks-fight-club-fan-theory/",
+          "title": "I am Jack's Fight Club Fan Theory - What Would Bale Do"
+        },
+        {
+          "url": "https://www.reddit.com/r/fightclub/comments/1jyfjyj/everytime_tyler_flashes_in/",
+          "title": "r/fightclub on Reddit: Everytime Tyler flashes in"
+        }
+      ]
+    },
+    {
+      "q": "underrated github repos to earn money",
+      "previous_count": 40,
+      "providers": [
+        {
+          "provider": "reddit",
+          "status": "ok",
+          "message": "Reddit discussions checked."
+        },
+        {
+          "provider": "pages",
+          "status": "ok",
+          "message": "15 of 20 result pages were checked, 4 in a browser."
+        },
+        {
+          "provider": "judge",
+          "status": "ok",
+          "message": "Results were checked for relevance by AI."
+        },
+        {
+          "provider": "relevance_filter",
+          "status": "ok",
+          "message": "26 weak or insufficiently supported candidates were excluded. Fewer results may be shown."
+        }
+      ],
+      "candidates": [
+        {
+          "url": "https://www.indiehackers.com/post/i-did-it-my-open-source-company-now-makes-14-2k-monthly-as-a-single-developer-f2fec088a4",
+          "title": "I did it! My open-source company now makes $14.2k monthly as a single developer - Indie Hackers",
+          "description": "In September 2024, I started Postiz (star it if you can 🙏🏻): https://github.com/gitroomhq/postiz-app · A social media scheduling tool built in open-source. It&#x27;s funny that a market that has existed for 20 years doesn&#x27;t have a good open-source solution. I had a few principles in mind as a non-funded company that doesn&#x27;t need money (or maximize revenue at all costs)",
+          "judgement": {
+            "relevance": 9,
+            "reason": "Indie Hackers post detailing how the Postiz open-source repository earns monthly subscription revenue.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "I did it! My open-source company now makes $14.2k monthly as a single developer - Indie Hackers"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "page",
+                "quote": "Today, Postiz earns $14,000 per month from subscriptions, and I aim to reach $20,000 in two months."
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "page",
+                "quote": "In September 2024, I started Postiz (star it if you can 🙏🏻): https://github.com/gitroomhq/postiz-app"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://www.buildmvpfast.com/blog/github-repos-making-money-open-source-profitable-2026",
+          "title": "GitHub Repos Making Money Open Source Profitable 2026",
+          "description": "It’s one of the most underrated self-hosted tools for client work, largely because the chatbot-builder market looks crowded until you realize how few options are self-hostable. How people monetize: Lead-gen bot agency for local businesses. Embedded chatbots in client websites. Managed hosting with monthly retainers. GitHub: knadh/listmonk | Stars: 16k+ | License: AGPL-3.0",
+          "judgement": {
+            "relevance": 9,
+            "reason": "Article listing profitable open-source GitHub repositories with concrete ways to build paid services.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "GitHub Repos Making Money Open Source Profitable 2026"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "page",
+                "quote": "The money comes from building services on top of the free software: automation agencies, managed hosting, white-labeled verticals, and micro-SaaS products"
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "page",
+                "quote": "GitHub Repos Making Money Open Source Profitable 2026"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://deepwiki.com/gitroomhq/postiz-app",
+          "title": "gitroomhq/postiz-app | DeepWiki",
+          "description": "Postiz is an open-source AI-powered social media scheduling tool that manages content publishing across 14+ platforms. Licensed under AGPL-3.0 $1, it provides an alternative to Buffer.com and HypefuryPostiz is an open-source AI-powered social media scheduling tool that manages content publishing across 14+ platforms. Licensed under AGPL-3.0 $1, it provides an alternative to Buffer.com and Hypefury",
+          "judgement": {
+            "relevance": 9,
+            "reason": "Postiz is a usable open-source social media scheduling tool that can be self-hosted as a paid SaaS alternative.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "gitroomhq/postiz-app | DeepWiki"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "description",
+                "quote": "Postiz is an open-source AI-powered social media scheduling tool that manages content publishing across 14+ platforms."
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "url",
+                "quote": "https://deepwiki.com/gitroomhq/postiz-app"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://agentbreaking.com/blog/10-github-repos-passive-income-ai/",
+          "title": "10 Open-Source GitHub Repos That Can Earn You Money While You Sleep — AgentBreaking Blog",
+          "description": "Repo: The-Swarm-Corp/AutoHedge ⭐ 1,880 | Python | MIT · AutoHedge is an enterprise-grade autonomous AI hedge fund platform built by The Swarm Corporation. It combines swarm intelligence with specialized AI agents — Director, Quant, Risk, and Execution agents — to handle end-to-end market analysis, risk management, and trade execution with minimal human intervention.",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Blog post discussing open-source GitHub repos claimed to offer passive income potential.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "10 Open-Source GitHub Repos That Can Earn You Money While You Sleep — AgentBreaking Blog"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "page",
+                "quote": "We dug into each one — examining their architecture, community traction, star trajectories, licensing models, and real monetization potential"
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "page",
+                "quote": "10 Open-Source GitHub Repos That Can Earn You Money While You Sleep"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://osrepos.com/repo/the-swarm-corporation-autohedge",
+          "title": "AutoHedge: Build Your Autonomous AI Hedge Fund with Swarm ...",
+          "description": "Jun 15, 2026 · Open the original repository on GitHub. AutoHedge is an enterprise-grade autonomous agent hedge fund that leverages swarm intelligence and specialized AI agents. This powerful Python project automates end-to-end market analysis, risk management, and trade execution.",
+          "judgement": {
+            "relevance": 8,
+            "reason": "AutoHedge is an enterprise-grade autonomous agent hedge fund repository that enables algorithmic trading apps.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "AutoHedge: Build Your Autonomous AI Hedge Fund with Swarm ..."
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "description",
+                "quote": "AutoHedge is an enterprise-grade autonomous agent hedge fund that leverages swarm intelligence and specialized AI agents."
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "url",
+                "quote": "https://osrepos.com/repo/the-swarm-corporation-autohedge"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://news.ycombinator.com/item?id=42769275",
+          "title": "Ask HN: What would you like to see in Postiz?",
+          "description": "Hi, community :)There are some new updates for Postiz, but just a small recap:*Postiz is a social media scheduling tool supporting 17 social media channels:**Instagram, Facebook, TikTok, Reddit, LinkedIn, X, Threads, BlueSky, Mastodon, YouTube, Pinterest, Dribbble, Slack, Discord, Warpcast, Lemmy and Telegram.*[*https://github.com/gitroomhq/postiz-app*](https://github.com/gitroomhq/postiz-app)Here are the latest updates :)* We added a stand-alone Instagram provider that doesn't require you to have Facebook business. * I added Lemmy, which is the Reddit alternative. I really like this platform. * We have added short-linking. By default, it uses DUB, but we have added a nice infrastructure to easily create new providers (currently working on Bitly and short.io). When you add links, once you schedule the post, it asks if you want to shorten them. * I added a Telegram provider, which was really challenging because the way you add a Telegram bot is a bit different. * A big step into web3 - Postiz now supports scheduling to Warpcast using Neynar. * We also added a web3 login with Farcaster.Of course, everything available in the open source :)*Future*:* I started to get more into web3 …",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Hacker News discussion about Postiz features, relevant for understanding its capabilities as a SaaS product.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "Ask HN: What would you like to see in Postiz?"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "description",
+                "quote": "Postiz is a social media scheduling tool supporting 17 social media channels"
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "url",
+                "quote": "https://news.ycombinator.com/item?id=42769275"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://github.com/garylab/MakeMoneyWithAI",
+          "title": "GitHub - garylab/MakeMoneyWithAI: A list of open-source AI ...",
+          "description": "Make Money With AI is a curated list of AI tools and projects that help you turn open-source into income. LibreCode | ☆236.6k | LibreCode - A Ollama cursor ...",
+          "judgement": {
+            "relevance": 6,
+            "reason": "A curated GitHub list specifically tracking open-source AI projects meant to turn into income. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "GitHub - garylab/MakeMoneyWithAI: A list of open-source AI ..."
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "description",
+                "quote": "Make Money With AI is a curated list of AI tools and projects that help you turn open-source into income."
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "url",
+                "quote": "https://github.com/garylab/MakeMoneyWithAI"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "not_permitted",
+            "captions": "not_permitted",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://railway.com/deploy/postiz-open-source-social-media-scheduler-for-30-platforms--deploy-postiz",
+          "title": "Postiz | Open-Source Social Media Scheduler for 30+ Platforms",
+          "description": "Postiz (GitHub: gitroomhq/postiz-app) is an open-source social media scheduling and automation platform — a self-hosted alternative to Buffer, Hypefury, and Later. It centralises scheduling, AI-assisted content creation, and analytics across 30+ platforms including X (Twitter), Instagram, LinkedIn, Facebook, Reddit, Threads, and Mastodon.Postiz (GitHub: gitroomhq/postiz-app) is an open-source social media scheduling and automation platform — a self-hosted alternative to Buffer, Hypefury, and Later. It centralises scheduling, AI-assisted content creation, and analytics across 30+ platforms including X (Twitter), Instagram, LinkedIn, Facebook, Reddit, Threads, and Mastodon.",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Deployment page for Postiz, offering a direct path to host and monetize the scheduling platform. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "Postiz | Open-Source Social Media Scheduler for 30+ Platforms"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "description",
+                "quote": "Postiz (GitHub: gitroomhq/postiz-app) is an open-source social media scheduling and automation platform — a self-hosted alternative to Buffer"
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "url",
+                "quote": "https://railway.com/deploy/postiz-open-source-social-media-scheduler-for-30-platforms--deploy-postiz"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://github.com/The-Swarm-Corporation/AutoHedge",
+          "title": "GitHub - The-Swarm-Corporation/AutoHedge: Build your ...",
+          "description": "AutoHedge is an enterprise-grade autonomous agent hedge fund that trades on your behalf. It combines swarm intelligence and specialized AI agents to perform ...",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Direct GitHub repository for AutoHedge, offering a foundation for a financial or trading tech tool, but requires implementation. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "GitHub - The-Swarm-Corporation/AutoHedge"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "description",
+                "quote": "AutoHedge is an enterprise-grade autonomous agent hedge fund that trades on your behalf."
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "url",
+                "quote": "https://github.com/The-Swarm-Corporation/AutoHedge"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "not_permitted",
+            "captions": "not_permitted",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://news.ycombinator.com/item?id=41402138",
+          "title": "Show HN: Postiz – open-source social media scheduling tool",
+          "description": "https://github.com/gitroomhq/postiz-app",
+          "judgement": {
+            "relevance": 6,
+            "reason": "HN show item pointing directly to an open-source social media scheduling tool repository with a viable monetization path. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "Show HN: Postiz – open-source social media scheduling tool"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "description",
+                "quote": "https://github.com/gitroomhq/postiz-app"
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "url",
+                "quote": "https://news.ycombinator.com/item?id=41402138"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://context7.com/gitroomhq/postiz-app",
+          "title": "Postiz (gitroomhq/postiz-app) - Context7",
+          "description": "Postiz is an open-source AI-powered social media scheduling tool that allows users to schedule, publish, and manage posts across multiple platforms ...",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Context page about Postiz, an open-source AI-powered social media scheduling repository.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "Postiz (gitroomhq/postiz-app) - Context7"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "description",
+                "quote": "Postiz is an open-source AI-powered social media scheduling tool that allows users to schedule, publish, and manage posts"
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "url",
+                "quote": "https://context7.com/gitroomhq/postiz-app"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.reddit.com/r/selfhosted/comments/1f4x806/postiz_opensource_social_media_scheduling_tool/",
+          "title": "r/selfhosted on Reddit: Postiz - open-source social media scheduling tool",
+          "description": "I&#x27;ll add that if I docker compose exec gitroom-postiz sh and ping the container for redis, I get responses, so that tells me that it is able to reach the redis container. Also, if you want to follow along with me on this adventure, here is the Dockerfile that I&#x27;m using (I&#x27;m first to admit that it is inefficient but I&#x27;m not at the stage of optimizing yet)— · FROM node:18-alpine RUN apk add --no-cache git WORKDIR /usr/src/app RUN git clone https://github.com/gitroomhq...",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Reddit discussion showing setup and self-hosting details for the Postiz scheduling tool repository.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "r/selfhosted on Reddit: Postiz - open-source social media scheduling tool"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "description",
+                "quote": "git clone https://github.com/gitroomhq..."
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "url",
+                "quote": "https://www.reddit.com/r/selfhosted/comments/1f4x806/postiz_opensource_social_media_scheduling_tool/"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "unsupported",
+            "captions": "unsupported",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://aiinsider.in/money-with-ai/open-source-github-repos-make-money-2026/",
+          "title": "10 GitHub Repos That Actually Make Money (2026)",
+          "description": "Cal.com, Ghost, n8n, Supabase — these 10 repos have built-in business models. Fork → brand → charge. Real income, verified. Updated 2026.",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Article listing GitHub repositories with built-in business models for monetization.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "10 GitHub Repos That Actually Make Money (2026)"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "description",
+                "quote": "Cal.com, Ghost, n8n, Supabase — these 10 repos have built-in business models. Fork → brand → charge."
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "url",
+                "quote": "https://aiinsider.in/money-with-ai/open-source-github-repos-make-money-2026/"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.indiehackers.com/post/tech/growing-an-open-source-product-to-1-3m-arr-in-two-years-hbMiXIoZsueV9D3L58DP",
+          "title": "Growing an open-source product to $1.3M ARR in two years",
+          "description": "I brought them to 30,000 GitHub stars in two years and a lot of sales. I understood the power of open source. I started a consulting business, charging a high ticket of $3,000-$4,000 per month for two meetings a week, and at the same time, working on Gitroom. Gitroom was a SaaS to help you prepare your open-source launch.I brought them to 30,000 GitHub stars in two years and a lot of sales. I understood the power of open source. I started a consulting business, charging a high ticket of $3,000-$4,000 per month for two meetings a week, and at the same time, working on Gitroom. Gitroom was a SaaS to help you prepare your open-source launch.",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Indie Hackers post detailing how an open-source product grew its revenue and built a consulting business around Gitroom. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "Growing an open-source product to $1.3M ARR in two years"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "description",
+                "quote": "Gitroom was a SaaS to help you prepare your open-source launch."
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "url",
+                "quote": "https://www.indiehackers.com/post/tech/growing-an-open-source-product-to-1-3m-arr-in-two-years-hbMiXIoZsueV9D3L58DP"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        }
+      ],
+      "excluded": [
+        {
+          "url": "https://github.com/gitroomhq/postiz-app",
+          "title": "GitHub - gitroomhq/postiz-app: 📨 The ultimate agentic social media scheduling tool 🤖"
+        },
+        {
+          "url": "https://github.com/gitroomhq/postiz-app/releases",
+          "title": "Releases · gitroomhq/postiz-app - GitHub"
+        },
+        {
+          "url": "https://machiav3lli.gitlab.io/alt3rnative/post/postiz/",
+          "title": "[Postiz](https://github.com/gitroomhq/postiz-app)"
+        },
+        {
+          "url": "https://sourceforge.net/projects/postiz.mirror/",
+          "title": "Postiz download | SourceForge.net"
+        },
+        {
+          "url": "https://trendshift.io/repositories/25842",
+          "title": "The-Swarm-Corporation/AutoHedge — GitHub trending ..."
+        },
+        {
+          "url": "https://www.spreaker.com/episode/github-the-swarm-corporation-autohedge-build-your-autonomous-hedge-fund-in-minutes-autohedge-harnesses-the-power-of-swarm-intelligence-a--74955933",
+          "title": "GitHub - The-Swarm-Corporation/AutoHedge: Build your ..."
+        },
+        {
+          "url": "https://context7.com/the-swarm-corporation/autohedge",
+          "title": "AutoHedge (the-swarm-corporation/autohedge) | Context7"
+        },
+        {
+          "url": "https://www.threads.com/@quantscience_/post/DRPuJDJjr1L/grab-it-here-i-have-one-more-thing-before-you-go-if-you-want-to-become-an",
+          "title": "Grab it here: https://github.com/The-Swarm-Corporation/AutoHedge I have one more thing before you go. If you want to become an algorithmic trader in 2026, then I'd like to help. This is how: 👇"
+        },
+        {
+          "url": "https://t.co/RlsJ1iyOow",
+          "title": "GitHub - The-Swarm-Corporation/AutoHedge: Build your ..."
+        },
+        {
+          "url": "https://releasealert.dev/github/gitroomhq/postiz-app",
+          "title": "gitroomhq/postiz-app on GitHub | Release Alert"
+        },
+        {
+          "url": "https://github.com/gitroomhq/postiz-app/blob/main/README.md",
+          "title": "postiz-app/README.md at main · gitroomhq/postiz-app · GitHub"
+        },
+        {
+          "url": "https://www.blog.brightcoding.dev/2025/11/26/autohedge-build-your-autonomous-ai-hedge-fund-in-minutes-2025-guide",
+          "title": "AutoHedge: Build Your Autonomous AI Hedge Fund in Minutes (2025 Guide) | Bright Coding"
+        },
+        {
+          "url": "https://www.instagram.com/reel/Dc-o4hHAVRD/",
+          "title": "The-Swarm-Corporation/AutoHedge You might ... - Instagram"
+        },
+        {
+          "url": "https://blog.stackademic.com/10-github-repos-that-are-embarrassingly-good-at-making-money-c9063f7a1316?gi=23b3faee00bc",
+          "title": "10 GitHub Repos That Are Embarrassingly Good at Making Money | by Usman Writes | Stackademic"
+        },
+        {
+          "url": "https://hexmos.com/freedevtools/installerpedia/tool/the-swarm-corporation-autohedge/",
+          "title": "The-Swarm-Corporation/AutoHedge Installation Guide - Hexmos"
+        },
+        {
+          "url": "https://x.com/swarms_corp/status/2023922859266240786?lang=en",
+          "title": "swarms on X: \"AutoHedge v2 is coming 📈 Two years ago, AutoHedge was one of the first demo apps we built with Swarms focused on agent-powered stock analysis. Now we’re finally shipping the long-awaited upgrade: You can analyze stocks, crypto, and execute trades directly from your CLI all in https://t.co/RvXRvezH00\" / X"
+        },
+        {
+          "url": "https://theresanaiforthat.com/company/the-swarm-corporation/repository/AutoHedge/",
+          "title": "The-Swarm-Corporation/AutoHedge | Repositories | There's An AI For That"
+        },
+        {
+          "url": "https://gist.github.com/jerryliutaipei",
+          "title": "jerryliutaipei’s gists · GitHub"
+        },
+        {
+          "url": "https://www.threads.com/@quantscience_/post/DRPtyWoDvsH/what-is-auto-hedge-auto-hedge-harnesses-the-power-of-swarm-intelligence-and-ai",
+          "title": "1. What is AutoHedge? AutoHedge harnesses the power of swarm intelligence and AI agents to automate market analysis, risk management, and trade execution. It does all of this in Python."
+        },
+        {
+          "url": "https://podcasts.apple.com/jp/podcast/github-the-swarm-corporation-autohedge-build-your/id1745882529?i=1000788253993&l=en-US",
+          "title": "The-Swarm-Corporation… - GitHub Daily Trend - Apple Podcasts"
+        },
+        {
+          "url": "https://viralmint.net/open-source-ai-video-tools/",
+          "title": "Open-Source AI Video Tools — Free Opus Clip Alternative"
+        },
+        {
+          "url": "https://medium.com/coding-nexus/10-github-repos-that-print-money-while-you-sleep-ca297456862c",
+          "title": "10 GitHub Repos that Print Money While You Sleep | by Code Coup | Coding Nexus | Medium"
+        },
+        {
+          "url": "https://markaicode.com/monetize-open-source-github-income/",
+          "title": "Monetize Open Source: 5 Ways to Earn $1K/Month from GitHub Projects in 2026 | Markaicode"
+        },
+        {
+          "url": "https://postiz.com/",
+          "title": "Postiz: The All-in-One agentic social media scheduling tool"
+        },
+        {
+          "url": "https://openhub.net/p/youtube-monetization-checker",
+          "title": "The VideoDubber's YouTube Monetization Checker Open Source Project on Open Hub"
+        },
+        {
+          "url": "https://grokipedia.com/page/Ghost_(blogging_platform)",
+          "title": "Ghost (blogging platform) — Grokipedia"
+        }
+      ]
+    },
+    {
+      "q": "wwe commentators gone crazy moments",
+      "previous_count": 40,
+      "providers": [
+        {
+          "provider": "youtube",
+          "status": "ok",
+          "message": "YouTube details and viewer comments checked."
+        },
+        {
+          "provider": "reddit",
+          "status": "ok",
+          "message": "Reddit discussions checked."
+        },
+        {
+          "provider": "pages",
+          "status": "ok",
+          "message": "11 of 20 result pages were checked, 5 in a browser."
+        },
+        {
+          "provider": "archive_evidence",
+          "status": "partial",
+          "message": "0 comment/review samples and 0 caption tracks available across 2 checked results."
+        },
+        {
+          "provider": "judge",
+          "status": "ok",
+          "message": "Results were checked for relevance by AI."
+        },
+        {
+          "provider": "relevance_filter",
+          "status": "ok",
+          "message": "29 weak or insufficiently supported candidates were excluded. Fewer results may be shown."
+        },
+        {
+          "provider": "scene_analysis",
+          "status": "partial",
+          "message": "1 videos queued for scene analysis; these pending analyses are not evidence in this ranking."
+        }
+      ],
+      "candidates": [
+        {
+          "url": "https://www.youtube.com/watch?v=4oe9799XYoU",
+          "title": "Craziest announcer reactions of the year so far: WWE Top 10, June 2, 2024",
+          "description": "Watch these hilarious moments on commentary in 2024, from reactions to shocking moments, like Roman Reigns Spearing The Rock, to Pat McAfee and Michael Cole dissing Dominik Mysterio. Stream WWE on Peacock https://pck.tv/3ZTjVE7 in the U.S. and on WWE Network http://wwe.yt/wwenetwork everywhere else ...",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Official WWE top 10 video focused on craziest announcer reactions and commentary moments of the year. Supporting evidence only; exact match unverified.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "Craziest announcer reactions of the year so far: WWE Top 10"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "description",
+                "quote": "Watch these hilarious moments on commentary in 2024, from reactions to shocking moments"
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "description",
+                "quote": "Watch these hilarious moments on commentary in 2024"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=5NDBTUrQcTI",
+          "title": "Greatest announcer calls: WWE Top 10, June 30, 2018",
+          "description": "Leave it to WWE's esteemed commentary teams to turn an incredible WWE moment into an iconic one. Here are 10 of the greatest calls made by a WWE announcer. Get your first month of WWE Network for FREE: http://wwenetwork.com Subscribe to WWE on YouTube: http://bit.ly/1i64OdT Visit WWE.com: http://goo.gl/akf0J4 Must-See WWE videos on YouTube ...",
+          "judgement": {
+            "relevance": 8,
+            "reason": "WWE Top 10 compilation showcasing greatest announcer calls and iconic commentator reactions. Supporting evidence only; exact match unverified.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "Greatest announcer calls: WWE Top 10"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "description",
+                "quote": "Leave it to WWE's esteemed commentary teams to turn an incredible WWE moment into an iconic one."
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "title",
+                "quote": "Greatest announcer calls: WWE Top 10"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=gQ4FRVecf3Y",
+          "title": "WWF | Jim Ross and Jerry Lawler being the Funniest Commentary Duo Alive for 3 Mins",
+          "description": "247.4K views - May 28, 2022 - YouTube - Now! With Attitude!",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Attitude Era compilation focusing on the funny and lively commentary banter between Jim Ross and Jerry Lawler.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "Jim Ross and Jerry Lawler being the Funniest Commentary Duo Alive"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "description",
+                "quote": "All Clips are from the Attitude Era."
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "title",
+                "quote": "Jim Ross and Jerry Lawler being the Funniest Commentary Duo Alive for 3 Mins"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=HC4JGPezIVI",
+          "title": "WWF | Jim Ross and Jerry Lawler being the Funniest Commentary Duo Part 2",
+          "description": "218.9K views - Jun 2, 2022 - YouTube - Now! With Attitude!",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Part 2 of WWF commentary compilation highlighting funny and unfiltered moments from Jim Ross and Jerry Lawler.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "Jim Ross and Jerry Lawler being the Funniest Commentary Duo Part 2"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "description",
+                "quote": "The Kings of Commentary are back! And with some interesting topics and remarks!"
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "title",
+                "quote": "Jim Ross and Jerry Lawler being the Funniest Commentary Duo Part 2"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=HNootEGv5Z8",
+          "title": "14 Minutes of Jim Ross Absolutely Hating Wrestlers on Commentary",
+          "description": "14 Minutes of Jim Ross Hating Wrestlers on Commentary Jim Ross is one of the greatest commentators in wrestling history, but when he didn't like a wrestler, he made sure everyone knew it! 😂 From brutal roasts to legendary one-liners, here are 14 minutes of JR absolutely burying wrestlers on commentary. Wrestlers he hated was Triple h ...",
+          "judgement": {
+            "relevance": 7,
+            "reason": "Jim Ross commentary compilation featuring intense and funny rants against wrestlers.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "14 Minutes of Jim Ross Absolutely Hating Wrestlers on Commentary"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "description",
+                "quote": "From brutal roasts to legendary one-liners, here are 14 minutes of JR absolutely burying wrestlers on commentary."
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "title",
+                "quote": "14 Minutes of Jim Ross Absolutely Hating Wrestlers on Commentary"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=DNy2Qw_XsFY",
+          "title": "10 Wrestlers Jim Ross ABSOLUTELY HATED On Commentary",
+          "description": "In this video I rank the top 10 wrestlers that Jim Ross hated on commentary Head over to the WWE Shop and buy official WWE ...",
+          "judgement": {
+            "relevance": 7,
+            "reason": "Compilation focusing on Jim Ross's extreme and passionate commentary hatred against specific wrestlers.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "10 Wrestlers Jim Ross ABSOLUTELY HATED On Commentary"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "comments",
+                "quote": "Nobody, not a single soul, could sell the heinous actions of a heel better than JR!"
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "title",
+                "quote": "10 Wrestlers Jim Ross ABSOLUTELY HATED On Commentary"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=LDGOEf8Une8",
+          "title": "Jim Ross Calling Triple H a “son of a b*tch” Compilation",
+          "description": null,
+          "judgement": {
+            "relevance": 6,
+            "reason": "Short clip compilation of Jim Ross calling Triple H a son of a bitch.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "Jim Ross Calling Triple H a “son of a b*tch” Compilation"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "comments",
+                "quote": "i love the \"whyyy whyy triple H whyy. you sob, whyy\""
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "title",
+                "quote": "Jim Ross Calling Triple H a “son of a b*tch” Compilation"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=fHA8TzdqGHQ",
+          "title": "14 Minutes of Jim Ross Hating WWE Wrestlers on Commentary",
+          "description": "Jim Ross Hating WWE Wrestlers on Commentary Jim Ross didn't hold back when calling matches. From brutal roasts to hilarious jabs, this video looks at the most savage moments where JR went off on wrestlers live during WWE commentary. These unscripted reactions and raw emotions show why Jim Ross became a fan favorite — even when he was ...",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Shorter compilation of Jim Ross going off on WWE wrestlers on commentary.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "14 Minutes of Jim Ross Hating WWE Wrestlers on Commentary"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "description",
+                "quote": "These unscripted reactions and raw emotions show why Jim Ross became a fan favorite"
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "title",
+                "quote": "14 Minutes of Jim Ross Hating WWE Wrestlers on Commentary"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.wwe.com/videos/craziest-announcer-reactions-of-the-year-so-far-wwe-top-10-june-2-2024",
+          "title": "Craziest announcer reactions of the year so far: WWE Top 10 ...",
+          "description": null,
+          "judgement": {
+            "relevance": 6,
+            "reason": "Official WWE Top 10 list featuring craziest announcer reactions. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "Craziest announcer reactions of the year so far: WWE Top 10"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "page",
+                "quote": "Craziest announcer reactions of the year so far: WWE Top 10, June 2, 2024"
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "url",
+                "quote": "https://www.wwe.com/videos/craziest-announcer-reactions-of-the-year-so-far-wwe-top-10-june-2-2024"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://www.facebook.com/90sWWE/videos/jim-ross-and-jerry-lawler-commentary-makes-everything-better-/1837426413507054/",
+          "title": "Jim Ross and Jerry Lawler commentary makes everything better! 😂💯 | 90s WWE",
+          "description": "90s WWE. . Jim Ross and Jerry Lawler commentary makes everything better! 😂💯",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Facebook video compilation of Jim Ross and Jerry Lawler commentary.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "Jim Ross and Jerry Lawler commentary makes everything better!"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "description",
+                "quote": "Jim Ross and Jerry Lawler commentary makes everything better!"
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "url",
+                "quote": "https://www.facebook.com/90sWWE/videos/jim-ross-and-jerry-lawler-commentary-makes-everything-better-/1837426413507054/"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.thestunner.com/jim-ross-greatest-calls-wwe/",
+          "title": "Jim Ross' 10 Greatest Calls in WWE - The Stunner",
+          "description": "‘As God as my witness, he is broken in half!’",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Article about Jim Ross's greatest commentary calls, featuring iconic quotes.",
+            "model": "google/gemini-3.5-flash-lite",
+            "intent_checks": [
+              {
+                "dimension": "subject",
+                "status": "supported",
+                "field": "title",
+                "quote": "Jim Ross' 10 Greatest Calls in WWE"
+              },
+              {
+                "dimension": "intent",
+                "status": "supported",
+                "field": "description",
+                "quote": "‘As God as my witness, he is broken in half!’"
+              },
+              {
+                "dimension": "format",
+                "status": "supported",
+                "field": "url",
+                "quote": "https://www.thestunner.com/jim-ross-greatest-calls-wwe/"
+              }
+            ]
+          },
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        }
+      ],
+      "excluded": [
+        {
+          "url": "https://www.youtube.com/watch?v=2hf51UXsUpc",
+          "title": "Jim Ross Being A National Treasure For 25 Minutes Straight"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=SEXwCO8n3Dg",
+          "title": "Funny Commentary Edit: The Best of Ultimate Fails 2013"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=YlCRzZxAxVY",
+          "title": "WWE Commentary (Jim Ross) on Video Games - Episode 2"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=C6PWp_OCLqk",
+          "title": "Jim Ross Goes Crazy"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=kBXHbTgjVKk",
+          "title": "WWE Commentary (Jim Ross) on Video Games - Episode 1"
+        },
+        {
+          "url": "https://www.wrestlinginc.com/2075395/winc-watchlist-wwe-most-absurd-moments-ranked/",
+          "title": "WINC Watchlist: Most Absurd WWE Moments, Ranked - Wrestling Inc."
+        },
+        {
+          "url": "https://www.dailymotion.com/video/x8ek2ae",
+          "title": "WWE Kane burns JR Jim Ross"
+        },
+        {
+          "url": "https://www.wwe.com/videos/playlists/michael-coles-miserable-moments",
+          "title": "Michael Cole's Miserable Moments - WWE"
+        },
+        {
+          "url": "https://worldstar.com/videos/wshh637pra9oGHtoNEJA/firefighter-really-rock-bottomed-this-person-out-of-a-burning-building-tho-wwe-jim-ross-commentary",
+          "title": "Firefighter Really Rock Bottomed This Person Out Of A Burning Building Tho! (WWE Jim Ross Commentary)"
+        },
+        {
+          "url": "https://www.dailymotion.com/video/x3tzth0",
+          "title": "5 Crazy Unscripted Moments Of Pro-Wrestling (WWE/WWF/WCW)"
+        },
+        {
+          "url": "https://copyright-certificate.byu.edu/news/wwes-craziest-moments-you-wont",
+          "title": "WWE's Craziest Moments: You Won't Believe These!"
+        },
+        {
+          "url": "https://www.dailymotion.com/video/x4hbvvx",
+          "title": "Fail Compilation with WWE Jim Ross Commentary REACTION!!! (STD) - video Dailymotion"
+        },
+        {
+          "url": "https://www.facebook.com/groups/2452278295040175/posts/3271324799802183/",
+          "title": "WWE commentators & exaggerating 😏🤞"
+        },
+        {
+          "url": "https://x.com/90sWWE/status/2078428259855835506",
+          "title": "90s WWE (@90sWWE) on X"
+        },
+        {
+          "url": "https://www.wwe.com/article/top-5-insane-moments-of-2025-so-far",
+          "title": "Top 5 Insane WWE Moments of 2025… so far | WWE"
+        },
+        {
+          "url": "https://www.facebook.com/wwe/videos/michael-cole-said-it-best-this-is-one-of-the-most-disgusting-displays-ive-ever-w/988909702659508/",
+          "title": "Michael Cole said it best: \"This is one of the most disgusting ..."
+        },
+        {
+          "url": "https://tvtropes.org/pmwiki/pmwiki.php/Funny/MichaelCole",
+          "title": "Funny Moments in Michael Cole - TV Tropes"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=WH-EielroQM",
+          "title": "10 Times WWE Wrestlers & Announcers Broke Character ..."
+        },
+        {
+          "url": "https://www.reddit.com/r/SquaredCircle/comments/f2jbq3/favorite_corpsing_moment/",
+          "title": "r/SquaredCircle on Reddit: Favorite corpsing moment?"
+        },
+        {
+          "url": "https://archive.org/details/10TimesWWEWrestlersAnnouncersBrokeCharacterCaughtLaughingOnCamera",
+          "title": "10 Times WWE Wrestlers & Announcers Broke Character & Caught Laughing On Camera! : Free Download, Borrow, and Streaming : Internet Archive"
+        },
+        {
+          "url": "https://x.com/AllDAYZ77/status/2072322692779495621",
+          "title": "That time Michael Cole delivered one of the worst commentary lines in wrestling history. “I get those goosebumps every time.” https://t.co/5VBqumbaGx"
+        },
+        {
+          "url": "https://sports.yahoo.com/articles/wwes-michael-cole-reveals-times-203000633.html",
+          "title": "WWE's Michael Cole Reveals The Times He Was Most Shocked On Commentary - Yahoo Sports"
+        },
+        {
+          "url": "https://bleacherreport.com/articles/1789450-15-best-calls-of-jim-ross-wwe-career",
+          "title": "15 Best Calls of Jim Ross' WWE Career"
+        },
+        {
+          "url": "https://www.reddit.com/r/SquaredCircle/comments/20a7q9/fail_compilation_with_wwe_commentary_jim_ross/",
+          "title": "r/SquaredCircle on Reddit: Fail Compilation with WWE Commentary-- Jim Ross Makes Everything Instantly Better-- Like Bacon"
+        },
+        {
+          "url": "https://makeagif.com/gif/fail-compilation-with-wwe-jim-ross-commentary-ydnEMG",
+          "title": "Fail Compilation with WWE Jim Ross Commentary on Make a GIF"
+        },
+        {
+          "url": "https://odysee.com/jim-ross-shoots-on-the-ultimate-3:b",
+          "title": "Jim Ross shoots on The Ultimate Warrior's 1990 World title run"
+        },
+        {
+          "url": "https://archive.org/details/XOFnoEWW",
+          "title": "WWE on FOX YT Archive : FOX Sports : Free Download, Borrow, and Streaming : Internet Archive"
+        },
+        {
+          "url": "https://www.reddit.com/r/WWE/comments/u97wm1/what_is_your_most_memorable_jim_ross_commentary/",
+          "title": "r/WWE on Reddit: What is your most memorable Jim Ross commentary moment?"
+        },
+        {
+          "url": "https://www.thesportster.com/wwe-commentaries-ruined-talked-over-big-moment/",
+          "title": "10 Times WWE Commentary Talked Over A Major Moment"
+        }
+      ]
+    }
+  ]
+}

@@ -30,17 +30,28 @@ export async function retrieve(db: DB, config: Config, input: SearchInput, owner
    FROM content c JOIN sources s ON s.id=c.source_id JOIN video_scenes v ON v.content_id=c.id
    WHERE ${eligible} AND ${activeScene} AND v.search_vector @@ websearch_to_tsquery('english',$1)
  ) evidence GROUP BY id ORDER BY score DESC,id LIMIT 200`,args)).rows;
- let semantic: {id:string}[] = []; const providers: ProviderStatus[] = [];
+ let semantic: {id:string;moment_ids?:string[];scene_ids?:string[]}[] = []; const providers: ProviderStatus[] = [];
  if (config.SEMANTIC_ENABLED) {
    try {
      const vector = await embed(db,config,input.q);
      // Restrict semantic augmentation to lexical/moment matches when explicit search operators exist.
      // This preserves exclusion and phrase constraints instead of silently weakening them.
-     if (vector && !/["\-]|\bOR\b/.test(input.q)) semantic = (await db.query(`SELECT c.id FROM embeddings e
+     if (vector && !/["\-]|\bOR\b/.test(input.q)) semantic = (await db.query(`SELECT id,
+       array_agg(moment_id) FILTER (WHERE moment_id IS NOT NULL) AS moment_ids,
+       array_agg(scene_id) FILTER (WHERE scene_id IS NOT NULL) AS scene_ids FROM (
+       SELECT c.id,(e.embedding <=> $8::vector) AS distance,NULL::uuid AS moment_id,NULL::uuid AS scene_id FROM embeddings e
        JOIN content c ON c.id=e.content_id JOIN sources s ON s.id=c.source_id
        WHERE ${eligible} AND e.model=$6 AND vector_dims(e.embedding)=$7
        AND e.created_at >= c.fetched_at AND (e.embedding <=> $8::vector)<0.45
-       ORDER BY e.embedding <=> $8::vector,c.id LIMIT 200`,[...args,config.EMBEDDING_MODEL,config.EMBEDDING_DIMENSIONS,JSON.stringify(vector)])).rows;
+       UNION ALL SELECT c.id,(e.embedding <=> $8::vector) AS distance,e.moment_id,e.scene_id FROM evidence_embeddings e
+       JOIN content c ON c.id=e.content_id JOIN sources s ON s.id=c.source_id
+       LEFT JOIN moments m ON m.id=e.moment_id AND m.content_id=c.id
+       LEFT JOIN video_scenes v ON v.id=e.scene_id AND v.content_id=c.id
+       LEFT JOIN media_versions mv ON mv.id=v.media_version_id
+       WHERE ${eligible} AND e.model=$6 AND vector_dims(e.embedding)=$7 AND (e.embedding <=> $8::vector)<0.45
+       AND ((m.status='active' AND m.evidence_type='transcript_supported' AND (s.policy->>'transcripts')::boolean=true)
+         OR (${activeScene} AND mv.status='current' AND mv.access_status='accessible'))
+       ) matches GROUP BY id ORDER BY min(distance),id LIMIT 200`,[...args,config.EMBEDDING_MODEL,config.EMBEDDING_DIMENSIONS,JSON.stringify(vector)])).rows;
      if (!vector) providers.push({provider:'embeddings',status:'disabled',message:'Semantic search is unavailable; keyword search is active.'});
    } catch { providers.push({provider:'embeddings',status:'unavailable',message:'Semantic search is unavailable; keyword search is active.'}); }
  }
@@ -50,9 +61,11 @@ export async function retrieve(db: DB, config: Config, input: SearchInput, owner
    coalesce((SELECT CASE WHEN f.useful THEN 1 ELSE -1 END FROM feedback f WHERE f.owner=$2 AND f.content_id=c.id),0) AS personal
    FROM content c JOIN sources s ON s.id=c.source_id WHERE c.id=ANY($1::uuid[])`,[ids,owner])).rows;
  const moments = (await db.query(`SELECT * FROM moments WHERE content_id=ANY($1::uuid[]) AND status='active'
-   AND search_vector @@ websearch_to_tsquery('english',$2) ORDER BY start_seconds,id`,[ids,input.q])).rows;
+   AND ($4='any' OR evidence_type=$4)
+   AND (search_vector @@ websearch_to_tsquery('english',$2) OR id=ANY($3::uuid[])) ORDER BY start_seconds,id`,[ids,input.q,semantic.flatMap(r=>r.moment_ids??[]),input.evidence])).rows;
  const scenes = (await db.query(`${sceneSelect} WHERE v.content_id=ANY($1::uuid[]) AND ${activeScene}
-   AND v.search_vector @@ websearch_to_tsquery('english',$2)`,[ids,input.q])).rows;
+   AND ($4='any' OR $4='video_analysed')
+   AND (v.search_vector @@ websearch_to_tsquery('english',$2) OR v.id=ANY($3::uuid[]))`,[ids,input.q,semantic.flatMap(r=>r.scene_ids??[]),input.evidence])).rows;
  const results = rows.map(row=>{
    const found: Moment[] = [...moments.filter(m=>m.content_id===row.id).map(m=>({id:m.id,
      start_seconds:m.start_seconds,end_seconds:m.end_seconds,summary:m.summary,evidence_type:m.evidence_type,

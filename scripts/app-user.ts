@@ -10,7 +10,8 @@ try{
    await tx.query(`ALTER ROLE search_app PASSWORD '${secret.replaceAll("'","''")}'`);
    await tx.query('GRANT USAGE ON SCHEMA public TO search_app');
    await tx.query('GRANT SELECT ON schema_migrations TO search_app');
-   await tx.query('GRANT SELECT,INSERT,UPDATE,DELETE ON sources,source_alternatives,source_health_events,source_policy_rules,viewer_timestamps,content,content_removals,transcript_segments,moments,jobs,searches,feedback,provider_health,budgets,media_versions,scene_analyses,video_scenes,page_previews,dependency_checks,dependency_events,service_heartbeats TO search_app');
+   await tx.query('GRANT SELECT,INSERT,UPDATE,DELETE ON sources,source_alternatives,source_health_events,source_policy_rules,viewer_timestamps,content,content_removals,transcript_segments,moments,jobs,searches,feedback,provider_health,budgets,media_versions,scene_analyses,video_scenes,page_previews,dependency_checks,dependency_events,service_heartbeats,search_traces,search_audits,result_feedback TO search_app');
    if((await tx.query("SELECT to_regclass('embeddings') AS name")).rows[0].name)await tx.query('GRANT SELECT,INSERT,UPDATE,DELETE ON embeddings TO search_app');
+   if((await tx.query("SELECT to_regclass('evidence_embeddings') AS name")).rows[0].name)await tx.query('GRANT SELECT,INSERT,UPDATE,DELETE ON evidence_embeddings TO search_app');
  });console.log('search_app runtime privileges configured.');
 }finally{await db.close();}

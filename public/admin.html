@@ -31,6 +31,16 @@
    </table>
   </div>
 
+  <h2>Search audits</h2>
+  <p class="hint">After each search a critic model (CRITIC_MODEL) grades it, and tests any source it says was missed with a real search. Weekly, a reviewer re-checks a sample. Scores are 0–1; confidence is the critic's own and is calibrated against confirmed findings over time. Nothing here changes rankings yet.</p>
+  <p id="audit-line" class="health-line"></p>
+  <div class="table-wrap">
+   <table id="audits">
+    <thead><tr><th>Search</th><th>Results</th><th>Best results</th><th>Quality</th><th>Depth</th><th>Missing sources</th><th>Your feedback</th></tr></thead>
+    <tbody></tbody>
+   </table>
+  </div>
+
   <h2>Add a website</h2>
   <form id="add-form" class="row-form">
    <label>Website address<input name="url" required maxlength="2048" placeholder="www.example.org or https://www.example.org"></label>

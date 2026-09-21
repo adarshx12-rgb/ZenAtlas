@@ -15,7 +15,7 @@ export interface VideoDetails {
  // The spoken language, narrowed to its primary subtag, or null when the uploader declared none.
  language?: string|null;
 }
-export interface ViewerComment { id: string; text: string; likes: number }
+export interface ViewerComment { id: string; text: string; likes: number; sample?: 'relevant'|'recent'|'reply'; parentId?: string }
 export interface YouTubeClient {
  videos(ids: string[]): Promise<Map<string,VideoDetails>>;
  comments(videoId: string, max: number): Promise<ViewerComment[]>;
@@ -48,9 +48,11 @@ const videoList = z.object({items: z.array(z.object({
  liveStreamingDetails: z.object({actualStartTime: z.string().optional()}).optional(),
  statistics: z.object({viewCount: z.string().regex(/^\d{1,15}$/).optional(), commentCount: z.string().regex(/^\d{1,15}$/).optional()}).optional(),
 })).max(50).default([])});
-const commentList = z.object({items: z.array(z.object({
+const commentSnippet = z.object({textOriginal:z.string().optional(),textDisplay:z.string().optional(),likeCount:z.number().int().nonnegative().default(0)});
+const commentList = z.object({nextPageToken:z.string().optional(), items: z.array(z.object({
  id: z.string(),
- snippet: z.object({topLevelComment: z.object({snippet: z.object({
+ replies: z.object({comments:z.array(z.object({id:z.string(),snippet:commentSnippet})).default([])}).optional(),
+ snippet: z.object({topLevelComment: z.object({id:z.string().optional(),snippet: z.object({
    textOriginal: z.string().optional(), textDisplay: z.string().optional(), likeCount: z.number().int().nonnegative().default(0)})})}),
 })).max(100).default([])});
 
@@ -81,11 +83,36 @@ export class YouTubeData implements YouTubeClient {
    return found;
  }
  async comments(videoId: string, max: number) {
-   const data = commentList.parse(await this.get('commentThreads', {part: 'snippet', videoId, order: 'relevance',
-     maxResults: String(max), textFormat: 'plainText'}));
-   return data.items.map(t => {
-     const s = t.snippet.topLevelComment.snippet;
-     return {id: t.id, text: (s.textOriginal ?? s.textDisplay ?? '').slice(0, 5000), likes: s.likeCount};
-   }).filter(c => c.text.trim());
+   const limit = Math.max(1, Math.min(300, max));
+   const found: ViewerComment[] = [];
+   let successful = 0, failure: unknown;
+   // Separate relevance and recency samples; include returned replies, without claiming all replies were read.
+   for (const order of ['relevance','time'] as const) {
+     let pageToken: string|undefined;
+     for (let page=0; page<2; page++) {
+       try {
+         const data = commentList.parse(await this.get('commentThreads', {part:'snippet,replies',videoId,order,
+           maxResults:String(Math.min(100,Math.ceil(limit/2))),textFormat:'plainText',...(pageToken?{pageToken}:{})}));
+         successful++;
+         for (const t of data.items) {
+           const parent = t.snippet.topLevelComment.id ?? t.id;
+           const s = t.snippet.topLevelComment.snippet;
+           found.push({id:parent,text:(s.textOriginal??s.textDisplay??'').slice(0,5000),likes:s.likeCount,sample:order==='time'?'recent':'relevant'});
+           for (const reply of t.replies?.comments ?? []) found.push({id:reply.id,parentId:parent,sample:'reply',
+             text:(reply.snippet.textOriginal??reply.snippet.textDisplay??'').slice(0,5000),likes:reply.snippet.likeCount});
+         }
+         pageToken = data.nextPageToken;
+         if (!pageToken || limit<=200) break;
+       } catch(error) { failure=error; break; }
+     }
+   }
+   if (!successful) throw failure;
+   const unique = [...new Map(found.filter(c=>c.text.trim()).map(c=>[c.id,c])).values()];
+   const groups = ['relevant','recent','reply'].map(kind=>unique.filter(c=>c.sample===kind));
+   const sampled: ViewerComment[] = [];
+   while(sampled.length<limit && groups.some(g=>g.length)) for(const g of groups) {
+     if(g.length && sampled.length<limit) sampled.push(g.shift()!);
+   }
+   return sampled;
  }
 }

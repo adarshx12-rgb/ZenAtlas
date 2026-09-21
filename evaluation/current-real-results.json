@@ -1,0 +1,3526 @@
+{
+  "ranking_version": "relevance-v2",
+  "generated_at": "2026-09-21T05:13:01.319Z",
+  "human_judged": false,
+  "queries": [
+    {
+      "q": "ghost videos with insane plot twist",
+      "criteria": "A ghost or supernatural story with an actual major narrative reveal. Generic scary clips and clickbait twist claims are weak matches.",
+      "elapsed_ms": 119994,
+      "providers": [
+        {
+          "provider": "brave",
+          "status": "ok",
+          "message": "Brave discovery completed."
+        },
+        {
+          "provider": "searxng",
+          "status": "ok",
+          "message": "Discovery completed."
+        },
+        {
+          "provider": "internet_archive",
+          "status": "ok",
+          "message": "Internet Archive film catalogue searched directly."
+        },
+        {
+          "provider": "planner",
+          "status": "ok",
+          "message": "AI planned 6 searches for lesser-known sources."
+        },
+        {
+          "provider": "leads",
+          "status": "ok",
+          "message": "AI followed 8 leads from what it found, in 2 rounds."
+        },
+        {
+          "provider": "candidate_pool",
+          "status": "partial",
+          "message": "1912 candidates found; the best 160 keyword matches were selected for checking after all sources answered."
+        },
+        {
+          "provider": "youtube",
+          "status": "ok",
+          "message": "YouTube details and viewer comments checked."
+        },
+        {
+          "provider": "reddit",
+          "status": "ok",
+          "message": "Reddit discussions checked."
+        },
+        {
+          "provider": "pages",
+          "status": "ok",
+          "message": "12 of 20 result pages were checked, 6 in a browser."
+        },
+        {
+          "provider": "archive_evidence",
+          "status": "partial",
+          "message": "0 comment/review samples and 0 caption tracks available across 3 checked results."
+        },
+        {
+          "provider": "judge",
+          "status": "ok",
+          "message": "Results were checked for relevance by AI."
+        },
+        {
+          "provider": "scene_analysis",
+          "status": "partial",
+          "message": "3 videos queued for scene analysis; these pending analyses are not evidence in this ranking."
+        }
+      ],
+      "candidates": [
+        {
+          "url": "https://www.youtube.com/watch?v=aP4CL4GSIAE",
+          "title": "One Winter's Night (a gothic animated short) - YouTube",
+          "description": "My first short and animated film, based on a rhyme I wrote back in 2008. Anyone who really loves ghost stories, gothic tales, horror stories, Halloween, scar...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Viewers comment on the unique plot twists and calm-to-jumpscare ghost and vampire narrative. Supporting evidence only; exact match unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "cd5fa367-2fd4-4b80-9741-18da4e5cedef",
+              "start_seconds": 171,
+              "end_seconds": 206,
+              "summary": "2:56 her eyes are xbox controller lights",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "0b5e4686-e4a0-420c-aa4c-8931e51c3036"
+              ]
+            },
+            {
+              "id": "b936ccab-7c0b-49c9-9374-575be28b9882",
+              "start_seconds": 249,
+              "end_seconds": 284,
+              "summary": "OMG I SKIPPED TO 4:14 AND MY VOLUME WAS ALL THE WAY UP AND GAVE MY SELF A HEART ATTACK!",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "10896dea-e553-481f-87c8-48fd7534aded"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=TEmwbgcWrpw",
+          "title": "Horror Short Film \"Pleasant Inn\" | ALTER",
+          "description": "Subscribe to ALTER on YouTube: https://goo.gl/LnXRC3 🔥 This horror is scripted. Your goosebumps are not. A lonely Inn becomes a setting for survival against a monstrous visitor. \"Pleasant Inn\" by David Romero #ALTER #horror #shortfilm Connect with the Filmmakers: https://www.tumblr.com/cinemamind https://bsky.app/profile/cinemaminddavid.bsky ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "ALTER horror short film featuring a monstrous creature and tense survival.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "d67c83a1-3315-4aee-a935-0bb90b52cc11",
+              "start_seconds": 219,
+              "end_seconds": 284,
+              "summary": "3:48 · 4:14 Ngl that is so fucking creepy just imagine you see that in your window, a entity that’s ready to feed on you and go inside your body. Matter fact why you turn on the lights to began with when there’s danger outside of your window? · 3:44, I think I’ll leave the curtains open at a hotel that I’ve never been in, I like it when strangers watch me sleep.  XD",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "6617fd9a-35d6-4844-b1ad-b9ca0d5a5a75",
+                "e76f91a9-2112-4609-99c1-50e72d5c261d",
+                "403c3820-ca74-4d03-8fc0-7072b0eab659"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=OFYDiMe8wSo",
+          "title": "\"Double Vision\" | Independent Horror Short Film - YouTube",
+          "description": null,
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Independent horror short film featuring a supernatural doppelganger entity and a narrative reversal.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "370d7970-9a30-4f80-804a-e3f136788ebf",
+              "start_seconds": 224,
+              "end_seconds": 270,
+              "summary": "Why would you turn off the lights? 4:00 😂 · @3:49 tell me that isn't the whitest thing someone has done in a horror scene",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "b03d62c1-e350-40ce-9054-2969893175fa",
+                "809508aa-4333-4c9b-94a5-f2c8ad68ab8f"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=EQ-FARjhHwQ",
+          "title": "रुह | Horror Short Film | Unexpected Twist Ending | GLIMSFLIMS",
+          "description": "A haunted haveli. A lonely photographer. A mysterious girl in white. What starts as a casual meeting inside an abandoned mansion slowly turns into a chilling psychological nightmare. But when reality starts breaking apart, Watch till the end for the shocking twist ending. 🎬 Short Film: The Real Ghost 🎭 Genre: Horror | Psychological ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Viewers explicitly praise the unexpected twist ending in this horror short film featuring a ghost story. Supporting evidence only; exact match unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=_q3nOwYQod8",
+          "title": "The Numismatist - A Ghost Story - Short Film - YouTube",
+          "description": null,
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "A standalone supernatural ghost short film with strong viewer praise for its clear narrative conclusion and mystery.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=vmsmBgTIpYg",
+          "title": "SHABNAM: Raat Abhi Baki Hai | Indian Rural Horror Short Film | GLIMS FILMS",
+          "description": "35.4K views - 7 months ago - YouTube - GLIMSFILMS",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "An Indian rural horror short film that description and comments confirm builds tension leading to a shocking final moment/twist. Supporting evidence only; exact match unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=XoVVWzg1RLA",
+          "title": "वो मेरे पीछे है | Hindi Horror Short Film | GLIMS FILMS",
+          "description": "245 views - 1 month ago - YouTube - GLIMSFILMS",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Hindi ghost horror short film with psychological elements and a twist ending. Supporting evidence only; exact match unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=xyobyrpHgFY",
+          "title": "उसने सड़क से सिक्का उठाया… फिर घर में ये हुआ | Horror Short Film | Glims Films",
+          "description": "Unwanted Coin - Hindi Horror Short Film | Scary Indian Horror Story A simple five-rupee coin found on the street… but some things should never be brought home. This Hindi horror short film tells a chilling Indian horror story about a cursed coin that slowly brings supernatural events into a young girl's life. What begins as a harmless ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Indian horror short film featuring a supernatural curse and eerie events.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=qcu9LydQPo4",
+          "title": "A Terrifying Call You Can't Ignore | Horror Short Film",
+          "description": "A stormy night. A girl home alone. A phone call she was never meant to answer. This horror short film blends psychological tension with a chilling phone call horror premise that spirals into a mind-bending twist. When 18-year-old Riya receives a frantic call from a girl begging for help, she quickly realizes the caller seems to know her house ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Horror short film featuring psychological tension and a mind-bending twist. Supporting evidence only; exact match unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=hs3paMLb9Qg",
+          "title": "Ignore It - Short Horror Film ( Award Winning )",
+          "description": "A family struggles to live with a spirit that becomes deadly if its presence is acknowledged. #horror #shortfilm Subscribe for more ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 7,
+            "reason": "A short horror film on YouTube about a deadly spirit that kills if acknowledged, though its twist is less prominent.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "b03cee16-eda4-4656-996b-448b073ec6c8",
+              "start_seconds": 375,
+              "end_seconds": 394,
+              "summary": "6:20 THAT JUMPSCARE IS SO GOOD BRO I NEARLY DIED OF SCARDNESS",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "ffa2fdc7-0a15-4ddb-9d82-561c35d81a81"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://vurchel.com/v/31982/koreatown-ghost-story-https-www.instagram.com-koreatownghoststory-minsun-park-teddy-tenenbaum",
+          "title": "Koreatown Ghost Story - short film by Minsun Park, Teddy Tenenbaum | Watch full film online!",
+          "description": "by Minsun Park, Teddy Tenenbaum ... · In this supernatural horror tale based on a Korean ritual, a woman entertains a macabre marriage offer that would let her pursue her dreams, for better or for much much worse....",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Mentions a supernatural horror short film based on a ritual, but lacks detail on a plot twist.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://vimeo.com/552700510",
+          "title": "Koreatown Ghost Story Short Film, Audience Feedback from June 2021 HORROR Festival | Videos & Movies on Vimeo",
+          "description": "KOREATOWN GHOST STORY, 14min., USA, Thriller/Horror Directed by Minsun Park & Teddy Tenenbaum In this supernatural horror tale based on a Korean ritual starring Margaret Cho and Lyrica Okano, a woman entertains a macabre offer that would let her pursue her dreams, for better or for much much worse.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Vimeo listing for 'Koreatown Ghost Story', a supernatural horror short film based on ritual.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "http://www.bilibili.com/video/av117302821456422",
+          "title": "Elevator Ghost Story 午夜神秘电梯",
+          "description": "Do not take an empty elevator after midnight or you might find yourself on a floor that does not exist. Alex pressed 12 but the elevator stopped at 13. When the doors opened, there was no hallway, and the security camera showed someone standing right behi",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "An elevator ghost story short featuring supernatural elements and a sudden twist ending. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://vimeo.com/474315292",
+          "title": "Michael Jackson - Ghosts (Official Full-Length Short Film)",
+          "description": "Michael Jackson's Ghosts is a 1996 short film starring singer Michael Jackson, written by horror novelist Stephen King and Mick Garris, and directed by Stan Winston. It was filmed and first screened in 1996 and released along with select prints of the film Thinner. It was released as promo a year later internationally on LaserDisc, VHS and ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Michael Jackson's Ghosts short film features supernatural elements, but is a music-driven project rather than a tight plot-twist ghost narrative.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.facebook.com/WatchALTER/posts/the-hidebehind-horror-short-filmlost-deep-in-the-forest-a-lone-backpacker-encoun/1034771482390064/",
+          "title": "“The Hidebehind” | Horror Short Film Lost deep in the forest, a ...",
+          "description": null,
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "A horror short film about a forest entity, but lacking direct evidence of a twist ending.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://vimeo.com/324205600",
+          "title": "The Monkey&#039;s Paw by W. W. Jacobs Ghost Story Short Student Film 1984",
+          "description": "Classic tale of mystery, suspense and the supernatural directed by Andrew Barker, Produced at the London College of Printing in 1984, broadcast by Channel Four…",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Classic student supernatural ghost story short film adaptation. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "http://www.bilibili.com/video/av50719775",
+          "title": "【中文字幕】精彩恐怖短片 特殊的日子 Horror Short Film _Special Day_ _ Presented by ALTER",
+          "description": "@ALTER",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Horror short film presented by ALTER with Chinese subtitles. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=z7ccTlVXYzI",
+          "title": "Midnight Horror \"Camera Chalu Hai Na?\" | POV Horror Short Film | Glims Films",
+          "description": "🔥 Midnight Horror Camera Chalu Hai Na?\" | POV Horror Short Film 😱 क्या आपने कभी सोचा है… अगर कैमरा ON हो… और कुछ ऐसा रिकॉर्ड हो जाए… जिसे होना ही नहीं चाहिए था? 👁️ एक साधारण ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "POV horror short film involving mysterious presences, though comments do not confirm a specific twist.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.dailymotion.com/video/xj55oi",
+          "title": "One Winter's Night - an animated short film and gothic ghost story",
+          "description": "A young girl has a familiar, if unsettling encounter one cold winter's night. Based on a rhyme i wrote back in 2008, and inspired by my love of gothic fiction/ghost stories and movies. Any comments/feedback are welcome :)",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Metadata mentions an animated gothic ghost story short film, but video evidence is absent.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://www.shortoftheweek.com/2024/10/28/koreatown-ghost-story/",
+          "title": "Koreatown Ghost Story by Minsun Park & Teddy Tenenbaum",
+          "description": "Watch Koreatown Ghost Story by Minsun Park &amp; Teddy Tenenbaum - a short film about a young woman forced to entertain a macabre marriage offer.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Discusses a supernatural horror short film about a macabre marriage offer, but does not detail a twist.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://www.dailymotion.com/video/x8ln7jy",
+          "title": "The Numismatist - A Ghost Story - Short Film",
+          "description": "2 views - Jun 10, 2023 - Dailymotion - Filmow",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "A Dailymotion listing for a ghost story short film, but lacks proof of a specific plot twist.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=tP7imEcclVk",
+          "title": "Horror Short Film \"The Hidebehind\" | ALTER",
+          "description": "Lost deep in the forest, a lone backpacker encounters a peculiar stranger. \"The Hidebehind\" by Parker Finn Subscribe to ALTER on YouTube: https://goo.gl/LnXRC3 #ALTER #horror #shortfilm About ALTER: The most provocative minds in horror bring you three new short films every week exploring the human condition through warped and uncanny ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "A horror short film featuring a forest monster, but viewer comments discuss its creature design rather than a narrative plot twist.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "8e91cb59-a6e4-4c36-8a57-8991ab417184",
+              "start_seconds": 353,
+              "end_seconds": 388,
+              "summary": "5:58 Actually it kinda is... I'd believe this was a spoof. It's so goddamn goofy.",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "f8b4cae1-1ad1-4e4f-82ac-7023f53c1812"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://longislandfilm.com/films/koreatown-ghost-story/",
+          "title": "Koreatown Ghost Story – The Long Island International Film Expo",
+          "description": "Title of Film: Koreatown Ghost Story · Date of Screening: August 13, 2021 · Film Block Time: 11:30pm · Buy Tickets · FILM INFO FOR: Category: A short · Director: Minsun Park &amp; Teddy Tenenbaum · Producer(s): Minsun Park, Teddy Tenenbaum, Jim Wedaa · Writer(s): Minsun Park &amp; Teddy Tenenbaum ·",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Metadata mentions a supernatural short film, but no video player or full clip is provided.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://geektyrant.com/news/trailer-for-the-supernatural-horror-short-film-koreatown-ghost-story",
+          "title": "Trailer For The Supernatural Horror Short Film KOREATOWN GHOST STORY — GeekTyrant",
+          "description": "The tale is based on a Korean ritual and follows a woman who entertains a macabre offer that would let her pursue her dreams, for better or for much much worse. The film was written and directed by Minsun Park and Teddy Tenenbaum and it stars ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Discusses a supernatural horror short film trailer, not the full standalone clip or twist details.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://filminvasionla.com/koreatown-ghost-story/",
+          "title": "Koreatown Ghost Story – Film Invasion Los Angeles",
+          "description": "Director(s): Minsun Park &amp; Teddy Tenenbaum Writer(s): Minsun Park &amp; Teddy Tenenbaum Producer(s): Minsun Park &amp; Teddy Tenenbaum, Jim Wedaa.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Festival listing for a supernatural short film, but contains no video content.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=ITlk30pgVH0",
+          "title": "Koreatown Ghost Story Trailer Directed by Minsun Park, Teddy ...",
+          "description": null,
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "YouTube trailer for 'Koreatown Ghost Story', but only a trailer rather than the full short film.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=D_pZ5_jyVgs",
+          "title": "Top 75 Mind-Blowing Horror Movie Plot Twists - YouTube",
+          "description": "Get ready for the most shocking moments in scary movie history! Join us as we count down the revelations that left audiences gasping. From ghostly surprises ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "A compilation video discussing horror movie plot twists like The Sixth Sense, but it is a compilation.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://archive.org/details/a-ghost-story-for-christmas-1971",
+          "title": "A Ghost Story for Christmas (1971 - 78, 2005 - 13, 18 -) Complete Series inc. Whistle and I'll Come to You (1968)",
+          "description": "British supernatural anthology series which airs its episodes at Christmas, the majority based on short stories by the master of the English ghost story and...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Classic British ghost story anthology episodes, though too broad and long compared to a specific short twist clip.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "not_permitted",
+            "captions": "not_permitted",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.facebook.com/WatchALTER/posts/the-hidebehind-horror-short-film/977455971454949/",
+          "title": "“The Hidebehind” | Horror Short Film - Facebook",
+          "description": null,
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Horror short film about a creature, but lacks metadata on twist details.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.dailymotion.com/video/x9nkmym",
+          "title": "🏨 Night Shift Movie Explained – Haunted Motel, Ghosts & Gwen’s Twisted Truth 👻🌙 #NightShiftMovie",
+          "description": "🌙 *Night Shift (2023)* is a chilling horror thriller where one woman’s first night on the job turns into a descent into madness. Gwen takes a caretaker role at a remote motel—only to discover ghostly apparitions, mysterious guests, and a terrifying truth buried beneath the surface. 🎥 What you’ll di...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Movie explanation video about a haunted motel and ghosts.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.instagram.com/reel/DYJINhDP8en/",
+          "title": "The Hidebehind (2018) short film - Full Movie Genre - Instagram",
+          "description": null,
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Short clip of a horror short film.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unsupported",
+            "captions": "unsupported",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://vimeo.com/652367569",
+          "title": "Horror Short Film - PLATFORM | Videos & Movies on Vimeo",
+          "description": null,
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Horror short film on Vimeo without detailed description.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.indieshortsmag.com/articles/2015/08/top-10-thriller-short-films-thatll-completely-blow-your-mind-with-its-clever-climax-twists/",
+          "title": "Top 10 Thriller Short Films That’ll Completely Blow Your Mind With It’s Clever Climax Twists - Indie Shorts Mag",
+          "description": "Indie Shorts Mag presents the lineup of the top ten thriller short films that’ll completely blow your mind with it’s clever climax twists you wouldn’t be expecting.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Article about thriller short films with clever climax twists, but no supernatural ghost focus.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://archive.org/details/ghost-story-circle-of-fear-complete",
+          "title": "Ghost Story-Circle of Fear (1972-1973)",
+          "description": "This is the complete collection of the short ran anthology series known as Ghost Story but also known as Circle of Fear.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Archive.org link for a full vintage television anthology series episode, not a standalone short clip.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "not_permitted",
+            "captions": "not_permitted",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.imdb.com/list/ls061601909/",
+          "title": "Short Horror Films",
+          "description": "Alison is left home alone on Halloween night, but while chatting with her best friend Jenna over Skype, something terrifying happens to Jenna, leaving Alison helpless on the other side of the computer screen, watching in horror.DirectorJohn FitzpatrickStarsCerina VincentAnnika MarksRyan Dillon",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Description of a short horror film involving a Skype call, but lacks detailed evidence of a ghost twist.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.imdb.com/title/tt9340734/",
+          "title": "The Numismatist (Short 2018) | Short, Horror",
+          "description": "The Numismatist: Directed by Andrew Loveridge. With Jim Byrne, Charlotte Dunnico, Neil Richardson, Victoria Henrietta. Personal history and ancient legend interweave in a complex narrative of lust, revenge and murder.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Horror short film metadata, duration and video content missing.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.imdb.com/title/tt10868986/",
+          "title": "One Winter's Night (Short 2011) ⭐ 5.4 | Animation, Short, Horror",
+          "description": "One Winter&#x27;s Night: Directed by Emlyn Boyle",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Animated horror short film metadata only.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "http://www.bilibili.com/video/av117277924005496",
+          "title": "CATIVO | Trailer Oficial | Short Horror Film | 官方预告片",
+          "description": "PORTUGUÊS CATIVO — TRAILER OFICIAL Em uma fazenda isolada, um homem encontra algo estranho entre a mata e um antigo celeiro. O que parecia ser apenas uma descoberta inesperada logo se transforma em uma situação de medo, tensão e sobrevivência. Algo es",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Horror film trailer, but it's only a trailer rather than a standalone clip or short film.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.facebook.com/thehidebehindmovie/",
+          "title": "The Hidebehind (@thehidebehindmovie)",
+          "description": "Deep in the forest, an injured backpacker is lost and alone... Or is he? A short horror film starr ... In one week, THE HIDEBEHIND was viewed more than 200,000 times combined between Facebook and Youtube! To celebrate, here&#x27;s a quick Q&amp;A director Parker Finn did with ALTER.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Mentions a short horror film about a forest entity, but only provides a Q&A link rather than the film itself.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://deadline.com/2021/09/paramount-players-short-film-koreatown-ghost-story-teddy-tenenbaum-minsun-park-1234829428/",
+          "title": "Paramount Players Lands Rights To The Short Film ‘Koreatown Ghost Story’ With Teddy Tenenbaum And Minsun Park Directing",
+          "description": "“Koreatown Ghost Story,” a short film written and directed by Teddy Tenenbaum and Minsun Park, has been sold to Paramount Players. Paramount Players also made a deal for Tenenbaum and Park to write and direct the feature film.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "An article reporting on the acquisition rights of a horror short film rather than the video itself.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        }
+      ]
+    },
+    {
+      "q": "fight club reveal scene",
+      "criteria": "The actual identity reveal scene from Fight Club; distinguish the scene from reviews, recaps and unrelated fights.",
+      "elapsed_ms": 106005,
+      "providers": [
+        {
+          "provider": "brave",
+          "status": "ok",
+          "message": "Brave discovery completed."
+        },
+        {
+          "provider": "searxng",
+          "status": "ok",
+          "message": "18 of 20 search engines answered; Brave Videos (rate-limited), Brave (rate-limited) did not."
+        },
+        {
+          "provider": "internet_archive",
+          "status": "ok",
+          "message": "Internet Archive film catalogue searched directly."
+        },
+        {
+          "provider": "planner",
+          "status": "ok",
+          "message": "AI planned 6 searches for lesser-known sources."
+        },
+        {
+          "provider": "leads",
+          "status": "ok",
+          "message": "AI followed 8 leads from what it found, in 2 rounds."
+        },
+        {
+          "provider": "candidate_pool",
+          "status": "partial",
+          "message": "1453 candidates found; the best 160 keyword matches were selected for checking after all sources answered."
+        },
+        {
+          "provider": "youtube",
+          "status": "ok",
+          "message": "YouTube details and viewer comments checked."
+        },
+        {
+          "provider": "reddit",
+          "status": "ok",
+          "message": "Reddit discussions checked."
+        },
+        {
+          "provider": "pages",
+          "status": "ok",
+          "message": "14 of 20 result pages were checked, 5 in a browser."
+        },
+        {
+          "provider": "archive_evidence",
+          "status": "partial",
+          "message": "0 comment/review samples and 0 caption tracks available across 3 checked results."
+        },
+        {
+          "provider": "judge",
+          "status": "ok",
+          "message": "Results were checked for relevance by AI."
+        },
+        {
+          "provider": "scene_analysis",
+          "status": "partial",
+          "message": "1 videos queued for scene analysis; these pending analyses are not evidence in this ranking."
+        }
+      ],
+      "candidates": [
+        {
+          "url": "https://www.youtube.com/watch?v=WKVxKrrbz1E",
+          "title": "Fight Club 1999: Jack finds out the truth.",
+          "description": "Enjoy the videos and music you love, upload original content, and share it all with friends, family, and the world on YouTube.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Video directly features the iconic hotel room reveal scene where Jack finds out the truth. Supporting evidence only; exact match unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "31f1da09-c929-4c91-b209-95df8ac84b33",
+              "start_seconds": 38,
+              "end_seconds": 90,
+              "summary": "0:43 the subtle swoosh followed by '' We have just lost cabin pressure \" is just perfection!!! · 0:43 tyler durden tyler durden · 0:44 cabin pressure",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "38a8eb58-ccca-480f-9969-405e58517b24",
+                "ada98739-14c9-4cd7-96e1-d39db96ca662",
+                "dcb355ce-5a76-4e7c-a69a-e1b8bba2ce34"
+              ]
+            },
+            {
+              "id": "e563b3e9-d1e3-419b-a0b5-6524c909c5a9",
+              "start_seconds": 90,
+              "end_seconds": 153,
+              "summary": "1:35 Once we realize what's going on, Brad subtly shifts to being a villain, and his mannerisms actually start to resemble Jeffrey Goines, his crazy antagonist from \"12 Monkeys.\" · 2:03 a friend of mine on acid.",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "0d2bf742-1b01-4d94-ad64-c926f89fb0ec",
+                "ad008d52-d1d9-40aa-ae6f-3d4374f55064"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=USWVa3_GEtM",
+          "title": "CRAZY \"TYLER DURDEN TWIST\" REACTIONS! *FIGHT CLUB* REVEAL SCENE! BRAD PITT! FIRST TIME WATCHING!",
+          "description": "2.5K views - 8 months ago - YouTube - CineMash",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 7,
+            "reason": "Features reactions and explores how the iconic Fight Club twist reveal scene works, fitting the video format and theme.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=e4vB16ZFXUk",
+          "title": "Final Fight With Tyler Scene | FIGHT CLUB (1999) Movie CLIP HD",
+          "description": "98.3K views - Apr 17, 2025 - YouTube - JoBlo Movie Clips",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "JoBlo clip shows the final fight scene between the Narrator and Tyler, but not the initial identity reveal.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "3ea5e1e2-a08c-4d80-9cf2-d660a0e0f04d",
+              "start_seconds": 89,
+              "end_seconds": 134,
+              "summary": "1:35 WHOA! Whoa! · 1:57 - \"AH!\" · 1:34 how did bro miss 🥀🥀",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "06bf6543-72e2-44c3-8353-db465f7f90b9",
+                "9eebf959-e05f-4190-b59d-1c413b1dcce2",
+                "e87d48d1-8bb3-47a4-9fa8-88a03aa3e32e"
+              ]
+            },
+            {
+              "id": "395e143b-a7e1-4047-b835-c07967e2dbd9",
+              "start_seconds": 134,
+              "end_seconds": 177,
+              "summary": "2:48 WHAT · 2:19 why did they use a stunt double in this one-second scene? lol · 2:48 WHAT",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "a0650b86-91f0-450b-8c65-30eb32120384",
+                "5f913bfe-6659-43fe-a074-824aa1c56b27",
+                "b64c657f-7986-4e53-94f1-efc8d1cfb2aa"
+              ]
+            },
+            {
+              "id": "2d58b60a-7a69-46c0-a24f-d5d8a5e23cd0",
+              "start_seconds": 177,
+              "end_seconds": 232,
+              "summary": "3:03 how tf · 3:22 we can see the stuntman · 3:02 how is that possible??",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "7cbbb8da-6db6-4dc7-9912-beb5b2cf884c",
+                "a8c466ea-ef23-4502-99d4-89b49dabd224",
+                "17ada95e-6d00-4441-930c-64da14dd4b34"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=Hzox6ea78vs",
+          "title": "Every time Tyler flashes in Fight Club (1999)",
+          "description": "There it is !",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Video shows single-frame Tyler flashes from Fight Club but lacks the identity reveal scene.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://player.vimeo.com/video/304662327",
+          "title": "Devolving Masculinity in Fight Club - FINAL CUT (Brian Morales) from Brian Morales on Vimeo",
+          "description": "The video platform trusted by 287 million creatives, entrepreneurs, and businesses. Everything you need to create, manage, and share stunning videos.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Video discusses masculinity in Fight Club on Vimeo, but lacks specific focus on the reveal scene analysis.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://archive.org/details/fight-club_202006",
+          "title": "Fight Club FULL MOVIE : Free Download, Borrow, and Streaming : Internet Archive",
+          "description": "Fight Club full movie, 1999",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Archive.org entry offers the full movie file but lacks specific analysis or scene selection.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "not_permitted",
+            "captions": "not_permitted",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "http://www.bilibili.com/video/av116628209536959",
+          "title": "搏击俱乐部 Fight Club (1999) 【主演：爱德华·诺顿 布拉德•皮特】",
+          "description": "杰克（爱德华•诺顿 饰）是一个大汽车公司的职员，患有严重的失眠症，对周围的一切充满危机和憎恨。 一个偶然的机会，杰克遇上了卖肥皂的商人泰勒（布拉德•皮特），一个浑身充满叛逆、残酷和暴烈的痞子英雄，并因为自己公寓失火而住进了泰勒破旧不堪的家中。两人因缘际会地成为了好朋友，并创立了“搏击俱乐部”：一个让人们不戴护具而徒手搏击，宗旨在于发泄情绪的地下组织。 俱乐部吸引了越来越多的人，逐渐发展成为一个全国性的地下组织，而泰勒也以自己个人的魅力，吸引着那些盲目的信徒。俱乐部的成员们到处滋事打架、大肆破坏，泰勒本",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Bilibili upload contains the full Fight Club movie in foreign language without targeted scene analysis.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=5KiLVOAK7U0",
+          "title": "Fight Club frame splice scene",
+          "description": "not even a hummingbird could catch tyler's handywork SUBSCRIZZLE: https://bit.ly/2UH7uwp MY OTHER \"works\" ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Shows frame splices of Tyler Durden rather than the identity reveal scene.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "f36b2d9b-24d6-41b2-b016-63732a234cb2",
+              "start_seconds": 12,
+              "end_seconds": 22,
+              "summary": "0:17 \"Nobody knows that they saw it, but they did.\" · 0:17 The way the mother and son slowly turn to look at each other always gets me.... Neither want to be the one to SAY what they think they saw. The parent/child dynamic will not allow either to confirm such things. · 0:17 a-",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "34a9cf71-4cee-417f-99fe-12422bb2a598",
+                "47fb6ecc-2daf-467f-9a7f-7940e4078f06",
+                "702f8443-34a1-4ab9-afa1-ab84fea91bb6"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=QbsoUNb5tEg",
+          "title": "FIGHT CLUB | SCENEPACK | 4K 60 FPS | ALL MOMENTS",
+          "description": "My telegram: @yourselfdestruction Приветствую, друзья! Хочу пригласить Вас в беседу эдиторов. Ждём всех! https://t.me/fightclubstructure The characteristics of my PC: Nvidia Rtx 3070 ti Ryzen 7 5700x 16 GB RAM ADATA XPG 3800mhz In this video, we bring you the second installment of our ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Large 4K scene pack containing multiple moments, but not focused on the specific identity reveal scene.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=BdDnT7jSAYA",
+          "title": "The Bizarre Ending Of Fight Club Explained",
+          "description": "Acclaimed director David Fincher began his directing career in the '90s and arguably his best work from that decade has to be his adaptation of Chuck Palahniuk's novel Fight Club. 1999 was a great year for movies and Fight Club stood out among so many groundbreaking flicks. Not only did it have an ensemble cast that included Brad Pitt, Edward ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Looper video explaining the ending and twist of Fight Club.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=bYd97Z09LEk",
+          "title": "FIGHT CLUB | SCENEPACK | 4K 60 FPS",
+          "description": "385.5K views - Aug 27, 2023 - YouTube - hell.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "This is a general scene pack of Fight Club in 4K without specific focus on the reveal scene or analysis.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.facebook.com/writeseen/videos/this-behind-the-scenes-footage-from-fight-club-1999-captures-the-filming-of-one-/1717532749562332/",
+          "title": "This behind-the-scenes footage from Fight Club (1999 ...",
+          "description": null,
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Facebook video features behind-the-scenes footage from Fight Club but lacks specific focus on the reveal.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://movies.stackexchange.com/questions/89050/how-did-david-fincher-splice-brad-pitt-into-multiple-frames",
+          "title": "film techniques - How did David Fincher splice Brad Pitt into multiple frames? - Movies & TV Stack Exchange",
+          "description": "May 15, 2018 — In Fight Club (1999), you can actually see Tyler Durden (aka, Brad Pitt) in a few frames before we ever meet him. I understand this is a nod to how Tyler did something similar during his job as a\"In Fight Club (1999), you can actually see Tyler Durden (aka, Brad Pitt) in a few frames before we ever meet him. I understand this is a nod to how Tyler did something similar during his job as a projectionist. But my question is, how did David Fincher film those momentary appearances?\"\"When Fight Club was made, digital film editing using tools such as Avid was quite popular, and Fight Club was almost certainly edited digitally. This makes adding frames much easier than editing by cutting film. But splicing frames by actually cutting film isn't super difficult. Fight Club shows Tyler doing this in his spare time while working as a projectionist.\"",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Stack Exchange discussion covers David Fincher's editing techniques for early frames rather than the reveal scene.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=vh6SDvDhDN4",
+          "title": "Fight Club 1999 - Tyler's Ending Scene HD",
+          "description": "CLIP DESCRIPTION: Tyler (Brad Pitt) convinces The Narrator (Edward Norton) to hit him as hard as he can. FILM DESCRIPTION: ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Video shows the ending scene of Fight Club rather than the identity reveal scene.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.dailymotion.com/video/x8xhjgg",
+          "title": "Best fight club movie scene",
+          "description": "United States based content",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Generic video compilation clip titled Best fight club movie scene without specific analysis.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://screenrant.com/fight-club-final-scene-real-meaning/",
+          "title": "The Real Meaning Of Fight Club's Final Scene Explained",
+          "description": "After shooting himself in the head, ... final scene. Masterfully portrayed by Edward Norton and Helena Bonham Carter, these two share a brief discussion and hold hands while watching a romantic display of fireworks. Except for the fireworks are actually the world&#x27;s banks being blown apart by strategically placed nitroglycerin. This may not be immediately obvious; after all, the Narrator is far from reliable. However, digging into Fight Club&#x27;s Tyler Durden twist and Project Mayhem reveals the final ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Screen Rant video covering the final scene and twist, but not focused on the mirror reveal scene with high technical analysis.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://vimeo.com/43177217",
+          "title": "Fight Club - Homework scene | Videos & Movies on Vimeo",
+          "description": "35.8K views·14 years ago · Low quality video extract for class use",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "This is a low-quality extract of the homework scene from Fight Club, not the identity reveal scene.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.cinemablend.com/new/See-How-Fight-Club-Scene-Looks-With-Tyler-Durden-Digitally-Removed-41209.html",
+          "title": "See How A Fight Club Scene Looks With Tyler Durden Digitally Removed | Cinemablend",
+          "description": "He was dead the whole time. No wait, it&#x27;s that Tyler Durden was all in the narrator&#x27;s head. Which means the whole time we thought the Narrator (Edward Norton) was with Tyler (Brad Pitt), he was really alone, either talking to himself or being Tyler.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Discusses how a scene looks with Tyler Durden digitally removed, but is an article/video clip not centering on the reveal scene analysis.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://whatwouldbaledo.com/2012/08/25/i-am-jacks-fight-club-fan-theory/",
+          "title": "I am Jack's Fight Club Fan Theory - What Would Bale Do",
+          "description": "His mental illness came boiling to the surface, and he imagined that Tyler had reappeared in his life. He began fighting with a hallucinated, imaginary version of his former friend. Consider what scene would follow the last scene of the film.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Fan theory video about the ending of Fight Club, but not the specific identity reveal scene.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.reddit.com/r/fightclub/comments/1jyfjyj/everytime_tyler_flashes_in/",
+          "title": "r/fightclub on Reddit: Everytime Tyler flashes in",
+          "description": "In Fight Club, the narrator hallucinates Tyler Durden four times onscreen before actually meeting him, he is visible for only a single frame before disappearing.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 3,
+            "reason": "Reddit discussion post mentions early Tyler Durden appearances rather than the reveal scene analysis.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unsupported",
+            "captions": "unsupported",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        }
+      ]
+    },
+    {
+      "q": "underrated github repos to earn money",
+      "criteria": "Usable GitHub repositories with a concrete plausible way to build a paid product or service. No guaranteed-income claims; inspect license and maintenance separately.",
+      "elapsed_ms": 101421,
+      "providers": [
+        {
+          "provider": "brave",
+          "status": "ok",
+          "message": "Brave discovery completed."
+        },
+        {
+          "provider": "searxng",
+          "status": "ok",
+          "message": "19 of 20 search engines answered; Brave Videos (rate-limited) did not."
+        },
+        {
+          "provider": "internet_archive",
+          "status": "ok",
+          "message": "Internet Archive film catalogue searched directly."
+        },
+        {
+          "provider": "planner",
+          "status": "ok",
+          "message": "AI planned 6 searches for lesser-known sources."
+        },
+        {
+          "provider": "leads",
+          "status": "ok",
+          "message": "AI followed 8 leads from what it found, in 2 rounds."
+        },
+        {
+          "provider": "candidate_pool",
+          "status": "partial",
+          "message": "1111 candidates found; the best 160 keyword matches were selected for checking after all sources answered."
+        },
+        {
+          "provider": "youtube",
+          "status": "ok",
+          "message": "YouTube details and viewer comments checked."
+        },
+        {
+          "provider": "reddit",
+          "status": "ok",
+          "message": "Reddit discussions checked."
+        },
+        {
+          "provider": "pages",
+          "status": "ok",
+          "message": "16 of 20 result pages were checked, 5 in a browser."
+        },
+        {
+          "provider": "judge",
+          "status": "ok",
+          "message": "Results were checked for relevance by AI."
+        }
+      ],
+      "candidates": [
+        {
+          "url": "https://github.com/gitroomhq/postiz-app",
+          "title": "GitHub - gitroomhq/postiz-app: 📨 The ultimate agentic social media scheduling tool 🤖",
+          "description": "📨 The ultimate agentic social media scheduling tool 🤖 - gitroomhq/postiz-app",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 10,
+            "reason": "Links to gitroomhq/postiz-app, a functional open-source SaaS tool for income generation.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "not_permitted",
+            "captions": "not_permitted",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://github.com/gitroomhq/postiz-app/releases",
+          "title": "Releases · gitroomhq/postiz-app - GitHub",
+          "description": "Feb 21, 2010 · This release focuses on reliability and memory efficiency: provider media uploads are now streamed instead of buffered in memory, a new pending-post workflow prevents duplicate posts, and the MCP server got a round of stability and OAuth fixes.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 9,
+            "reason": "Links directly to the gitroomhq/postiz-app releases page for a revenue-generating SaaS tool.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "not_permitted",
+            "captions": "not_permitted",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://www.indiehackers.com/post/i-did-it-my-open-source-company-now-makes-14-2k-monthly-as-a-single-developer-f2fec088a4",
+          "title": "I did it! My open-source company now makes $14.2k monthly as a single developer - Indie Hackers",
+          "description": "In September 2024, I started Postiz (star it if you can 🙏🏻): https://github.com/gitroomhq/postiz-app · A social media scheduling tool built in open-source. It&#x27;s funny that a market that has existed for 20 years doesn&#x27;t have a good open-source solution. I had a few principles in mind as a non-funded company that doesn&#x27;t need money (or maximize revenue at all costs)",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 9,
+            "reason": "Indie Hackers case study linking directly to the revenue-generating Postiz GitHub repository.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://machiav3lli.gitlab.io/alt3rnative/post/postiz/",
+          "title": "[Postiz](https://github.com/gitroomhq/postiz-app)",
+          "description": "An open-source self-hosted social media posts scheduling tool. As with most \"up-to-date\" apps nowdays, added some AI features.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 9,
+            "reason": "Links to Postiz GitHub repository within an alternative tools directory.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://sourceforge.net/projects/postiz.mirror/",
+          "title": "Postiz download | SourceForge.net",
+          "description": "This is an exact mirror of the Postiz project, hosted at https://github.com/gitroomhq/postiz-app.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "SourceForge download mirror referencing the Postiz GitHub repository.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://trendshift.io/repositories/25842",
+          "title": "The-Swarm-Corporation/AutoHedge — GitHub trending ...",
+          "description": "Build your autonomous hedge fund in minutes. AutoHedge harnesses the power of swarm intelligence and AI agents to automate market analysis, risk management, and trade execution. Visit GitHubLike The-Swarm-Corporation/AutoHedge, 0 likes0Bookmark The-Swarm-Corporation/AutoHedge, 0 bookmarks0",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 7,
+            "reason": "Mentions AutoHedge on GitHub for automated trading, but acts as a trending stats aggregator.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://www.spreaker.com/episode/github-the-swarm-corporation-autohedge-build-your-autonomous-hedge-fund-in-minutes-autohedge-harnesses-the-power-of-swarm-intelligence-a--74955933",
+          "title": "GitHub - The-Swarm-Corporation/AutoHedge: Build your ...",
+          "description": "Sep 7, 2026 · https://github.com/The-Swarm-Corporation/AutoHedge Build your autonomous hedge fund in minutes. AutoHedge harnesses the power of swarm intelligence and AI agents to automate market analysis, risk management, and trade execution.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 7,
+            "reason": "SourceForge mirror mentioning the AutoHedge AI trading repository.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://context7.com/the-swarm-corporation/autohedge",
+          "title": "AutoHedge (the-swarm-corporation/autohedge) | Context7",
+          "description": "https://github.com/the-swarm-corporation/autohedge · Admin · Tokens:8,739 · Snippets:65 · Trust Score:9 · License:MIT · Update:1 week ago · ContextChat · Benchmark · Latest · Show doc for... CodeInfoShow Results ·",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 7,
+            "reason": "Context7 snippet page detailing AutoHedge GitHub repository code information.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://www.buildmvpfast.com/blog/github-repos-making-money-open-source-profitable-2026",
+          "title": "GitHub Repos Making Money Open Source Profitable 2026",
+          "description": "It’s one of the most underrated self-hosted tools for client work, largely because the chatbot-builder market looks crowded until you realize how few options are self-hostable. How people monetize: Lead-gen bot agency for local businesses. Embedded chatbots in client websites. Managed hosting with monthly retainers. GitHub: knadh/listmonk | Stars: 16k+ | License: AGPL-3.0",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Article lists profitable GitHub repos like listmonk, but is primarily a general blog post.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://agentbreaking.com/blog/10-github-repos-passive-income-ai/",
+          "title": "10 Open-Source GitHub Repos That Can Earn You Money While You Sleep — AgentBreaking Blog",
+          "description": "Repo: The-Swarm-Corp/AutoHedge ⭐ 1,880 | Python | MIT · AutoHedge is an enterprise-grade autonomous AI hedge fund platform built by The Swarm Corporation. It combines swarm intelligence with specialized AI agents — Director, Quant, Risk, and Execution agents — to handle end-to-end market analysis, risk management, and trade execution with minimal human intervention.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Blog review detailing the AutoHedge GitHub repo for automated trading and revenue potential. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://www.threads.com/@quantscience_/post/DRPuJDJjr1L/grab-it-here-i-have-one-more-thing-before-you-go-if-you-want-to-become-an",
+          "title": "Grab it here: https://github.com/The-Swarm-Corporation/AutoHedge I have one more thing before you go. If you want to become an algorithmic trader in 2026, then I'd like to help. This is how: 👇",
+          "description": "AutoHedge: A Python library to build your autonomous AI hedge fund in minutes.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Mentions and links to AutoHedge GitHub repository for algorithmic trading. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://t.co/RlsJ1iyOow",
+          "title": "GitHub - The-Swarm-Corporation/AutoHedge: Build your ...",
+          "description": "AutoHedge is an enterprise-grade autonomous agent hedge fund that trades on your behalf. It combines swarm intelligence and specialized AI agents to perform end-to-end market analysis, risk management, and execution with minimal human intervention. Current support: Full autonomous trading on Solana. Coming soon: Coinbase and additional exchanges.AutoHedge is an enterprise-grade autonomous agent hedge fund that trades on your behalf. It combines swarm intelligence and specialized AI agents to perform end-to-end market analysis, risk management, and execution with minimal human intervention. Current support: Full autonomous trading on Solana. Coming soon: Coinbase and additional exchanges.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Shortened link snippet referencing the AutoHedge autonomous hedge fund repository. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://deepwiki.com/gitroomhq/postiz-app",
+          "title": "gitroomhq/postiz-app | DeepWiki",
+          "description": "Postiz is an open-source AI-powered social media scheduling tool that manages content publishing across 14+ platforms. Licensed under AGPL-3.0 $1, it provides an alternative to Buffer.com and HypefuryPostiz is an open-source AI-powered social media scheduling tool that manages content publishing across 14+ platforms. Licensed under AGPL-3.0 $1, it provides an alternative to Buffer.com and Hypefury",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Wiki page providing an overview of the Postiz AI social media scheduling tool repository. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://releasealert.dev/github/gitroomhq/postiz-app",
+          "title": "gitroomhq/postiz-app on GitHub | Release Alert",
+          "description": "Latest releases for gitroomhq/postiz-app on GitHub. Latest version: v2.23.0, last published: August 4, 2026Latest releases for gitroomhq/postiz-app on GitHub. Latest version: v2.23.0, last published: August 4, 2026",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Release alert tracker page for gitroomhq/postiz-app updates. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://github.com/gitroomhq/postiz-app/blob/main/README.md",
+          "title": "postiz-app/README.md at main · gitroomhq/postiz-app · GitHub",
+          "description": "Postiz is an open-source, self-hosted social media scheduling tool that supports platforms like X (formerly Twitter), Bluesky, Mastodon, Discord, and others. Postiz hosted service uses official, platform-approved OAuth flows.Postiz is an open-source, self-hosted social media scheduling tool that supports platforms like X (formerly Twitter), Bluesky, Mastodon, Discord, and others. Postiz hosted service uses official, platform-approved OAuth flows.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Links directly to the gitroomhq/postiz-app GitHub repository, which is a functional open-source SaaS scheduling tool used to build income-generating businesses. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "not_permitted",
+            "captions": "not_permitted",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://osrepos.com/repo/the-swarm-corporation-autohedge",
+          "title": "AutoHedge: Build Your Autonomous AI Hedge Fund with Swarm ...",
+          "description": "Jun 15, 2026 · Open the original repository on GitHub. AutoHedge is an enterprise-grade autonomous agent hedge fund that leverages swarm intelligence and specialized AI agents. This powerful Python project automates end-to-end market analysis, risk management, and trade execution.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Discusses AutoHedge on GitHub, an autonomous AI hedge fund project designed for automated trading and market analysis. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://news.ycombinator.com/item?id=42769275",
+          "title": "Ask HN: What would you like to see in Postiz?",
+          "description": "Hi, community :)There are some new updates for Postiz, but just a small recap:*Postiz is a social media scheduling tool supporting 17 social media channels:**Instagram, Facebook, TikTok, Reddit, LinkedIn, X, Threads, BlueSky, Mastodon, YouTube, Pinterest, Dribbble, Slack, Discord, Warpcast, Lemmy and Telegram.*[*https://github.com/gitroomhq/postiz-app*](https://github.com/gitroomhq/postiz-app)Here are the latest updates :)* We added a stand-alone Instagram provider that doesn't require you to have Facebook business. * I added Lemmy, which is the Reddit alternative. I really like this platform. * We have added short-linking. By default, it uses DUB, but we have added a nice infrastructure to easily create new providers (currently working on Bitly and short.io). When you add links, once you schedule the post, it asks if you want to shorten them. * I added a Telegram provider, which was really challenging because the way you add a Telegram bot is a bit different. * A big step into web3 - Postiz now supports scheduling to Warpcast using Neynar. * We also added a web3 login with Farcaster.Of course, everything available in the open source :)*Future*:* I started to get more into web3 …",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Hacker News discussion directly linking to the gitroomhq/postiz-app GitHub repository for social media management and SaaS creation. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.blog.brightcoding.dev/2025/11/26/autohedge-build-your-autonomous-ai-hedge-fund-in-minutes-2025-guide",
+          "title": "AutoHedge: Build Your Autonomous AI Hedge Fund in Minutes (2025 Guide) | Bright Coding",
+          "description": "🚀 Just discovered AutoHedge - build an AI hedge fund in Python in 5 mins! Multi-agent swarm intelligence Institutional-grade risk management Open-source &amp; free Game-changer for quant devs 👇 https://github.com/The-Swarm-Corporation/AutoHedge #Python #AlgoTrading #AI",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Provides a direct link to The-Swarm-Corporation/AutoHedge repository, a tool for automated financial trading and crypto/quant generation. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.instagram.com/reel/Dc-o4hHAVRD/",
+          "title": "The-Swarm-Corporation/AutoHedge You might ... - Instagram",
+          "description": "7 Sept 2026 · Trending on GitHub: AutoHedge. So this repo is blowing up on GitHub today. What it is: Build your autonomous hedge fund in minutes. AutoHedge ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Social media post discussing the trending AutoHedge GitHub repository for autonomous hedge funds. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unsupported",
+            "captions": "unsupported",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://blog.stackademic.com/10-github-repos-that-are-embarrassingly-good-at-making-money-c9063f7a1316?gi=23b3faee00bc",
+          "title": "10 GitHub Repos That Are Embarrassingly Good at Making Money | by Usman Writes | Stackademic",
+          "description": "github.com/The-Swarm-Corporation/AutoHedge ⭐ 1.9k stars",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Links to AutoHedge on GitHub via a list of money-making repositories. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://hexmos.com/freedevtools/installerpedia/tool/the-swarm-corporation-autohedge/",
+          "title": "The-Swarm-Corporation/AutoHedge Installation Guide - Hexmos",
+          "description": "The-Swarm-Corporation/AutoHedge. GitHub-based tool. Official repository and installation instructions. Build your autonomous hedge fund in minutes.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Installation guide directly referencing The-Swarm-Corporation/AutoHedge GitHub repository. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://x.com/swarms_corp/status/2023922859266240786?lang=en",
+          "title": "swarms on X: \"AutoHedge v2 is coming 📈 Two years ago, AutoHedge was one of the first demo apps we built with Swarms focused on agent-powered stock analysis. Now we’re finally shipping the long-awaited upgrade: You can analyze stocks, crypto, and execute trades directly from your CLI all in https://t.co/RvXRvezH00\" / X",
+          "description": "What’s new in v2: &gt; Natural language ... GitHub below ⬇️ ... GitHub - The-Swarm-Corporation/AutoHedge: Build your autonomous hedge fund in minutes....",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Links directly to the AutoHedge GitHub repository for building an autonomous trading hedge fund tool. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://github.com/garylab/MakeMoneyWithAI",
+          "title": "GitHub - garylab/MakeMoneyWithAI: A list of open-source AI ...",
+          "description": "Make Money With AI is a curated list of AI tools and projects that help you turn open-source into income. LibreCode | ☆236.6k | LibreCode - A Ollama cursor ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Links directly to a curated GitHub repository featuring AI tools and projects designed to generate income from open source. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "not_permitted",
+            "captions": "not_permitted",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://railway.com/deploy/postiz-open-source-social-media-scheduler-for-30-platforms--deploy-postiz",
+          "title": "Postiz | Open-Source Social Media Scheduler for 30+ Platforms",
+          "description": "Postiz (GitHub: gitroomhq/postiz-app) is an open-source social media scheduling and automation platform — a self-hosted alternative to Buffer, Hypefury, and Later. It centralises scheduling, AI-assisted content creation, and analytics across 30+ platforms including X (Twitter), Instagram, LinkedIn, Facebook, Reddit, Threads, and Mastodon.Postiz (GitHub: gitroomhq/postiz-app) is an open-source social media scheduling and automation platform — a self-hosted alternative to Buffer, Hypefury, and Later. It centralises scheduling, AI-assisted content creation, and analytics across 30+ platforms including X (Twitter), Instagram, LinkedIn, Facebook, Reddit, Threads, and Mastodon.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Mentions the Postiz social media scheduler GitHub repository, which can be used for SaaS income, but is a secondary mention on an hosting site.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://theresanaiforthat.com/company/the-swarm-corporation/repository/AutoHedge/",
+          "title": "The-Swarm-Corporation/AutoHedge | Repositories | There's An AI For That",
+          "description": "AutoHedge is an enterprise-grade autonomous agent hedge fund that trades on your behalf. It combines swarm intelligence and specialized AI agents to perform end-to-end market analysis, risk management, and execution with minimal human intervention.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Mentions AutoHedge, an autonomous agent hedge fund repository that can be used for trading and income generation. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://github.com/The-Swarm-Corporation/AutoHedge",
+          "title": "GitHub - The-Swarm-Corporation/AutoHedge: Build your autonomous hedge fund in minutes. AutoHedge harnesses the power of swarm intelligence and AI agents to automate market analysis, risk management, and trade execution. · GitHub",
+          "description": "AutoHedge is an enterprise-grade autonomous agent hedge fund that trades on your behalf. It combines swarm intelligence and specialized AI agents to perform end-to-end market analysis, risk management, and execution with minimal human intervention.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Links directly to the GitHub repository for AutoHedge, an autonomous agent system designed to automate trading and generate income. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "not_permitted",
+            "captions": "not_permitted",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://news.ycombinator.com/item?id=41402138",
+          "title": "Show HN: Postiz – open-source social media scheduling tool",
+          "description": "https://github.com/gitroomhq/postiz-app",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Links directly to the open-source GitHub repository for Postiz, a social media scheduling tool. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://gist.github.com/jerryliutaipei",
+          "title": "jerryliutaipei’s gists · GitHub",
+          "description": "The market shows clear consolidation around specific platforms (n8n, OpenAI), proven use cases (LinkedIn automation, HR), and viable business models (agencies, vertical SaaS). 1 file 0 forks 0 comments 0 stars jerryliutaipei/ ai-content-monetization-report.md Created July 27, 2025 19:43The market shows clear consolidation around specific platforms (n8n, OpenAI), proven use cases (LinkedIn automation, HR), and viable business models (agencies, vertical SaaS). 1 file 0 forks 0 comments 0 stars jerryliutaipei/ ai-content-monetization-report.md Created July 27, 2025 19:43",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Contains a content report mentioning monetization platforms and strategies.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.threads.com/@quantscience_/post/DRPtyWoDvsH/what-is-auto-hedge-auto-hedge-harnesses-the-power-of-swarm-intelligence-and-ai",
+          "title": "1. What is AutoHedge? AutoHedge harnesses the power of swarm intelligence and AI agents to automate market analysis, risk management, and trade execution. It does all of this in Python.",
+          "description": "I have one more thing before you go. If you want to become an algorithmic trader in 2026, then I&#x27;d like to help. ... GitHub - The-Swarm-Corporation/AutoHedge: Build your autonomous hedge fund in minutes.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Links to a specific GitHub repository for algorithmic trading and market analysis (AutoHedge). Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://context7.com/gitroomhq/postiz-app",
+          "title": "Postiz (gitroomhq/postiz-app) - Context7",
+          "description": "Postiz is an open-source AI-powered social media scheduling tool that allows users to schedule, publish, and manage posts across multiple platforms ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Links to the open-source social media scheduling tool Postiz on GitHub, useful for building a SaaS business. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.reddit.com/r/selfhosted/comments/1f4x806/postiz_opensource_social_media_scheduling_tool/",
+          "title": "r/selfhosted on Reddit: Postiz - open-source social media scheduling tool",
+          "description": "I&#x27;ll add that if I docker compose exec gitroom-postiz sh and ping the container for redis, I get responses, so that tells me that it is able to reach the redis container. Also, if you want to follow along with me on this adventure, here is the Dockerfile that I&#x27;m using (I&#x27;m first to admit that it is inefficient but I&#x27;m not at the stage of optimizing yet)— · FROM node:18-alpine RUN apk add --no-cache git WORKDIR /usr/src/app RUN git clone https://github.com/gitroomhq...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Unavailable Reddit discussion page referencing Postiz setup via Docker.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unsupported",
+            "captions": "unsupported",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://aiinsider.in/money-with-ai/open-source-github-repos-make-money-2026/",
+          "title": "10 GitHub Repos That Actually Make Money (2026)",
+          "description": "Cal.com, Ghost, n8n, Supabase — these 10 repos have built-in business models. Fork → brand → charge. Real income, verified. Updated 2026.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Article listing repos with built-in business models, but lacks direct repository links.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.indiehackers.com/post/tech/growing-an-open-source-product-to-1-3m-arr-in-two-years-hbMiXIoZsueV9D3L58DP",
+          "title": "Growing an open-source product to $1.3M ARR in two years",
+          "description": "I brought them to 30,000 GitHub stars in two years and a lot of sales. I understood the power of open source. I started a consulting business, charging a high ticket of $3,000-$4,000 per month for two meetings a week, and at the same time, working on Gitroom. Gitroom was a SaaS to help you prepare your open-source launch.I brought them to 30,000 GitHub stars in two years and a lot of sales. I understood the power of open source. I started a consulting business, charging a high ticket of $3,000-$4,000 per month for two meetings a week, and at the same time, working on Gitroom. Gitroom was a SaaS to help you prepare your open-source launch.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Indie Hackers post discussing growing an open-source product (Gitroom) to high ARR, though it lacks a direct repository link in the text snippet.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://podcasts.apple.com/jp/podcast/github-the-swarm-corporation-autohedge-build-your/id1745882529?i=1000788253993&l=en-US",
+          "title": "The-Swarm-Corporation… - GitHub Daily Trend - Apple Podcasts",
+          "description": "7 Sept 2026 · AutoHedge harnesses the power of swarm intelligence and AI agents to automate market analysis, risk management, and trade execution. - The-Swarm ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Podcast entry referencing the AutoHedge GitHub repository and its trading features.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://viralmint.net/open-source-ai-video-tools/",
+          "title": "Open-Source AI Video Tools — Free Opus Clip Alternative",
+          "description": "An open-source AI video pipeline — a free, self-hostable alternative to Opus Clip, HeyGen, Descript and Submagic, with the full source on GitHub under AGPL-3.0.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Discusses an open-source AI video pipeline on GitHub for clipping, useful for creating a content business, but lacks the exact repo link.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://medium.com/coding-nexus/10-github-repos-that-print-money-while-you-sleep-ca297456862c",
+          "title": "10 GitHub Repos that Print Money While You Sleep | by Code Coup | Coding Nexus | Medium",
+          "description": "These ten repositories automate money-related tasks such as trading, advertising, lead generation, content creation, and video production using AI, agents, and open infrastructure.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Discusses GitHub repositories designed for automation and trading.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://markaicode.com/monetize-open-source-github-income/",
+          "title": "Monetize Open Source: 5 Ways to Earn $1K/Month from GitHub Projects in 2026 | Markaicode",
+          "description": "May 11, 2026 — Quick Answer: The five most effective ways to monetize an open source GitHub project in 2026 are: (1) GitHub Sponsors for direct community funding, (2) dual licensing to sell commercial rights, (3) a hosted SaaS layer on top of your open code, ...\"No middleman, no platform cut (GitHub waives its fee for the first year), and no need to change your license. Go to your GitHub profile and open the Sponsorship tab. Click Set up GitHub Sponsors and complete tax and banking details. Write tier descriptions that name specific, tangible benefits—not vague \"support the project\" copy. Publish at least one sponsor-only repository or newsletter to justify the subscription. Real-world reference: Vue.js ecosystem contributors and popular CLI tool maintainers have publicly documented Sponsors income in the $800–$4,000/month range when tiers are clearly scoped.\"\"Quick Answer: The five most effective ways to monetize an open source GitHub project in 2026 are: (1) GitHub Sponsors for direct community funding, (2) dual licensing to sell commercial rights, (3) a hosted SaaS layer on top of your open code, (4) professional services such as consulting and training, and (5) paid …",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Offers general advice on how to monetize open source projects rather than specific underrated repos.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://postiz.com/",
+          "title": "Postiz: The All-in-One agentic social media scheduling tool",
+          "description": "Postiz shows per-channel and per-post analytics pulled from each network’s official insights API. Depending on the channel, you’ll see impressions, likes, comments, shares, reach, and engagement rate. Everything is in one dashboard — you can compare how the same post performed on LinkedIn vs. X vs. Instagram without opening five different apps.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Postiz product landing page, but does not link directly to the GitHub repository.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://openhub.net/p/youtube-monetization-checker",
+          "title": "The VideoDubber's YouTube Monetization Checker Open Source Project on Open Hub",
+          "description": "🔹 AI-powered monetization check 🔹 Detect risky or non-compliant content 🔹 Fast, … free 🔹 No login or software needed Perfect for creators aiming to stay ad-safe and maximize earnings.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Mentions an open source project for monetization, but lacks an explicit GitHub URL.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://grokipedia.com/page/Ghost_(blogging_platform)",
+          "title": "Ghost (blogging platform) — Grokipedia",
+          "description": "Ghost is an open-source publishing ... a streamlined, distraction-free writing experience while offering robust tools for content distribution and monetization.[2] It is built using Node.js and JavaScript, distributed under the ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Mentions the Ghost blogging platform, but doesn't point to an underrated repo.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        }
+      ]
+    },
+    {
+      "q": "wwe commentators gone crazy moments",
+      "criteria": "WWE clips with clearly excited or shocked commentator reactions, preferably with exact moments. Crowd-only reactions and generic match highlights are weaker.",
+      "elapsed_ms": 84224,
+      "providers": [
+        {
+          "provider": "brave",
+          "status": "ok",
+          "message": "Brave discovery completed."
+        },
+        {
+          "provider": "searxng",
+          "status": "ok",
+          "message": "17 of 20 search engines answered; Brave Videos (rate-limited), Brave (rate-limited), Resulthunter (rate-limited) did not."
+        },
+        {
+          "provider": "internet_archive",
+          "status": "ok",
+          "message": "Internet Archive film catalogue searched directly."
+        },
+        {
+          "provider": "planner",
+          "status": "ok",
+          "message": "AI planned 6 searches for lesser-known sources."
+        },
+        {
+          "provider": "leads",
+          "status": "ok",
+          "message": "AI followed 8 leads from what it found, in 2 rounds."
+        },
+        {
+          "provider": "candidate_pool",
+          "status": "partial",
+          "message": "1422 candidates found; the best 160 keyword matches were selected for checking after all sources answered."
+        },
+        {
+          "provider": "youtube",
+          "status": "ok",
+          "message": "YouTube details and viewer comments checked."
+        },
+        {
+          "provider": "reddit",
+          "status": "ok",
+          "message": "Reddit discussions checked."
+        },
+        {
+          "provider": "pages",
+          "status": "ok",
+          "message": "16 of 20 result pages were checked, 5 in a browser."
+        },
+        {
+          "provider": "archive_evidence",
+          "status": "partial",
+          "message": "0 comment/review samples and 0 caption tracks available across 3 checked results."
+        },
+        {
+          "provider": "judge",
+          "status": "ok",
+          "message": "Results were checked for relevance by AI."
+        },
+        {
+          "provider": "scene_analysis",
+          "status": "partial",
+          "message": "3 videos queued for scene analysis; these pending analyses are not evidence in this ranking."
+        }
+      ],
+      "candidates": [
+        {
+          "url": "https://www.youtube.com/watch?v=2hf51UXsUpc",
+          "title": "Jim Ross Being A National Treasure For 25 Minutes Straight",
+          "description": "In this video I list what made Jim Ross the greatest wrestling commentator of all time. Head over to the WWE Shop and buy official ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Viewers highlight classic Jim Ross quotes and intense commentary moments. Supporting evidence only; exact match unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "810aab00-a6b5-4bdb-b061-dad2cb198147",
+              "start_seconds": 449,
+              "end_seconds": 484,
+              "summary": "7:34 “Shawn Micheals gettin whipped like a government mule” 😂😂😂 always kills me 😂😂",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "1f928269-c35b-4527-9002-f7ad796c08f9"
+              ]
+            },
+            {
+              "id": "6d5a7806-37dc-4af4-802f-c2681e572bdd",
+              "start_seconds": 862,
+              "end_seconds": 908,
+              "summary": "14:37 \"welcome to home depot\" got me dying so hard I don't remember that line 😂😂😂 · 14:27 aged pretty well eh? XD · My favorite will always be when Shawn Michaels hits Vince in the head with the ladder and JR says “Welcome to Home Depot!” Which is at 14:36",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "825c6484-e7a5-4cd8-a4e8-feb86c713f20",
+                "d735af86-8f88-4d31-a442-2869a8c9a8ea",
+                "f108c1bb-e715-4b6b-afef-e28ac2718832"
+              ]
+            },
+            {
+              "id": "0fc385fe-9972-477b-ba35-471bd47227ca",
+              "start_seconds": 1260,
+              "end_seconds": 1295,
+              "summary": "21:05 He's not saying \"rotten demon\", he's saying \"rotund demon\" which, I'd argue, is even funnier.",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "7c50eb35-7cfc-411e-be2e-a0e98b1808cd"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=4oe9799XYoU",
+          "title": "Craziest announcer reactions of the year so far: WWE Top 10, June 2, 2024",
+          "description": "Watch these hilarious moments on commentary in 2024, from reactions to shocking moments, like Roman Reigns Spearing The Rock, to Pat McAfee and Michael Cole dissing Dominik Mysterio. Stream WWE on Peacock https://pck.tv/3ZTjVE7 in the U.S. and on WWE Network http://wwe.yt/wwenetwork everywhere else ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Features wild WWE announcer reactions and commentary moments from 2024. Supporting evidence only; exact match unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "0eb1d215-0a7b-4aa1-8da2-6a7f84f5e1bc",
+              "start_seconds": 60,
+              "end_seconds": 96,
+              "summary": "Wade Barrett and Corey Graves reaction to The Rock roasting the crowd was hilarious. 😂😂 1:20 · 1:05 Meme time...for old time sake. · Michael Cole😂😂😂😂😂 1:06 RKO to LP.",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "1e9574ea-0333-4285-98ee-904412fefbbd",
+                "9a64a911-dcfe-4772-a867-620a5aafaf7c",
+                "8d7808ae-39d5-4394-bcb8-cbfaedac31a8"
+              ]
+            },
+            {
+              "id": "f22079ec-820f-43ef-b179-04daafe1cf05",
+              "start_seconds": 96,
+              "end_seconds": 131,
+              "summary": "2:00 Haha Corey throwing Cole under the bus! 😂 · 2:02 \"Hit him. Do it.\" LOL · 2:11 LMAO",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "2ee5979f-20d0-4fe2-a055-38579194be1e",
+                "f1d883cb-2890-4ab7-b1ea-a93ca8e19a12",
+                "a090976c-1f59-4ea7-8179-855cb4d35e21"
+              ]
+            },
+            {
+              "id": "26c2c31d-4718-4c72-864e-7506d52ea16f",
+              "start_seconds": 165,
+              "end_seconds": 219,
+              "summary": "3:09 Michael Cole is like: why did I do this job 😂😂😂😂 · 3:03 Cole is holding it together! He’s trying! · 2:50 🤣",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "1f4ca8f1-6586-444a-8ec1-f05107b60b75",
+                "fc322ec7-bcf4-4412-9657-7d8def1ff579",
+                "d58f9438-6183-4175-981d-c94c9ab84f0c"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=HNootEGv5Z8",
+          "title": "14 Minutes of Jim Ross Absolutely Hating Wrestlers on Commentary",
+          "description": "14 Minutes of Jim Ross Hating Wrestlers on Commentary Jim Ross is one of the greatest commentators in wrestling history, but when he didn't like a wrestler, he made sure everyone knew it! 😂 From brutal roasts to legendary one-liners, here are 14 minutes of JR absolutely burying wrestlers on commentary. Wrestlers he hated was Triple h ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Viewers note classic Jim Ross outbursts and emotional commentary shouting matches. Supporting evidence only; exact match unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "8b81289b-5665-47c2-ac25-9b83fbdb2f73",
+              "start_seconds": 126,
+              "end_seconds": 185,
+              "summary": "2:11 lol😂😂 · 2:29 · 2:35😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂 \"hes a SOB if you ask me\"",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "73f3612a-8751-4a49-b835-17bf83bce242",
+                "650ed935-a658-41ef-9bb2-3aba632d8f62",
+                "cd6bbb98-6f0e-4462-aadc-f1dcae27387f"
+              ]
+            },
+            {
+              "id": "3f964d46-e43e-4d4c-872d-33aba4fdb6e1",
+              "start_seconds": 205,
+              "end_seconds": 240,
+              "summary": "3:30 Prasing hard that these two are fighting to... \"FOR THE LOVE OF GOD! SOMBODY STOP THIS!\" 😅 I was only a toddler at the time. But more than glad that i eventually witnesses these great JR moments when i was a bit older.",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "5a883de8-371a-40a3-923e-a33f0e729ea4"
+              ]
+            },
+            {
+              "id": "acdfc010-ecbc-4d2c-9ac4-764d729ad85f",
+              "start_seconds": 268,
+              "end_seconds": 303,
+              "summary": "4:33 lmao “that big asz of rikishi” cmon jr 😂😂😂😂",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "db5a24be-0847-4128-9d52-f200530c76b1"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=LDGOEf8Une8",
+          "title": "Jim Ross Calling Triple H a “son of a b*tch” Compilation",
+          "description": null,
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Compilation of Jim Ross screaming in absolute anger at Triple H with strong viewer confirmation. Supporting evidence only; exact match unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "c05c9410-dc1b-4145-9f5f-1acd3cec9497",
+              "start_seconds": 0,
+              "end_seconds": 27,
+              "summary": "0:05 - 0:07 \"Why, tell me why!!\" Like Triple H owes Jim Ross an explanation 😄 · 0:19 when WWE jacked up the ticket prices · 0:09 damn his sooooul😂😂😂😂",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "baf61b00-7e2c-4993-b5d3-905b8c9e77ac",
+                "6c5c1c01-df7a-4255-8250-d1d27a753cd9",
+                "3eebd8ba-16c7-4cf5-b812-86153d717e41"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=SEXwCO8n3Dg",
+          "title": "Funny Commentary Edit: The Best of Ultimate Fails 2013",
+          "description": "This is the real sport entertainment! + Special bonus at the end!",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Features chaotic Jim Ross commentary reacting wildly over chaotic video clips and crashes.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "46a97c8c-7b35-4f50-bf66-8be7bbb04506",
+              "start_seconds": 81,
+              "end_seconds": 122,
+              "summary": "1:26 HE JUST WENT THROUGH THAT TABLE IN THE WATER!! · I laughed sooo fuckin at 1:26 Lol · 1:32 you can hear the bone snap",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "0ec342fa-cd07-4343-a735-c3e2df94af1e",
+                "0bc2cb3f-af83-41ac-909e-94b6cb3427fe",
+                "dbbcbc71-d412-4215-9fc8-eacc1077892a"
+              ]
+            },
+            {
+              "id": "98cbdb89-cd01-4c9f-932f-36b730b52018",
+              "start_seconds": 145,
+              "end_seconds": 176,
+              "summary": "2:30 Jerry Laughs Maniacally · 2:30 oh man! That's pathetic! That's not funny · 2:31 Jerry Lawler laughing 2:50 some dude laughing",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "14f32c11-18e4-41b1-a829-872bd1cc9b6a",
+                "7eb6592a-54e3-4d32-b5e6-64760c1d8c35",
+                "f1ab43c3-45fe-450b-9447-9682173ead01"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=YlCRzZxAxVY",
+          "title": "WWE Commentary (Jim Ross) on Video Games - Episode 2",
+          "description": "Follow me for new videos: http://twitter.com/BlueOwlTweets Part 1: https://www.youtube.com/watch?v=kBXHbTgjVKk Part 3: ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Features Jim Ross screaming and losing his mind with dramatic commentary over video game clips.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "0188115d-298b-4110-9396-cfc619224ebb",
+              "start_seconds": 8,
+              "end_seconds": 49,
+              "summary": "0:13 Goosebumps, that match was stunning! · 0:39 \"Theres people in there!!! Theres people in there!!!\" Jim Ross screams as the tower in Shanghai collapses. 🤣 · 0:33-",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "f770a056-8e7d-46a7-80b7-0688362f1df9",
+                "e6c73fcd-3a50-4a31-be87-9e6f960059a7",
+                "9368ef21-2917-41ed-ae4c-e16b682360ad"
+              ]
+            },
+            {
+              "id": "138fd345-4585-4a28-b128-35df25565043",
+              "start_seconds": 49,
+              "end_seconds": 81,
+              "summary": "0:54  let's see how you like that, son of b@&$@% 😂😂😂😂😂 cracked my ribs in half · 0:58 Let’s see if we can smell what The Rock is cooking for this round. · 1:05 \"Somebody stop the damn surgery! Enough is enough!\"",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "92e8d3a0-51b2-4850-95ed-5dce6ba91dff",
+                "e202499a-dd90-4d15-8b0a-32001d52f96a",
+                "74c10e91-2675-4e3e-a719-b77a3d67ba73"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=5NDBTUrQcTI",
+          "title": "Greatest announcer calls: WWE Top 10, June 30, 2018",
+          "description": "Leave it to WWE's esteemed commentary teams to turn an incredible WWE moment into an iconic one. Here are 10 of the greatest calls made by a WWE announcer. Get your first month of WWE Network for FREE: http://wwenetwork.com Subscribe to WWE on YouTube: http://bit.ly/1i64OdT Visit WWE.com: http://goo.gl/akf0J4 Must-See WWE videos on YouTube ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "WWE compilation explicitly featuring top announcer calls with extreme emotion and shouting. Supporting evidence only; exact match unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "aa88e4a1-995c-43bf-a885-d8c2cb0a5a78",
+              "start_seconds": 62,
+              "end_seconds": 97,
+              "summary": "1:07 I used to sit in the same booth as Vince and he would wish death upon Eric Biscoff😂😂😂😂😂😂😂😂😂😂😂😂",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "8e42edd2-087e-45d1-8cc3-d701c1c3836b"
+              ]
+            },
+            {
+              "id": "5942a375-1c8c-450c-aa12-c1234ee057b7",
+              "start_seconds": 139,
+              "end_seconds": 181,
+              "summary": "\"Stone Cold is cartman's father\" lol 2:24 · 2:31 This gotta be my fav commentator reaction ever!",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "7b88d8b9-d075-4f60-8981-fffad7f20264",
+                "a870a653-75c6-48d3-a5e0-2c6f52e5946a"
+              ]
+            },
+            {
+              "id": "e0fc8bee-4aad-4ec0-8da1-103fb74effab",
+              "start_seconds": 199,
+              "end_seconds": 222,
+              "summary": "3:24 “GOOD GOD MIGHTY GOOD GOD MIGHTY HE KILLED HIM HE IS BROKEN IN HALF”",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "b1a894ce-d505-455c-9055-fc1da600a3da"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=DNy2Qw_XsFY",
+          "title": "10 Wrestlers Jim Ross ABSOLUTELY HATED On Commentary",
+          "description": "In this video I rank the top 10 wrestlers that Jim Ross hated on commentary Head over to the WWE Shop and buy official WWE ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Compilation focusing on Jim Ross passionately hating and calling out wrestlers on commentary.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "30360d72-11b1-4a37-b742-842fca7bb852",
+              "start_seconds": 813,
+              "end_seconds": 860,
+              "summary": "13:50 „I…am…REALITY!“ - „He's a son of a bitch, if you ask me.“ 😂😂😂 · 13:38 POV: Every wrestling fan during 2025",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "ee66828f-c59e-4708-8c60-a61957023b9b",
+                "981a16bd-a555-455c-b245-a3ad3f91c152"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=fHA8TzdqGHQ",
+          "title": "14 Minutes of Jim Ross Hating WWE Wrestlers on Commentary",
+          "description": "Jim Ross Hating WWE Wrestlers on Commentary Jim Ross didn't hold back when calling matches. From brutal roasts to hilarious jabs, this video looks at the most savage moments where JR went off on wrestlers live during WWE commentary. These unscripted reactions and raw emotions show why Jim Ross became a fan favorite — even when he was ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Features 14 minutes of Jim Ross going off, showing extreme emotion and erratic behavior on live commentary. Supporting evidence only; exact match unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "eb4a44ac-4878-496f-93c4-63722d4ce2ab",
+              "start_seconds": 1,
+              "end_seconds": 36,
+              "summary": "0:06 does he have no conscious does he have no heart? Does he have no soul you son of a bitch?!!! 😂😂😂😂",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "6710d227-6fa6-4731-ab17-55d6a1412282"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=C6PWp_OCLqk",
+          "title": "Jim Ross Goes Crazy",
+          "description": "Twist of Fate Twist of Fate Hardy Hits Hardy Hits SWANTON!!!!",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 8,
+            "reason": "Features Jim Ross going crazy calling a chaotic match ending with extreme shouting. Supporting evidence only; exact match unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=gQ4FRVecf3Y",
+          "title": "WWF | Jim Ross and Jerry Lawler being the Funniest Commentary Duo Alive for 3 Mins",
+          "description": "247.4K views - May 28, 2022 - YouTube - Now! With Attitude!",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 7,
+            "reason": "Features WWF commentators Jim Ross and Jerry Lawler during classic Attitude Era moments.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "80d132d4-6c28-4a08-87b9-d7dcfb4731e7",
+              "start_seconds": 25,
+              "end_seconds": 68,
+              "summary": "0:30 had me screaming 😂😂😂 · 1:00 hnn 🤣🤣🤣",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "95620b56-2a39-4bb6-a7db-61aef1b14125",
+                "1c3fb186-df21-43e0-a4f6-ff5c59797edf"
+              ]
+            },
+            {
+              "id": "e4ee4bf1-c630-4d63-9092-10bf42c6475a",
+              "start_seconds": 68,
+              "end_seconds": 100,
+              "summary": "The look JR gives King at 1:35 🤣🤣 · The way Jr looks at king at 1:34 is hilarious 🤣 · 1:13 My favorite ones that Jr said 😂.",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "6056f151-db90-4e2c-8b55-15bd5fddf25e",
+                "063c3e30-b767-48ae-9079-9f4dc380a97c",
+                "6fe29adc-a980-4ac0-86d2-01155ef4a200"
+              ]
+            },
+            {
+              "id": "a4668226-e2c7-4364-9119-a99d400e9b8c",
+              "start_seconds": 99,
+              "end_seconds": 133,
+              "summary": "2:06 · 2:06  JR sounds like Freddy Kruger lol · 2:05 I always enjoy seeing Vince that way.",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "35a8f489-d2d2-44db-851a-62de54f57951",
+                "c26a7a46-e463-4923-a3bc-f538a3fad730",
+                "a503e344-2f19-4258-8328-031aebbfd879"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=HC4JGPezIVI",
+          "title": "WWF | Jim Ross and Jerry Lawler being the Funniest Commentary Duo Part 2",
+          "description": "218.9K views - Jun 2, 2022 - YouTube - Now! With Attitude!",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 7,
+            "reason": "Features Jim Ross and Jerry Lawler commentary outtakes and funny moments.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "b62f19a1-1997-4050-8ec1-d25424166ebe",
+              "start_seconds": 13,
+              "end_seconds": 64,
+              "summary": "0:37 My man JR said you can't say TITS on television yet he emphasized the word 😭😂 · 0:23 WHAT?! - Jerry “The King” Lawler. · At 0:43 Jerry Lawler was such a dawg JR can't  fathom that JL doesn't know what a Hyman  is😂",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "4cd3dbbf-8af4-4e39-bbb7-92a1e63ea2c4",
+                "3b7d6393-e05b-4e73-b0dc-1b7bba03e054",
+                "5ccd23b2-c86e-4428-93c7-0ac7d5c5762f"
+              ]
+            },
+            {
+              "id": "941d1520-4f1a-4883-b83a-b1d0d67615ba",
+              "start_seconds": 64,
+              "end_seconds": 117,
+              "summary": "1:35 goddammit Jerry😂 · 1:35 · 1:09",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "8ff5f043-8ed0-470a-b920-0be88456c75c",
+                "f80a4e00-8f87-4bfe-8bf5-ce8f4f9f630a",
+                "82973e84-84c3-4520-b29b-bf67cdf27708"
+              ]
+            },
+            {
+              "id": "34664ee7-6fe5-4a9e-b3ce-5b29f288404f",
+              "start_seconds": 117,
+              "end_seconds": 150,
+              "summary": "2:24 Next thing you know they'll be chanting \"WE WANT HYMEN\"... _whatever that is._ 😂 · 2:13 Victoria before she became a wrestler herself 😂 👌🏾 · 2:04 Victoria knows how to save the Ho’s. Lol",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "dcf7beda-c4a8-4025-9463-756cf8bc1054",
+                "66bdd84e-8130-43ca-a8cf-82c7e1799f5f",
+                "5c910e42-3b60-4363-b607-27ef8a36e8d4"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=kBXHbTgjVKk",
+          "title": "WWE Commentary (Jim Ross) on Video Games - Episode 1",
+          "description": null,
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Video dubbing Jim Ross commentary over video games.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "c29b0efb-75e8-4af5-96ef-be767f2f5546",
+              "start_seconds": 0,
+              "end_seconds": 27,
+              "summary": "At 00:10 it killed me 😂😂😂 · 0:01 WHAT?! WHAT?!!! 😂 · 0:14 All God Almighty!!",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "6b12d4db-20f9-4fce-82c2-3853f548d2a3",
+                "c23e3905-c42f-46be-ba1b-4931dd0502b2",
+                "bb7a1bfe-a995-4d68-b52b-7ab22bb94871"
+              ]
+            },
+            {
+              "id": "8a5754af-5dfe-457d-9b59-5b17d7506f62",
+              "start_seconds": 27,
+              "end_seconds": 61,
+              "summary": "0:54 BAH GAWD!!! THAT KILLED ME!!! · 0:32 what game is that? · Xbox 0:55 and CoD 1:11 aged like fine wine",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "ebec4780-ec83-43b8-b4c3-bad812cbb0bb",
+                "e6f672ae-566b-49ab-963e-77ee5a130526",
+                "9841d041-c2f8-4e30-80c0-ef1d614939b8"
+              ]
+            },
+            {
+              "id": "25a21630-8679-4b72-9700-db0cba55f1ea",
+              "start_seconds": 61,
+              "end_seconds": 104,
+              "summary": "I'm not a COD fan by any stretch, but honestly? The classic RAW theme & the \"This is gonna be a WAR!\" at 1:06 actually fit that really well. · 1:25 its me austin! Oh son of a b*tch · 1:06 Everyone's reaction to the Call of Duty franchise! 😂",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "a4b44cbf-9357-4ed1-8d2e-4bf6db0aef10",
+                "9401b4ea-6682-40b0-8ad2-0842b58a8ad6",
+                "1d14878d-1a4d-4ea8-8679-37feb4eea4c5"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.wrestlinginc.com/2075395/winc-watchlist-wwe-most-absurd-moments-ranked/",
+          "title": "WINC Watchlist: Most Absurd WWE Moments, Ranked - Wrestling Inc.",
+          "description": "... The segment that infamously became known to fans as &quot;Pillman&#x27;s Got a Gun,&quot; thanks to a call on commentary by a wildly confused Jim Ross, was one of WWE&#x27;s most absurd moments in a more ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Discusses Jim Ross's wildly confused commentary on Pillman's Got a Gun.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.wwe.com/videos/craziest-announcer-reactions-of-the-year-so-far-wwe-top-10-june-2-2024",
+          "title": "Craziest announcer reactions of the year so far: WWE Top 10 ...",
+          "description": null,
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Top 10 video directly titled Craziest announcer reactions of the year. Metadata only; contents unverified.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.dailymotion.com/video/x8ek2ae",
+          "title": "WWE Kane burns JR Jim Ross",
+          "description": "_JR_ Jim Ross Needs To Feel Kane_s Pain_",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 6,
+            "reason": "Video segment showing Kane and Jim Ross, but description lacks focus on general commentator outbursts.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.facebook.com/90sWWE/videos/jim-ross-and-jerry-lawler-commentary-makes-everything-better-/1837426413507054/",
+          "title": "Jim Ross and Jerry Lawler commentary makes everything better! 😂💯 | 90s WWE",
+          "description": "90s WWE. . Jim Ross and Jerry Lawler commentary makes everything better! 😂💯",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Short clip highlighting Jim Ross and Jerry Lawler commentary.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.wwe.com/videos/playlists/michael-coles-miserable-moments",
+          "title": "Michael Cole's Miserable Moments - WWE",
+          "description": null,
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "WWE page about Michael Cole moments, but no video evidence provided.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://worldstar.com/videos/wshh637pra9oGHtoNEJA/firefighter-really-rock-bottomed-this-person-out-of-a-burning-building-tho-wwe-jim-ross-commentary",
+          "title": "Firefighter Really Rock Bottomed This Person Out Of A Burning Building Tho! (WWE Jim Ross Commentary)",
+          "description": "Posted By Persist",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Meme video applying Jim Ross commentary to a firefighter clip.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.dailymotion.com/video/x3tzth0",
+          "title": "5 Crazy Unscripted Moments Of Pro-Wrestling (WWE/WWF/WCW)",
+          "description": "TWITTER: http://www.twitter.com/top5unknowns GPLUS: https://google.com/+Top5Unknowns/ ---- This is a compilation of the most surprised unscripted moments on WWe/WCW/WWf This series explains atrocities that happened, sad moments, angry moments and even shocking moments. These are little known or even...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "General unscripted pro-wrestling compilation, not strictly focused on commentators.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://copyright-certificate.byu.edu/news/wwes-craziest-moments-you-wont",
+          "title": "WWE's Craziest Moments: You Won't Believe These!",
+          "description": "The first fall, an unplanned plummet through the announcer&#x27;s table, is one of the most iconic and replayed moments in wrestling history. But he wasn&#x27;t done there! After somehow managing to climb back to the top, he was chokeslammed through the ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Mentions commentary on an announcer's table plummet, but lacks full video evidence.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.dailymotion.com/video/x4hbvvx",
+          "title": "Fail Compilation with WWE Jim Ross Commentary REACTION!!! (STD) - video Dailymotion",
+          "description": "Original Video: https://www.youtube.com/watch?v=Dv5mGdN_b2A &quot;WARNING: VIEWER DISCRETION IS ADVISED!&quot;Show more",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Fail compilation utilizing Jim Ross commentary audio.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.facebook.com/groups/2452278295040175/posts/3271324799802183/",
+          "title": "WWE commentators & exaggerating 😏🤞",
+          "description": "Popular groups · Find communities for you · Over 1 billion people across the globe are using Facebook Groups to explore their favorite topics · Log in · Categories · Science &amp; tech · Travel · Animals · Sports &amp; fitness · Entertainment",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Facebook group page about WWE commentators exaggerating.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://x.com/90sWWE/status/2078428259855835506",
+          "title": "90s WWE (@90sWWE) on X",
+          "description": "Some videos just deserve Jim Ross and Jerry Lawler commentary 😂",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Short clip pairing 90s wrestling footage with Jim Ross and Jerry Lawler commentary.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.wwe.com/article/top-5-insane-moments-of-2025-so-far",
+          "title": "Top 5 Insane WWE Moments of 2025… so far | WWE",
+          "description": "Hear how the world reacted to Paul Heyman’s shocking betrayal of CM Punk and Roman Reigns, with WWE commentary teams from all over the globe calling the thrilling final moments of WrestleMania 41 Saturday.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Shows commentary team reactions, but is a promotional recap piece rather than classic crazy commentator moments.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.facebook.com/wwe/videos/michael-cole-said-it-best-this-is-one-of-the-most-disgusting-displays-ive-ever-w/988909702659508/",
+          "title": "Michael Cole said it best: \"This is one of the most disgusting ...",
+          "description": null,
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 5,
+            "reason": "Features Michael Cole calling a disgusting moment, but lacks sufficient context or length.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://tvtropes.org/pmwiki/pmwiki.php/Funny/MichaelCole",
+          "title": "Funny Moments in Michael Cole - TV Tropes",
+          "description": "Now that Byron Saxton has joined the Raw commentary team, Cole has been trolling Saxton in a similar manner to a hazing. Saxton: I&#x27;ve got to get me a Cesaro Section sign! Cole: [Deadpan] Byron, no-one likes you. During Wrestlemania 32, The New Day end up coming out for their match dressed as Saiyans. That&#x27;s a moment all on its own, but Cole then namedrops Vegeta in a moment that&#x27;s simply surreal.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "TV Tropes page listing funny moments involving Michael Cole.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "direct_evidence"
+          }
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=WH-EielroQM",
+          "title": "10 Times WWE Wrestlers & Announcers Broke Character & Caught Laughing on Camera!",
+          "description": "wwe breaking character wwe wrestlers corpsing on tv wwe caught on camera ▻Many More Videos: https://goo.gl/p1cRZN ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Focuses on breaking character and laughing rather than extreme commentator shouting and match calls.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [
+            {
+              "id": "24d2086a-17ae-4edb-b10a-2c67d805842d",
+              "start_seconds": 80,
+              "end_seconds": 118,
+              "summary": "1:25 · 1:28 YOOOOOOO",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "22b959b5-74ce-434d-9b1f-d3adfedf56ab",
+                "bfda897a-246e-4ae8-92b5-8e56f9aad0cb"
+              ]
+            },
+            {
+              "id": "0ef4b5a9-4316-4a67-9b95-ec5664579861",
+              "start_seconds": 214,
+              "end_seconds": 249,
+              "summary": "3:39 RIP  \"Mean\" Gene Okerlund. Very funny",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "f00dce58-cee5-4f27-8ed3-5c5dca4503a5"
+              ]
+            },
+            {
+              "id": "6cbb7040-a659-4de0-85b6-5c26aece077d",
+              "start_seconds": 457,
+              "end_seconds": 499,
+              "summary": "7:48 ...del rio laughed at steph's speech about the king of kings lol · 7:49 - this face is epic xD Philip, you're the best! · 7:42",
+              "evidence_type": "viewer_timestamp",
+              "analysis_version": "viewer-comments-v1",
+              "inspected_ranges": [],
+              "evidence_refs": [
+                "bcd4ecca-a1e6-48c4-b50c-c2ecf2b5392b",
+                "5f690ae1-e708-4379-ba73-cfd7e2f458fc",
+                "ad605685-5881-41ce-8675-27f459067072"
+              ]
+            }
+          ],
+          "evidence_coverage": {
+            "comments": "available",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "viewer_claims"
+          }
+        },
+        {
+          "url": "https://www.reddit.com/r/SquaredCircle/comments/f2jbq3/favorite_corpsing_moment/",
+          "title": "r/SquaredCircle on Reddit: Favorite corpsing moment?",
+          "description": "The Hybrid Dolphins, always and forever. ... Don&#x27;t forget Peligro Abejas! And, Colt teaching El Generico how to cut a promo. ... The best is edge laughing at Rey. Simply because Cena doesn’t show any emotion and edge just breaks instantly and walks offscreen ... That never actually made air. It was part of a blooper compilation released by WWE well after-the-fact.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Reddit thread discussing wrestling corpsing moments.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unsupported",
+            "captions": "unsupported",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://archive.org/details/10TimesWWEWrestlersAnnouncersBrokeCharacterCaughtLaughingOnCamera",
+          "title": "10 Times WWE Wrestlers & Announcers Broke Character & Caught Laughing On Camera! : Free Download, Borrow, and Streaming : Internet Archive",
+          "description": "wwe breaking characterwwe wrestlers corpsing on tvwwe caught on cameraMany More Videos: https://goo.gl/p1cRZNTwitter Page http://bit.ly/1Pes74sFacebook...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Compilation of WWE wrestlers and announcers breaking character.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "not_permitted",
+            "captions": "not_permitted",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://x.com/AllDAYZ77/status/2072322692779495621",
+          "title": "That time Michael Cole delivered one of the worst commentary lines in wrestling history. “I get those goosebumps every time.” https://t.co/5VBqumbaGx",
+          "description": "23.4K views - 2 months ago - x.com - A L L D A Y &#128640;",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Short clip showcasing a poor commentary line by Michael Cole.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://sports.yahoo.com/articles/wwes-michael-cole-reveals-times-203000633.html",
+          "title": "WWE's Michael Cole Reveals The Times He Was Most Shocked On Commentary - Yahoo Sports",
+          "description": "He said he doesn&#x27;t listen back to much of his work, but when he hears that call, he still gets chills. Cole said the other most shocking moment to him was when Eddie Guerrero defeated Lesnar to win his first world championship in 2004.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Article discussing Michael Cole moments, not a video clip showing them.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://bleacherreport.com/articles/1789450-15-best-calls-of-jim-ross-wwe-career",
+          "title": "15 Best Calls of Jim Ross' WWE Career",
+          "description": "Justice finally being served and the villainous, smug authority figure finally getting the beatdown he deserved was made into a celebration by Ross&#x27; commentary. He was on fire all night, but the post-match rant elevated the bout beyond its in-ring quality. Ross turned a one-sided match involving a non-wrestler into a classic moment.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Bleacher Report article text about Jim Ross calls.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.reddit.com/r/SquaredCircle/comments/20a7q9/fail_compilation_with_wwe_commentary_jim_ross/",
+          "title": "r/SquaredCircle on Reddit: Fail Compilation with WWE Commentary-- Jim Ross Makes Everything Instantly Better-- Like Bacon",
+          "description": "Not to be that guy but I thought he said &#x27;Snitsky&#x27;. Either way, that was one of the best bits of the video ... I thought to myself &#x27;I&#x27;ve seen so many wrestling commentary added to non wrestling videos&#x27; that I wouldn&#x27;t laugh.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Reddit thread discussing fail videos with WWE commentary.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unsupported",
+            "captions": "unsupported",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://makeagif.com/gif/fail-compilation-with-wwe-jim-ross-commentary-ydnEMG",
+          "title": "Fail Compilation with WWE Jim Ross Commentary on Make a GIF",
+          "description": "Pictures to GIF YouTube to GIF Facebook to GIF Video to GIF Webcam to GIF Upload a GIF",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "GIF site link, not a full video clip compilation.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://odysee.com/jim-ross-shoots-on-the-ultimate-3:b",
+          "title": "Jim Ross shoots on The Ultimate Warrior's 1990 World title run",
+          "description": "For over forty years Jim Ross has been the Voice of Wrestling. From starting as referee in the regional territories to becoming the Executive Vice President for WWE, nobody has a story quite like Jim ...",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Interview/podcast clip of Jim Ross talking about Warrior, not live commentary behavior.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://archive.org/details/XOFnoEWW",
+          "title": "WWE on FOX YT Archive : FOX Sports : Free Download, Borrow, and Streaming : Internet Archive",
+          "description": "1.1G Bischoff on the WWE management changes, the WCW, and more! ｜ FULL EPISODE ｜ Out of Character [qyVfrUm3Mzg].mp4 download · 638.0M Bobby Lashley on unfinished business with Lesnar, and much more! ｜ FULL EPISODE ｜ Out of Character [RTSVJH9FJdo].mp4 download · 767.9M Booker T on NXT Commentary, life as a WCW Champion &amp; Work-Life Balance ｜ FULL EP ｜ Out of Character [0J2BTPYHH_M].mp4 download",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Archive containing full interview episodes with personalities like Eric Bischoff and Booker T.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "not_permitted",
+            "captions": "not_permitted",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.thestunner.com/jim-ross-greatest-calls-wwe/",
+          "title": "Jim Ross' 10 Greatest Calls in WWE - The Stunner",
+          "description": "‘As God as my witness, he is broken in half!’",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Listicle covering Jim Ross's greatest commentary calls.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.reddit.com/r/WWE/comments/u97wm1/what_is_your_most_memorable_jim_ross_commentary/",
+          "title": "r/WWE on Reddit: What is your most memorable Jim Ross commentary moment?",
+          "description": "As I’m watching old PPVs with Vince on commentary, I hear JR in my head saying that and I need to hear it again so I can get it straight once and for all. ... That&#x27;s enough for christ sakes. You done enough, not this way, oh no, stop it, dont do it, how evil, how demonic, this is inhuman, this is heinous, I don&#x27;t believe this, somebody stop this, and no, no, no, no.... damn it. I&#x27;m trying to find a match where triple h cheated in his whc run and Jim ross lost it when the referee was counting the pin.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "Reddit thread discussing memorable Jim Ross commentary calls.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unsupported",
+            "captions": "unsupported",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        },
+        {
+          "url": "https://www.thesportster.com/wwe-commentaries-ruined-talked-over-big-moment/",
+          "title": "10 Times WWE Commentary Talked Over A Major Moment",
+          "description": "RELATED: 7 Dumb Things That Got Wrestling Commentators In Trouble · The match was exciting, and the stakes made for some very exciting near-falls. The result of the match saw Randy retaining despite The Nexus, and Cena was to be fired. As the implication of a WWE without John Cena set in, it was utterly ruined by Matt Striker enthusiastically calling &quot;CENA&#x27;S FREE!&quot; The call confused everybody, and it took Michael Cole correcting him, but by then the moment was already ruined.",
+          "evidence": "metadata_match",
+          "judgement": {
+            "relevance": 4,
+            "reason": "An article discussing commentary mishaps rather than a compilation of emotional calls.",
+            "model": "google/gemini-3.5-flash-lite"
+          },
+          "moments": [],
+          "evidence_coverage": {
+            "comments": "unavailable",
+            "captions": "unavailable",
+            "transcript_passages": 0,
+            "analysed_scenes": 0,
+            "basis": "metadata"
+          }
+        }
+      ]
+    }
+  ]
+}
