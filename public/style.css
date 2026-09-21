@@ -180,7 +180,8 @@ footer{max-width:1240px;margin:0 auto;padding:22px 36px 40px;border-top:1px soli
 .group-heading{grid-column:1/-1;margin:30px 0 0;padding-top:18px;border-top:1px solid var(--rule);font-family:var(--font-display);font-size:20px;font-weight:400;color:var(--ink)}
 .group-heading span{font-family:var(--font-mono);font-weight:400;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);margin-left:10px}
 .card-group{display:contents}
-#results.thumb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;align-items:start}
+#results.thumb-grid,#closest-results.thumb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;align-items:start}
+.match-tabs{width:fit-content;margin:0 0 20px}
 .thumb-grid .card{padding:14px}
 .thumb-wrap{position:relative;aspect-ratio:16/9;border-radius:var(--r-md);overflow:hidden;background:var(--wash);margin:0 0 12px}
 .thumb-wrap img{width:100%;height:100%;object-fit:cover;display:block}

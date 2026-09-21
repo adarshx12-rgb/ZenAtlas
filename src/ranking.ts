@@ -1,5 +1,5 @@
 import type { ContentInput, Result } from './types.js';
-export const RANKING_VERSION = 'relevance-v5-soft-intent';
+export const RANKING_VERSION = 'relevance-v7-optional-closest';
 // RRF combines ordinal ranks, never incomparable raw lexical/cosine scores.
 export function reciprocalRankFusion(lists: string[][], k = 60): Map<string,number> {
  const scores = new Map<string,number>();

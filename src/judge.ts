@@ -34,22 +34,18 @@ export function evidenceCeiling(candidate:JudgeCandidate):number {
 }
 
 const evidenceField=z.enum(['title','url','description','comments','moments','transcripts','scenes','page']);
-const intentCheck=z.object({dimension:z.enum(['subject','intent','format']),status:z.enum(['supported','unknown','mismatch']),
+const intentDimensions = ['subject','intent','relationship','format'] as const;
+const intentCheck=z.object({dimension:z.enum(intentDimensions),status:z.enum(['supported','unknown','mismatch']),
  field:evidenceField,quote:z.string().max(500)});
 type IntentCheck=z.infer<typeof intentCheck>;
 const normaliseQuote=(text:string)=>text.normalize('NFKC').replace(/\s+/g,' ').trim().toLowerCase();
-const words=(text:string)=>normaliseQuote(text).match(/[\p{L}\p{N}]+/gu)??[];
-// Exact text, or a quote of 3+ words that is at least 80% present: listings truncate titles ("You ...") and add
-// site suffixes, and a model completing a truncated title has not invented evidence. Fabricated quotes share few words.
+// Preserve order and negation: word overlap can turn a reversed relationship into apparently valid evidence.
+// Models must quote the visible excerpt of a truncated title, never complete the missing words.
 function quoted(quote:string,text:string):boolean {
- if(normaliseQuote(text).includes(normaliseQuote(quote))) return true;
- const wanted=words(quote);
- if(wanted.length<3) return false;
- const present=new Set(words(text));
- return wanted.filter(w=>present.has(w)).length/wanted.length>=0.8;
+ return normaliseQuote(text).includes(normaliseQuote(quote));
 }
 export function groundedIntent(candidate:JudgeCandidate,checks:IntentCheck[]|undefined):boolean {
- if(!checks || checks.length!==3 || new Set(checks.map(c=>c.dimension)).size!==3) return false;
+ if(!checks || checks.length!==intentDimensions.length || !intentDimensions.every(d=>checks.some(c=>c.dimension===d))) return false;
  const fields:Record<z.infer<typeof evidenceField>,string[]>={
    title:[candidate.title],url:[candidate.url??''],description:[candidate.description??''],comments:candidate.comments,
    moments:candidate.moments.flatMap(m=>m.viewers_said),transcripts:(candidate.transcripts??[]).map(t=>t.text),
@@ -62,20 +58,18 @@ export function groundedIntent(candidate:JudgeCandidate,checks:IntentCheck[]|und
 
 // Scores at or below this are dropped: 3-4 is "only tangential" on the rubric.
 export const TANGENTIAL=4;
-// A plausible match whose evidence could not be verified stays, below every verified match.
+// Keep uncertain verdicts for diagnostics; the display filter excludes them.
 const UNVERIFIED=5;
-// The highest score a verdict may keep. An explicit mismatch removes the candidate; missing or unverifiable
-// quotes only lower it. A video is never the wrong format unless the request wanted videos in the first place:
-// this engine serves creators, and a video presenting the requested tools, sites or repositories delivers them.
-export function verdictCeiling(candidate:JudgeCandidate,checks:IntentCheck[]|undefined,wanted?:JudgeContext['kind']):number {
- const excused=(c:IntentCheck)=>c.dimension==='format' && candidate.kind==='video' && !!wanted && wanted!=='videos';
- if(checks?.some(c=>c.status==='mismatch' && !excused(c))) return TANGENTIAL;
+// No supported dimension can compensate for a mismatch in another, including the requested relationship.
+export function verdictCeiling(candidate:JudgeCandidate,checks:IntentCheck[]|undefined):number {
+ if(checks?.some(c=>c.status==='mismatch')) return TANGENTIAL;
  return groundedIntent(candidate,checks)?evidenceCeiling(candidate):UNVERIFIED;
 }
 
 const SYSTEM_INSTRUCTION = `You rank search results for a search engine that helps creators find material quickly and accurately.
 Judge every candidate strictly against the request and the listed criteria, using only the supplied evidence. Accuracy matters more than generosity: when the evidence does not show that a candidate meets the request, score it low.
-The original request is authoritative. Planner criteria are hints, never permission to substitute a broader topic or a different deliverable. Check three dimensions before scoring: subject (the requested entity or subject), intent (ALL essential requested properties/events and their relationship), and format (the requested deliverable itself). Return exactly one intent_check for each dimension, with status supported, unknown or mismatch. For supported, cite a short exact verbatim quote from the named candidate field that establishes that dimension. For unknown/mismatch, quote relevant evidence if available, otherwise use an empty quote. Do not invent quotes, paraphrase them or join separate excerpts. A matching subject alone is not a matching result. Use mismatch only when the evidence shows the candidate misses that dimension; a mismatch must score at most 4. Unknown means the evidence neither confirms nor contradicts it: such a plausible but unverified candidate scores at most 5. Missing evidence does not mean false.
+The original request is authoritative. Planner criteria are hints, never permission to substitute a broader topic or a different deliverable. Check four dimensions before scoring: subject (the requested entity or subject), intent (ALL essential requested properties/events), relationship (who does what, to whom or what, and in which context), and format (the requested deliverable itself). Return exactly one intent_check for each dimension, with status supported, unknown or mismatch. For supported, cite a short exact verbatim quote from the named candidate field that establishes that dimension. For unknown/mismatch, quote relevant evidence if available, otherwise use an empty quote. Do not invent quotes, paraphrase them, complete truncated text or join separate excerpts. A matching subject alone is not a matching result. Use mismatch only when the evidence shows the candidate misses that dimension; a mismatch must score at most 4. Unknown means the evidence neither confirms nor contradicts it: such a plausible but unverified candidate scores at most 5. Missing evidence does not mean false.
+Relationship: identify the requested actor, action or reaction, its target, and its setting from the original request before checking candidates. All must belong to the same requested event or connection; finding the individual concepts in unrelated contexts is insufficient. The relationship quote must establish that connection, not just name an entity or praise the content. For a simple topic request, check that the deliverable actually concerns that topic; do not invent an event requirement. A WWE commentator reacting intensely during wrestling footage fits "wwe commentators gone crazy moments"; the same voice dubbed over gameplay or unrelated fails is a relationship mismatch. Crowd reactions are not commentator reactions. Funny commentary, bloopers and biographies alone do not establish an intense reaction: mark unknown unless there is evidence of the requested event, or mismatch when the evidence establishes a different one. These distinctions depend on the request: dubbed gaming edits are relevant when the user asks for them. Likewise a review describing a film reveal does not supply the reveal scene, and viewers reacting to a character do not establish that the character reacts. For event requests, a title alone is a lead; seek a description, comments, transcript or inspected scene that connects the participants and event. If any essential connection is missing, mark relationship unknown. Explain a relationship mismatch or uncertainty in the reason even if other dimensions match.
 Format: "Wanted" is a planner's guess, not a restriction. This engine serves video creators, so a video that presents, demonstrates or reviews specific instances of the requested tools, websites, repositories or products delivers them, and so does a page listing them; mark format mismatch only for a different deliverable than the one asked for, such as a reaction or recap when the scene itself was requested, or a video when the request excludes videos.
 Respect the tone and genre the request implies: a request for scary, serious or dramatic material is not satisfied by comedy, pranks or parody unless those are requested. Do not assert that footage presented as real is authentic. A title, hashtag or thumbnail claim alone does not establish a specific property such as a twist, a reveal or a reaction; look for supporting description, comments or other evidence.
 Videos: use site, title, channel, duration, live status, description, top viewer comments, moments that viewers pointed to with timestamps, and titles of Reddit threads that appear to discuss it. Prefer videos whose comments confirm the requested content, such as viewers reacting to a story, a twist or a scene. Score lower for clickbait whose comments contradict the title, unrelated compilations, and uploads that look like unofficial full copies of commercial films or TV episodes. For film or TV scene requests, prefer candidates marked official.
@@ -94,7 +88,7 @@ const RESPONSE_SCHEMA = {
  properties: {verdicts: {type: 'array', items: {type: 'object', properties: {
    key: {type: 'string'}, relevance: {type: 'integer', minimum: 0, maximum: 10},
    reason: {type: 'string'}, moment_keys: {type: 'array', items: {type: 'string'}}, lesser_known: {type: 'boolean'},
-   intent_checks:{type:'array',items:{type:'object',properties:{dimension:{type:'string',enum:['subject','intent','format']},
+   intent_checks:{type:'array',minItems:4,maxItems:4,items:{type:'object',properties:{dimension:{type:'string',enum:intentDimensions},
      status:{type:'string',enum:['supported','unknown','mismatch']},field:{type:'string',enum:evidenceField.options},quote:{type:'string'}},
      required:['dimension','status','field','quote']}}},
    required: ['key', 'relevance', 'reason', 'moment_keys', 'lesser_known','intent_checks']}}},
@@ -103,7 +97,7 @@ const RESPONSE_SCHEMA = {
 const verdicts = z.object({verdicts: z.array(z.object({
  key: z.string(), relevance: z.number().int().min(0).max(10), reason: z.string(), moment_keys: z.array(z.string()).default([]),
  lesser_known: z.boolean().default(false),
- intent_checks:z.array(intentCheck).max(3).optional(),
+ intent_checks:z.array(intentCheck).max(4).optional(),
 }))});
 
 // Ranks candidates with any model client. The bucket is the daily budget it spends.
@@ -127,13 +121,13 @@ export class ModelJudge implements Judge {
      const candidate = byKey.get(v.key);
      if (!candidate || result.has(v.key)) continue;
      const allowed = new Set(candidate.moments.map(m => m.key));
-     const ceiling=verdictCeiling(candidate,v.intent_checks,context?.kind);
+     const ceiling=verdictCeiling(candidate,v.intent_checks);
      const matches=ceiling>UNVERIFIED;
      const uncertainty=ceiling===TANGENTIAL?(v.relevance>ceiling?' Misses part of the request.':''):!matches?' Match not verified from the evidence.'
        :v.relevance<=ceiling?'':ceiling===6?' Metadata only; contents unverified.':' Supporting evidence only; exact match unverified.';
      result.set(v.key, {key: v.key, relevance: Math.min(v.relevance,ceiling), reason: v.reason.trim().slice(0, 240)+uncertainty,
-       ...(matches?{intentChecks:v.intent_checks}:{}),
-       momentKeys: [...new Set(v.moment_keys)].filter(k => allowed.has(k)), lesserKnown: v.lesser_known});
+       ...(v.intent_checks?{intentChecks:v.intent_checks}:{}),
+       momentKeys: matches ? [...new Set(v.moment_keys)].filter(k => allowed.has(k)) : [], lesserKnown: v.lesser_known});
    }
    return {model: reply.model, verdicts: result};
  }

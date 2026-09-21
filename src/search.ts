@@ -1,7 +1,7 @@
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import type { DB } from './db.js';
 import type { Config } from './config.js';
-import { searchInput, type Result, type SearchInput, type SearchResponse, type ProviderStatus, type SceneAnalysisStatus } from './types.js';
+import { searchInput, type Result, type SearchInput, type SearchResponse, type ClosestMatchesResponse, type ProviderStatus, type SceneAnalysisStatus } from './types.js';
 import { activeScene, sceneAnalysisStatus } from './scenes.js';
 import { retrieve } from './retrieval.js';
 import { matchesFilters } from './catalogue.js';
@@ -41,7 +41,7 @@ const withDetails = (item: Result, found: Result): Result => ({...item,
  ...(found.preview && found.id === item.id ? {preview: true} : {})});
 
 // Completion replaces provisional ordering across quick, deep and catalogue results. A slower
-// source can take the first position. Unjudged catalogue entries follow the ranked discovery pool.
+// source can take the first position. Once judging was attempted, only its accepted pool remains.
 function merge(existing: Result[], found: Result[], filters: SearchInput, final: {dropped: string[]; deep: boolean; checked:boolean}|null) {
  const results = [...existing];
  const at = new Map(results.map((r, i) => [r.canonical_url, i]));
@@ -97,6 +97,24 @@ export class SearchService {
    return row;
  }
  async poll(id:string,owner:string) { return this.page(await this.owned(id,owner),0); }
+ async closest(id:string,owner:string):Promise<ClosestMatchesResponse> {
+   const snapshot=await this.owned(id,owner);
+   const response=(status:ClosestMatchesResponse['status'],message:string,results:Result[]=[]):ClosestMatchesResponse=>
+     ({search_id:id,status,message,results});
+   if(snapshot.cancelled) return response('cancelled','Discovery updates were stopped. Start another search to see closest matches.');
+   if(!snapshot.job_id) return response('unavailable','Closest matches are available after external discovery. Try a fresh discovery search.');
+   const job=(await this.db.query('SELECT status,result FROM jobs WHERE id=$1',[snapshot.job_id])).rows[0];
+   if(job && ['queued','running'].includes(job.status)) return response('pending','Closest matches will be available when discovery finishes.');
+   if(job?.status!=='complete') return response('unavailable','Discovery could not finish. Retry the search to see closest matches.');
+   const main=new Set((job.result?.results??[]).map((r:Result)=>r.canonical_url));
+   const items:Result[]=(job.result?.closest??[]).filter((r:Result)=>!main.has(r.canonical_url) &&
+     r.judgement && r.judgement.relevance>=3 && r.judgement.relevance<=5 &&
+     !r.judgement.intent_checks?.some(c=>c.status==='mismatch')).slice(0,20);
+   const shown=await this.visible(snapshot,items);
+   const results=items.flatMap(r=>shown.get(r.id)??[]);
+   return response('ready',results.length?'These are partial or uncertain matches. Check the reason shown on each result.'
+     :'No closest matches are available for this search.',results);
+ }
  async cancel(id:string,owner:string) {
    await this.owned(id,owner);
    await this.db.query('UPDATE searches SET cancelled=true WHERE id=$1 AND owner=$2',[id,owner]);
@@ -145,7 +163,7 @@ export class SearchService {
      if (current.discovery_applied || current.cancelled) return current;
      const results = merge(current.results,found,current.filters,
        final ? {dropped:job.result.dropped??[],deep:current.filters.depth==='deep',
-         checked:(job.result.providers??[]).some((p:ProviderStatus)=>p.provider==='judge'&&(p.status==='ok'||p.status==='partial'))} : null);
+         checked:(job.result.providers??[]).some((p:ProviderStatus)=>p.provider==='judge')} : null);
      const providers = final ? [...current.provider_status,...(job.result.providers??[])] : current.provider_status;
      return (await tx.query(`UPDATE searches SET results=$2,provider_status=$3,discovery_applied=$4 WHERE id=$1 RETURNING *`,
        [current.id,JSON.stringify(results.slice(0,250)),JSON.stringify(providers),final])).rows[0];

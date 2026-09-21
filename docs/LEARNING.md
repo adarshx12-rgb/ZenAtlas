@@ -8,11 +8,13 @@ The engine keeps evidence about how well each search went, so later changes can 
 
 | Metric | Meaning |
 |---|---|
-| `verified`, `possible`, `closest` | Shown results that passed quote verification, fill-ins marked *Possible match*, and *Closest match* fallbacks |
+| `verified`, `possible`, `closest` | Shown results that passed quote verification; `possible` and `closest` track historical fill-ins and are zero for new searches under strict filtering |
 | `rejected`, `near_misses` | Judged candidates not shown; those that scored 3–4 |
 | `last_round_share` | Share of shown results first found in the final follow-up round. High means the search stopped too early; `null` when no follow-up round ran |
 | `duplicate_groups` | Shown results that look like one series (for example "Part 17", "Part 18") |
 | `basis` | Shown results judged on metadata, viewer claims or direct evidence |
+
+The optional Closest matches tab does not change these main-ranking metrics. Its candidates remain marked as not shown in the discovery trace; opening or voting on an optional result records ordinary result feedback with the same search and trace.
 
 **Searcher feedback** (`result_feedback`). Every result card has *Useful* / *Not useful*; after *Not useful*, optional reasons (off-topic, low quality, wrong format, duplicate). Opening a result is recorded, and *Missing something?* under the results takes a free-text note. Unlike `POST /api/feedback`, this works for every result, retained in the catalogue or not. Votes on retained records still feed the bounded personal ranking.
 

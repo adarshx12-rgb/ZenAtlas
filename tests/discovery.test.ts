@@ -43,8 +43,7 @@ test('late specialist semantic matches compete before the display limit, regardl
    assert.deepEqual(first.results.map(r=>r.canonical_url),second.results.map(r=>r.canonical_url));
    assert.deepEqual(first.results.map(r=>r.judgement?.relevance),[9],'weak earlier candidates cannot fill spare display slots');
    const failed=await run(true,{async judge(){throw Error('unavailable');}});
-   assert.ok(failed.results.every(r=>r.canonical_url.startsWith('https://general.example.org/')),
-     'when checking fails, semantic-only guesses cannot displace actual keyword matches');
+   assert.deepEqual(failed.results,[], 'when checking fails, no unchecked discovery result is displayed');
  }finally{await db.close();}
 });
 
@@ -61,6 +60,33 @@ test('clear keyword matches fill the checking pool before loosely related leads,
    assert.equal(out.ingested.length,3);
    assert.ok(out.ingested.every(r=>r.title.startsWith('Hidden OSINT tools')),out.ingested.map(r=>r.title).join(', '));
  }finally{await db.close();}
+});
+
+test('completed judging cannot leave provisional catalogue matches behind after rejection or failure',async()=>{
+ const db=await database();
+ try {
+   const item=await fixture(db,'WWE commentators gone crazy moments','WWE commentary over unrelated gaming footage');
+   const config={...testConfig,SEARXNG_BASE_URL:'http://localhost:8080'};
+   const service=new SearchService(db,config);
+   const adapter:SourceAdapter={name:'fixture',capabilities:{transcripts:false,comments:false,embeds:false,accessible_media:false},
+     async search(){return {results:[contentInput.parse({url:item.canonical_url,title:item.title,description:item.description})],
+       next_cursor:null,status:{provider:'fixture',status:'ok',message:'Fixture'}};}};
+   for(const failing of [false,true]) {
+     const started=await service.start({q:failing?'WWE commentators':'WWE moments',mode:'refresh'},'strict-display');
+     assert.equal(started.results.length,1,'catalogue supplies the provisional match');
+     const judge:Judge={async judge(_q,candidates){
+       if(failing) throw Error('fixture judge failure');
+       return {model:'fixture',verdicts:new Map(candidates.map(c=>[c.key,{key:c.key,relevance:5,reason:'Uncertain relationship',momentKeys:[]}]))};
+     }};
+     await workOnce(db,config,[adapter],undefined,{judge});
+     const finished=await service.poll(started.search_id,'strict-display');
+     assert.deepEqual(finished.results,[]);
+     assert.deepEqual(finished.ranked,[]);
+     assert.deepEqual(finished.discovered,[]);
+     assert.deepEqual((await service.poll(started.search_id,'strict-display')).results,[],'subsequent polls cannot resurrect the rejected match');
+     assert.equal(finished.status,failing?'partial':'complete');
+   }
+ } finally {await db.close();}
 });
 
 test('discovery ranking drops unrelated leads only when related ones exist, and stems simple plurals',()=>{

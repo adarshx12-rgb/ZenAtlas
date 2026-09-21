@@ -21,8 +21,18 @@
  <p id="status" role="status" aria-live="polite">Enter a query to search the catalogue.</p>
  <div id="deep-row" class="deep-row" hidden><button id="deep" type="button">Dig deeper ↓</button><span class="hint">Search specialist sites, archive catalogues and references. When sources finish, all finds are checked and ranked together by relevance.</span></div>
  <div id="notices"></div>
- <section id="results" class="thumb-grid" aria-label="Search results"><div id="catalogue-results" class="card-group"></div><div id="found-results" class="card-group"></div>
+ <div id="match-tabs" class="tabs match-tabs" role="tablist" aria-label="Match quality">
+  <button id="tab-matches" type="button" role="tab" class="active" aria-selected="true" aria-controls="results">Matches</button>
+  <button id="tab-closest" type="button" role="tab" aria-selected="false" aria-controls="closest-panel" tabindex="-1">Closest matches</button>
+ </div>
+ <section id="results" class="thumb-grid" role="tabpanel" aria-labelledby="tab-matches"><div id="catalogue-results" class="card-group"></div><div id="found-results" class="card-group"></div>
   <h3 id="deep-heading" class="group-heading" hidden>Deep dive finds</h3><div id="deep-results" class="card-group"></div></section>
+ <section id="closest-panel" role="tabpanel" aria-labelledby="tab-closest" hidden>
+  <p class="hint">Broader suggestions that may only partially match your request.</p>
+  <p id="closest-status" role="status" aria-live="polite">Select this tab to load closest matches.</p>
+  <button id="closest-retry" type="button" class="secondary" hidden>Retry closest matches</button>
+  <div id="closest-results" class="thumb-grid"></div>
+ </section>
  <section id="image-results" class="image-grid" aria-label="Image results" hidden></section>
  <button id="image-more" class="secondary" hidden>Load more images</button>
  <button id="more" class="secondary" hidden>Load more results</button>

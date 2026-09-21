@@ -46,7 +46,7 @@ export interface SceneAnalysisStatus {
 }
 export type EvidenceType = 'transcript_supported'|'video_analysed'|'viewer_timestamp';
 export interface Judgement { relevance: number; reason: string; model: string;
- intent_checks?:{dimension:'subject'|'intent'|'format';status:'supported'|'unknown'|'mismatch';field:string;quote:string}[] }
+ intent_checks?:{dimension:'subject'|'intent'|'relationship'|'format';status:'supported'|'unknown'|'mismatch';field:string;quote:string}[] }
 export interface Moment {
  id: string; start_seconds: number; end_seconds: number; summary: string;
  evidence_type: EvidenceType; analysis_version: string;
@@ -67,6 +67,9 @@ export interface Result {
  deep_find?: boolean;
 }
 export type DiscoveryStage = 'queued'|'searching'|'following'|'checking';
+export interface ClosestMatchesResponse {
+ search_id: string; status: 'pending'|'ready'|'unavailable'|'cancelled'; results: Result[]; message: string;
+}
 export interface SearchResponse {
  query: string; search_id: string; status: 'complete'|'discovering'|'partial'|'cancelled';
  depth: SearchInput['depth']; stage: DiscoveryStage|null;

@@ -8,6 +8,10 @@ const missing=document.querySelector('#missing'),missingNote=document.querySelec
 const videoGrid=document.querySelector('#results'),imageGrid=document.querySelector('#image-results');
 const imageMore=document.querySelector('#image-more'),resultsHeading=document.querySelector('#results-heading');
 const tabVideos=document.querySelector('#tab-videos'),tabImages=document.querySelector('#tab-images');
+const matchTabs=document.querySelector('#match-tabs'),tabMatches=document.querySelector('#tab-matches'),tabClosest=document.querySelector('#tab-closest');
+const closestPanel=document.querySelector('#closest-panel'),closestBox=document.querySelector('#closest-results');
+const closestStatus=document.querySelector('#closest-status'),closestRetry=document.querySelector('#closest-retry');
+let matchView='matches',closestSearch=null,closestLoaded=false,closestRequest=null,closestAbort=null,closestTimer=null,closestDeadline=0,lastSearchData=null;
 const controller=new SearchController();
 // Images come from a separate discovery-only endpoint, so they keep their own paging state
 // rather than sharing the search snapshot's cursor.
@@ -52,7 +56,7 @@ function card(item){
  if(details.length)article.append(node('div',details.join(' · '),'details'));
  for(const badge of item.badges??[])article.append(node('span',badge,badge===UNDERRATED?'badge gem':'badge highlight'));
  article.append(node('span',item.evidence.replaceAll('_',' '),'badge'),node('span',`Rights: ${item.rights_status}`,'badge'));
- if(item.judgement)article.append(node('p',`Why this matches (${item.judgement.relevance}/10): ${item.judgement.reason}`,'why'));
+ if(item.judgement)article.append(node('p',`${item.badges?.includes('Closest match')?'Why this may be related':'Why this matches'} (${item.judgement.relevance}/10): ${item.judgement.reason}`,'why'));
  else if(item.origin==='discovery')article.append(node('p','Relevance has not been checked.','hint'));
  if(item.description)article.append(node('p',item.description));
  for(const moment of item.moments){
@@ -119,10 +123,68 @@ function showDeepHeading(data,busy){
  deepHeading.hidden=true;
 }
 const shownCount=()=>catalogueBox.children.length+foundBox.children.length+deepBox.children.length;
+function resetClosest(resetView=true){
+ clearTimeout(closestTimer);closestDeadline=0;
+ closestAbort?.abort();closestAbort=null;closestRequest=null;closestSearch=null;closestLoaded=false;
+ closestBox.replaceChildren();closestRetry.hidden=true;closestPanel.removeAttribute('aria-busy');
+ closestStatus.textContent='Select this tab to load closest matches.';
+ if(resetView)matchView='matches';
+}
+function showMatchView(){
+ const images=tabOf(window.location.search)==='images',closest=matchView==='closest';
+ matchTabs.hidden=images;closestPanel.hidden=images||!closest;videoGrid.hidden=images||closest;
+ status.hidden=!images&&closest;
+ if(!images)resultsHeading.textContent=closest?'Closest matches':'Search results';
+ for(const [button,selected] of [[tabMatches,!closest],[tabClosest,closest]]){
+  button.setAttribute('aria-selected',String(selected));button.tabIndex=selected?0:-1;button.classList.toggle('active',selected);
+ }
+ if(closest&&!images)more.hidden=true;
+}
+async function loadClosest(){
+ if(matchView!=='closest'||tabOf(window.location.search)==='images')return;
+ if(!searchId){closestStatus.textContent='Run a search to see closest matches.';return;}
+ if(!current||!controller.current(current.generation)){closestStatus.textContent='Discovery updates were stopped. Start another search to see closest matches.';return;}
+ if(closestSearch!==searchId){resetClosest(false);closestSearch=searchId;}
+ if(closestLoaded||closestRequest)return;
+ clearTimeout(closestTimer);
+ closestDeadline ||= Date.now()+POLL_WINDOW_MS[lastSearchData?.depth??'quick'];
+ if(Date.now()>closestDeadline){closestStatus.textContent='Discovery is taking longer than expected. Retry to check for closest matches.';closestRetry.hidden=false;return;}
+ const request={id:searchId,generation:current.generation};closestRequest=request;closestAbort=new AbortController();
+ closestPanel.setAttribute('aria-busy','true');closestRetry.hidden=true;closestStatus.textContent='Loading closest matches…';
+ const valid=()=>closestRequest===request&&searchId===request.id&&controller.current(request.generation)&&matchView==='closest';
+ try{
+  const data=await api(`/api/search/${encodeURIComponent(request.id)}/closest`,{signal:closestAbort.signal});
+  if(!valid())return;
+  closestLoaded=data.status!=='pending';closestStatus.textContent=data.message;
+  if(data.status==='pending')closestTimer=setTimeout(()=>void loadClosest(),1500);
+  // Separate cards prevent an optional result from moving into the main results during polling.
+  closestBox.replaceChildren(...data.results.flatMap(item=>{try{return [card(item)];}catch{return [];}}));
+ }catch(error){if(valid()&&error.name!=='AbortError'){closestStatus.textContent=error.message;closestRetry.hidden=false;}}
+ finally{if(closestRequest===request){closestRequest=null;closestPanel.removeAttribute('aria-busy');}}
+}
+function selectMatchView(view){
+ matchView=view;
+ if(view==='matches'){
+  clearTimeout(closestTimer);
+  closestAbort?.abort();closestRequest=null;closestPanel.removeAttribute('aria-busy');
+  if(lastSearchData)render(lastSearchData);
+ }
+ showMatchView();if(view==='closest')void loadClosest();
+}
+tabMatches.addEventListener('click',()=>selectMatchView('matches'));
+tabClosest.addEventListener('click',()=>selectMatchView('closest'));
+closestRetry.addEventListener('click',()=>{closestDeadline=0;void loadClosest();});
+matchTabs.addEventListener('keydown',event=>{
+ if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+ event.preventDefault();const view=event.key==='Home'?'matches':event.key==='End'?'closest':matchView==='closest'?'matches':'closest';
+ selectMatchView(view);(view==='closest'?tabClosest:tabMatches).focus();
+});
 function render(data){
+ lastSearchData=data;
+ if(searchId!==data.search_id)resetClosest(false);
  searchId=data.search_id;catalogueTotal=data.catalogue_total;
  catalogueBox.replaceChildren();showFound(data.ranked??[...data.results.filter(r=>r.origin==='catalogue'),...data.discovered]);
- notices.replaceChildren(...data.providers.filter(p=>p.status!=='ok'||p.message.includes('did not')).map(p=>node('p',p.message,'notice')));
+ notices.replaceChildren(...data.providers.filter(p=>p.status!=='ok'||p.provider==='relevance_filter'||p.message.includes('did not')).map(p=>node('p',p.message,'notice')));
  const busy=data.status==='discovering',partial=data.status==='partial',deepDone=data.depth==='deep';
  cancel.hidden=!busy;
  missing.hidden=busy;if(missing.dataset.search!==data.search_id){missing.dataset.search=data.search_id;missingStatus.textContent='';}
@@ -134,6 +196,7 @@ function render(data){
  status.textContent=busy?`${label} so far. ${progressText(data)}`
   :count?`${label} · ${deepDone?(partial?'Deep dive finished; some services were unavailable':'Deep dive complete'):partial?'Some search services are unavailable':'Search complete'}`
   :partial?'No catalogue matches. Discovery is unavailable or incomplete.':'No matching results. Try another query or broader filters.';
+ showMatchView();if(matchView==='closest'&&closestRetry.hidden)void loadClosest();
 }
 async function poll(token,deadline,misses=0){if(!controller.current(token.generation))return;
  if(Date.now()>deadline){cancel.hidden=true;retry.hidden=false;const count=shownCount();
@@ -153,6 +216,7 @@ function follow(token,data){
  if(data.status==='discovering')pollTimer=setTimeout(()=>poll(token,Date.now()+POLL_WINDOW_MS[data.depth]),1500);
 }
 async function search(){clearTimeout(pollTimer);const previous=searchId;current=controller.begin();const token=current;
+ resetClosest();lastSearchData=null;showMatchView();
  if(previous)void api(`/api/search/${previous}`,{method:'DELETE',headers:{'X-Requested-With':'CreatorSearch'}}).catch(()=>{});
  searchId=null;next=null;cards.clear();catalogueBox.replaceChildren();foundBox.replaceChildren();deepBox.replaceChildren();deepHeading.hidden=true;notices.replaceChildren();
  more.hidden=true;retry.hidden=true;cancel.hidden=true;deepRow.hidden=true;status.textContent='Searching the catalogue…';
@@ -195,6 +259,7 @@ function syncTabs(tab){
  videoGrid.hidden=images_;imageGrid.hidden=!images_;
  resultsHeading.textContent=images_?'Image results':'Search results';
  if(images_){deepRow.hidden=true;cancel.hidden=true;more.hidden=true;missing.hidden=true;}else{imageMore.hidden=true;}
+ showMatchView();
 }
 
 function imageTile(item){
@@ -237,6 +302,7 @@ async function searchImagesPage(token,append){
 
 async function runImageSearch(){
  clearTimeout(pollTimer);current=controller.begin();const token=current;
+ resetClosest();lastSearchData=null;showMatchView();
  imagePage=1;imageGrid.replaceChildren();notices.replaceChildren();
  imageMore.hidden=true;retry.hidden=true;status.textContent='Searching for images…';
  try{await session();await searchImagesPage(token,false);}
@@ -289,7 +355,7 @@ more.addEventListener('click',async()=>{if(!next)return;const token=current;more
   }
   more.hidden=!(next&&pageEnd<catalogueTotal);
  }catch(error){if(controller.current(token.generation))status.textContent=error.message;}finally{more.disabled=false;}});
-cancel.addEventListener('click',()=>{clearTimeout(pollTimer);controller.stop();cancel.hidden=true;status.textContent='Discovery updates stopped. Your current results remain available.';if(searchId)void api(`/api/search/${searchId}`,{method:'DELETE',headers:{'X-Requested-With':'CreatorSearch'}}).catch(()=>{});});
+cancel.addEventListener('click',()=>{clearTimeout(pollTimer);controller.stop();resetClosest(false);closestStatus.textContent='Discovery updates were stopped. Start another search to see closest matches.';cancel.hidden=true;status.textContent='Discovery updates stopped. Your current results remain available.';if(searchId)void api(`/api/search/${searchId}`,{method:'DELETE',headers:{'X-Requested-With':'CreatorSearch'}}).catch(()=>{});});
 window.addEventListener('popstate',runFromURL);
 runFromURL();
 

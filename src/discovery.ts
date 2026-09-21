@@ -93,7 +93,7 @@ function leadsMaterial(results: {url: string; title: string; creator: string|nul
 // Returns the final order, the records it stored, the addresses its judge rejected after they had been shown, and the
 // searches it ran.
 export async function runDiscovery(db: DB, config: Config, input: SearchInput, adapters: SourceAdapter[]|undefined,
- deps: DiscoveryDeps, health: Health, progress: Progress = async () => {}): Promise<{results: Result[]; ingested: Result[]; dropped: string[];
+ deps: DiscoveryDeps, health: Health, progress: Progress = async () => {}): Promise<{results: Result[]; closest: Result[]; ingested: Result[]; dropped: string[];
  providers: ProviderStatus[]; previews: Map<string,Buffer>; searches: PlannedSearch[]; trace: SearchTrace}> {
  const deep = input.depth === 'deep' && !input.source;
  const providers = adapters ?? configuredProviders(config);
@@ -302,7 +302,7 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
    .slice(0, limit + earlier.results.length);
  const kept = new Set(results.map(r => r.canonical_url));
  for (const [id] of signals.previews) if (!results.some(r => r.id === id)) signals.previews.delete(id);
- return {results, ingested: found, previews: signals.previews, searches,
+ return {results, closest:signals.closest.filter(r=>matchesFilters(r,input)), ingested: found, previews: signals.previews, searches,
    dropped: [...new Set([...found, ...earlier.results].filter(r => !kept.has(r.canonical_url)).map(r => r.canonical_url))], providers: [...statuses, ...signals.providers],
    trace: traceOf(input, plan, searches, rounds, [...statuses, ...signals.providers], leads, found, leadUrl, signals.judged, results, roundOf)};
 }

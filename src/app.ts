@@ -101,6 +101,7 @@ export async function createApp(db:DB,config:Config) {
  // deep-dive machinery — one request in, one page of results out.
  app.get('/api/images',async req=>searchImages(db,config,imageSearchInput.parse(req.query)));
  app.get('/api/search/:id',async req=>service.poll(id(req.params),owner(req)));
+ app.get('/api/search/:id/closest',async req=>service.closest(id(req.params),owner(req)));
  app.delete('/api/search/:id',async req=>service.cancel(id(req.params),owner(req)));
  app.post('/api/search/:id/deep',async req=>service.deepen(id(req.params),owner(req)));
  app.get('/api/search/:id/previews/:result',async(req,reply)=>{
@@ -138,7 +139,8 @@ export async function createApp(db:DB,config:Config) {
  app.post('/api/search/:id/feedback',async(req,reply)=>{
    const input=searchFeedback.parse(req.body);
    const snapshot=await service.owned(id(req.params),owner(req));
-   const item=input.url?(snapshot.results as Result[]).find(r=>r.canonical_url===input.url):undefined;
+   let item=input.url?(snapshot.results as Result[]).find(r=>r.canonical_url===input.url):undefined;
+   if(input.url&&!item) item=(await service.closest(snapshot.id,owner(req))).results.find(r=>r.canonical_url===input.url);
    if(input.url&&!item) throw new ApiError(403,'result_required','Feedback requires a result from your search.');
    const trace=snapshot.job_id?(await db.query('SELECT id FROM search_traces WHERE job_id=$1',[snapshot.job_id])).rows[0]?.id??null:null;
    const values=[owner(req),snapshot.id,trace,snapshot.query,input.kind,input.url??null,input.useful??null,input.reason??null,input.note??null];

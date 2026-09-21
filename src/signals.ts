@@ -6,7 +6,7 @@ import { discoveryQuery, sameWord, STOPWORDS, tokens } from './ranking.js';
 import { UpstreamError } from './http.js';
 import { takeBudget } from './budgets.js';
 import { YouTubeData, youtubeId, type VideoDetails, type ViewerComment, type YouTubeClient } from './youtube.js';
-import { makeJudge, TANGENTIAL, type Judge, type JudgeCandidate, type JudgeContext, type JudgeResult, type Verdict } from './judge.js';
+import { makeJudge, type Judge, type JudgeCandidate, type JudgeContext, type JudgeResult, type Verdict } from './judge.js';
 import { PageChecker, type PageCheck, type PageEvidence } from './pages.js';
 import type { SearchTarget } from './planner.js';
 import {PublicVideoEvidence,selectComments,type VideoEvidenceAdapter,type VideoEvidence} from './video-evidence.js';
@@ -26,11 +26,7 @@ export interface SignalDeps { youtube?: YouTubeClient; judge?: Judge; pages?: Pa
 // underrated is retained for callers; obscurity is a badge, never a ranking boost.
 export interface SignalContext extends JudgeContext { targets: Map<string,SearchTarget>; underrated?: boolean }
 export const UNDERRATED_BADGE = 'Underrated find';
-export const CLOSEST_BADGE = 'Closest match';
-const CLOSEST_MATCHES = 5;
-// Verified matches always show. Unverified ones (the judge's plausible-but-unquoted 5) only fill a short list.
-export const POSSIBLE_BADGE = 'Possible match';
-const POSSIBLE_FILL = 10;
+// Uncertain verdicts remain in the trace, never as filler in the main results.
 const UNVERIFIED_SCORE = 5;
 const RETRY_BATCH = 10;
 
@@ -142,13 +138,13 @@ const unavailable = (provider: string, error: unknown, message: string): Provide
    : {provider, status: 'unavailable', message};
 
 // Enriches ranked discovery results with YouTube details and viewer timestamps, Reddit mentions and an AI relevance
-// judgement, then re-orders them. Every step is optional and a failing step leaves the others' results intact.
+// judgement, then re-orders them. Enrichment failures are optional; configured relevance checks must pass for display.
 // previews: first-screen captures of checked web pages by result id, kept only as long as the searches that show them.
 export interface Judged { id: string; relevance: number|null; reason: string|null; basis: 'metadata'|'viewer_claims'|'direct_evidence'|null }
 export async function applySignals(db: DB, config: Config, query: string, results: Result[], deps: SignalDeps = {}, context?: SignalContext) {
  const providers: ProviderStatus[] = [];
  const previews = new Map<string,Buffer>();
- if (!results.length) return {results, providers, previews, judged: [] as Judged[]};
+ if (!results.length) return {results, closest: [] as Result[], providers, previews, judged: [] as Judged[]};
  const rows = (await db.query(`SELECT c.id,c.duration,(s.policy->>'viewer_signals')::boolean AS viewer_signals,
    (s.policy->>'transcripts')::boolean AS transcripts FROM content c
    JOIN sources s ON s.id=c.source_id WHERE c.id=ANY($1::uuid[]) AND s.status='active' AND s.health_status<>'down'
@@ -293,11 +289,11 @@ export async function applySignals(db: DB, config: Config, query: string, result
    const failed = settled.flatMap(s => s.status === 'rejected' ? [s.reason] : []);
    if (failed.length < settled.length) {
      verdicts = new Map(pool.flatMap(r => { const v = byKey.get(keys.get(r.id)!); return v ? [[r.id, v] as const] : []; }));
-     providers.push(byKey.size < candidates.length ? {provider: 'judge', status: 'partial', message: 'Some results could not be checked by AI and are listed after checked ones.'}
+     providers.push(byKey.size < candidates.length ? {provider: 'judge', status: 'partial', message: 'Some results could not be checked by AI and were excluded.'}
        : {provider: 'judge', status: 'ok', message: 'Results were checked for relevance by AI.'});
    } else {
      logFailure('judge_failed', failed[0]);
-     providers.push(unavailable('judge', failed[0], 'AI relevance checking is unavailable right now; results use keyword ranking.'));
+     providers.push(unavailable('judge', failed[0], 'AI relevance checking is unavailable right now; unchecked discovery results were excluded.'));
    }
  }
 
@@ -317,7 +313,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
    const badges = [...(e?.badges ?? []), ...(underrated ? [UNDERRATED_BADGE] : [])];
    const evidenceData=retained.get(r.id);
    const basis:'metadata'|'viewer_claims'|'direct_evidence'=evidenceData?.transcripts.length||evidenceData?.scenes.length||e?.page?.status==='checked'?'direct_evidence':e?.comments.length?'viewer_claims':'metadata';
-   return {score, evidence, base, dropped: !!v && v.relevance <= TANGENTIAL, result: {...r,
+   return {score, evidence, base, dropped: !!judge && (!v || v.relevance <= UNVERIFIED_SCORE || v.intentChecks?.some(c=>c.status!=='supported')), result: {...r,
      evidence_coverage:{comments:e?.video?.commentStatus??(e?.comments.length?'available':'unavailable'),
        captions:e?.video?.captionStatus??(evidenceData?.transcripts.length?'available':'unavailable'),
        transcript_passages:evidenceData?.transcripts.length??0,analysed_scenes:evidenceData?.scenes.length??0,basis},
@@ -330,21 +326,19 @@ export async function applySignals(db: DB, config: Config, query: string, result
        ...(v.intentChecks?{intent_checks:v.intentChecks}:{})} : null}};
  });
  const order = (a: typeof scored[number], b: typeof scored[number]) => b.score - a.score || (a.score >= 0 ? b.evidence - a.evidence : 0) || b.base - a.base;
- let kept = scored.filter(s => !s.dropped);
- const verified = kept.filter(s => s.score > UNVERIFIED_SCORE).length;
- const possible = kept.filter(s => s.score === UNVERIFIED_SCORE).sort(order).slice(0, Math.max(0, POSSIBLE_FILL - verified));
- const guesses = kept.filter(s => s.score === UNVERIFIED_SCORE).length - possible.length;
- kept = [...kept.filter(s => s.score !== UNVERIFIED_SCORE),
-   ...possible.map(s => ({...s, result: {...s.result, badges: [...new Set([...(s.result.badges ?? []), POSSIBLE_BADGE])]}}))];
- const rejected=scored.filter(s=>s.dropped).length+guesses;
- // An empty page hides whether nothing matched or the checks were too strict. When every candidate was rejected,
- // the few that were at least tangential are shown and labelled; contradicted ones never are.
- const closest = kept.length ? [] : scored.filter(s => s.dropped && s.score > 2).sort(order).slice(0, CLOSEST_MATCHES);
- if(closest.length) {
-   kept = closest.map(s => ({...s, result: {...s.result, badges: [...new Set([...(s.result.badges ?? []), CLOSEST_BADGE])]}}));
-   providers.push({provider:'relevance_filter',status:'partial',message:`No result was confirmed as a strong match; showing the ${closest.length} closest.`});
- } else if(rejected) providers.push({provider:'relevance_filter',status:'ok',message:`${rejected} weak or insufficiently supported candidates were excluded. Fewer results may be shown.`});
+ const kept = scored.filter(s => !s.dropped);
+ const rejected=scored.length-kept.length;
+ if(rejected) providers.push({provider:'relevance_filter',status:'ok',message:kept.length
+   ? `${rejected} weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.`
+   : 'No sufficiently supported matches were found. Weak, uncertain and unchecked candidates were excluded.'});
  const ranked = kept.sort(order).map(s => s.result);
+ // Optional leads are retained separately and fetched only through the closest-matches endpoint.
+ // Explicit mismatches and unchecked results never qualify, even for this broader view.
+ const closest: Result[] = scored.filter(s=>s.dropped && s.score>=3 && s.score<=UNVERIFIED_SCORE &&
+   !s.result.judgement?.intent_checks?.some(c=>c.status==='mismatch')).sort(order).slice(0,20).map(s=>({
+     ...s.result, moments:[], evidence:'metadata_match', preview:false,
+     badges:[...new Set([...(s.result.badges??[]),'Closest match'])],
+   }));
  const shown = new Set(ranked.map(r => r.id));
  for (const id of previews.keys()) if (!shown.has(id)) previews.delete(id);
  const queued=await queueSceneShortlist(db,config,ranked,query).catch(()=>0);
@@ -352,5 +346,5 @@ export async function applySignals(db: DB, config: Config, query: string, result
  // Every candidate's verdict, rejected ones included, for the search's learning trace.
  const judged: Judged[] = scored.map(s => ({id: s.result.id, relevance: s.result.judgement?.relevance ?? null, reason: s.result.judgement?.reason ?? null,
    basis: s.result.judgement ? s.result.evidence_coverage?.basis ?? null : null}));
- return {results: ranked, providers, previews, judged};
+ return {results: ranked, closest, providers, previews, judged};
 }
