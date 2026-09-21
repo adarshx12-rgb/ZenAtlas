@@ -5,7 +5,7 @@ import {publicURL} from './urls.js';
 import {probeURL,UpstreamError,type ProbeResponse} from './http.js';
 import {configuredProviders} from './providers.js';
 import {searchInput,type SourceAdapter} from './types.js';
-import {takeBudget} from './budgets.js';
+import {providerBudget,takeBudget} from './budgets.js';
 import {enqueue,complete} from './queue.js';
 
 export const alternativeInput=z.object({url:z.string().url().max(2048),status:z.enum(['verified','rejected','candidate']),
@@ -67,6 +67,14 @@ async function observe(db:DB,config:Config,domain:string,probe:Probe,url=`https:
  }
 }
 
+// When to look at a source again. Approved sources are watched closely. Unreviewed candidates outnumber them a hundred
+// to one, so they get a slow, flat cadence even after a failure: probing every dead domain every SOURCE_HEALTH_RETRY_MINUTES
+// would spend the whole daily budget on domains nobody has approved.
+export function nextCheckMinutes(config:Config,status:string,state:Observation['state']):number{
+ if(status!=='active')return config.SOURCE_HEALTH_CANDIDATE_HOURS*60;
+ return state==='failure'?config.SOURCE_HEALTH_RETRY_MINUTES:config.SOURCE_HEALTH_HOURS*60;
+}
+
 export async function checkSource(db:DB,config:Config,job:any,probe:Probe=probeURL){
  const source=(await db.query("SELECT * FROM sources WHERE id=$1 AND status<>'rejected'",[job.payload.source_id])).rows[0];
  if(!source){await complete(db,job,{status:'source_ineligible'});return;}
@@ -102,7 +110,7 @@ export async function checkSource(db:DB,config:Config,job:any,probe:Probe=probeU
    await tx.query(`UPDATE sources SET health_status=$2,health_failures=$3,health_checked_at=now(),health_code=$4,
      health_next_at=now()+($5*interval '1 minute') WHERE id=$1`,[source.id,
      observation.state==='healthy'?'healthy':observation.state==='blocked'?'blocked':down?'down':'degraded',failures,observation.code,
-     observation.state==='failure'?config.SOURCE_HEALTH_RETRY_MINUTES:config.SOURCE_HEALTH_HOURS*60]);
+     nextCheckMinutes(config,current.status,observation.state)]);
    await tx.query(`INSERT INTO source_health_events(source_id,kind,from_domain,code,job_id) VALUES($1,'check',$2,$3,$4)`,[source.id,source.active_domain,observation.code,job.id]);
    for(const row of alternatives)await tx.query('UPDATE source_alternatives SET checked_at=now(),last_health=$2 WHERE id=$1',[row.id,row.health.code]);
    // Recheck approval and domain ownership after probes; an administrator may have revoked the alternative meanwhile.
@@ -139,7 +147,7 @@ export async function discoverAlternatives(db:DB,config:Config,job:any,adapters?
  const input=searchInput.parse({q:`${source.domain} official website new domain`,mode:'refresh'});
  const providers=adapters??configuredProviders(config,'sources');
  const pages=await Promise.all(providers.slice(0,3).map(async provider=>{
-   if(!await takeBudget(db,`discovery:${provider.name}`,config.DISCOVERY_DAILY_BUDGET))return {provider:provider.name,status:'budget_exhausted',results:[]};
+   if(!await takeBudget(db,`discovery:${provider.name}`,providerBudget(config,provider.name)))return {provider:provider.name,status:'budget_exhausted',results:[]};
    try{const page=await provider.search(input.q,input);return {provider:provider.name,status:page.status.status,results:page.results};}
    catch{return {provider:provider.name,status:'unavailable',results:[]};}
  }));
@@ -152,8 +160,9 @@ export async function discoverAlternatives(db:DB,config:Config,job:any,adapters?
 
 export async function scheduleHealth(db:DB,config:Config){
  await db.transaction(async tx=>{
+   // Approved sources go first, so a backlog of candidates can never use up the day's probes before they are checked.
    const sources=(await tx.query(`SELECT * FROM sources WHERE status<>'rejected' AND health_next_at<=now()
-     ORDER BY health_next_at FOR UPDATE SKIP LOCKED LIMIT 10`)).rows;
+     ORDER BY status='active' DESC,health_next_at FOR UPDATE SKIP LOCKED LIMIT 10`)).rows;
    for(const source of sources){
      if((await tx.query("SELECT 1 FROM jobs WHERE kind='source_health' AND payload->>'source_id'=$1 AND status IN ('queued','running')",[source.id])).rows.length)continue;
      if(!await takeBudget(tx,'source_health_jobs',config.SOURCE_HEALTH_DAILY_BUDGET))break;

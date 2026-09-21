@@ -34,8 +34,9 @@ The **production worker** checks all registered non-rejected sources, including 
 
 Defaults:
 
-- Healthy/unknown sites: schedule a check every **6 hours** (`SOURCE_HEALTH_HOURS`).
-- Suspected outage: retry after **15 minutes** (`SOURCE_HEALTH_RETRY_MINUTES`).
+- Approved (active) sites, healthy or unknown: schedule a check every **6 hours** (`SOURCE_HEALTH_HOURS`).
+- Approved sites with a suspected outage: retry after **15 minutes** (`SOURCE_HEALTH_RETRY_MINUTES`).
+- Unreviewed candidate domains, whatever the outcome: check every **7 days** (`SOURCE_HEALTH_CANDIDATE_HOURS`, 168). There are far more candidates than approved sites, so checking them as often would use the whole daily probe budget. When budget is short, approved sites are scheduled first.
 - Mark down after **3 consecutive failed checks** (`SOURCE_HEALTH_FAILURES`), rather than three immediate HTTP attempts.
 - At most **1000 logical health probes/day** and 1000 scheduled health jobs/day (`SOURCE_HEALTH_DAILY_BUDGET`). Each logical probe is bounded to two redirects; a HEAD-not-supported response permits a bounded GET fallback that only reads response headers.
 

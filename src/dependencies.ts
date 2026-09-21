@@ -40,6 +40,9 @@ export interface Check {
 export const PROCESSES = {api: 'zenatlas-api', worker: 'zenatlas-worker', watchdog: 'zenatlas-watchdog'} as const;
 
 const ENGINE_FAILURES = 3, PROVIDER_FAILURES = 3, MODEL_FAILURES = 3;
+// A failure streak only counts while it is recent. Nothing resets it except a later call, so an engine or model that
+// stopped being called (a deep-dive-only engine, a standby fallback) would otherwise stay flagged for good.
+const RECENT = `checked_at>now()-interval '24 hours'`;
 const JOB_RUNNING_LIMIT_SECONDS = 15 * 60;
 const SEARXNG_MAX_AGE_DAYS = 30;
 // Stable public records that should always be found: YouTube's first upload, and AniList's first entry.
@@ -189,7 +192,7 @@ const FIXED_BUDGETS: {bucket: string; label: string; setting: keyof Config; esse
  {bucket: 'discovery_jobs', label: 'discovery searches', setting: 'DISCOVERY_DAILY_BUDGET', essential: true},
  {bucket: 'discovery:searxng', label: 'SearXNG requests', setting: 'SEARXNG_DAILY_BUDGET', essential: true},
  {bucket: 'discovery:google', label: 'Google requests', setting: 'DISCOVERY_DAILY_BUDGET', essential: true},
- {bucket: 'discovery:brave', label: 'Brave requests', setting: 'DISCOVERY_DAILY_BUDGET', essential: true},
+ {bucket: 'discovery:brave', label: 'Brave requests', setting: 'BRAVE_DAILY_BUDGET', essential: true},
  {bucket: 'planner_calls', label: 'AI planning calls', setting: 'JUDGE_DAILY_BUDGET'},
  {bucket: 'judge_calls', label: 'AI judging calls', setting: 'JUDGE_DAILY_BUDGET'},
  {bucket: 'youtube_units', label: 'YouTube quota units', setting: 'YOUTUBE_DAILY_UNITS'},
@@ -272,11 +275,11 @@ const searxngEngines: Check = {name: 'searxng_engines', label: 'Search engines',
    if (!config.SEARXNG_BASE_URL) return disabled('SearXNG is not configured.');
    const wanted = configuredEngines(config);
    const rows = (await db.query<{provider: string; failure_count: number; last_error_code: string|null}>(
-     `SELECT provider,failure_count,last_error_code FROM provider_health WHERE provider LIKE 'searxng:%'`)).rows
+     `SELECT provider,failure_count,last_error_code FROM provider_health WHERE provider LIKE 'searxng:%' AND ${RECENT}`)).rows
      .map(r => ({...r, engine: r.provider.slice('searxng:'.length)})).filter(r => wanted.has(r.engine));
    const down = rows.filter(r => r.failure_count >= ENGINE_FAILURES).sort((a, b) => b.failure_count - a.failure_count || a.engine.localeCompare(b.engine));
    const details = {engines_seen: rows.length, failing: Object.fromEntries(down.map(r => [r.engine, {failures: r.failure_count, reason: r.last_error_code}]))};
-   if (!down.length) return ok('answering', rows.length ? `All ${rows.length} engines used so far answered their latest searches.` : 'No engine results are recorded yet.', details);
+   if (!down.length) return ok('answering', rows.length ? `All ${rows.length} engines used in the last day answered their latest searches.` : 'No engine results were recorded in the last day.', details);
    const text = `${list(down.map(r => `${r.engine} (${r.failure_count} in a row${r.last_error_code && r.last_error_code !== 'unavailable' ? `, ${r.last_error_code}` : ''})`))} failed ${down.length === 1 ? 'its' : 'their'} latest searches.`;
    const standard = engineNames(config.SEARXNG_ENGINES);
    const standardDown = standard.filter(e => down.some(r => r.engine === e));
@@ -294,7 +297,7 @@ const searchProviders: Check = {name: 'search_providers', label: 'Discovery prov
    const providers = configuredProviders(config).map(p => p.name);
    if (!providers.length) return failing('none_configured', 'No discovery provider is configured (SEARXNG_BASE_URL, BRAVE_SEARCH_API_KEY or Google), so searches only use the saved catalogue.');
    const rows = new Map((await db.query<{provider: string; failure_count: number; last_error_code: string|null}>(
-     'SELECT provider,failure_count,last_error_code FROM provider_health WHERE provider=ANY($1::text[])', [providers])).rows.map(r => [r.provider, r]));
+     `SELECT provider,failure_count,last_error_code FROM provider_health WHERE provider=ANY($1::text[]) AND ${RECENT}`, [providers])).rows.map(r => [r.provider, r]));
    const issues: Issue[] = [];
    const down = providers.filter(p => (rows.get(p)?.failure_count ?? 0) >= PROVIDER_FAILURES);
    if (down.length) {
@@ -402,7 +405,7 @@ const gemini: Check = {name: 'gemini', label: 'Gemini models', category: 'ai', e
    if (!planning.includes(config.GEMINI_MODEL) && !available.has(config.GEMINI_MODEL)) issues.push({status: 'warning', code: 'scene_model_retired', text: `GEMINI_MODEL ${config.GEMINI_MODEL}, used by the scene worker, is no longer offered.`});
    // What real searches saw: a model can be listed yet unusable, for example when its daily free quota is used up.
    const calls = new Map((await db.query<{provider: string; failure_count: number; last_error_code: string|null}>(
-     'SELECT provider,failure_count,last_error_code FROM provider_health WHERE provider=ANY($1::text[])', [usable.map(m => `gemini:${m}`)])).rows
+     `SELECT provider,failure_count,last_error_code FROM provider_health WHERE provider=ANY($1::text[]) AND ${RECENT}`, [usable.map(m => `gemini:${m}`)])).rows
      .map(r => [r.provider.slice('gemini:'.length), r]));
    const struggling = usable.filter(m => (calls.get(m)?.failure_count ?? 0) >= MODEL_FAILURES);
    if (struggling.length) {

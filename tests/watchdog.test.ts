@@ -107,6 +107,20 @@ test('worker and queue checks notice a stopped worker and searches that wait',as
  }finally{await db.close();}
 });
 
+test('the budget check measures Brave against its own limit, not the shared discovery one',async()=>{
+ const db=await database();
+ try{
+   await db.query(`INSERT INTO budgets(bucket,window_start,used) VALUES('discovery:brave',date_trunc('day',now()),100)`);
+   const quiet=await check('budgets').run(env(db));
+   assert.equal(quiet.status,'ok','100 of 250 is well within Brave\'s limit, though it would exhaust the shared 100');
+   assert.match(quiet.summary,/Brave requests at 40% \(100\/250\)/);
+   await db.query(`UPDATE budgets SET used=250 WHERE bucket='discovery:brave'`);
+   const spent=await check('budgets').run(env(db));
+   assert.match(spent.summary,/Today's Brave requests are used up \(250\/250\)/);
+   assert.match(spent.summary,/Raise BRAVE_DAILY_BUDGET/);
+ }finally{await db.close();}
+});
+
 test('database, budget and running-code checks read local state',async()=>{
  const db=await database();
  try{
@@ -158,6 +172,8 @@ test('the Gemini check finds retired models, rejected keys and models failing in
    for(let i=0;i<3;i++)await providerHealth(db,'gemini:gemini-3.8-flash',false,'rate_limited_daily RESOURCE_EXHAUSTED');
    result=await check('gemini').run(e);
    assert.equal(result.code,'model_failing');assert.match(result.summary,/gemini-3\.8-flash failed its last 3 calls \(daily quota used up\)/);
+   await db.query("UPDATE provider_health SET checked_at=now()-interval '2 days' WHERE provider='gemini:gemini-3.8-flash'");
+   assert.equal((await check('gemini').run(e)).status,'ok','a streak that nothing has added to for two days is old news, not a current failure');
 
    offered=['gemini-9-flash'];
    result=await check('gemini').run(e);
@@ -202,7 +218,7 @@ test('SearXNG checks find engines the instance lacks, engines failing in searche
    const down=await check('searxng').run(env(db,{config,transport:fails(new UpstreamError('network_error'))}));
    assert.equal(down.code,'unreachable');assert.match(down.summary,/http:\/\/127\.0\.0\.1:8080 is not answering \(network_error\)/);
 
-   assert.equal((await check('searxng_engines').run(e)).summary,'No engine results are recorded yet.');
+   assert.equal((await check('searxng_engines').run(e)).summary,'No engine results were recorded in the last day.');
    for(let i=0;i<3;i++)await providerHealth(db,'searxng:dailymotion',false,'timed out');
    await providerHealth(db,'searxng:youtube',true);
    await providerHealth(db,'searxng:retired-engine',false);
@@ -223,6 +239,31 @@ test('SearXNG checks find engines the instance lacks, engines failing in searche
    assert.equal((await check('search_providers').run(e)).status,'ok');
    for(let i=0;i<3;i++)await providerHealth(db,'searxng',false,'partial');
    assert.equal((await check('search_providers').run(e)).code,'providers_failing');
+ }finally{await db.close();}
+});
+
+test('a failure streak stops counting once nothing has called that engine or provider for a day',async()=>{
+ const db=await database();
+ try{
+   const config={...testConfig,SEARXNG_BASE_URL:'http://127.0.0.1:8080',SEARXNG_ENGINES:'youtube,dailymotion,odysee',SEARXNG_SOURCE_ENGINES:'google',
+     SEARXNG_WEB_ENGINES:'google,bing',SEARXNG_DEEP_ENGINES:'acfun',SEARXNG_DEEP_WEB_ENGINES:''};
+   const e=env(db,{config});
+   // acfun only runs in deep dives, so its last failures can be days old by the time anyone looks.
+   for(let i=0;i<9;i++)await providerHealth(db,'searxng:acfun',false);
+   for(let i=0;i<3;i++)await providerHealth(db,'searxng',false,'partial');
+   assert.equal((await check('searxng_engines').run(e)).code,'engines_failing');
+   assert.equal((await check('search_providers').run(e)).code,'providers_failing');
+   await db.query("UPDATE provider_health SET checked_at=now()-interval '3 days' WHERE provider IN ('searxng:acfun','searxng')");
+   const engines=await check('searxng_engines').run(e),providers=await check('search_providers').run(e);
+   assert.equal(engines.status,'ok','acfun failed nine times three days ago and has not been asked since');
+   assert.match(engines.summary,/^No engine results were recorded in the last day/);
+   assert.equal(providers.status,'ok');
+   // Asked again and failed again: the streak is live once more, and it still counts every failure since the last success.
+   await providerHealth(db,'searxng:acfun',false);
+   const again=await check('searxng_engines').run(e);
+   assert.equal(again.status,'warning');assert.match(again.summary,/^acfun \(10 in a row\)/);
+   await providerHealth(db,'searxng:acfun',true);
+   assert.equal((await check('searxng_engines').run(e)).status,'ok','a success clears it');
  }finally{await db.close();}
 });
 

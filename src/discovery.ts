@@ -2,7 +2,7 @@ import type { DB } from './db.js';
 import type { Config } from './config.js';
 import type { DiscoveryPage, EngineFailure, ProviderStatus, Result, SearchInput, SourceAdapter } from './types.js';
 import { configuredProviders, engineStatus, SearXNG } from './providers.js';
-import { takeBudget } from './budgets.js';
+import { providerBudget, takeBudget } from './budgets.js';
 import { canonicalize } from './urls.js';
 import { rankDiscovery, type DiscoveryCandidate } from './ranking.js';
 import { ingest } from './catalogue.js';
@@ -175,8 +175,7 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
    }));
    outcomes.push(...(await Promise.all(jobs.map(async ({search, provider, adapter}): Promise<Outcome|null> => {
      if (Date.now() > deadline) return null;
-     const budget = provider.name === 'searxng' ? config.SEARXNG_DAILY_BUDGET : config.DISCOVERY_DAILY_BUDGET;
-     if (!await takeBudget(db, `discovery:${provider.name}`, budget)) return {provider, page: null, failure: 'budget_exhausted'};
+     if (!await takeBudget(db, `discovery:${provider.name}`, providerBudget(config, provider.name))) return {provider, page: null, failure: 'budget_exhausted'};
      const filters = {...input, q: search.query};
      try {
        let page: DiscoveryPage;

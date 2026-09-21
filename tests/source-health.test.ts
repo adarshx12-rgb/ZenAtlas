@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {database,fixture,testConfig} from './helpers.js';
-import {addSource,setAlternative,checkSource,discoverAlternatives,scheduleHealth} from '../src/source-health.js';
+import {addSource,setAlternative,checkSource,discoverAlternatives,scheduleHealth,nextCheckMinutes} from '../src/source-health.js';
 import {claim,enqueue} from '../src/queue.js';
 import {UpstreamError,type ProbeResponse} from '../src/http.js';
 import {SearchService} from '../src/search.js';
@@ -98,6 +98,41 @@ test('durable health scheduling includes link-only candidates, deduplicates work
    assert.equal((await db.query('SELECT health_status FROM sources WHERE id=$1',[source.id])).rows[0].health_status,'healthy');
    await checkSource(db,testConfig,recovered,healthy);
    assert.equal((await db.query('SELECT * FROM source_health_events')).rows.length,1);
+ }finally{await db.close();}
+});
+
+test('approved sources are watched closely, unreviewed candidates on a slow cadence whatever the outcome',()=>{
+ const config={...testConfig,SOURCE_HEALTH_HOURS:6,SOURCE_HEALTH_RETRY_MINUTES:15,SOURCE_HEALTH_CANDIDATE_HOURS:168};
+ assert.equal(nextCheckMinutes(config,'active','healthy'),6*60);
+ assert.equal(nextCheckMinutes(config,'active','blocked'),6*60);
+ assert.equal(nextCheckMinutes(config,'active','failure'),15,'an approved source that fails is retried soon');
+ for(const state of ['healthy','blocked','failure'] as const)
+   assert.equal(nextCheckMinutes(config,'candidate',state),168*60,`a candidate is only looked at weekly (${state}), so a dead domain is not probed every 15 minutes forever`);
+});
+
+test('a failing candidate waits a week for its next probe, while a failing approved source is retried soon',async()=>{
+ const db=await database();
+ try{
+   const candidate=await addSource(db,'https://unreviewed.example.org');
+   const approved=await fixture(db);
+   const failing=async(url:string):Promise<ProbeResponse>=>({url,status:503,redirects:[]});
+   await runHealth(db,candidate.id,failing);await runHealth(db,approved.source_id,failing);
+   const wait=async(id:string)=>Number((await db.query('SELECT extract(epoch FROM health_next_at-now())/3600 AS hours FROM sources WHERE id=$1',[id])).rows[0].hours);
+   assert.ok(await wait(candidate.id)>167,'candidate: about 168 hours');
+   assert.ok(await wait(approved.source_id)<1,'approved source: minutes');
+ }finally{await db.close();}
+});
+
+test('when the probe budget is short, approved sources are scheduled before older-due candidates',async()=>{
+ const db=await database();
+ try{
+   const candidate=await addSource(db,'https://older-due.example.org');
+   const approved=await fixture(db);
+   await db.query("UPDATE sources SET health_next_at=now()-interval '3 days' WHERE id=$1",[candidate.id]);
+   await db.query("UPDATE sources SET health_next_at=now()-interval '1 hour' WHERE id=$1",[approved.source_id]);
+   await scheduleHealth(db,{...testConfig,SOURCE_HEALTH_DAILY_BUDGET:1});
+   const queued=(await db.query("SELECT payload->>'source_id' AS id FROM jobs WHERE kind='source_health'")).rows.map(r=>r.id);
+   assert.deepEqual(queued,[approved.source_id],'the one probe of the day goes to the approved source, not the candidate that has waited longer');
  }finally{await db.close();}
 });
 

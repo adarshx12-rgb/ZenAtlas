@@ -215,7 +215,8 @@ All names are in `.env.example` and parsed in `src/config.ts`:
 | `SEARXNG_BASE_URL`, `SEARXNG_TOKEN` | Optional private discovery endpoint/proxy credential |
 | `SEARXNG_ENGINES` | The nine video engines above; each must be enabled in the instance |
 | `PROVIDER_TIMEOUT_MS`, `DISCOVERY_RESULTS` | 5000 ms per attempt (`.env.example` uses 12000 because video engines are slower; SearXNG is asked to finish 2 s earlier), 20 ranked results per search (30 in `.env.example`) |
-| `DISCOVERY_DAILY_BUDGET` | 100 searches per adapter/day; also caps scheduled collections |
+| `DISCOVERY_DAILY_BUDGET` | 100 searches per adapter/day (Google and other metered adapters); also caps discovery jobs, Reddit lookups and scheduled collections |
+| `BRAVE_DAILY_BUDGET` | 250 Brave Search API requests/day, separate from the shared limit above |
 | `COVERAGE_MIN_RESULTS`, `COVERAGE_MIN_SCORE` | 5 sufficiently matching records; normalized lexical/moment score at least 0.03 |
 | `COVERAGE_MIN_SOURCES` | 1 (3 in `.env.example`); auto mode also runs discovery when those strong matches come from fewer sites |
 | `SEARCH_TTL_SECONDS`, `DISCOVERY_CACHE_SECONDS` | 1800-second snapshots; 600-second discovery reuse |
