@@ -1,0 +1,3118 @@
+{
+  "q": "official whatsapp chat ui interface from over past 3 years",
+  "elapsed_ms": 53308,
+  "trace": {
+    "query": "official whatsapp chat ui interface from over past 3 years",
+    "depth": "quick",
+    "plan": {
+      "kind": "mixed",
+      "criteria": [
+        "Shows the WhatsApp chat user interface",
+        "Covers the period from approximately 2021 to 2024",
+        "Displays official design versions or documented updates"
+      ],
+      "model": "google/gemma-4-31b-it"
+    },
+    "searches": [
+      {
+        "query": "official whatsapp chat ui interface from over past 3 years",
+        "target": "videos",
+        "round": 0
+      },
+      {
+        "query": "official whatsapp chat ui interface from over past 3 years",
+        "target": "web",
+        "round": 0
+      },
+      {
+        "query": "official WhatsApp chat UI interface design evolution 2020 2023",
+        "target": "web",
+        "round": 0
+      },
+      {
+        "query": "WhatsApp chat interface UI evolution 2021 2024",
+        "target": "web",
+        "round": 0
+      }
+    ],
+    "rounds": 0,
+    "providers": [
+      {
+        "provider": "brave",
+        "status": "ok",
+        "message": "Brave discovery completed."
+      },
+      {
+        "provider": "searxng",
+        "status": "ok",
+        "message": "11 of 12 search engines answered; Brave (rate-limited) did not."
+      },
+      {
+        "provider": "planner",
+        "status": "ok",
+        "message": "AI planned 4 searches for mixed."
+      },
+      {
+        "provider": "jev_exploration",
+        "status": "ok",
+        "message": "Explored 4 pages and found 0 new candidates."
+      },
+      {
+        "provider": "candidate_pool",
+        "status": "partial",
+        "message": "221 candidates found; up to 60 candidates were selected for checking after all sources answered."
+      },
+      {
+        "provider": "jev_screener",
+        "status": "unavailable",
+        "message": "Candidate screening was unavailable; the original candidate order was used."
+      },
+      {
+        "provider": "youtube",
+        "status": "ok",
+        "message": "YouTube details and viewer comments checked."
+      },
+      {
+        "provider": "reddit",
+        "status": "ok",
+        "message": "Reddit discussions checked."
+      },
+      {
+        "provider": "pages",
+        "status": "ok",
+        "message": "8 of 20 result pages were checked, 5 in a browser."
+      },
+      {
+        "provider": "judge",
+        "status": "ok",
+        "message": "Results were checked for relevance by AI."
+      },
+      {
+        "provider": "relevance_filter",
+        "status": "ok",
+        "message": "39 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown."
+      }
+    ],
+    "pool": [
+      {
+        "url": "https://www.reddit.com/r/coolguides/comments/1cos43d/a_cool_guide_to_whatsapps_interface_design/",
+        "title": "r/coolguides on Reddit: A cool guide to WhatsApp’s interface design evolution over the years",
+        "site": "reddit.com",
+        "round": 0,
+        "relevance": 6,
+        "reason": "Reddit post discussing WhatsApp interface design evolution. Metadata only; contents unverified.",
+        "basis": "metadata",
+        "shown": true,
+        "rank": 6,
+        "badges": [
+          "Discussed on Reddit"
+        ]
+      },
+      {
+        "url": "https://www.news18.com/tech/whatsapp-redesign-chat-ui-for-iphone-and-android-users-is-live-heres-what-you-get-now-8885070.html",
+        "title": "WhatsApp Redesign Chat UI For iPhone And Android ... - News18",
+        "site": "news18.com",
+        "round": 0,
+        "relevance": 5,
+        "reason": "News article detailing the May 2024 WhatsApp chat UI redesign. Match not verified from the evidence.",
+        "basis": "direct_evidence",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://www.reddit.com/r/whatsapp/comments/1c8oun6/evolution_of_whatsapp_ui/",
+        "title": "Evolution of WhatsApp UI - Reddit",
+        "site": "reddit.com",
+        "round": 0,
+        "relevance": 6,
+        "reason": "Reddit thread discussing WhatsApp UI evolution across years. Metadata only; contents unverified.",
+        "basis": "metadata",
+        "shown": true,
+        "rank": 7,
+        "badges": [
+          "Discussed on Reddit"
+        ]
+      },
+      {
+        "url": "https://medium.com/@jennifermajala/whatapp-ui-ux-evolution-2020-2023-bd092bb94b96",
+        "title": "WhatApp UI/UX Evolution (2020–2023) | by Jennifer Majala | Medium",
+        "site": "medium.com",
+        "round": 0,
+        "relevance": 6,
+        "reason": "Medium article covering WhatsApp UI/UX evolution from 2020 to 2023.",
+        "basis": "metadata",
+        "shown": true,
+        "rank": 8,
+        "badges": []
+      },
+      {
+        "url": "https://www.linkedin.com/posts/manoharmamidi_frontenddeveloper-frontend-reactjs-activity-7490718514538803200-eOL4",
+        "title": "WhatsApp UI Evolution: Clean, Fast, and Intuitive - LinkedIn",
+        "site": "linkedin.com",
+        "round": 0,
+        "relevance": 6,
+        "reason": "LinkedIn post about the WhatsApp UI evolution.",
+        "basis": "metadata",
+        "shown": true,
+        "rank": 9,
+        "badges": []
+      },
+      {
+        "url": "https://www.montekservices.com/news/WhatsApp-Web-Introduces-New-User-Interface:-Here-is-What-Has-Changed",
+        "title": "WhatsApp Web Introduces New User Interface - Montek Services",
+        "site": "montekservices.com",
+        "round": 0,
+        "relevance": 7,
+        "reason": "Article about the WhatsApp Web interface update.",
+        "basis": "direct_evidence",
+        "shown": true,
+        "rank": 3,
+        "badges": [
+          "Underrated find"
+        ]
+      },
+      {
+        "url": "https://www.meta.com/design-at-meta/blog/whatsapp-user-interface-update/",
+        "title": "Keeping WhatsApp fresh, simple and approachable - Meta",
+        "site": "meta.com",
+        "round": 0,
+        "relevance": 9,
+        "reason": "Official Meta design blog detailing the WhatsApp UI update.",
+        "basis": "direct_evidence",
+        "shown": true,
+        "rank": 1,
+        "badges": []
+      },
+      {
+        "url": "https://www.deccanherald.com/technology/whatsapp-gets-refreshed-visual-user-interface-new-features-3016849",
+        "title": "WhatsApp gets refreshed visual user interface, new features",
+        "site": "deccanherald.com",
+        "round": 0,
+        "relevance": 6,
+        "reason": "Deccan Herald report on the refreshed WhatsApp visual user interface. Metadata only; contents unverified.",
+        "basis": "metadata",
+        "shown": true,
+        "rank": 10,
+        "badges": []
+      },
+      {
+        "url": "https://www.figma.com/community/file/1462688379607447469/whatsapp-chat-ui-2025",
+        "title": "Whatsapp chat UI 2025 - Figma",
+        "site": "figma.com",
+        "round": 0,
+        "relevance": 4,
+        "reason": "Figma community custom concept UI file, not official.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://www.macrumors.com/2024/05/10/whatsapp-for-iphone-android-new-design/",
+        "title": "WhatsApp Gets Overhauled Interface Design and New Attachment Tray - MacRumors",
+        "site": "macrumors.com",
+        "round": 0,
+        "relevance": 9,
+        "reason": "MacRumors article detailing the 2024 WhatsApp interface overhaul and 2021 comparison.",
+        "basis": "direct_evidence",
+        "shown": true,
+        "rank": 2,
+        "badges": []
+      },
+      {
+        "url": "https://www.pinterest.com/ideas/whatsapp-chat-interface/901006728823/",
+        "title": "Whatsapp Chat Interface - Pinterest",
+        "site": "pinterest.com",
+        "round": 0,
+        "relevance": 3,
+        "reason": "Pinterest idea collection for WhatsApp chat interfaces. Match not verified from the evidence.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=LYmR_y0RzpA",
+        "title": "Build a WhatsApp Chat Bubble UI in React Native Expo | React Native Tutorial | chat box",
+        "site": "youtube.com",
+        "round": 0,
+        "relevance": 2,
+        "reason": "Tutorial video on building a React Native chat bubble UI resembling WhatsApp, not an official UI display.",
+        "basis": "viewer_claims",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://www.creativebloq.com/news/whatsapp-ui-redesign-2024",
+        "title": "Whatsapp's UI redesign looks clean and fresh | Creative Bloq",
+        "site": "creativebloq.com",
+        "round": 0,
+        "relevance": 6,
+        "reason": "Covers WhatsApp UI redesign updates for dark mode and search bar placement. Metadata only; contents unverified.",
+        "basis": "metadata",
+        "shown": true,
+        "rank": 11,
+        "badges": []
+      },
+      {
+        "url": "https://www.figma.com/community/file/1330950114849676455/whatsapp-ui",
+        "title": "WhatsApp UI - Figma",
+        "site": "figma.com",
+        "round": 0,
+        "relevance": 6,
+        "reason": "Figma community file featuring a fully functioning WhatsApp chat interface. Metadata only; contents unverified.",
+        "basis": "metadata",
+        "shown": true,
+        "rank": 12,
+        "badges": []
+      },
+      {
+        "url": "https://dribbble.com/search/whatsapp-chat-ui",
+        "title": "whatsapp chat ui - Dribbble",
+        "site": "dribbble.com",
+        "round": 0,
+        "relevance": 3,
+        "reason": "Search results page for Dribbble design inspiration images. Match not verified from the evidence.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://www.techi.com/whatsapp-chat-list-filters-update/",
+        "title": "WhatsApp Introduces Major UI Change for Chat List Filters",
+        "site": "techi.com",
+        "round": 0,
+        "relevance": 7,
+        "reason": "Discusses WhatsApp chat list filters UI update for easier navigation.",
+        "basis": "direct_evidence",
+        "shown": true,
+        "rank": 4,
+        "badges": [
+          "Underrated find"
+        ]
+      },
+      {
+        "url": "https://nokiamob.net/2023/08/31/whatsapp-is-changing-user-interface-and-introducing-chat-filters/",
+        "title": "WhatsApp is changing user interface and introducing chat filters | Nokiamob",
+        "site": "nokiamob.net",
+        "round": 0,
+        "relevance": 5,
+        "reason": "Article about WhatsApp changing its user interface following Material Design 3 guidelines. Match not verified from the evidence.",
+        "basis": "direct_evidence",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://www.socialmediatoday.com/news/whatsapp-launches-refreshed-ui-elements/715743/",
+        "title": "WhatsApp Launches Refreshed UI Elements - Social Media Today",
+        "site": "socialmediatoday.com",
+        "round": 0,
+        "relevance": 6,
+        "reason": "Details WhatsApp UI refresh including updated graphic elements and lower function bar options. Metadata only; contents unverified.",
+        "basis": "metadata",
+        "shown": true,
+        "rank": 13,
+        "badges": []
+      },
+      {
+        "url": "https://www.reddit.com/r/UXDesign/comments/1c8p0gs/evolution_of_whatsapp_ui_for_android/",
+        "title": "r/UXDesign on Reddit: Evolution of WhatsApp UI for Android",
+        "site": "reddit.com",
+        "round": 0,
+        "relevance": 5,
+        "reason": "Reddit thread discussing the evolution of WhatsApp UI for Android over time. Match not verified from the evidence.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://github.com/jazimabbas/whatsapp-web-ui",
+        "title": "GitHub - jazimabbas/whatsapp-web-ui: UI for WhatsApp Web, a project aimed at providing users with an interface that closely resembles the popular messaging application. · GitHub",
+        "site": "github.com",
+        "round": 0,
+        "relevance": 5,
+        "reason": "GitHub project for a WhatsApp Web UI clone built with React and TypeScript. Match not verified from the evidence.",
+        "basis": "direct_evidence",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://www.indiatoday.in/technology/news/story/whatsapp-planning-to-change-ui-design-for-android-users-with-new-icons-and-colors-details-here-2441110-2023-09-27",
+        "title": "WhatsApp planning to change UI design for Android users with new icons and colors, details here - India Today",
+        "site": "indiatoday.in",
+        "round": 0,
+        "relevance": 7,
+        "reason": "Covers WhatsApp's planned UI design changes including new icons, colors, and chat bubble styles.",
+        "basis": "direct_evidence",
+        "shown": true,
+        "rank": 5,
+        "badges": []
+      },
+      {
+        "url": "https://medium.com/design-bootcamp/a-look-at-whatsapps-ui-ux-changes-over-time-4690cac3a6ab",
+        "title": "A Look at WhatsApp’s UI/UX Changes Over Time | by Hasitha Lakshan | Bootcamp | Medium",
+        "site": "medium.com",
+        "round": 0,
+        "relevance": 6,
+        "reason": "Medium article reviewing WhatsApp's UI/UX changes and feature integrations over time.",
+        "basis": "metadata",
+        "shown": true,
+        "rank": 14,
+        "badges": []
+      },
+      {
+        "url": "https://timesofindia.indiatimes.com/technology/social/whatsapp-web-getting-new-user-interface-heres-what-has-changed/articleshow/109351732.cms",
+        "title": "WhatsApp Web getting 'new' user interface: Here's what has ...",
+        "site": "timesofindia.indiatimes.com",
+        "round": 0,
+        "relevance": 5,
+        "reason": "Reports on WhatsApp Web receiving a new user interface with a sidebar for quick navigation. Match not verified from the evidence.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://www.uxpin.com/studio/blog/chat-user-interface-design/",
+        "title": "Chat UI Design: How to Build Effective Chat Interfaces in 2026",
+        "site": "uxpin.com",
+        "round": 0,
+        "relevance": 3,
+        "reason": "General blog post about chat UI design best practices.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://www.sammyfans.com/2024/12/03/whatsapp-redesigns-chat-list-interface-with-latest-beta-update/",
+        "title": "WhatsApp redesigns chat list interface with latest beta update - Sammy Fans",
+        "site": "sammyfans.com",
+        "round": 0,
+        "relevance": 6,
+        "reason": "Covers WhatsApp interface redesigns from recent years with specific version updates. Metadata only; contents unverified.",
+        "basis": "metadata",
+        "shown": true,
+        "rank": 15,
+        "badges": []
+      },
+      {
+        "url": "https://www.androidheadlines.com/2023/09/whatsapp-is-working-on-a-major-interface-redesign.html",
+        "title": "WhatsApp is working on a major interface redesign",
+        "site": "androidheadlines.com",
+        "round": 0,
+        "relevance": 6,
+        "reason": "Discusses WhatsApp's interface redesign updates. Metadata only; contents unverified.",
+        "basis": "metadata",
+        "shown": true,
+        "rank": 16,
+        "badges": []
+      },
+      {
+        "url": "https://www.uxsnaps.com/chat-interface",
+        "title": "WhatsApp UX Breakdown – Seamless Multi-Modal Communication",
+        "site": "uxsnaps.com",
+        "round": 0,
+        "relevance": 5,
+        "reason": "Describes WhatsApp UX rather than tracking chronological interface updates. Match not verified from the evidence.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=vP1D2GMprms",
+        "title": "How To Design Your WhatsApp Chat Screen - YouTube",
+        "site": "youtube.com",
+        "round": 0,
+        "relevance": 3,
+        "reason": "Tutorial on designing custom chat screens, not official WhatsApp UI versions.",
+        "basis": "viewer_claims",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://www.shutterstock.com/search/whatsapp-chat-ui",
+        "title": "Whatsapp Chat Ui royalty-free images - Shutterstock",
+        "site": "shutterstock.com",
+        "round": 0,
+        "relevance": 5,
+        "reason": "Royalty-free UI kits for WhatsApp chat design. Match not verified from the evidence.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://dev.to/soorajsnblaze333/i-built-a-whatsapp-web-ui-clone-2723",
+        "title": "I built a WhatsApp Web UI Clone - Chats section - DEV Community",
+        "site": "dev.to",
+        "round": 0,
+        "relevance": 3,
+        "reason": "A user-built clone, not official WhatsApp interface updates.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://economictimes.indiatimes.com/news/new-updates/whatsapp-to-get-redesigned-interface-soon-heres-what-we-know-about-the-major-update/articleshow/99662295.cms",
+        "title": "WhatsApp New Design: WhatsApp to get redesigned interface soon; Here’s what we know about the major update - The Economic Times",
+        "site": "economictimes.indiatimes.com",
+        "round": 0,
+        "relevance": 6,
+        "reason": "Reports on official WhatsApp interface updates and navigation redesigns. Metadata only; contents unverified.",
+        "basis": "metadata",
+        "shown": true,
+        "rank": 17,
+        "badges": []
+      },
+      {
+        "url": "https://customlytics.com/ui-ux-makeover-whatsapp/",
+        "title": "UI/UX Makeover: WhatsApp - New features for improved interface – Customlytics",
+        "site": "customlytics.com",
+        "round": 0,
+        "relevance": 5,
+        "reason": "UI/UX makeover concept review for WhatsApp. Match not verified from the evidence.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://octet.design/journal/best-chat-ui-design/",
+        "title": "Best Chat UI Design to Watch In 2025",
+        "site": "octet.design",
+        "round": 0,
+        "relevance": 2,
+        "reason": "General article about chat UI designs in 2025, not specific to WhatsApp.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://arcitech.ai/whatsapp-new-ui-redesign-here-what-you-need-to-know/",
+        "title": "WhatsApp New UI Redesign , Here What You Need To Know",
+        "site": "arcitech.ai",
+        "round": 0,
+        "relevance": 6,
+        "reason": "Covers WhatsApp's new UI redesign features. Metadata only; contents unverified.",
+        "basis": "metadata",
+        "shown": true,
+        "rank": 18,
+        "badges": []
+      },
+      {
+        "url": "https://www.pinterest.com/ideas/whatsapp-chat-ui-design/898886899674/",
+        "title": "Whatsapp Chat Ui Design - Pinterest",
+        "site": "pinterest.com",
+        "round": 0,
+        "relevance": 4,
+        "reason": "Pinterest idea collection for WhatsApp chat UI designs. Match not verified from the evidence.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://www.instagram.com/reel/DdlHYZKN30Y/",
+        "title": "WhatsApp is testing redesigned chat themes on Android, giving ...",
+        "site": "instagram.com",
+        "round": 0,
+        "relevance": 5,
+        "reason": "Short video showing WhatsApp testing redesigned chat themes. Match not verified from the evidence.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://muz.li/inspiration/chat-ui/",
+        "title": "60+ Best Chat UI Design Ideas (2026 Trends) - Muzli",
+        "site": "muz.li",
+        "round": 0,
+        "relevance": 2,
+        "reason": "General chat UI design inspiration unrelated to official WhatsApp updates.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://www.scribd.com/document/826964261/Template-WhatsappReport",
+        "title": "WhatsApp Chat UI Design Report | PDF - Scribd",
+        "site": "scribd.com",
+        "round": 0,
+        "relevance": 3,
+        "reason": "Mentions a WhatsApp chat UI design report and template file from early 2024. Match not verified from the evidence.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://www.zeebiz.com/india/video-gallery-whatsapp-chat-lists-interface-redesigned-for-android-331334",
+        "title": "WhatsApp chat lists interface redesigned for Android",
+        "site": "zeebiz.com",
+        "round": 0,
+        "relevance": 6,
+        "reason": "Video reporting on the redesigned WhatsApp chat lists interface for Android. Metadata only; contents unverified.",
+        "basis": "metadata",
+        "shown": true,
+        "rank": 19,
+        "badges": []
+      },
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/official",
+        "title": "OFFICIAL | English meaning - Cambridge Dictionary",
+        "site": "dictionary.cambridge.org",
+        "round": 0,
+        "relevance": 0,
+        "reason": "Dictionary definition of the word official.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://www.gizchina.com/2023/03/17/whatsapp-update-a-major-redesigned-interface-is-coming/",
+        "title": "WhatsApp Update, A New Redesigned Interface - Gizchina.com",
+        "site": "gizchina.com",
+        "round": 0,
+        "relevance": 6,
+        "reason": "Article discussing WhatsApp UI changes and upcoming redesigned interface updates. Metadata only; contents unverified.",
+        "basis": "metadata",
+        "shown": true,
+        "rank": 20,
+        "badges": [
+          "Discussed on Reddit"
+        ]
+      },
+      {
+        "url": "https://www.perigon.io/news/tech/2024/05/09/whatsapp-introduces-new-visual-user-interface",
+        "title": "WhatsApp Introduces New Visual User Interface | Perigon",
+        "site": "perigon.io",
+        "round": 0,
+        "relevance": 5,
+        "reason": "Covers WhatsApp's May 2024 introduction of a new visual user interface and design changes. Match not verified from the evidence.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://tech.yahoo.com/general/articles/whatsapp-gets-fresh-redesign-much-182233238.html",
+        "title": "WhatsApp Web gets a fresh redesign with some much-needed changes",
+        "site": "tech.yahoo.com",
+        "round": 0,
+        "relevance": 5,
+        "reason": "Article detailing the fresh redesign and UI updates made to WhatsApp Web. Match not verified from the evidence.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://www.dailymotion.com/video/x7pbfd2",
+        "title": "WhatsApp fixes message bug that made app unusable for groups",
+        "site": "dailymotion.com",
+        "round": 0,
+        "relevance": 4,
+        "reason": "Discusses a security bug affecting group chats via the WhatsApp web interface. Match not verified from the evidence.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://www.facebook.com/Gadgets360/posts/whatsapp-interface-changed-whatsapp-update-2026-whatsapp-whatsappupdate-whatsapp/1495539585942305/",
+        "title": "WhatsApp Interface Changed: WhatsApp Update 2026 ...",
+        "site": "facebook.com",
+        "round": 0,
+        "relevance": 5,
+        "reason": "Video and Reddit discussions about a WhatsApp interface update. Match not verified from the evidence.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://imageappeal.medium.com/whatsapps-new-ui-redesign-here-s-what-you-need-to-know-4bfaf348972e",
+        "title": "WhatsApp’s New UI Redesign — Here’s What You Need to Know | by Image Appeal | Medium",
+        "site": "imageappeal.medium.com",
+        "round": 0,
+        "relevance": 5,
+        "reason": "Detailed overview of WhatsApp's new UI redesign, aesthetic updates, and chat filters. Match not verified from the evidence.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://www.mobigyaan.com/whatsapp-new-interface-2024-colors-icons-dark-mode",
+        "title": "WhatsApp unveils revamped interface with fresh look, new colors, icons, improved dark mode, and enhanced design features",
+        "site": "mobigyaan.com",
+        "round": 0,
+        "relevance": 5,
+        "reason": "Official announcement coverage on WhatsApp's revamped interface, colors, icons, and dark mode features. Match not verified from the evidence.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://www.merriam-webster.com/dictionary/official",
+        "title": "OFFICIAL Definition & Meaning - Merriam-Webster",
+        "site": "merriam-webster.com",
+        "round": 0,
+        "relevance": 0,
+        "reason": "Dictionary definition of the word official.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://github.com/topics/whatsapp-ui",
+        "title": "whatsapp-ui · GitHub Topics · GitHub",
+        "site": "github.com",
+        "round": 0,
+        "relevance": 1,
+        "reason": "This is a GitHub topics page for WhatsApp Bot UI tools, not official WhatsApp chat interface designs.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://en.wikipedia.org/wiki/Official",
+        "title": "Official - Wikipedia",
+        "site": "en.wikipedia.org",
+        "round": 0,
+        "relevance": 0,
+        "reason": "Generic Wikipedia definition for the word 'Official', entirely unrelated to WhatsApp.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://www.figma.com/community/file/1270421127715570113/ultimate-whatsapp-ui-kit",
+        "title": "Ultimate WhatsApp UI Kit",
+        "site": "figma.com",
+        "round": 0,
+        "relevance": 3,
+        "reason": "This is a third-party UI design kit project on Figma, not official WhatsApp design updates.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://elements.envato.com/video-templates/whatsapp+ui",
+        "title": "Whatsapp Ui Editable Video Templates - Envato",
+        "site": "elements.envato.com",
+        "round": 0,
+        "relevance": 2,
+        "reason": "This page sells stock video templates replicating WhatsApp UI, not official chat UI history.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://www.behance.net/search/projects/whatsapp%20ui",
+        "title": "Whatsapp Ui Projects :: Photos, videos, logos, illustrations and branding :: Behance",
+        "site": "behance.net",
+        "round": 0,
+        "relevance": 3,
+        "reason": "Behance showcase of community concept projects and mockups rather than official WhatsApp releases.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://web.whatsapp.com/",
+        "title": "WhatsApp Web",
+        "site": "web.whatsapp.com",
+        "round": 0,
+        "relevance": 5,
+        "reason": "Official WhatsApp Web landing page; displays current UI access but lacks historical documentation of UI changes over the past 3 years. Match not verified from the evidence.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=K4nafC4wqPM",
+        "title": "How to Create a WhatsApp Chat App UI with HTML & CSS (Step-by-Step)",
+        "site": "youtube.com",
+        "round": 0,
+        "relevance": 2,
+        "reason": "A coding tutorial on building a WhatsApp clone with HTML/CSS, not documentation of official WhatsApp UI.",
+        "basis": "viewer_claims",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://medium.com/design-bootcamp/why-whatsapps-chat-ui-just-works-and-what-you-can-learn-from-it-bd89fb114423",
+        "title": "Why WhatsApp's Chat UI Just Works (and What You Can Learn ...",
+        "site": "medium.com",
+        "round": 0,
+        "relevance": 5,
+        "reason": "An article analyzing WhatsApp's official chat UI design features, though scope across the past 3 years is unverified from metadata. Match not verified from the evidence.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://dribbble.com/tags/whatsapp-ui",
+        "title": "Whatsapp UI designs, themes, templates and downloadable ...",
+        "site": "dribbble.com",
+        "round": 0,
+        "relevance": 3,
+        "reason": "Dribbble collection page for user-created WhatsApp UI concepts, not official interface documentation.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://www.whatsapp.com/download",
+        "title": "Download WhatsApp",
+        "site": "whatsapp.com",
+        "round": 0,
+        "relevance": 4,
+        "reason": "Official WhatsApp download page, does not show historical UI updates or chat screen details. Match not verified from the evidence.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://tube.fede.re/videos/watch/24e88967-2556-432a-8780-4ddde82f45f0",
+        "title": "RDC : ces messages WhatsApp qui prouvent les abus sexuels dans le football congolais",
+        "site": "tube.fede.re",
+        "round": 0,
+        "relevance": 0,
+        "reason": "News video discussing sexual abuse evidence via WhatsApp messages, entirely unrelated to UI design.",
+        "basis": "metadata",
+        "shown": false,
+        "rank": null,
+        "badges": []
+      },
+      {
+        "url": "https://www.creativebloq.com/news/new-whatsapp-ui-design",
+        "title": "Whatsapp's new UI design looks super sleek | Creative Bloq",
+        "site": "creativebloq.com",
+        "round": 0,
+        "relevance": 6,
+        "reason": "Reports on official WhatsApp UI redesign updates including navigation bar, chat filters, and branding changes. Metadata only; contents unverified.",
+        "basis": "metadata",
+        "shown": true,
+        "rank": 21,
+        "badges": []
+      }
+    ],
+    "exploration": {
+      "pages_limit": 4,
+      "visited": [
+        {
+          "url": "https://www.meta.com/design-at-meta/blog/whatsapp-user-interface-update/",
+          "from_url": null,
+          "status": "checked",
+          "new_candidate": false
+        },
+        {
+          "url": "https://www.reddit.com/r/coolguides/comments/1cos43d/a_cool_guide_to_whatsapps_interface_design/",
+          "from_url": null,
+          "status": "robots_disallowed",
+          "new_candidate": false
+        },
+        {
+          "url": "https://www.macrumors.com/2024/05/10/whatsapp-for-iphone-android-new-design/",
+          "from_url": null,
+          "status": "checked",
+          "new_candidate": false
+        },
+        {
+          "url": "https://www.news18.com/tech/whatsapp-redesign-chat-ui-for-iphone-and-android-users-is-live-heres-what-you-get-now-8885070.html",
+          "from_url": null,
+          "status": "checked",
+          "new_candidate": false
+        }
+      ],
+      "rounds": [
+        {
+          "decisions": [
+            {
+              "url": "https://www.meta.com/design-at-meta/blog/whatsapp-user-interface-update/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.92,
+              "probabilities": {
+                "useful": 0.95,
+                "uncertain": 0.05,
+                "irrelevant": 0
+              }
+            },
+            {
+              "url": "https://www.reddit.com/r/coolguides/comments/1cos43d/a_cool_guide_to_whatsapps_interface_design/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.26,
+              "probabilities": {
+                "useful": 0.49,
+                "uncertain": 0.5,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://www.news18.com/tech/whatsapp-redesign-chat-ui-for-iphone-and-android-users-is-live-heres-what-you-get-now-8885070.html",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.32,
+              "probabilities": {
+                "useful": 0.55,
+                "uncertain": 0.45,
+                "irrelevant": 0
+              }
+            },
+            {
+              "url": "https://medium.com/@jennifermajala/whatapp-ui-ux-evolution-2020-2023-bd092bb94b96",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.54,
+              "probabilities": {
+                "useful": 0.7,
+                "uncertain": 0.3,
+                "irrelevant": 0
+              }
+            },
+            {
+              "url": "https://www.deccanherald.com/technology/whatsapp-gets-refreshed-visual-user-interface-new-features-3016849",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.48,
+              "probabilities": {
+                "useful": 0.34,
+                "uncertain": 0.66,
+                "irrelevant": 0
+              }
+            },
+            {
+              "url": "https://www.figma.com/community/file/1462688379607447469/whatsapp-chat-ui-2025",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.44,
+              "probabilities": {
+                "useful": 0.32,
+                "uncertain": 0.63,
+                "irrelevant": 0.05
+              }
+            },
+            {
+              "url": "https://www.pinterest.com/ideas/whatsapp-chat-interface/901006728823/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.37,
+              "probabilities": {
+                "useful": 0.3,
+                "uncertain": 0.58,
+                "irrelevant": 0.12
+              }
+            },
+            {
+              "url": "https://www.macrumors.com/2024/05/10/whatsapp-for-iphone-android-new-design/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.7,
+              "probabilities": {
+                "useful": 0.8,
+                "uncertain": 0.2,
+                "irrelevant": 0
+              }
+            },
+            {
+              "url": "https://www.linkedin.com/posts/manoharmamidi_frontenddeveloper-frontend-reactjs-activity-7490718514538803200-eOL4",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.77,
+              "probabilities": {
+                "useful": 0.13,
+                "uncertain": 0.85,
+                "irrelevant": 0.02
+              }
+            },
+            {
+              "url": "https://dribbble.com/search/whatsapp-chat-ui",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.26,
+              "probabilities": {
+                "useful": 0.42,
+                "uncertain": 0.51,
+                "irrelevant": 0.07
+              }
+            },
+            {
+              "url": "https://www.creativebloq.com/news/whatsapp-ui-redesign-2024",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.51,
+              "probabilities": {
+                "useful": 0.68,
+                "uncertain": 0.32,
+                "irrelevant": 0
+              }
+            },
+            {
+              "url": "https://nokiamob.net/2023/08/31/whatsapp-is-changing-user-interface-and-introducing-chat-filters/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.31,
+              "probabilities": {
+                "useful": 0.54,
+                "uncertain": 0.46,
+                "irrelevant": 0
+              }
+            },
+            {
+              "url": "https://www.socialmediatoday.com/news/whatsapp-launches-refreshed-ui-elements/715743/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.39,
+              "probabilities": {
+                "useful": 0.6,
+                "uncertain": 0.4,
+                "irrelevant": 0
+              }
+            },
+            {
+              "url": "https://www.montekservices.com/news/WhatsApp-Web-Introduces-New-User-Interface:-Here-is-What-Has-Changed",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.52,
+              "probabilities": {
+                "useful": 0.31,
+                "uncertain": 0.68,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://www.indiatoday.in/technology/news/story/whatsapp-planning-to-change-ui-design-for-android-users-with-new-icons-and-colors-details-here-2441110-2023-09-27",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.35,
+              "probabilities": {
+                "useful": 0.43,
+                "uncertain": 0.57,
+                "irrelevant": 0
+              }
+            },
+            {
+              "url": "https://timesofindia.indiatimes.com/technology/social/whatsapp-web-getting-new-user-interface-heres-what-has-changed/articleshow/109351732.cms",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.29,
+              "probabilities": {
+                "useful": 0.47,
+                "uncertain": 0.52,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://www.uxpin.com/studio/blog/chat-user-interface-design/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.43,
+              "probabilities": {
+                "useful": 0.02,
+                "uncertain": 0.62,
+                "irrelevant": 0.36
+              }
+            },
+            {
+              "url": "https://www.sammyfans.com/2024/12/03/whatsapp-redesigns-chat-list-interface-with-latest-beta-update/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.31,
+              "probabilities": {
+                "useful": 0.46,
+                "uncertain": 0.53,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://www.androidheadlines.com/2023/09/whatsapp-is-working-on-a-major-interface-redesign.html",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.29,
+              "probabilities": {
+                "useful": 0.53,
+                "uncertain": 0.47,
+                "irrelevant": 0
+              }
+            },
+            {
+              "url": "https://www.techi.com/whatsapp-chat-list-filters-update/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.73,
+              "probabilities": {
+                "useful": 0.17,
+                "uncertain": 0.82,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://www.shutterstock.com/search/whatsapp-chat-ui",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.47,
+              "probabilities": {
+                "useful": 0.65,
+                "uncertain": 0.33,
+                "irrelevant": 0.02
+              }
+            },
+            {
+              "url": "https://economictimes.indiatimes.com/news/new-updates/whatsapp-to-get-redesigned-interface-soon-heres-what-we-know-about-the-major-update/articleshow/99662295.cms",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.4,
+              "probabilities": {
+                "useful": 0.38,
+                "uncertain": 0.6,
+                "irrelevant": 0.02
+              }
+            },
+            {
+              "url": "https://customlytics.com/ui-ux-makeover-whatsapp/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.6,
+              "probabilities": {
+                "useful": 0.25,
+                "uncertain": 0.74,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://github.com/jazimabbas/whatsapp-web-ui",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.31,
+              "probabilities": {
+                "useful": 0.42,
+                "uncertain": 0.54,
+                "irrelevant": 0.04
+              }
+            },
+            {
+              "url": "https://octet.design/journal/best-chat-ui-design/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.55,
+              "probabilities": {
+                "useful": 0.16,
+                "uncertain": 0.7,
+                "irrelevant": 0.14
+              }
+            },
+            {
+              "url": "https://arcitech.ai/whatsapp-new-ui-redesign-here-what-you-need-to-know/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.3,
+              "probabilities": {
+                "useful": 0.46,
+                "uncertain": 0.53,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://muz.li/inspiration/chat-ui/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.36,
+              "probabilities": {
+                "useful": 0.35,
+                "uncertain": 0.58,
+                "irrelevant": 0.07
+              }
+            },
+            {
+              "url": "https://www.scribd.com/document/826964261/Template-WhatsappReport",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.25,
+              "probabilities": {
+                "useful": 0.5,
+                "uncertain": 0.49,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://dictionary.cambridge.org/dictionary/english/official",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "irrelevant",
+              "confidence": 1,
+              "probabilities": {
+                "useful": 0,
+                "uncertain": 0,
+                "irrelevant": 1
+              }
+            },
+            {
+              "url": "https://www.gizchina.com/2023/03/17/whatsapp-update-a-major-redesigned-interface-is-coming/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.32,
+              "probabilities": {
+                "useful": 0.45,
+                "uncertain": 0.54,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://www.perigon.io/news/tech/2024/05/09/whatsapp-introduces-new-visual-user-interface",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.29,
+              "probabilities": {
+                "useful": 0.53,
+                "uncertain": 0.46,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://imageappeal.medium.com/whatsapps-new-ui-redesign-here-s-what-you-need-to-know-4bfaf348972e",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.49,
+              "probabilities": {
+                "useful": 0.33,
+                "uncertain": 0.66,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://www.uxsnaps.com/chat-interface",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.54,
+              "probabilities": {
+                "useful": 0.29,
+                "uncertain": 0.7,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://www.mobigyaan.com/whatsapp-new-interface-2024-colors-icons-dark-mode",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.38,
+              "probabilities": {
+                "useful": 0.58,
+                "uncertain": 0.41,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://www.merriam-webster.com/dictionary/official",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "irrelevant",
+              "confidence": 0.99,
+              "probabilities": {
+                "useful": 0,
+                "uncertain": 0,
+                "irrelevant": 1
+              }
+            },
+            {
+              "url": "https://dev.to/soorajsnblaze333/i-built-a-whatsapp-web-ui-clone-2723",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.24,
+              "probabilities": {
+                "useful": 0.47,
+                "uncertain": 0.5,
+                "irrelevant": 0.03
+              }
+            },
+            {
+              "url": "https://en.wikipedia.org/wiki/Official",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "irrelevant",
+              "confidence": 0.97,
+              "probabilities": {
+                "useful": 0,
+                "uncertain": 0.02,
+                "irrelevant": 0.98
+              }
+            },
+            {
+              "url": "https://www.behance.net/search/projects/whatsapp%20ui",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.62,
+              "probabilities": {
+                "useful": 0.75,
+                "uncertain": 0.24,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://web.whatsapp.com/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.07,
+              "probabilities": {
+                "useful": 0.38,
+                "uncertain": 0.36,
+                "irrelevant": 0.26
+              }
+            },
+            {
+              "url": "https://www.whatsapp.com/download",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "irrelevant",
+              "confidence": 0.63,
+              "probabilities": {
+                "useful": 0.03,
+                "uncertain": 0.22,
+                "irrelevant": 0.75
+              }
+            }
+          ],
+          "failed_batches": 0,
+          "candidates": [
+            {
+              "url": "https://www.meta.com/design-at-meta/blog/whatsapp-user-interface-update/",
+              "title": "Keeping WhatsApp fresh, simple and approachable - Meta",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.reddit.com/r/coolguides/comments/1cos43d/a_cool_guide_to_whatsapps_interface_design/",
+              "title": "r/coolguides on Reddit: A cool guide to WhatsApp’s interface design evolution over the years",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.news18.com/tech/whatsapp-redesign-chat-ui-for-iphone-and-android-users-is-live-heres-what-you-get-now-8885070.html",
+              "title": "WhatsApp Redesign Chat UI For iPhone And Android ... - News18",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://medium.com/@jennifermajala/whatapp-ui-ux-evolution-2020-2023-bd092bb94b96",
+              "title": "WhatApp UI/UX Evolution (2020–2023) | by Jennifer Majala | Medium",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.deccanherald.com/technology/whatsapp-gets-refreshed-visual-user-interface-new-features-3016849",
+              "title": "WhatsApp gets refreshed visual user interface, new features",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.figma.com/community/file/1462688379607447469/whatsapp-chat-ui-2025",
+              "title": "Whatsapp chat UI 2025 - Figma",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.pinterest.com/ideas/whatsapp-chat-interface/901006728823/",
+              "title": "Whatsapp Chat Interface - Pinterest",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.macrumors.com/2024/05/10/whatsapp-for-iphone-android-new-design/",
+              "title": "WhatsApp Gets Overhauled Interface Design and New Attachment Tray - MacRumors",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.linkedin.com/posts/manoharmamidi_frontenddeveloper-frontend-reactjs-activity-7490718514538803200-eOL4",
+              "title": "WhatsApp UI Evolution: Clean, Fast, and Intuitive - LinkedIn",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://dribbble.com/search/whatsapp-chat-ui",
+              "title": "whatsapp chat ui - Dribbble",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.creativebloq.com/news/whatsapp-ui-redesign-2024",
+              "title": "Whatsapp's UI redesign looks clean and fresh | Creative Bloq",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://nokiamob.net/2023/08/31/whatsapp-is-changing-user-interface-and-introducing-chat-filters/",
+              "title": "WhatsApp is changing user interface and introducing chat filters | Nokiamob",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.socialmediatoday.com/news/whatsapp-launches-refreshed-ui-elements/715743/",
+              "title": "WhatsApp Launches Refreshed UI Elements - Social Media Today",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.montekservices.com/news/WhatsApp-Web-Introduces-New-User-Interface:-Here-is-What-Has-Changed",
+              "title": "WhatsApp Web Introduces New User Interface - Montek Services",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.indiatoday.in/technology/news/story/whatsapp-planning-to-change-ui-design-for-android-users-with-new-icons-and-colors-details-here-2441110-2023-09-27",
+              "title": "WhatsApp planning to change UI design for Android users with new icons and colors, details here - India Today",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://timesofindia.indiatimes.com/technology/social/whatsapp-web-getting-new-user-interface-heres-what-has-changed/articleshow/109351732.cms",
+              "title": "WhatsApp Web getting 'new' user interface: Here's what has ...",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.uxpin.com/studio/blog/chat-user-interface-design/",
+              "title": "Chat UI Design: How to Build Effective Chat Interfaces in 2026",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.sammyfans.com/2024/12/03/whatsapp-redesigns-chat-list-interface-with-latest-beta-update/",
+              "title": "WhatsApp redesigns chat list interface with latest beta update - Sammy Fans",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.androidheadlines.com/2023/09/whatsapp-is-working-on-a-major-interface-redesign.html",
+              "title": "WhatsApp is working on a major interface redesign",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.techi.com/whatsapp-chat-list-filters-update/",
+              "title": "WhatsApp Introduces Major UI Change for Chat List Filters",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.shutterstock.com/search/whatsapp-chat-ui",
+              "title": "Whatsapp Chat Ui royalty-free images - Shutterstock",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://economictimes.indiatimes.com/news/new-updates/whatsapp-to-get-redesigned-interface-soon-heres-what-we-know-about-the-major-update/articleshow/99662295.cms",
+              "title": "WhatsApp New Design: WhatsApp to get redesigned interface soon; Here’s what we know about the major update - The Economic Times",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://customlytics.com/ui-ux-makeover-whatsapp/",
+              "title": "UI/UX Makeover: WhatsApp - New features for improved interface – Customlytics",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://github.com/jazimabbas/whatsapp-web-ui",
+              "title": "GitHub - jazimabbas/whatsapp-web-ui: UI for WhatsApp Web, a project aimed at providing users with an interface that closely resembles the popular messaging application. · GitHub",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://octet.design/journal/best-chat-ui-design/",
+              "title": "Best Chat UI Design to Watch In 2025",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://arcitech.ai/whatsapp-new-ui-redesign-here-what-you-need-to-know/",
+              "title": "WhatsApp New UI Redesign , Here What You Need To Know",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://muz.li/inspiration/chat-ui/",
+              "title": "60+ Best Chat UI Design Ideas (2026 Trends) - Muzli",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.scribd.com/document/826964261/Template-WhatsappReport",
+              "title": "WhatsApp Chat UI Design Report | PDF - Scribd",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://dictionary.cambridge.org/dictionary/english/official",
+              "title": "OFFICIAL | English meaning - Cambridge Dictionary",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.gizchina.com/2023/03/17/whatsapp-update-a-major-redesigned-interface-is-coming/",
+              "title": "WhatsApp Update, A New Redesigned Interface - Gizchina.com",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.perigon.io/news/tech/2024/05/09/whatsapp-introduces-new-visual-user-interface",
+              "title": "WhatsApp Introduces New Visual User Interface | Perigon",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://imageappeal.medium.com/whatsapps-new-ui-redesign-here-s-what-you-need-to-know-4bfaf348972e",
+              "title": "WhatsApp’s New UI Redesign — Here’s What You Need to Know | by Image Appeal | Medium",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.uxsnaps.com/chat-interface",
+              "title": "WhatsApp UX Breakdown – Seamless Multi-Modal Communication",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.mobigyaan.com/whatsapp-new-interface-2024-colors-icons-dark-mode",
+              "title": "WhatsApp unveils revamped interface with fresh look, new colors, icons, improved dark mode, and enhanced design features",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.merriam-webster.com/dictionary/official",
+              "title": "OFFICIAL Definition & Meaning - Merriam-Webster",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://dev.to/soorajsnblaze333/i-built-a-whatsapp-web-ui-clone-2723",
+              "title": "I built a WhatsApp Web UI Clone - Chats section - DEV Community",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://en.wikipedia.org/wiki/Official",
+              "title": "Official - Wikipedia",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.behance.net/search/projects/whatsapp%20ui",
+              "title": "Whatsapp Ui Projects :: Photos, videos, logos, illustrations and branding :: Behance",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://web.whatsapp.com/",
+              "title": "WhatsApp Web",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.whatsapp.com/download",
+              "title": "Download WhatsApp",
+              "from_url": null,
+              "published_at": null
+            }
+          ],
+          "selected": [
+            "https://www.meta.com/design-at-meta/blog/whatsapp-user-interface-update/",
+            "https://www.reddit.com/r/coolguides/comments/1cos43d/a_cool_guide_to_whatsapps_interface_design/"
+          ]
+        },
+        {
+          "decisions": [
+            {
+              "url": "https://www.meta.com/ai-glasses/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.36,
+              "probabilities": {
+                "useful": 0.57,
+                "uncertain": 0.27,
+                "irrelevant": 0.16
+              }
+            },
+            {
+              "url": "https://www.news18.com/tech/whatsapp-redesign-chat-ui-for-iphone-and-android-users-is-live-heres-what-you-get-now-8885070.html",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.33,
+              "probabilities": {
+                "useful": 0.55,
+                "uncertain": 0.44,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://medium.com/@jennifermajala/whatapp-ui-ux-evolution-2020-2023-bd092bb94b96",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.53,
+              "probabilities": {
+                "useful": 0.6900000000000001,
+                "uncertain": 0.31,
+                "irrelevant": 0
+              }
+            },
+            {
+              "url": "https://www.deccanherald.com/technology/whatsapp-gets-refreshed-visual-user-interface-new-features-3016849",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.34,
+              "probabilities": {
+                "useful": 0.43,
+                "uncertain": 0.5700000000000001,
+                "irrelevant": 0
+              }
+            },
+            {
+              "url": "https://www.figma.com/community/file/1462688379607447469/whatsapp-chat-ui-2025",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.28,
+              "probabilities": {
+                "useful": 0.52,
+                "uncertain": 0.45,
+                "irrelevant": 0.03
+              }
+            },
+            {
+              "url": "https://www.reddit.com/r/whatsapp/comments/1c8oun6/evolution_of_whatsapp_ui/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.41,
+              "probabilities": {
+                "useful": 0.61,
+                "uncertain": 0.39,
+                "irrelevant": 0
+              }
+            },
+            {
+              "url": "https://www.pinterest.com/ideas/whatsapp-chat-interface/901006728823/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.39,
+              "probabilities": {
+                "useful": 0.3,
+                "uncertain": 0.59,
+                "irrelevant": 0.11
+              }
+            },
+            {
+              "url": "https://www.macrumors.com/2024/05/10/whatsapp-for-iphone-android-new-design/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.72,
+              "probabilities": {
+                "useful": 0.8200000000000001,
+                "uncertain": 0.18,
+                "irrelevant": 0
+              }
+            },
+            {
+              "url": "https://www.linkedin.com/posts/manoharmamidi_frontenddeveloper-frontend-reactjs-activity-7490718514538803200-eOL4",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.76,
+              "probabilities": {
+                "useful": 0.14,
+                "uncertain": 0.84,
+                "irrelevant": 0.02
+              }
+            },
+            {
+              "url": "https://dribbble.com/search/whatsapp-chat-ui",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.19,
+              "probabilities": {
+                "useful": 0.45,
+                "uncertain": 0.46,
+                "irrelevant": 0.09
+              }
+            },
+            {
+              "url": "https://www.creativebloq.com/news/whatsapp-ui-redesign-2024",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.54,
+              "probabilities": {
+                "useful": 0.7,
+                "uncertain": 0.3,
+                "irrelevant": 0
+              }
+            },
+            {
+              "url": "https://nokiamob.net/2023/08/31/whatsapp-is-changing-user-interface-and-introducing-chat-filters/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.29,
+              "probabilities": {
+                "useful": 0.53,
+                "uncertain": 0.47,
+                "irrelevant": 0
+              }
+            },
+            {
+              "url": "https://www.socialmediatoday.com/news/whatsapp-launches-refreshed-ui-elements/715743/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.4,
+              "probabilities": {
+                "useful": 0.6,
+                "uncertain": 0.4,
+                "irrelevant": 0
+              }
+            },
+            {
+              "url": "https://www.montekservices.com/news/WhatsApp-Web-Introduces-New-User-Interface:-Here-is-What-Has-Changed",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.4,
+              "probabilities": {
+                "useful": 0.39,
+                "uncertain": 0.6,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://www.indiatoday.in/technology/news/story/whatsapp-planning-to-change-ui-design-for-android-users-with-new-icons-and-colors-details-here-2441110-2023-09-27",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.43,
+              "probabilities": {
+                "useful": 0.37,
+                "uncertain": 0.63,
+                "irrelevant": 0
+              }
+            },
+            {
+              "url": "https://timesofindia.indiatimes.com/technology/social/whatsapp-web-getting-new-user-interface-heres-what-has-changed/articleshow/109351732.cms",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.29,
+              "probabilities": {
+                "useful": 0.53,
+                "uncertain": 0.47,
+                "irrelevant": 0
+              }
+            },
+            {
+              "url": "https://www.uxpin.com/studio/blog/chat-user-interface-design/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.36,
+              "probabilities": {
+                "useful": 0.02,
+                "uncertain": 0.57,
+                "irrelevant": 0.41
+              }
+            },
+            {
+              "url": "https://www.sammyfans.com/2024/12/03/whatsapp-redesigns-chat-list-interface-with-latest-beta-update/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.39,
+              "probabilities": {
+                "useful": 0.4,
+                "uncertain": 0.59,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://www.androidheadlines.com/2023/09/whatsapp-is-working-on-a-major-interface-redesign.html",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.31,
+              "probabilities": {
+                "useful": 0.46,
+                "uncertain": 0.54,
+                "irrelevant": 0
+              }
+            },
+            {
+              "url": "https://www.techi.com/whatsapp-chat-list-filters-update/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.71,
+              "probabilities": {
+                "useful": 0.18,
+                "uncertain": 0.81,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://www.shutterstock.com/search/whatsapp-chat-ui",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.53,
+              "probabilities": {
+                "useful": 0.69,
+                "uncertain": 0.29,
+                "irrelevant": 0.02
+              }
+            },
+            {
+              "url": "https://economictimes.indiatimes.com/news/new-updates/whatsapp-to-get-redesigned-interface-soon-heres-what-we-know-about-the-major-update/articleshow/99662295.cms",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.41,
+              "probabilities": {
+                "useful": 0.38,
+                "uncertain": 0.61,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://customlytics.com/ui-ux-makeover-whatsapp/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.62,
+              "probabilities": {
+                "useful": 0.24,
+                "uncertain": 0.75,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://github.com/jazimabbas/whatsapp-web-ui",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.31,
+              "probabilities": {
+                "useful": 0.42,
+                "uncertain": 0.54,
+                "irrelevant": 0.04
+              }
+            },
+            {
+              "url": "https://octet.design/journal/best-chat-ui-design/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.59,
+              "probabilities": {
+                "useful": 0.12,
+                "uncertain": 0.73,
+                "irrelevant": 0.15
+              }
+            },
+            {
+              "url": "https://arcitech.ai/whatsapp-new-ui-redesign-here-what-you-need-to-know/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.26,
+              "probabilities": {
+                "useful": 0.49,
+                "uncertain": 0.5,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://muz.li/inspiration/chat-ui/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.44,
+              "probabilities": {
+                "useful": 0.29,
+                "uncertain": 0.63,
+                "irrelevant": 0.08
+              }
+            },
+            {
+              "url": "https://www.scribd.com/document/826964261/Template-WhatsappReport",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.3,
+              "probabilities": {
+                "useful": 0.54,
+                "uncertain": 0.45,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://dictionary.cambridge.org/dictionary/english/official",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "irrelevant",
+              "confidence": 1,
+              "probabilities": {
+                "useful": 0,
+                "uncertain": 0,
+                "irrelevant": 1
+              }
+            },
+            {
+              "url": "https://www.gizchina.com/2023/03/17/whatsapp-update-a-major-redesigned-interface-is-coming/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.31,
+              "probabilities": {
+                "useful": 0.45,
+                "uncertain": 0.54,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://www.perigon.io/news/tech/2024/05/09/whatsapp-introduces-new-visual-user-interface",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.31,
+              "probabilities": {
+                "useful": 0.54,
+                "uncertain": 0.45,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://imageappeal.medium.com/whatsapps-new-ui-redesign-here-s-what-you-need-to-know-4bfaf348972e",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.48,
+              "probabilities": {
+                "useful": 0.34,
+                "uncertain": 0.65,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://www.uxsnaps.com/chat-interface",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.51,
+              "probabilities": {
+                "useful": 0.32,
+                "uncertain": 0.67,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://www.mobigyaan.com/whatsapp-new-interface-2024-colors-icons-dark-mode",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.38,
+              "probabilities": {
+                "useful": 0.59,
+                "uncertain": 0.41,
+                "irrelevant": 0
+              }
+            },
+            {
+              "url": "https://www.merriam-webster.com/dictionary/official",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "irrelevant",
+              "confidence": 0.99,
+              "probabilities": {
+                "useful": 0,
+                "uncertain": 0,
+                "irrelevant": 1
+              }
+            },
+            {
+              "url": "https://dev.to/soorajsnblaze333/i-built-a-whatsapp-web-ui-clone-2723",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.24,
+              "probabilities": {
+                "useful": 0.48,
+                "uncertain": 0.49,
+                "irrelevant": 0.03
+              }
+            },
+            {
+              "url": "https://en.wikipedia.org/wiki/Official",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "irrelevant",
+              "confidence": 0.97,
+              "probabilities": {
+                "useful": 0,
+                "uncertain": 0.02,
+                "irrelevant": 0.98
+              }
+            },
+            {
+              "url": "https://www.behance.net/search/projects/whatsapp%20ui",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "useful",
+              "confidence": 0.54,
+              "probabilities": {
+                "useful": 0.7,
+                "uncertain": 0.29,
+                "irrelevant": 0.01
+              }
+            },
+            {
+              "url": "https://web.whatsapp.com/",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "uncertain",
+              "confidence": 0.08,
+              "probabilities": {
+                "useful": 0.34,
+                "uncertain": 0.38,
+                "irrelevant": 0.28
+              }
+            },
+            {
+              "url": "https://www.whatsapp.com/download",
+              "model": "typesafe/jev-1.13-20260917",
+              "type": "choice",
+              "choice": "irrelevant",
+              "confidence": 0.63,
+              "probabilities": {
+                "useful": 0.02,
+                "uncertain": 0.22,
+                "irrelevant": 0.76
+              }
+            }
+          ],
+          "failed_batches": 0,
+          "candidates": [
+            {
+              "url": "https://www.meta.com/ai-glasses/",
+              "title": "AI glasses",
+              "from_url": "https://www.meta.com/design-at-meta/blog/whatsapp-user-interface-update/",
+              "published_at": null
+            },
+            {
+              "url": "https://www.news18.com/tech/whatsapp-redesign-chat-ui-for-iphone-and-android-users-is-live-heres-what-you-get-now-8885070.html",
+              "title": "WhatsApp Redesign Chat UI For iPhone And Android ... - News18",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://medium.com/@jennifermajala/whatapp-ui-ux-evolution-2020-2023-bd092bb94b96",
+              "title": "WhatApp UI/UX Evolution (2020–2023) | by Jennifer Majala | Medium",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.deccanherald.com/technology/whatsapp-gets-refreshed-visual-user-interface-new-features-3016849",
+              "title": "WhatsApp gets refreshed visual user interface, new features",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.figma.com/community/file/1462688379607447469/whatsapp-chat-ui-2025",
+              "title": "Whatsapp chat UI 2025 - Figma",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.reddit.com/r/whatsapp/comments/1c8oun6/evolution_of_whatsapp_ui/",
+              "title": "Evolution of WhatsApp UI - Reddit",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.pinterest.com/ideas/whatsapp-chat-interface/901006728823/",
+              "title": "Whatsapp Chat Interface - Pinterest",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.macrumors.com/2024/05/10/whatsapp-for-iphone-android-new-design/",
+              "title": "WhatsApp Gets Overhauled Interface Design and New Attachment Tray - MacRumors",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.linkedin.com/posts/manoharmamidi_frontenddeveloper-frontend-reactjs-activity-7490718514538803200-eOL4",
+              "title": "WhatsApp UI Evolution: Clean, Fast, and Intuitive - LinkedIn",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://dribbble.com/search/whatsapp-chat-ui",
+              "title": "whatsapp chat ui - Dribbble",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.creativebloq.com/news/whatsapp-ui-redesign-2024",
+              "title": "Whatsapp's UI redesign looks clean and fresh | Creative Bloq",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://nokiamob.net/2023/08/31/whatsapp-is-changing-user-interface-and-introducing-chat-filters/",
+              "title": "WhatsApp is changing user interface and introducing chat filters | Nokiamob",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.socialmediatoday.com/news/whatsapp-launches-refreshed-ui-elements/715743/",
+              "title": "WhatsApp Launches Refreshed UI Elements - Social Media Today",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.montekservices.com/news/WhatsApp-Web-Introduces-New-User-Interface:-Here-is-What-Has-Changed",
+              "title": "WhatsApp Web Introduces New User Interface - Montek Services",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.indiatoday.in/technology/news/story/whatsapp-planning-to-change-ui-design-for-android-users-with-new-icons-and-colors-details-here-2441110-2023-09-27",
+              "title": "WhatsApp planning to change UI design for Android users with new icons and colors, details here - India Today",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://timesofindia.indiatimes.com/technology/social/whatsapp-web-getting-new-user-interface-heres-what-has-changed/articleshow/109351732.cms",
+              "title": "WhatsApp Web getting 'new' user interface: Here's what has ...",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.uxpin.com/studio/blog/chat-user-interface-design/",
+              "title": "Chat UI Design: How to Build Effective Chat Interfaces in 2026",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.sammyfans.com/2024/12/03/whatsapp-redesigns-chat-list-interface-with-latest-beta-update/",
+              "title": "WhatsApp redesigns chat list interface with latest beta update - Sammy Fans",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.androidheadlines.com/2023/09/whatsapp-is-working-on-a-major-interface-redesign.html",
+              "title": "WhatsApp is working on a major interface redesign",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.techi.com/whatsapp-chat-list-filters-update/",
+              "title": "WhatsApp Introduces Major UI Change for Chat List Filters",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.shutterstock.com/search/whatsapp-chat-ui",
+              "title": "Whatsapp Chat Ui royalty-free images - Shutterstock",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://economictimes.indiatimes.com/news/new-updates/whatsapp-to-get-redesigned-interface-soon-heres-what-we-know-about-the-major-update/articleshow/99662295.cms",
+              "title": "WhatsApp New Design: WhatsApp to get redesigned interface soon; Here’s what we know about the major update - The Economic Times",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://customlytics.com/ui-ux-makeover-whatsapp/",
+              "title": "UI/UX Makeover: WhatsApp - New features for improved interface – Customlytics",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://github.com/jazimabbas/whatsapp-web-ui",
+              "title": "GitHub - jazimabbas/whatsapp-web-ui: UI for WhatsApp Web, a project aimed at providing users with an interface that closely resembles the popular messaging application. · GitHub",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://octet.design/journal/best-chat-ui-design/",
+              "title": "Best Chat UI Design to Watch In 2025",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://arcitech.ai/whatsapp-new-ui-redesign-here-what-you-need-to-know/",
+              "title": "WhatsApp New UI Redesign , Here What You Need To Know",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://muz.li/inspiration/chat-ui/",
+              "title": "60+ Best Chat UI Design Ideas (2026 Trends) - Muzli",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.scribd.com/document/826964261/Template-WhatsappReport",
+              "title": "WhatsApp Chat UI Design Report | PDF - Scribd",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://dictionary.cambridge.org/dictionary/english/official",
+              "title": "OFFICIAL | English meaning - Cambridge Dictionary",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.gizchina.com/2023/03/17/whatsapp-update-a-major-redesigned-interface-is-coming/",
+              "title": "WhatsApp Update, A New Redesigned Interface - Gizchina.com",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.perigon.io/news/tech/2024/05/09/whatsapp-introduces-new-visual-user-interface",
+              "title": "WhatsApp Introduces New Visual User Interface | Perigon",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://imageappeal.medium.com/whatsapps-new-ui-redesign-here-s-what-you-need-to-know-4bfaf348972e",
+              "title": "WhatsApp’s New UI Redesign — Here’s What You Need to Know | by Image Appeal | Medium",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.uxsnaps.com/chat-interface",
+              "title": "WhatsApp UX Breakdown – Seamless Multi-Modal Communication",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.mobigyaan.com/whatsapp-new-interface-2024-colors-icons-dark-mode",
+              "title": "WhatsApp unveils revamped interface with fresh look, new colors, icons, improved dark mode, and enhanced design features",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.merriam-webster.com/dictionary/official",
+              "title": "OFFICIAL Definition & Meaning - Merriam-Webster",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://dev.to/soorajsnblaze333/i-built-a-whatsapp-web-ui-clone-2723",
+              "title": "I built a WhatsApp Web UI Clone - Chats section - DEV Community",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://en.wikipedia.org/wiki/Official",
+              "title": "Official - Wikipedia",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.behance.net/search/projects/whatsapp%20ui",
+              "title": "Whatsapp Ui Projects :: Photos, videos, logos, illustrations and branding :: Behance",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://web.whatsapp.com/",
+              "title": "WhatsApp Web",
+              "from_url": null,
+              "published_at": null
+            },
+            {
+              "url": "https://www.whatsapp.com/download",
+              "title": "Download WhatsApp",
+              "from_url": null,
+              "published_at": null
+            }
+          ],
+          "selected": [
+            "https://www.macrumors.com/2024/05/10/whatsapp-for-iphone-android-new-design/",
+            "https://www.news18.com/tech/whatsapp-redesign-chat-ui-for-iphone-and-android-users-is-live-heres-what-you-get-now-8885070.html"
+          ]
+        }
+      ],
+      "new_urls": [],
+      "elapsed_ms": 14828
+    }
+  },
+  "results": [
+    {
+      "url": "https://www.meta.com/design-at-meta/blog/whatsapp-user-interface-update/",
+      "title": "Keeping WhatsApp fresh, simple and approachable - Meta",
+      "judgement": {
+        "relevance": 9,
+        "reason": "Official Meta design blog detailing the WhatsApp UI update.",
+        "model": "google/gemini-3.5-flash-lite",
+        "intent_checks": [
+          {
+            "dimension": "subject",
+            "status": "supported",
+            "field": "title",
+            "quote": "Keeping WhatsApp fresh, simple and approachable"
+          },
+          {
+            "dimension": "intent",
+            "status": "supported",
+            "field": "description",
+            "quote": "An in-depth look at our design approach: why and how we updated the user interface on WhatsApp"
+          },
+          {
+            "dimension": "relationship",
+            "status": "supported",
+            "field": "description",
+            "quote": "why and how we updated the user interface on WhatsApp"
+          },
+          {
+            "dimension": "format",
+            "status": "supported",
+            "field": "url",
+            "quote": "https://www.meta.com/design-at-meta/blog/whatsapp-user-interface-update/"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://www.macrumors.com/2024/05/10/whatsapp-for-iphone-android-new-design/",
+      "title": "WhatsApp Gets Overhauled Interface Design and New Attachment Tray - MacRumors",
+      "judgement": {
+        "relevance": 9,
+        "reason": "MacRumors article detailing the 2024 WhatsApp interface overhaul and 2021 comparison.",
+        "model": "google/gemini-3.5-flash-lite",
+        "intent_checks": [
+          {
+            "dimension": "subject",
+            "status": "supported",
+            "field": "title",
+            "quote": "WhatsApp Gets Overhauled Interface Design and New Attachment Tray"
+          },
+          {
+            "dimension": "intent",
+            "status": "supported",
+            "field": "description",
+            "quote": "WhatsApp is receiving a refreshed design on iPhone and Android, the first interface overhaul of its kind since 2021."
+          },
+          {
+            "dimension": "relationship",
+            "status": "supported",
+            "field": "title",
+            "quote": "WhatsApp Gets Overhauled Interface Design and New Attachment Tray"
+          },
+          {
+            "dimension": "format",
+            "status": "supported",
+            "field": "url",
+            "quote": "https://www.macrumors.com/2024/05/10/whatsapp-for-iphone-android-new-design/"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://www.montekservices.com/news/WhatsApp-Web-Introduces-New-User-Interface:-Here-is-What-Has-Changed",
+      "title": "WhatsApp Web Introduces New User Interface - Montek Services",
+      "judgement": {
+        "relevance": 7,
+        "reason": "Article about the WhatsApp Web interface update.",
+        "model": "google/gemini-3.5-flash-lite",
+        "intent_checks": [
+          {
+            "dimension": "subject",
+            "status": "supported",
+            "field": "title",
+            "quote": "WhatsApp Web Introduces New User Interface"
+          },
+          {
+            "dimension": "intent",
+            "status": "supported",
+            "field": "description",
+            "quote": "The new UI integrates emojis and stickers more seamlessly into the chat interface"
+          },
+          {
+            "dimension": "relationship",
+            "status": "supported",
+            "field": "title",
+            "quote": "WhatsApp Web Introduces New User Interface"
+          },
+          {
+            "dimension": "format",
+            "status": "supported",
+            "field": "url",
+            "quote": "https://www.montekservices.com/news/WhatsApp-Web-Introduces-New-User-Interface:-Here-is-What-Has-Changed"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://www.techi.com/whatsapp-chat-list-filters-update/",
+      "title": "WhatsApp Introduces Major UI Change for Chat List Filters",
+      "judgement": {
+        "relevance": 7,
+        "reason": "Discusses WhatsApp chat list filters UI update for easier navigation.",
+        "model": "google/gemini-3.5-flash-lite",
+        "intent_checks": [
+          {
+            "dimension": "subject",
+            "status": "supported",
+            "field": "title",
+            "quote": "WhatsApp Introduces Major UI Change for Chat List Filters"
+          },
+          {
+            "dimension": "intent",
+            "status": "supported",
+            "field": "description",
+            "quote": "WhatsApp, the popular messaging platform Meta owns, has introduced a significant user interface (UI) update"
+          },
+          {
+            "dimension": "relationship",
+            "status": "supported",
+            "field": "description",
+            "quote": "ensuring that chat list filters remain"
+          },
+          {
+            "dimension": "format",
+            "status": "supported",
+            "field": "url",
+            "quote": "https://www.techi.com/whatsapp-chat-list-filters-update/"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://www.indiatoday.in/technology/news/story/whatsapp-planning-to-change-ui-design-for-android-users-with-new-icons-and-colors-details-here-2441110-2023-09-27",
+      "title": "WhatsApp planning to change UI design for Android users with new icons and colors, details here - India Today",
+      "judgement": {
+        "relevance": 7,
+        "reason": "Covers WhatsApp's planned UI design changes including new icons, colors, and chat bubble styles.",
+        "model": "google/gemini-3.5-flash-lite",
+        "intent_checks": [
+          {
+            "dimension": "subject",
+            "status": "supported",
+            "field": "title",
+            "quote": "WhatsApp planning to change UI design for Android users with new icons and colors, details here"
+          },
+          {
+            "dimension": "intent",
+            "status": "supported",
+            "field": "description",
+            "quote": "This overhaul will include the introduction of new icons, a predominant green colour theme"
+          },
+          {
+            "dimension": "relationship",
+            "status": "supported",
+            "field": "description",
+            "quote": "changes to chat bubble colours and the floating action button"
+          },
+          {
+            "dimension": "format",
+            "status": "supported",
+            "field": "url",
+            "quote": "https://www.indiatoday.in/technology/news/story/whatsapp-planning-to-change-ui-design-for-android-users-with-new-icons-and-colors-details-here-2441110-2023-09-27"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://www.reddit.com/r/coolguides/comments/1cos43d/a_cool_guide_to_whatsapps_interface_design/",
+      "title": "r/coolguides on Reddit: A cool guide to WhatsApp’s interface design evolution over the years",
+      "judgement": {
+        "relevance": 6,
+        "reason": "Reddit post discussing WhatsApp interface design evolution. Metadata only; contents unverified.",
+        "model": "google/gemini-3.5-flash-lite",
+        "intent_checks": [
+          {
+            "dimension": "subject",
+            "status": "supported",
+            "field": "title",
+            "quote": "WhatsApp’s interface design evolution over the years"
+          },
+          {
+            "dimension": "intent",
+            "status": "supported",
+            "field": "description",
+            "quote": "assuming the current bottom bar includes: Updates, Calls, Communities, Chats, Settings"
+          },
+          {
+            "dimension": "relationship",
+            "status": "supported",
+            "field": "title",
+            "quote": "A cool guide to WhatsApp’s interface design evolution over the years"
+          },
+          {
+            "dimension": "format",
+            "status": "supported",
+            "field": "url",
+            "quote": "https://www.reddit.com/r/coolguides/comments/1cos43d/a_cool_guide_to_whatsapps_interface_design/"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://www.reddit.com/r/whatsapp/comments/1c8oun6/evolution_of_whatsapp_ui/",
+      "title": "Evolution of WhatsApp UI - Reddit",
+      "judgement": {
+        "relevance": 6,
+        "reason": "Reddit thread discussing WhatsApp UI evolution across years. Metadata only; contents unverified.",
+        "model": "google/gemini-3.5-flash-lite",
+        "intent_checks": [
+          {
+            "dimension": "subject",
+            "status": "supported",
+            "field": "title",
+            "quote": "Evolution of WhatsApp UI"
+          },
+          {
+            "dimension": "intent",
+            "status": "supported",
+            "field": "description",
+            "quote": "Can we go back to either 2015, 2017 or 2022"
+          },
+          {
+            "dimension": "relationship",
+            "status": "supported",
+            "field": "description",
+            "quote": "A cool guide to WhatsApp's interface design evolution over the years."
+          },
+          {
+            "dimension": "format",
+            "status": "supported",
+            "field": "url",
+            "quote": "https://www.reddit.com/r/whatsapp/comments/1c8oun6/evolution_of_whatsapp_ui/"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://medium.com/@jennifermajala/whatapp-ui-ux-evolution-2020-2023-bd092bb94b96",
+      "title": "WhatApp UI/UX Evolution (2020–2023) | by Jennifer Majala | Medium",
+      "judgement": {
+        "relevance": 6,
+        "reason": "Medium article covering WhatsApp UI/UX evolution from 2020 to 2023.",
+        "model": "google/gemini-3.5-flash-lite",
+        "intent_checks": [
+          {
+            "dimension": "subject",
+            "status": "supported",
+            "field": "title",
+            "quote": "WhatApp UI/UX Evolution (2020–2023)"
+          },
+          {
+            "dimension": "intent",
+            "status": "supported",
+            "field": "description",
+            "quote": "Users could now switch between devices with minimal friction"
+          },
+          {
+            "dimension": "relationship",
+            "status": "supported",
+            "field": "title",
+            "quote": "WhatApp UI/UX Evolution (2020–2023)"
+          },
+          {
+            "dimension": "format",
+            "status": "supported",
+            "field": "url",
+            "quote": "https://medium.com/@jennifermajala/whatapp-ui-ux-evolution-2020-2023-bd092bb94b96"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://www.linkedin.com/posts/manoharmamidi_frontenddeveloper-frontend-reactjs-activity-7490718514538803200-eOL4",
+      "title": "WhatsApp UI Evolution: Clean, Fast, and Intuitive - LinkedIn",
+      "judgement": {
+        "relevance": 6,
+        "reason": "LinkedIn post about the WhatsApp UI evolution.",
+        "model": "google/gemini-3.5-flash-lite",
+        "intent_checks": [
+          {
+            "dimension": "subject",
+            "status": "supported",
+            "field": "title",
+            "quote": "WhatsApp UI Evolution: Clean, Fast, and Intuitive"
+          },
+          {
+            "dimension": "intent",
+            "status": "supported",
+            "field": "description",
+            "quote": "2024: AI integration, bottom navigation, cleaner components"
+          },
+          {
+            "dimension": "relationship",
+            "status": "supported",
+            "field": "title",
+            "quote": "WhatsApp UI Evolution"
+          },
+          {
+            "dimension": "format",
+            "status": "supported",
+            "field": "url",
+            "quote": "https://www.linkedin.com/posts/manoharmamidi_frontenddeveloper-frontend-reactjs-activity-7490718514538803200-eOL4"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://www.deccanherald.com/technology/whatsapp-gets-refreshed-visual-user-interface-new-features-3016849",
+      "title": "WhatsApp gets refreshed visual user interface, new features",
+      "judgement": {
+        "relevance": 6,
+        "reason": "Deccan Herald report on the refreshed WhatsApp visual user interface. Metadata only; contents unverified.",
+        "model": "google/gemini-3.5-flash-lite",
+        "intent_checks": [
+          {
+            "dimension": "subject",
+            "status": "supported",
+            "field": "title",
+            "quote": "WhatsApp gets refreshed visual user interface, new features"
+          },
+          {
+            "dimension": "intent",
+            "status": "supported",
+            "field": "description",
+            "quote": "New visual user interface introduced to both Android and iOS versions of WhatsApp"
+          },
+          {
+            "dimension": "relationship",
+            "status": "supported",
+            "field": "title",
+            "quote": "WhatsApp gets refreshed visual user interface"
+          },
+          {
+            "dimension": "format",
+            "status": "supported",
+            "field": "url",
+            "quote": "https://www.deccanherald.com/technology/whatsapp-gets-refreshed-visual-user-interface-new-features-3016849"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://www.creativebloq.com/news/whatsapp-ui-redesign-2024",
+      "title": "Whatsapp's UI redesign looks clean and fresh | Creative Bloq",
+      "judgement": {
+        "relevance": 6,
+        "reason": "Covers WhatsApp UI redesign updates for dark mode and search bar placement. Metadata only; contents unverified.",
+        "model": "google/gemini-3.5-flash-lite",
+        "intent_checks": [
+          {
+            "dimension": "subject",
+            "status": "supported",
+            "field": "title",
+            "quote": "Whatsapp's UI redesign looks clean and fresh"
+          },
+          {
+            "dimension": "intent",
+            "status": "supported",
+            "field": "description",
+            "quote": "Dark mode is a shade darker and has been given more contrast"
+          },
+          {
+            "dimension": "relationship",
+            "status": "supported",
+            "field": "description",
+            "quote": "The search bar has been moved to the top of the Chats tab"
+          },
+          {
+            "dimension": "format",
+            "status": "supported",
+            "field": "url",
+            "quote": "https://www.creativebloq.com/news/whatsapp-ui-redesign-2024"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://www.figma.com/community/file/1330950114849676455/whatsapp-ui",
+      "title": "WhatsApp UI - Figma",
+      "judgement": {
+        "relevance": 6,
+        "reason": "Figma community file featuring a fully functioning WhatsApp chat interface. Metadata only; contents unverified.",
+        "model": "google/gemini-3.5-flash-lite",
+        "intent_checks": [
+          {
+            "dimension": "subject",
+            "status": "supported",
+            "field": "title",
+            "quote": "WhatsApp UI - Figma"
+          },
+          {
+            "dimension": "intent",
+            "status": "supported",
+            "field": "description",
+            "quote": "Last updated 3 years ago"
+          },
+          {
+            "dimension": "relationship",
+            "status": "supported",
+            "field": "description",
+            "quote": "The chat interface is fully functioning, including message boxes"
+          },
+          {
+            "dimension": "format",
+            "status": "supported",
+            "field": "url",
+            "quote": "https://www.figma.com/community/file/1330950114849676455/whatsapp-ui"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://www.socialmediatoday.com/news/whatsapp-launches-refreshed-ui-elements/715743/",
+      "title": "WhatsApp Launches Refreshed UI Elements - Social Media Today",
+      "judgement": {
+        "relevance": 6,
+        "reason": "Details WhatsApp UI refresh including updated graphic elements and lower function bar options. Metadata only; contents unverified.",
+        "model": "google/gemini-3.5-flash-lite",
+        "intent_checks": [
+          {
+            "dimension": "subject",
+            "status": "supported",
+            "field": "title",
+            "quote": "WhatsApp Launches Refreshed UI Elements - Social Media Today"
+          },
+          {
+            "dimension": "intent",
+            "status": "supported",
+            "field": "description",
+            "quote": "May 9, 2024 · WhatsApp’s getting a new look, with Meta’s top messaging app rolling out a UI update"
+          },
+          {
+            "dimension": "relationship",
+            "status": "supported",
+            "field": "description",
+            "quote": "includes significant changes to its Android app, as well as a cleaner layout"
+          },
+          {
+            "dimension": "format",
+            "status": "supported",
+            "field": "url",
+            "quote": "https://www.socialmediatoday.com/news/whatsapp-launches-refreshed-ui-elements/715743/"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://medium.com/design-bootcamp/a-look-at-whatsapps-ui-ux-changes-over-time-4690cac3a6ab",
+      "title": "A Look at WhatsApp’s UI/UX Changes Over Time | by Hasitha Lakshan | Bootcamp | Medium",
+      "judgement": {
+        "relevance": 6,
+        "reason": "Medium article reviewing WhatsApp's UI/UX changes and feature integrations over time.",
+        "model": "google/gemini-3.5-flash-lite",
+        "intent_checks": [
+          {
+            "dimension": "subject",
+            "status": "supported",
+            "field": "title",
+            "quote": "A Look at WhatsApp’s UI/UX Changes Over Time"
+          },
+          {
+            "dimension": "intent",
+            "status": "supported",
+            "field": "description",
+            "quote": "Updates introduced features like voice calling, video calling, and end-to-end encryption"
+          },
+          {
+            "dimension": "relationship",
+            "status": "supported",
+            "field": "description",
+            "quote": "seamlessly integrated into the existing interface"
+          },
+          {
+            "dimension": "format",
+            "status": "supported",
+            "field": "url",
+            "quote": "https://medium.com/design-bootcamp/a-look-at-whatsapps-ui-ux-changes-over-time-4690cac3a6ab"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://www.sammyfans.com/2024/12/03/whatsapp-redesigns-chat-list-interface-with-latest-beta-update/",
+      "title": "WhatsApp redesigns chat list interface with latest beta update - Sammy Fans",
+      "judgement": {
+        "relevance": 6,
+        "reason": "Covers WhatsApp interface redesigns from recent years with specific version updates. Metadata only; contents unverified.",
+        "model": "google/gemini-3.5-flash-lite",
+        "intent_checks": [
+          {
+            "dimension": "subject",
+            "status": "supported",
+            "field": "title",
+            "quote": "WhatsApp redesigns chat list interface with latest beta update"
+          },
+          {
+            "dimension": "intent",
+            "status": "supported",
+            "field": "description",
+            "quote": "WhatsApp has released a new update with version 2.24.25.8, which brings a redesigned interface for managing chat lists."
+          },
+          {
+            "dimension": "relationship",
+            "status": "supported",
+            "field": "description",
+            "quote": "WhatsApp has released a new update with version 2.24.25.8, which brings a redesigned interface for managing chat lists."
+          },
+          {
+            "dimension": "format",
+            "status": "supported",
+            "field": "url",
+            "quote": "https://www.sammyfans.com/2024/12/03/whatsapp-redesigns-chat-list-interface-with-latest-beta-update/"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://www.androidheadlines.com/2023/09/whatsapp-is-working-on-a-major-interface-redesign.html",
+      "title": "WhatsApp is working on a major interface redesign",
+      "judgement": {
+        "relevance": 6,
+        "reason": "Discusses WhatsApp's interface redesign updates. Metadata only; contents unverified.",
+        "model": "google/gemini-3.5-flash-lite",
+        "intent_checks": [
+          {
+            "dimension": "subject",
+            "status": "supported",
+            "field": "title",
+            "quote": "WhatsApp is working on a major interface redesign"
+          },
+          {
+            "dimension": "intent",
+            "status": "supported",
+            "field": "description",
+            "quote": "WhatsApp is working on a major interface redesign featuring Material Design 3 UI elements"
+          },
+          {
+            "dimension": "relationship",
+            "status": "supported",
+            "field": "description",
+            "quote": "WhatsApp is working on a major interface redesign featuring Material Design 3 UI elements"
+          },
+          {
+            "dimension": "format",
+            "status": "supported",
+            "field": "url",
+            "quote": "https://www.androidheadlines.com/2023/09/whatsapp-is-working-on-a-major-interface-redesign.html"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://economictimes.indiatimes.com/news/new-updates/whatsapp-to-get-redesigned-interface-soon-heres-what-we-know-about-the-major-update/articleshow/99662295.cms",
+      "title": "WhatsApp New Design: WhatsApp to get redesigned interface soon; Here’s what we know about the major update - The Economic Times",
+      "judgement": {
+        "relevance": 6,
+        "reason": "Reports on official WhatsApp interface updates and navigation redesigns. Metadata only; contents unverified.",
+        "model": "google/gemini-3.5-flash-lite",
+        "intent_checks": [
+          {
+            "dimension": "subject",
+            "status": "supported",
+            "field": "title",
+            "quote": "WhatsApp New Design: WhatsApp to get redesigned interface soon"
+          },
+          {
+            "dimension": "intent",
+            "status": "supported",
+            "field": "description",
+            "quote": "WhatsApp users will soon have the convenience of accessing navigation options like Communities, Chats, Status, and Calls"
+          },
+          {
+            "dimension": "relationship",
+            "status": "supported",
+            "field": "description",
+            "quote": "WhatsApp users will soon have the convenience of accessing navigation options like Communities, Chats, Status, and Calls"
+          },
+          {
+            "dimension": "format",
+            "status": "supported",
+            "field": "url",
+            "quote": "https://economictimes.indiatimes.com/news/new-updates/whatsapp-to-get-redesigned-interface-soon-heres-what-we-know-about-the-major-update/articleshow/99662295.cms"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://arcitech.ai/whatsapp-new-ui-redesign-here-what-you-need-to-know/",
+      "title": "WhatsApp New UI Redesign , Here What You Need To Know",
+      "judgement": {
+        "relevance": 6,
+        "reason": "Covers WhatsApp's new UI redesign features. Metadata only; contents unverified.",
+        "model": "google/gemini-3.5-flash-lite",
+        "intent_checks": [
+          {
+            "dimension": "subject",
+            "status": "supported",
+            "field": "title",
+            "quote": "WhatsApp New UI Redesign , Here What You Need To Know"
+          },
+          {
+            "dimension": "intent",
+            "status": "supported",
+            "field": "description",
+            "quote": "The new WhatsApp Redesign embraces minimalist principles, offering a cleaner look."
+          },
+          {
+            "dimension": "relationship",
+            "status": "supported",
+            "field": "description",
+            "quote": "The new WhatsApp Redesign embraces minimalist principles, offering a cleaner look."
+          },
+          {
+            "dimension": "format",
+            "status": "supported",
+            "field": "url",
+            "quote": "https://arcitech.ai/whatsapp-new-ui-redesign-here-what-you-need-to-know/"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://www.zeebiz.com/india/video-gallery-whatsapp-chat-lists-interface-redesigned-for-android-331334",
+      "title": "WhatsApp chat lists interface redesigned for Android",
+      "judgement": {
+        "relevance": 6,
+        "reason": "Video reporting on the redesigned WhatsApp chat lists interface for Android. Metadata only; contents unverified.",
+        "model": "google/gemini-3.5-flash-lite",
+        "intent_checks": [
+          {
+            "dimension": "subject",
+            "status": "supported",
+            "field": "title",
+            "quote": "WhatsApp chat lists interface redesigned for Android"
+          },
+          {
+            "dimension": "intent",
+            "status": "supported",
+            "field": "title",
+            "quote": "WhatsApp chat lists interface redesigned for Android"
+          },
+          {
+            "dimension": "relationship",
+            "status": "supported",
+            "field": "title",
+            "quote": "WhatsApp chat lists interface redesigned for Android"
+          },
+          {
+            "dimension": "format",
+            "status": "supported",
+            "field": "url",
+            "quote": "https://www.zeebiz.com/india/video-gallery-whatsapp-chat-lists-interface-redesigned-for-android-331334"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://www.gizchina.com/2023/03/17/whatsapp-update-a-major-redesigned-interface-is-coming/",
+      "title": "WhatsApp Update, A New Redesigned Interface - Gizchina.com",
+      "judgement": {
+        "relevance": 6,
+        "reason": "Article discussing WhatsApp UI changes and upcoming redesigned interface updates. Metadata only; contents unverified.",
+        "model": "google/gemini-3.5-flash-lite",
+        "intent_checks": [
+          {
+            "dimension": "subject",
+            "status": "supported",
+            "field": "title",
+            "quote": "WhatsApp Update, A New Redesigned Interface - Gizchina.com"
+          },
+          {
+            "dimension": "intent",
+            "status": "supported",
+            "field": "description",
+            "quote": "WhatsApp is currently working on an update that will bring some UI changes."
+          },
+          {
+            "dimension": "relationship",
+            "status": "supported",
+            "field": "description",
+            "quote": "The WhatsApp chat attachment menu has remained the same for quite ..."
+          },
+          {
+            "dimension": "format",
+            "status": "supported",
+            "field": "url",
+            "quote": "https://www.gizchina.com/2023/03/17/whatsapp-update-a-major-redesigned-interface-is-coming/"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://www.creativebloq.com/news/new-whatsapp-ui-design",
+      "title": "Whatsapp's new UI design looks super sleek | Creative Bloq",
+      "judgement": {
+        "relevance": 6,
+        "reason": "Reports on official WhatsApp UI redesign updates including navigation bar, chat filters, and branding changes. Metadata only; contents unverified.",
+        "model": "gemini-3.6-flash",
+        "intent_checks": [
+          {
+            "dimension": "subject",
+            "status": "supported",
+            "field": "title",
+            "quote": "Whatsapp's new UI design"
+          },
+          {
+            "dimension": "intent",
+            "status": "supported",
+            "field": "description",
+            "quote": "navigation bar moved to the bottom, chat filters in an entirely white top bar"
+          },
+          {
+            "dimension": "relationship",
+            "status": "supported",
+            "field": "description",
+            "quote": "The new Whatsapp UI looks much sleeker, with the navigation bar moved to the bottom, chat filters"
+          },
+          {
+            "dimension": "format",
+            "status": "supported",
+            "field": "url",
+            "quote": "https://www.creativebloq.com/news/new-whatsapp-ui-design"
+          }
+        ]
+      }
+    }
+  ],
+  "providers": [
+    {
+      "provider": "brave",
+      "status": "ok",
+      "message": "Brave discovery completed."
+    },
+    {
+      "provider": "searxng",
+      "status": "ok",
+      "message": "11 of 12 search engines answered; Brave (rate-limited) did not."
+    },
+    {
+      "provider": "planner",
+      "status": "ok",
+      "message": "AI planned 4 searches for mixed."
+    },
+    {
+      "provider": "jev_exploration",
+      "status": "ok",
+      "message": "Explored 4 pages and found 0 new candidates."
+    },
+    {
+      "provider": "candidate_pool",
+      "status": "partial",
+      "message": "221 candidates found; up to 60 candidates were selected for checking after all sources answered."
+    },
+    {
+      "provider": "jev_screener",
+      "status": "unavailable",
+      "message": "Candidate screening was unavailable; the original candidate order was used."
+    },
+    {
+      "provider": "youtube",
+      "status": "ok",
+      "message": "YouTube details and viewer comments checked."
+    },
+    {
+      "provider": "reddit",
+      "status": "ok",
+      "message": "Reddit discussions checked."
+    },
+    {
+      "provider": "pages",
+      "status": "ok",
+      "message": "8 of 20 result pages were checked, 5 in a browser."
+    },
+    {
+      "provider": "judge",
+      "status": "ok",
+      "message": "Results were checked for relevance by AI."
+    },
+    {
+      "provider": "relevance_filter",
+      "status": "ok",
+      "message": "39 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown."
+    }
+  ]
+}

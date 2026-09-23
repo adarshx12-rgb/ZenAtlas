@@ -1,0 +1,1506 @@
+{
+  "query": "rosswell ufo incident real article",
+  "kind": "Separate same-pool screening retry; original search results are unchanged.",
+  "timeout_ms": 4000,
+  "batches": [
+    {
+      "elapsed_ms": 956,
+      "usage": {
+        "input_tokens": 5723,
+        "output_tokens": 881,
+        "cost": 0.000240366
+      },
+      "model": "typesafe/jev-1.13-20260917"
+    },
+    {
+      "elapsed_ms": 1303,
+      "usage": {
+        "input_tokens": 5798,
+        "output_tokens": 890,
+        "cost": 0.000243516
+      },
+      "model": "typesafe/jev-1.13-20260917"
+    },
+    {
+      "elapsed_ms": 1325,
+      "usage": {
+        "input_tokens": 5959,
+        "output_tokens": 879,
+        "cost": 0.000250278
+      },
+      "model": "typesafe/jev-1.13-20260917"
+    },
+    {
+      "elapsed_ms": 1358,
+      "usage": {
+        "input_tokens": 5780,
+        "output_tokens": 894,
+        "cost": 0.00024276
+      },
+      "model": "typesafe/jev-1.13-20260917"
+    },
+    {
+      "elapsed_ms": 1898,
+      "usage": {
+        "input_tokens": 6051,
+        "output_tokens": 875,
+        "cost": 0.000254142
+      },
+      "model": "typesafe/jev-1.13-20260917"
+    },
+    {
+      "elapsed_ms": 2257,
+      "usage": {
+        "input_tokens": 5501,
+        "output_tokens": 898,
+        "cost": 0.000231042
+      },
+      "model": "typesafe/jev-1.13-20260917"
+    }
+  ],
+  "decisions": [
+    {
+      "url": "https://www.skyatnightmagazine.com/space-science/roswell-ufo-incident",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.94,
+      "probabilities": {
+        "promising": 0.97,
+        "uncertain": 0.03,
+        "mismatch": 0
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://readtherealstory.com/conspiracies-theories/roswell-ufo",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.9,
+      "probabilities": {
+        "promising": 0.93,
+        "uncertain": 0.06,
+        "mismatch": 0.01
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=zpSA3LxsD_I",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "uncertain",
+      "confidence": 0.61,
+      "probabilities": {
+        "promising": 0.25,
+        "uncertain": 0.74,
+        "mismatch": 0.01
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://people.com/roswell-incident-true-story-unsolved-mysteries-8722935",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.97,
+      "probabilities": {
+        "promising": 0.97,
+        "uncertain": 0.02,
+        "mismatch": 0.01
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.reddit.com/r/ufo/comments/1uv6lj5/was_roswell_real/",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "uncertain",
+      "confidence": 0.54,
+      "probabilities": {
+        "promising": 0.22,
+        "uncertain": 0.69,
+        "mismatch": 0.09
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://theweek.com/us/59331/roswell-ufo-crash-what-really-happened-67-years-ago",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.97,
+      "probabilities": {
+        "promising": 0.98,
+        "uncertain": 0.02,
+        "mismatch": 0
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.facebook.com/NewsNationNow/videos/ross-coulthart-weighs-in-on-roswell-incident-video-newsnation-prime/2110681236428555/",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.25,
+      "probabilities": {
+        "promising": 0.5,
+        "uncertain": 0.36,
+        "mismatch": 0.14
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.dailymotion.com/video/x74rbt",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 1,
+      "probabilities": {
+        "promising": 0,
+        "uncertain": 0,
+        "mismatch": 1
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=OvEnr76O6AQ",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.51,
+      "probabilities": {
+        "promising": 0.67,
+        "uncertain": 0.31,
+        "mismatch": 0.02
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=Huc_YUJM-qM",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "uncertain",
+      "confidence": 0.35,
+      "probabilities": {
+        "promising": 0.41,
+        "uncertain": 0.57,
+        "mismatch": 0.02
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=5c9NX-ABtZg",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "uncertain",
+      "confidence": 0.24,
+      "probabilities": {
+        "promising": 0.38,
+        "uncertain": 0.5,
+        "mismatch": 0.12
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=V_RwoUn9GDo",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.67,
+      "probabilities": {
+        "promising": 0.78,
+        "uncertain": 0.21,
+        "mismatch": 0.01
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=qgLpp2uDv04",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.58,
+      "probabilities": {
+        "promising": 0.72,
+        "uncertain": 0.27,
+        "mismatch": 0.01
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=nrLVpWBxHRA",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.16,
+      "probabilities": {
+        "promising": 0.44,
+        "uncertain": 0.4,
+        "mismatch": 0.16
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=vP43ny3q0V8",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.64,
+      "probabilities": {
+        "promising": 0.76,
+        "uncertain": 0.21,
+        "mismatch": 0.03
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=7edMl_pEX18",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.93,
+      "probabilities": {
+        "promising": 0.96,
+        "uncertain": 0.04,
+        "mismatch": 0
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://en.wikipedia.org/wiki/Roswell_incident",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.89,
+      "probabilities": {
+        "promising": 0.93,
+        "uncertain": 0.07,
+        "mismatch": 0
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.history.com/articles/roswell-ufo-aliens-what-happened",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.87,
+      "probabilities": {
+        "promising": 0.92,
+        "uncertain": 0.08,
+        "mismatch": 0
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.britannica.com/event/Roswell-incident",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.97,
+      "probabilities": {
+        "promising": 0.98,
+        "uncertain": 0.02,
+        "mismatch": 0
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://airandspace.si.edu/stories/editorial/reports-ufos-1947-roswell-incident",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.79,
+      "probabilities": {
+        "promising": 0.86,
+        "uncertain": 0.13,
+        "mismatch": 0.01
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.frieze.com/article/roswell-incident",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.46,
+      "probabilities": {
+        "promising": 0.64,
+        "uncertain": 0.34,
+        "mismatch": 0.02
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://time.com/3916193/roswell-history/",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.93,
+      "probabilities": {
+        "promising": 0.96,
+        "uncertain": 0.04,
+        "mismatch": 0
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://blogs.library.unt.edu/sycamore-stacks/2022/07/07/75-years-after-the-roswell-incident-what-have-we-learned/",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.97,
+      "probabilities": {
+        "promising": 0.98,
+        "uncertain": 0.02,
+        "mismatch": 0
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.historyextra.com/period/20th-century/roswell-incident-ufo-alien-crash-conspiracy/",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.78,
+      "probabilities": {
+        "promising": 0.86,
+        "uncertain": 0.13,
+        "mismatch": 0.01
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://muller.lbl.gov/teaching/physics10/Roswell/RoswellIncident.html",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.44,
+      "probabilities": {
+        "promising": 0.63,
+        "uncertain": 0.24,
+        "mismatch": 0.13
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://science.howstuffworks.com/space/aliens-ufos/history-roswell-incident.htm",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.88,
+      "probabilities": {
+        "promising": 0.93,
+        "uncertain": 0.07,
+        "mismatch": 0
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.history.com/articles/roswell",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.82,
+      "probabilities": {
+        "promising": 0.89,
+        "uncertain": 0.11,
+        "mismatch": 0
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=H4AxRTzASxE",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "uncertain",
+      "confidence": 0.58,
+      "probabilities": {
+        "promising": 0.16,
+        "uncertain": 0.72,
+        "mismatch": 0.12
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.wired.com/story/roswell-aliens-fermi-paradox/",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.76,
+      "probabilities": {
+        "promising": 0.84,
+        "uncertain": 0.14,
+        "mismatch": 0.02
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.go.newsreview.com/article/the-roswell-ufo-incident-a-deep-dive-into-the-legend",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.27,
+      "probabilities": {
+        "promising": 0.51,
+        "uncertain": 0.48,
+        "mismatch": 0.01
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.dvidshub.net/news/475677/intelligence-agents-investigate-ufos-roswell-7-jul-1947",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.88,
+      "probabilities": {
+        "promising": 0.91,
+        "uncertain": 0.07,
+        "mismatch": 0.02
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://cdn.nationalarchives.gov.uk/documents/briefing-guide-12-07-12.pdf",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.21,
+      "probabilities": {
+        "promising": 0.47,
+        "uncertain": 0.4,
+        "mismatch": 0.13
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://vault.fbi.gov/Roswell%20UFO",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.78,
+      "probabilities": {
+        "promising": 0.85,
+        "uncertain": 0.13,
+        "mismatch": 0.02
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.dafhistory.af.mil/Portals/16/documents/AFD-101201-038.pdf",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.9,
+      "probabilities": {
+        "promising": 0.93,
+        "uncertain": 0.07,
+        "mismatch": 0
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.bbc.co.uk/programmes/articles/3Lg5q2XxYMbby5bcslkTQr2/roswell-ufo-incident-27-june-1997",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.35,
+      "probabilities": {
+        "promising": 0.5599999999999999,
+        "uncertain": 0.37,
+        "mismatch": 0.07
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.msn.com/en-us/lifestyle/other/the-forgotten-ufo-stories-that-made-roswell-a-global-phenomenon/vi-AA29nBwX",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.83,
+      "probabilities": {
+        "promising": 0.89,
+        "uncertain": 0.11,
+        "mismatch": 0
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://sites.libraries.uta.edu/roswell/deciphering-ramey-memo",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.78,
+      "probabilities": {
+        "promising": 0.86,
+        "uncertain": 0.14,
+        "mismatch": 0
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://peertube.dngr.us/videos/watch/1b3b8697-6a67-41ab-8466-2f0965092aad",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "uncertain",
+      "confidence": 0.3,
+      "probabilities": {
+        "promising": 0.17,
+        "uncertain": 0.54,
+        "mismatch": 0.29
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.af.mil/The-Roswell-Report/",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.98,
+      "probabilities": {
+        "promising": 0.99,
+        "uncertain": 0.01,
+        "mismatch": 0
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://media.defense.gov/2010/Oct/27/2001330219/-1/-1/0/AFD-101027-030.pdf",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.95,
+      "probabilities": {
+        "promising": 0.97,
+        "uncertain": 0.03,
+        "mismatch": 0
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=odUSnDgU-oo",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.89,
+      "probabilities": {
+        "promising": 0.92,
+        "uncertain": 0.07,
+        "mismatch": 0.01
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.dailymotion.com/video/x5eq3c4",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 0.36,
+      "probabilities": {
+        "promising": 0,
+        "uncertain": 0.43,
+        "mismatch": 0.57
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://cdn.nationalarchives.gov.uk/documents/ufo-research-guide-2013.pdf",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 0.88,
+      "probabilities": {
+        "promising": 0.01,
+        "uncertain": 0.07,
+        "mismatch": 0.92
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.britannica.com/today-in-history/July-8-A-Local-Newspaper-Kicks-Off-Roswells-UFO-Mania",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.86,
+      "probabilities": {
+        "promising": 0.91,
+        "uncertain": 0.08,
+        "mismatch": 0.01
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.peterjames.com/roswell-what-really-happened/",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 0.3,
+      "probabilities": {
+        "promising": 0.06,
+        "uncertain": 0.41,
+        "mismatch": 0.53
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.nationalarchives.gov.uk/explore-the-collection/explore-by-time-period/postwar/ufo-reports/",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 0.55,
+      "probabilities": {
+        "promising": 0,
+        "uncertain": 0.29,
+        "mismatch": 0.71
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://kojistevensakai.com/2025/07/17/s5e4-were-the-roswell-aliens-really-special-needs-soviet-children/",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "uncertain",
+      "confidence": 0.29,
+      "probabilities": {
+        "promising": 0.27,
+        "uncertain": 0.52,
+        "mismatch": 0.21
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.npr.org/2023/11/27/1215372533/how-the-roswell-ufo-spurred-our-modern-age-of-conspiracy-theories",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.96,
+      "probabilities": {
+        "promising": 0.98,
+        "uncertain": 0.02,
+        "mismatch": 0
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://peertube.lagbag.com/videos/watch/66bfa355-1141-4a9b-936f-ea3e3a518c62",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "uncertain",
+      "confidence": 0.22,
+      "probabilities": {
+        "promising": 0.48,
+        "uncertain": 0.48,
+        "mismatch": 0.04
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.history.com/this-day-in-history/june-24/u-s-air-force-reports-on-roswell",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.99,
+      "probabilities": {
+        "promising": 0.99,
+        "uncertain": 0.01,
+        "mismatch": 0
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=HQRyaCBxPeU",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.85,
+      "probabilities": {
+        "promising": 0.9,
+        "uncertain": 0.09,
+        "mismatch": 0.01
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.smithsonianmag.com/air-space-magazine/roswell-the-genesis-story-of-us-ufos-140945396/",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.72,
+      "probabilities": {
+        "promising": 0.81,
+        "uncertain": 0.18,
+        "mismatch": 0.01
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://images.nationalarchives.gov.uk/asset/74261/",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 0.97,
+      "probabilities": {
+        "promising": 0,
+        "uncertain": 0.02,
+        "mismatch": 0.98
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://discovery.nationalarchives.gov.uk/",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 0.91,
+      "probabilities": {
+        "promising": 0,
+        "uncertain": 0.06,
+        "mismatch": 0.94
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.doolly.com/blog/1947-roswell-ufo-crash-declassified-files-revealed",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.95,
+      "probabilities": {
+        "promising": 0.97,
+        "uncertain": 0.03,
+        "mismatch": 0
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.af.mil/the-roswell-report/",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.97,
+      "probabilities": {
+        "promising": 0.97,
+        "uncertain": 0.02,
+        "mismatch": 0.01
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://blog.nationalarchives.gov.uk/portillos-state-secrets-mysteries",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 0.65,
+      "probabilities": {
+        "promising": 0,
+        "uncertain": 0.23,
+        "mismatch": 0.77
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.reddit.com/r/aliens/comments/17noo90/jesse_marcel_one_of_the_witnesses_to_the_roswell/",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "uncertain",
+      "confidence": 0.56,
+      "probabilities": {
+        "promising": 0.27,
+        "uncertain": 0.71,
+        "mismatch": 0.02
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.dailymotion.com/video/x74tge",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 0.74,
+      "probabilities": {
+        "promising": 0,
+        "uncertain": 0.17,
+        "mismatch": 0.83
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://cdn.nationalarchives.gov.uk/documents/ufo-highlights-guide-2013.pdf",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 0.95,
+      "probabilities": {
+        "promising": 0,
+        "uncertain": 0.03,
+        "mismatch": 0.97
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.facebook.com/HISTORY/posts/what-really-happened-at-roswell-during-the-summer-of-1947-extreme-weather-may-ho/10157393923841184/",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.58,
+      "probabilities": {
+        "promising": 0.72,
+        "uncertain": 0.28,
+        "mismatch": 0
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://login.anz.com/internetbanking",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 1,
+      "probabilities": {
+        "promising": 0,
+        "uncertain": 0,
+        "mismatch": 1
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.nationalarchives.gov.uk/help-with-your-research/research-guides/ufos/",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 0.3,
+      "probabilities": {
+        "promising": 0.01,
+        "uncertain": 0.46,
+        "mismatch": 0.53
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://skeptikon.fr/videos/watch/6a19984e-b0bc-46d0-b46a-1733132d9377",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "uncertain",
+      "confidence": 0.24,
+      "probabilities": {
+        "promising": 0.34,
+        "uncertain": 0.49,
+        "mismatch": 0.17
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.yahoo.com/news/videos/data-controlled-boat-crash-could-032031867.html",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 1,
+      "probabilities": {
+        "promising": 0,
+        "uncertain": 0,
+        "mismatch": 1
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=gGsUUvOXxtY",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.91,
+      "probabilities": {
+        "promising": 0.94,
+        "uncertain": 0.06,
+        "mismatch": 0
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.reddit.com/r/UFOs/comments/14n2txj/investigators_2nd_roswell_ufo_debris_field/",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "uncertain",
+      "confidence": 0.27,
+      "probabilities": {
+        "promising": 0.46,
+        "uncertain": 0.52,
+        "mismatch": 0.02
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://cdn.nationalarchives.gov.uk/documents/aug-2009-highlights-guide.pdf",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 0.97,
+      "probabilities": {
+        "promising": 0,
+        "uncertain": 0.02,
+        "mismatch": 0.98
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=nW02FS4UoCo",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.67,
+      "probabilities": {
+        "promising": 0.78,
+        "uncertain": 0.2,
+        "mismatch": 0.02
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.kaveri.karnataka.gov.in/landing-page?source=post_page---------------------------",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 1,
+      "probabilities": {
+        "promising": 0,
+        "uncertain": 0,
+        "mismatch": 1
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://unisba.ac.id/d2b40BVZvXQ4EIgAcenk",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "uncertain",
+      "confidence": 0.47,
+      "probabilities": {
+        "promising": 0.28,
+        "uncertain": 0.65,
+        "mismatch": 0.07
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=bFiUglPz2sw",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.75,
+      "probabilities": {
+        "promising": 0.83,
+        "uncertain": 0.16,
+        "mismatch": 0.01
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://cdn.nationalarchives.gov.uk/documents/podcast-transcript.pdf",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "uncertain",
+      "confidence": 0.31,
+      "probabilities": {
+        "promising": 0.01,
+        "uncertain": 0.54,
+        "mismatch": 0.45
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=F5cI6DQHND4",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.77,
+      "probabilities": {
+        "promising": 0.85,
+        "uncertain": 0.15,
+        "mismatch": 0
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://skeptikon.fr/videos/watch/3c501966-b649-4388-84e0-c8b3efeec84f",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "uncertain",
+      "confidence": 0.08,
+      "probabilities": {
+        "promising": 0.29,
+        "uncertain": 0.38,
+        "mismatch": 0.33
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.google.com/",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 0.32,
+      "probabilities": {
+        "promising": 0,
+        "uncertain": 0.45,
+        "mismatch": 0.55
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://cdn.nationalarchives.gov.uk/documents/final-tranche-of-UFO-files-released.pdf",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 0.4,
+      "probabilities": {
+        "promising": 0.03,
+        "uncertain": 0.37,
+        "mismatch": 0.6
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.dailymotion.com/video/x7vnwkz",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 0.81,
+      "probabilities": {
+        "promising": 0,
+        "uncertain": 0.13,
+        "mismatch": 0.87
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://accounts.google.com/?authuser=1",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 1,
+      "probabilities": {
+        "promising": 0,
+        "uncertain": 0,
+        "mismatch": 1
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.dailymotion.com/video/x6rqdna",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 1,
+      "probabilities": {
+        "promising": 0,
+        "uncertain": 0,
+        "mismatch": 1
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=8lel5jqtrjI",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.25,
+      "probabilities": {
+        "promising": 0.5,
+        "uncertain": 0.48,
+        "mismatch": 0.02
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=bLn0zULQ4gk",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.16,
+      "probabilities": {
+        "promising": 0.44,
+        "uncertain": 0.44,
+        "mismatch": 0.12
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=jqGxWHn25qg",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.4,
+      "probabilities": {
+        "promising": 0.6,
+        "uncertain": 0.39,
+        "mismatch": 0.01
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=Pz0vYcc4KiI",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.69,
+      "probabilities": {
+        "promising": 0.8,
+        "uncertain": 0.19,
+        "mismatch": 0.01
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.oxygen.com/videos/nicole-linton-accused-of-driving-131-mph-in-crash-that-killed-pregnant-mom-ejected-unborn",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 1,
+      "probabilities": {
+        "promising": 0,
+        "uncertain": 0,
+        "mismatch": 1
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=uI0mbdQaw5w",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "uncertain",
+      "confidence": 0.27,
+      "probabilities": {
+        "promising": 0.46,
+        "uncertain": 0.51,
+        "mismatch": 0.03
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=7Zs1JmsuG6k",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.93,
+      "probabilities": {
+        "promising": 0.95,
+        "uncertain": 0.04,
+        "mismatch": 0.01
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=n1JCxhLQThY",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.53,
+      "probabilities": {
+        "promising": 0.68,
+        "uncertain": 0.31,
+        "mismatch": 0.01
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=TbNP3NJ5yJI",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "uncertain",
+      "confidence": 0.55,
+      "probabilities": {
+        "promising": 0.3,
+        "uncertain": 0.7,
+        "mismatch": 0
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=bPgrn52qyxY",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 0.38,
+      "probabilities": {
+        "promising": 0.05,
+        "uncertain": 0.36,
+        "mismatch": 0.59
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=yPxTfkIc7BY",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.9,
+      "probabilities": {
+        "promising": 0.93,
+        "uncertain": 0.06,
+        "mismatch": 0.01
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=oHLGXL4YfYM",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.54,
+      "probabilities": {
+        "promising": 0.69,
+        "uncertain": 0.21,
+        "mismatch": 0.1
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=CLzIaFgpoNI",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.92,
+      "probabilities": {
+        "promising": 0.95,
+        "uncertain": 0.04,
+        "mismatch": 0.01
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=5-ZHH8qPYIQ",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.82,
+      "probabilities": {
+        "promising": 0.88,
+        "uncertain": 0.11,
+        "mismatch": 0.01
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=ma7sxiw77IM",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.7,
+      "probabilities": {
+        "promising": 0.8,
+        "uncertain": 0.17,
+        "mismatch": 0.03
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=ud0rY62GJNk",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.62,
+      "probabilities": {
+        "promising": 0.75,
+        "uncertain": 0.24,
+        "mismatch": 0.01
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=Qnq1n3D4_ms",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.84,
+      "probabilities": {
+        "promising": 0.89,
+        "uncertain": 0.1,
+        "mismatch": 0.01
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=Qnym-ZcckYM",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.27,
+      "probabilities": {
+        "promising": 0.52,
+        "uncertain": 0.47,
+        "mismatch": 0.01
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=grG5KT20vTk",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 0.87,
+      "probabilities": {
+        "promising": 0.01,
+        "uncertain": 0.08,
+        "mismatch": 0.91
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=J6xtxZwrGLY",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.4,
+      "probabilities": {
+        "promising": 0.6,
+        "uncertain": 0.35,
+        "mismatch": 0.05
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=OQ3o_g9GtgY",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 0.99,
+      "probabilities": {
+        "promising": 0,
+        "uncertain": 0,
+        "mismatch": 1
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=F-C0BnreoWU",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.86,
+      "probabilities": {
+        "promising": 0.91,
+        "uncertain": 0.08,
+        "mismatch": 0.01
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=Tl9j8cGX1_I",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.29,
+      "probabilities": {
+        "promising": 0.53,
+        "uncertain": 0.34,
+        "mismatch": 0.13
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=70lKXJrSBw8",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.96,
+      "probabilities": {
+        "promising": 0.98,
+        "uncertain": 0.02,
+        "mismatch": 0
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=MjdgbX2-ntw",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "uncertain",
+      "confidence": 0.49,
+      "probabilities": {
+        "promising": 0.32,
+        "uncertain": 0.66,
+        "mismatch": 0.02
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=2ZuFrGNbld8",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 0.69,
+      "probabilities": {
+        "promising": 0,
+        "uncertain": 0.2,
+        "mismatch": 0.8
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=gxQqm62Hg4c",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "uncertain",
+      "confidence": 0.34,
+      "probabilities": {
+        "promising": 0.3,
+        "uncertain": 0.56,
+        "mismatch": 0.14
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=OyUs-JfBcQ0",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 0.98,
+      "probabilities": {
+        "promising": 0,
+        "uncertain": 0.01,
+        "mismatch": 0.99
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=-uFTI1cYPhI",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "uncertain",
+      "confidence": 0.61,
+      "probabilities": {
+        "promising": 0.24,
+        "uncertain": 0.74,
+        "mismatch": 0.02
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=RCAHyclAmZs",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.88,
+      "probabilities": {
+        "promising": 0.92,
+        "uncertain": 0.07,
+        "mismatch": 0.01
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=nOy8Lbble2Q",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.43,
+      "probabilities": {
+        "promising": 0.62,
+        "uncertain": 0.34,
+        "mismatch": 0.04
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=eg1vp1MPi_s",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 0.55,
+      "probabilities": {
+        "promising": 0.06,
+        "uncertain": 0.24,
+        "mismatch": 0.7
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=XgXjrK876z4",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.3,
+      "probabilities": {
+        "promising": 0.53,
+        "uncertain": 0.42,
+        "mismatch": 0.05
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=JxdNYXXegHk",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 0.58,
+      "probabilities": {
+        "promising": 0.03,
+        "uncertain": 0.25,
+        "mismatch": 0.72
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=yvrXFQWbaQ4",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.85,
+      "probabilities": {
+        "promising": 0.9,
+        "uncertain": 0.09,
+        "mismatch": 0.01
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=NoSJA1Oro1s",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.55,
+      "probabilities": {
+        "promising": 0.7,
+        "uncertain": 0.29,
+        "mismatch": 0.01
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=FSJ_yOK1b8I",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.26,
+      "probabilities": {
+        "promising": 0.51,
+        "uncertain": 0.48,
+        "mismatch": 0.01
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=yETl1cW_WHI",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "promising",
+      "confidence": 0.91,
+      "probabilities": {
+        "promising": 0.94,
+        "uncertain": 0.05,
+        "mismatch": 0.01
+      },
+      "promoted": true
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=LnqLegotH0E",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 0.74,
+      "probabilities": {
+        "promising": 0,
+        "uncertain": 0.17,
+        "mismatch": 0.83
+      },
+      "promoted": false
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=npHo0B0JRaM",
+      "model": "typesafe/jev-1.13-20260917",
+      "choice": "mismatch",
+      "confidence": 0.81,
+      "probabilities": {
+        "promising": 0.02,
+        "uncertain": 0.1,
+        "mismatch": 0.88
+      },
+      "promoted": false
+    }
+  ],
+  "screened": 120,
+  "promoted": 35,
+  "elapsed_ms": 2315
+}

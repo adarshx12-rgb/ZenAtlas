@@ -23,6 +23,18 @@ export const configSchema = z.object({
   DEEP_RESULTS: number(40, 1, 80), DEEP_SEARCH_SECONDS: number(120, 20, 600),
   // Shared candidate pool, selected only after all launched providers finish. Display limits apply after judging.
   DISCOVERY_CANDIDATES: number(60, 50, 250),
+  JEV_SCREENING_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
+  JEV_MODEL: z.string().regex(/^~?typesafe\/jev-[\w.-]{1,80}$/).default('typesafe/jev-1.13'),
+  JEV_SCREEN_CANDIDATES: number(120, 20, 120),
+  JEV_SCREEN_TIMEOUT_MS: number(4000, 500, 10000),
+  JEV_SCREEN_DAILY_BUDGET: number(600, 0, 100000),
+  JEV_SCREEN_CONFIDENCE: z.coerce.number().min(0).max(1).default(0.8),
+  JEV_EXPLORATION_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
+  JEV_EXPLORATION_PAGES: number(4, 0, 8), JEV_EXPLORATION_ROUNDS: number(2, 1, 3),
+  JEV_EXPLORATION_CANDIDATES: number(40, 10, 40),
+  JEV_EXPLORATION_TIMEOUT_MS: number(4000, 500, 10000),
+  JEV_EXPLORATION_DAILY_BUDGET: number(200, 0, 100000),
+  JEV_EXPLORATION_CONFIDENCE: z.coerce.number().min(0).max(1).default(0.65),
   SPECIALIST_SEARCHES: number(3, 0, 6),
   ARCHIVE_DISCOVERY: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
   ARCHIVE_COLLECTIONS: z.string().default('prelinger,ephemera').refine(v =>

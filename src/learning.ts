@@ -9,6 +9,7 @@ import { SearXNG } from './providers.js';
 import { canonicalize } from './urls.js';
 import { RANKING_VERSION } from './ranking.js';
 import { claim, complete, fail, renewLease } from './queue.js';
+import type { ExplorationTrace } from './exploration.js';
 
 // Learning loop, step 1. Every discovery search leaves a trace; a critic model audits it once results are shown,
 // testing any source it says was missed with a real search; once a week a reviewer re-checks a sample of audits.
@@ -22,6 +23,7 @@ export interface TraceEntry {
  shown: boolean; rank: number|null; badges: string[];
 }
 export interface SearchTrace {
+ exploration?: ExplorationTrace;
  query: string; depth: 'quick'|'deep';
  plan: {kind: string; criteria: string[]; model: string|null};
  searches: {query: string; target: string; round: number}[];

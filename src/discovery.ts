@@ -16,8 +16,10 @@ import { PageChecker, type PageEvidence } from './pages.js';
 import { matchesFilters } from './catalogue.js';
 import { makeJudge } from './judge.js';
 import type { SearchTrace } from './learning.js';
+import { makeScreener, screeningOrder, type Screener } from './screener.js';
+import { exploreSources, makeExplorer, type Explorer, type ExplorationTrace } from './exploration.js';
 
-export interface DiscoveryDeps extends SignalDeps { planner?: Planner; anilist?: AnimeClient; archives?: SourceAdapter[] }
+export interface DiscoveryDeps extends SignalDeps { planner?: Planner; anilist?: AnimeClient; archives?: SourceAdapter[]; screener?: Screener; explorer?: Explorer }
 export interface DiscoveryProgress { results: Result[]; providers: ProviderStatus[]; stage: 'searching'|'following'|'checking' }
 // code: why it failed, such as an engine's "blocked by a CAPTCHA".
 type Health = (provider: string, ok: boolean, code?: string) => Promise<void>;
@@ -248,6 +250,26 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
      cachedPages.set(url, checker.check(url).catch(() => ({status: 'unavailable', title: null, description: null, text: null, libraries: [], badges: []})));
    return cachedPages.get(url) ?? {status: 'unavailable', title: null, description: null, text: null, libraries: [], badges: []};
  };
+ let exploration: ExplorationTrace|undefined;
+ const explorer = deps.explorer ?? makeExplorer(db,config);
+ // Reserve at least half the page budget for normal evidence checks. Scoped searches
+ // remain scoped; exploration only follows real references and never approves a source.
+ const explorationPages = Math.min(config.JEV_EXPLORATION_PAGES,Math.floor(config.PAGE_CHECKS/2));
+ if (explorer && checker && explorationPages && !input.source && !/(?:^|\s)site:/i.test(input.q) && Date.now()<deadline) {
+   stage='following';await report();
+   const seeds=rankDiscovery(input.q,leads.filter(l=>l.target==='web'),leads.length,0,true).map(l=>({
+     url:l.item.url,title:l.item.title,description:l.item.description,published_at:l.item.published_at,from_url:null}));
+   if(seeds.length) {
+     const out=await exploreSources(input.q,seeds,explorer,checkPage,config,explorationPages,deadline);
+     exploration=out.trace;
+     for(const [position,item] of out.items.entries()) if(!leads.some(l=>l.item.url===item.url))
+       leads.push({item,provider:'jev_exploration',position,query:input.q,target:'web',round:0});
+     const partial=out.trace.rounds.some(r=>r.failed_batches>0);
+     notes.push({provider:'jev_exploration',status:out.trace.error?(out.trace.error==='budget_exhausted'?'budget_exhausted':'unavailable'):partial?'partial':'ok',
+       message:`Explored ${out.trace.visited.length} pages and found ${out.items.length} new candidates.${out.trace.error||partial?' Some exploration decisions were unavailable; other search results were retained.':''}`});
+     await health('jev_exploration',!out.trace.error&&!partial,out.trace.error??(partial?'partial':'ok'));
+   }
+ }
  let followed = 0, rounds = 0, leadError: unknown = null;
  while (deep && planner?.followUps && config.DEEP_FOLLOW_UPS && rounds < config.DEEP_ROUNDS && deadline - Date.now() > FOLLOW_UP_MIN_MS) {
    stage = 'following'; await report();
@@ -282,11 +304,28 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
  const judge = deps.judge ?? makeJudge(db, config);
  const ranked = rankDiscovery(input.q, leads, leads.length, 0, !!judge);
  if (ranked.length > config.DISCOVERY_CANDIDATES) notes.push({provider: 'candidate_pool', status: 'partial',
-   message: `${ranked.length} candidates found; the best ${config.DISCOVERY_CANDIDATES} keyword matches were selected for checking after all sources answered.`});
- // Leads matching at least half of the search that found them are checked first. Looser leads, including semantic
- // guesses, only fill what is left of the pool, so a well-placed generic page cannot take a judge slot from a match.
+   message: `${ranked.length} candidates found; up to ${config.DISCOVERY_CANDIDATES} candidates were selected for checking after all sources answered.`});
+ // Baseline: clear keyword matches precede loose leads. Optional screening can promote
+ // promising metadata matches while reserving every fourth pick for this original order.
  const clear = new Set(rankDiscovery(input.q, leads, leads.length, CLEAR_MATCH).map(l => l.item.url));
- await store([...ranked.filter(l => clear.has(l.item.url)), ...ranked.filter(l => !clear.has(l.item.url))]);
+ let picks = [...ranked.filter(l => clear.has(l.item.url)), ...ranked.filter(l => !clear.has(l.item.url))];
+ const screener = deps.screener ?? makeScreener(db, config);
+ stage = 'checking'; await report();
+ if (screener && picks.length) {
+   try {
+     const screened = await screener.screen(input.q, picks);
+     await health('jev_screener', true);
+     picks = screeningOrder(picks, screened.promising);
+     notes.push({provider: 'jev_screener', status: 'ok',
+       message: `Screened ${screened.screened} of ${ranked.length} leads to prioritize evidence checks; final relevance is checked separately.`});
+   } catch (error) {
+     const code = error instanceof UpstreamError ? error.code : 'unavailable';
+     notes.push({provider: 'jev_screener', status: code === 'budget_exhausted' ? 'budget_exhausted' : 'unavailable',
+       message: 'Candidate screening was unavailable; the original candidate order was used.'});
+     await health('jev_screener', false, code);
+   }
+ }
+ await store(picks);
  const statuses = [...[...providers, ...archives].map(p => summarise(p.name, outcomes.filter(o => o.provider === p))), ...notes];
  const searches = uniqueRan(ran);
 
@@ -304,7 +343,8 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
  for (const [id] of signals.previews) if (!results.some(r => r.id === id)) signals.previews.delete(id);
  return {results, closest:signals.closest.filter(r=>matchesFilters(r,input)), ingested: found, previews: signals.previews, searches,
    dropped: [...new Set([...found, ...earlier.results].filter(r => !kept.has(r.canonical_url)).map(r => r.canonical_url))], providers: [...statuses, ...signals.providers],
-   trace: traceOf(input, plan, searches, rounds, [...statuses, ...signals.providers], leads, found, leadUrl, signals.judged, results, roundOf)};
+   trace: {...traceOf(input, plan, searches, rounds, [...statuses, ...signals.providers], leads, found, leadUrl, signals.judged, results, roundOf),
+     ...(exploration?{exploration}:{})}};
 }
 
 const uniqueRan = (list: PlannedSearch[]) => list.filter((s, i) => list.findIndex(o => sameSearch(o, s)) === i);

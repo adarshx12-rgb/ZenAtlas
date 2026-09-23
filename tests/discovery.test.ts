@@ -12,10 +12,74 @@ import type {Judge} from '../src/judge.js';
 import type {YouTubeClient} from '../src/youtube.js';
 import type {AnimeClient, AnimeMatch} from '../src/anilist.js';
 import {runDiscovery} from '../src/discovery.js';
+import type {Screener} from '../src/screener.js';
+import {UpstreamError} from '../src/http.js';
+import type {Explorer} from '../src/exploration.js';
 
 const lead=(url:string,title:string,provider='searxng',position=0,description:string|null=null):DiscoveryCandidate=>
  ({item:contentInput.parse({url,title,description}),provider,position});
 const urls=(list:DiscoveryCandidate[])=>list.map(c=>c.item.url);
+
+test('Jev exploration adds checked outbound sources before judging, reuses pages, and respects scoped searches',async()=>{
+ const db=await database();
+ try{
+   const root='https://catalogue.example.org/moon',found='https://original.example.org/launch';
+   const provider:SourceAdapter={name:'explore-fixture',capabilities:{transcripts:false,comments:false,embeds:false,accessible_media:false},
+     async search(){return {results:[contentInput.parse({url:root,title:'Moon launch source catalogue'})],next_cursor:null,status:{provider:'explore-fixture',status:'ok',message:'TEST'}};}};
+   const planner:Planner={async plan(){return {kind:'websites',searches:[{query:'moon launch sources',target:'web'}],criteria:[],model:'test'};}};
+   const explorer:Explorer={async assess(_q,candidates){return {failed_batches:0,decisions:candidates.map(c=>({url:c.url,model:'test',choice:'useful',confidence:0.95,
+     probabilities:{useful:0.98,uncertain:0.01,irrelevant:0.01}}))};}};
+   const calls:string[]=[];
+   const pages={async check(url:string){calls.push(url);return {status:'checked' as const,title:'Moon launch footage',description:'Original moon launch footage and source references.',
+     text:'Moon launch footage',libraries:[],badges:[],links:url===root?[{url:found,title:'Original recording'}]:[]};}};
+   const judge:Judge={async judge(_q,candidates){return {model:'final',verdicts:new Map(candidates.map(c=>[c.key,{key:c.key,relevance:c.url===found?9:4,reason:'TEST evidence',momentKeys:[]}]))};}};
+   const config={...testConfig,PAGE_CHECKS:8};
+   const out=await runDiscovery(db,config,searchInput.parse({q:'moon launch websites'}),[provider],{planner,explorer,pages,judge},async()=>{});
+   assert.ok(out.results.some(r=>r.canonical_url===found));
+   assert.deepEqual(out.trace.exploration?.new_urls,[found]);
+   assert.ok(out.providers.some(p=>p.provider==='jev_exploration'&&p.status==='ok'));
+   assert.equal(calls.filter(url=>url===found).length,1,'final evidence checks reuse exploration fetches');
+   let assessed=false;
+   const scoped=await runDiscovery(db,config,searchInput.parse({q:'moon launch site:catalogue.example.org'}),[provider],
+     {planner,pages,judge,explorer:{async assess(){assessed=true;return {decisions:[],failed_batches:0};}}},async()=>{});
+   assert.equal(assessed,false);assert.equal(scoped.trace.exploration,undefined);
+ }finally{await db.close();}
+});
+
+test('Jev screening precedes admission, preserves exploration, and leaves final rejection to the judge',async()=>{
+ const db=await database();
+ try{
+   const items=Array.from({length:8},(_,i)=>contentInput.parse({url:`https://screen.example.org/${i}`,
+     title:i<4?`Moon launch ${i}`:`Orbital ascent ${i}`}));
+   const excluded=contentInput.parse({url:'https://screen.example.org/excluded',title:'Moon launch gameplay'});
+   const provider:SourceAdapter={name:'screen-fixture',capabilities:{transcripts:false,comments:false,embeds:false,accessible_media:false},
+     async search(){return {results:[...items,excluded],next_cursor:null,status:{provider:'screen-fixture',status:'ok',message:'TEST'}};}};
+   const judge:Judge={async judge(_q,candidates){return {model:'final-judge',verdicts:new Map(candidates.map(c=>[c.key,
+     {key:c.key,relevance:c.title==='Orbital ascent 4'?8:4,reason:'Final evidence verdict',momentKeys:[]}]))};}};
+   const screener:Screener={async screen(query,candidates){
+     assert.equal(query,'moon launch -gameplay');
+     assert.equal(candidates.length,8);
+     assert.ok(!candidates.some(c=>c.item.url===excluded.url),'exclusions apply before Jev');
+     return {screened:candidates.length,promising:new Set(items.slice(4).map(c=>c.url))};
+   }};
+   const config={...testConfig,DISCOVERY_CANDIDATES:4};
+   const input=searchInput.parse({q:'moon launch -gameplay'});
+   const health:{provider:string;ok:boolean}[]=[];
+   const out=await runDiscovery(db,config,input,[provider],{judge,screener},async(provider,ok)=>{health.push({provider,ok});});
+   assert.deepEqual(out.ingested.map(r=>r.title),['Orbital ascent 4','Orbital ascent 5','Orbital ascent 6','Moon launch 0']);
+   assert.deepEqual(out.results.map(r=>r.title),['Orbital ascent 4'],'Jev promotion cannot override final rejection');
+   assert.equal(out.results[0].judgement?.model,'final-judge');
+   assert.ok(out.providers.some(p=>p.provider==='jev_screener'&&p.status==='ok'));
+   assert.ok(health.some(h=>h.provider==='jev_screener'&&h.ok));
+   const baseline=await runDiscovery(db,config,input,[provider],{judge},async()=>{});
+   assert.ok(!baseline.providers.some(p=>p.provider==='jev_screener'),'no key preserves default behaviour');
+   for(const code of ['timeout','malformed_response','budget_exhausted']){
+     const failed=await runDiscovery(db,config,input,[provider],{judge,screener:{async screen(){throw new UpstreamError(code);}}},async()=>{});
+     assert.deepEqual(failed.ingested.map(r=>r.canonical_url),baseline.ingested.map(r=>r.canonical_url));
+     assert.ok(failed.providers.some(p=>p.provider==='jev_screener'&&p.status===(code==='budget_exhausted'?'budget_exhausted':'unavailable')));
+   }
+ }finally{await db.close();}
+});
 
 test('late specialist semantic matches compete before the display limit, regardless of arrival order',async()=>{
  const db=await database();
