@@ -1,0 +1,819 @@
+{
+  "ranking_version": "relevance-v8-requirements",
+  "generated_at": "2026-09-24T14:58:19.382Z",
+  "human_judged": false,
+  "runs": [
+    {
+      "q": "official whatsapp chat ui interface from over past 3 years",
+      "variant": "baseline",
+      "elapsed_ms": 51651,
+      "calls": {
+        "anilist_calls": 6,
+        "discovery:brave": 4,
+        "planner_calls:mistralai/ministral-14b-2512": 1,
+        "planner_calls:inception/mercury-2.5": 1,
+        "jev_screen_calls": 4,
+        "reddit_signals": 1,
+        "planner_calls:google/gemma-4-31b-it": 1,
+        "jev_exploration_calls": 4,
+        "source_health_jobs": 3,
+        "source_health_probes": 3,
+        "judge_calls": 5,
+        "youtube_units": 31
+      },
+      "estimated_cost_usd": {
+        "brave": 0.02,
+        "jev": 0.0032,
+        "note": "Brave and Jev only; chat-model calls are counted, not priced"
+      },
+      "metrics": {
+        "pool": 60,
+        "shown": 19,
+        "judged": 60,
+        "verified": 19,
+        "possible": 0,
+        "closest": 0,
+        "rejected": 41,
+        "near_misses": 40,
+        "unjudged": 0,
+        "basis": {
+          "metadata": 12,
+          "viewer_claims": 2,
+          "direct_evidence": 5
+        },
+        "last_round_share": null,
+        "duplicate_groups": [],
+        "sites": 15,
+        "failed_providers": []
+      },
+      "unmet": [],
+      "contract": null,
+      "gaps": null,
+      "providers": [
+        {
+          "provider": "brave",
+          "status": "ok",
+          "message": "Brave discovery completed."
+        },
+        {
+          "provider": "searxng",
+          "status": "ok",
+          "message": "Not needed: Brave answered every search."
+        },
+        {
+          "provider": "planner",
+          "status": "ok",
+          "message": "AI planned 4 searches for mixed."
+        },
+        {
+          "provider": "jev_exploration",
+          "status": "ok",
+          "message": "Explored 4 pages and found 0 new candidates."
+        },
+        {
+          "provider": "candidate_pool",
+          "status": "partial",
+          "message": "63 candidates found; up to 60 candidates were selected for checking after all sources answered."
+        },
+        {
+          "provider": "jev_screener",
+          "status": "ok",
+          "message": "Screened 63 of 63 leads to prioritize evidence checks; final relevance is checked separately."
+        },
+        {
+          "provider": "youtube",
+          "status": "ok",
+          "message": "YouTube details and viewer comments checked."
+        },
+        {
+          "provider": "reddit",
+          "status": "ok",
+          "message": "Reddit discussions checked."
+        },
+        {
+          "provider": "pages",
+          "status": "ok",
+          "message": "11 of 20 result pages were checked, 6 in a browser."
+        },
+        {
+          "provider": "judge",
+          "status": "ok",
+          "message": "Results were checked for relevance by AI."
+        },
+        {
+          "provider": "relevance_filter",
+          "status": "ok",
+          "message": "41 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown."
+        }
+      ],
+      "shown": [
+        {
+          "rank": 1,
+          "url": "https://www.macrumors.com/2024/05/10/whatsapp-for-iphone-android-new-design/",
+          "title": "WhatsApp Gets Overhauled Interface Design and New Attachment Tray - MacRumors",
+          "relevance": 9,
+          "model": "google/gemini-3.5-flash-lite",
+          "reason": "MacRumors article displays official WhatsApp UI overhauls from recent years.",
+          "requirements": null,
+          "uncertainties": []
+        },
+        {
+          "rank": 2,
+          "url": "https://www.meta.com/design-at-meta/blog/whatsapp-user-interface-update/",
+          "title": "Keeping WhatsApp fresh, simple and approachable",
+          "relevance": 9,
+          "model": "google/gemini-3.5-flash-lite",
+          "reason": "Official Meta Design blog post detailing the WhatsApp user interface update.",
+          "requirements": null,
+          "uncertainties": []
+        },
+        {
+          "rank": 3,
+          "url": "https://wabetainfo.com/whatsapp-to-redesign-and-enhance-the-interface-for-chat-lists/",
+          "title": "WhatsApp to redesign and enhance the interface for chat lists | WABetaInfo",
+          "relevance": 7,
+          "model": "google/gemini-3.5-flash-lite",
+          "reason": "WABetaInfo discusses upcoming chat list interface updates.",
+          "requirements": null,
+          "uncertainties": []
+        },
+        {
+          "rank": 4,
+          "url": "https://www.montekservices.com/news/WhatsApp-Web-Introduces-New-User-Interface:-Here-is-What-Has-Changed",
+          "title": "WhatsApp Web Introduces New User Interface",
+          "relevance": 7,
+          "model": "google/gemini-3.5-flash-lite",
+          "reason": "Montek Services article covers the recent WhatsApp Web UI update.",
+          "requirements": null,
+          "uncertainties": []
+        },
+        {
+          "rank": 5,
+          "url": "https://www.youtube.com/watch?v=aNWEfuxikSU",
+          "title": "WhatsApp chat lists interface redesigned for Android | WhatsApp, Android, Beta version - YouTube",
+          "relevance": 7,
+          "model": "google/gemini-3.5-flash-lite",
+          "reason": "Video covers the redesigned WhatsApp chat lists interface for Android.",
+          "requirements": null,
+          "uncertainties": []
+        },
+        {
+          "rank": 6,
+          "url": "https://www.youtube.com/watch?v=ZPgvs39BeaY",
+          "title": "WhatsApp gallery shortcut for the chat interface || WhatsApp new chat design update - YouTube",
+          "relevance": 7,
+          "model": "google/gemini-3.5-flash-lite",
+          "reason": "Video showcasing the WhatsApp gallery shortcut and new chat design update.",
+          "requirements": null,
+          "uncertainties": []
+        },
+        {
+          "rank": 7,
+          "url": "https://goldeninfosystems.com/whatsapp-is-developing-a-new-liquid-glass-in-chat-interface/",
+          "title": "Whatsapp is developing a new liquid glass in chat interface - Golden Info Systems",
+          "relevance": 6,
+          "model": "google/gemini-3.5-flash-lite",
+          "reason": "Golden Info Systems discusses WhatsApp's liquid glass chat interface development.",
+          "requirements": null,
+          "uncertainties": []
+        },
+        {
+          "rank": 8,
+          "url": "https://www.deccanherald.com/technology/whatsapp-gets-refreshed-visual-user-interface-new-features-3016849",
+          "title": "WhatsApp gets refreshed visual user interface, new features",
+          "relevance": 6,
+          "model": "google/gemini-3.5-flash-lite",
+          "reason": "News article about WhatsApp's refreshed visual user interface. Metadata only; contents unverified.",
+          "requirements": null,
+          "uncertainties": []
+        },
+        {
+          "rank": 9,
+          "url": "https://blog.eastlink.com.np/whatsapp-2024-redesigned-interface-ai-features-and-enhanced-privacy/",
+          "title": "WhatsApp 2024 Redesigned Interface, AI Features, and Enhanced Privacy",
+          "relevance": 6,
+          "model": "google/gemini-3.5-flash-lite",
+          "reason": "Blog post about WhatsApp's 2024 redesigned interface and features. Metadata only; contents unverified.",
+          "requirements": null,
+          "uncertainties": []
+        },
+        {
+          "rank": 10,
+          "url": "https://www.creativebloq.com/news/whatsapp-ui-redesign-2024",
+          "title": "Whatsapp's UI redesign looks clean and fresh | Creative Bloq",
+          "relevance": 6,
+          "model": "google/gemini-3.5-flash-lite",
+          "reason": "Creative Bloq review highlighting WhatsApp's 2024 UI redesign. Metadata only; contents unverified.",
+          "requirements": null,
+          "uncertainties": []
+        },
+        {
+          "rank": 11,
+          "url": "https://propakistani.pk/2026/05/04/here-is-whatsapps-major-upcoming-design-change-liquid-glass/amp/",
+          "title": "Here is WhatsApp’s Major Upcoming Design Change — Liquid Glass",
+          "relevance": 6,
+          "model": "google/gemini-3.5-flash-lite",
+          "reason": "ProPakistani covers upcoming WhatsApp design changes.",
+          "requirements": null,
+          "uncertainties": []
+        },
+        {
+          "rank": 12,
+          "url": "https://tech.yahoo.com/general/articles/whatsapp-gets-fresh-redesign-much-182233238.html",
+          "title": "WhatsApp Web gets a fresh redesign with some much-needed changes",
+          "relevance": 6,
+          "model": "google/gemini-3.5-flash-lite",
+          "reason": "Yahoo Tech highlights WhatsApp Web redesign updates. Metadata only; contents unverified.",
+          "requirements": null,
+          "uncertainties": []
+        },
+        {
+          "rank": 13,
+          "url": "https://beebom.com/new-whatsapp-features-may-2024/",
+          "title": "All New WhatsApp Features Added in May 2024 | Beebom",
+          "relevance": 6,
+          "model": "google/gemini-3.5-flash-lite",
+          "reason": "Beebom summarizes new WhatsApp features including redesigned interfaces on iOS. Metadata only; contents unverified.",
+          "requirements": null,
+          "uncertainties": []
+        },
+        {
+          "rank": 14,
+          "url": "https://9to5mac.com/2026/06/03/whatsapps-revamped-chat-lists-interface-rolling-out-on-ios/",
+          "title": "WhatsApp’s revamped chat lists interface rolling out on iOS - 9to5Mac",
+          "relevance": 6,
+          "model": "google/gemini-3.5-flash-lite",
+          "reason": "9to5Mac reports on WhatsApp's revamped chat lists interface rolling out on iOS. Metadata only; contents unverified.",
+          "requirements": null,
+          "uncertainties": []
+        },
+        {
+          "rank": 15,
+          "url": "https://webdesignerdepot.com/whatsapps-new-ui-redesign-heres-what-you-need-to-know/",
+          "title": "WhatsApp’s New UI Redesign—Here’s What You Need to Know",
+          "relevance": 6,
+          "model": "google/gemini-3.5-flash-lite",
+          "reason": "Details WhatsApp's recent major UI redesign and new look. Metadata only; contents unverified.",
+          "requirements": null,
+          "uncertainties": []
+        },
+        {
+          "rank": 16,
+          "url": "https://wabetainfo.com/whatsapp-will-bring-the-liquid-glass-interface-to-the-chat-screen/",
+          "title": "WhatsApp will bring the Liquid Glass interface to the chat screen | WABetaInfo",
+          "relevance": 6,
+          "model": "google/gemini-3.5-flash-lite",
+          "reason": "Discusses WhatsApp chat screen interface updates. Metadata only; contents unverified.",
+          "requirements": null,
+          "uncertainties": []
+        },
+        {
+          "rank": 17,
+          "url": "https://wabetainfo.com/whatsapp-is-rolling-out-a-new-revamped-interface-for-the-android-beta-app/",
+          "title": "WhatsApp is rolling out a new revamped interface for the Android beta app | WABetaInfo",
+          "relevance": 6,
+          "model": "google/gemini-3.5-flash-lite",
+          "reason": "WABetaInfo covers WhatsApp's revamped interface for the Android beta app. Metadata only; contents unverified.",
+          "requirements": null,
+          "uncertainties": []
+        },
+        {
+          "rank": 18,
+          "url": "https://www.reddit.com/r/whatsapp/comments/1ru6wck/whatsapps_new_ui_update/",
+          "title": "r/whatsapp on Reddit: WhatsApps New UI Update",
+          "relevance": 6,
+          "model": "google/gemini-3.5-flash-lite",
+          "reason": "Reddit discussion about WhatsApp's new UI update. Metadata only; contents unverified.",
+          "requirements": null,
+          "uncertainties": []
+        },
+        {
+          "rank": 19,
+          "url": "https://wabetainfo.com/whatsapp-announced-new-design-updates-for-ios-and-android/",
+          "title": "WhatsApp announced new design updates for iOS and Android | WABetaInfo",
+          "relevance": 6,
+          "model": "google/gemini-3.5-flash-lite",
+          "reason": "WABetaInfo announcement of new design updates for WhatsApp iOS and Android. Metadata only; contents unverified.",
+          "requirements": null,
+          "uncertainties": []
+        }
+      ],
+      "closest": [
+        {
+          "url": "https://www.techi.com/whatsapp-chat-list-filters-update/",
+          "title": "WhatsApp Introduces Major UI Change for Chat List Filters",
+          "uncertainties": []
+        },
+        {
+          "url": "https://www.sammyfans.com/2024/12/03/whatsapp-redesigns-chat-list-interface-with-latest-beta-update/",
+          "title": "WhatsApp redesigns chat list interface with latest beta update - Sammy Fans",
+          "uncertainties": []
+        },
+        {
+          "url": "https://www.androidpolice.com/new-whatsapp-features-added-may-2024/",
+          "title": "11 new WhatsApp features added in May 2024",
+          "uncertainties": []
+        },
+        {
+          "url": "https://dev.to/soorajsnblaze333/i-built-a-whatsapp-web-ui-clone-2723",
+          "title": "I built a WhatsApp Web UI Clone - Chats section - DEV Community",
+          "uncertainties": []
+        },
+        {
+          "url": "https://www.reddit.com/r/coolguides/comments/1cos43d/a_cool_guide_to_whatsapps_interface_design/",
+          "title": "r/coolguides on Reddit: A cool guide to WhatsApp’s interface design evolution over the years",
+          "uncertainties": []
+        },
+        {
+          "url": "https://www.reddit.com/r/whatsapp/comments/1c8oun6/evolution_of_whatsapp_ui/",
+          "title": "r/whatsapp on Reddit: Evolution of WhatsApp UI",
+          "uncertainties": []
+        },
+        {
+          "url": "https://www.figma.com/community/file/1462688379607447469/whatsapp-chat-ui-2025",
+          "title": "Whatsapp chat UI 2025 | Figma",
+          "uncertainties": []
+        },
+        {
+          "url": "https://www.reddit.com/r/UXDesign/comments/1c8p0gs/evolution_of_whatsapp_ui_for_android/",
+          "title": "r/UXDesign on Reddit: Evolution of WhatsApp UI for Android",
+          "uncertainties": []
+        },
+        {
+          "url": "https://www.pinterest.com/ideas/whatsapp-interface-design/942024334120/",
+          "title": "Whatsapp Interface Design",
+          "uncertainties": []
+        },
+        {
+          "url": "https://green-api.com/en/blog/2025/meet-the-updated-whatsapp-web-client-interface/",
+          "title": "What is changed in the updated WhatsApp Web client interface?",
+          "uncertainties": []
+        },
+        {
+          "url": "https://www.uxsnaps.com/chat-interface",
+          "title": "WhatsApp UX Breakdown – Seamless Multi-Modal Communication",
+          "uncertainties": []
+        },
+        {
+          "url": "https://www.socialmediatoday.com/news/whatsapp-launches-refreshed-ui-elements/715743/",
+          "title": "WhatsApp Launches Refreshed UI Elements | Social Media Today",
+          "uncertainties": []
+        },
+        {
+          "url": "https://www.figma.com/community/file/1330950114849676455/whatsapp-ui",
+          "title": "WhatsApp UI | Figma",
+          "uncertainties": []
+        },
+        {
+          "url": "https://medium.com/design-bootcamp/whatsapp-redefining-communication-with-intuitive-ux-and-ui-11ab19132cf5",
+          "title": "“WhatsApp: Redefining communication with intuitive UX and UI” | by Akansha Tandon | Bootcamp | Medium",
+          "uncertainties": []
+        },
+        {
+          "url": "https://imageappeal.medium.com/whatsapps-new-ui-redesign-here-s-what-you-need-to-know-4bfaf348972e",
+          "title": "WhatsApp’s New UI Redesign — Here’s What You Need to Know | by Image Appeal | Medium",
+          "uncertainties": []
+        },
+        {
+          "url": "https://medium.com/design-bootcamp/a-look-at-whatsapps-ui-ux-changes-over-time-4690cac3a6ab",
+          "title": "A Look at WhatsApp’s UI/UX Changes Over Time | by Hasitha Lakshan | Bootcamp | Medium",
+          "uncertainties": []
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=LYmR_y0RzpA",
+          "title": "Build a WhatsApp Chat Bubble UI in React Native Expo | React Native Tutorial | chat box - YouTube",
+          "uncertainties": []
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=R6JeCrxIDBw",
+          "title": "How To Recover Old Chats On WhatsApp? - YouTube",
+          "uncertainties": []
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=C2DLDQ0PV58",
+          "title": "Evolution of WhatsApp 2009 - 2021 | WhatsApp New Features and History | Documentary - YouTube",
+          "uncertainties": []
+        },
+        {
+          "url": "https://design.facebook.com/blog/whatsapp-user-interface-update/",
+          "title": "Keeping WhatsApp fresh, simple and approachable",
+          "uncertainties": []
+        }
+      ]
+    },
+    {
+      "q": "official whatsapp chat ui interface from over past 3 years",
+      "variant": "new",
+      "elapsed_ms": 48460,
+      "calls": {
+        "anilist_calls": 6,
+        "discovery:brave": 6,
+        "planner_calls:inception/mercury-2.5": 1,
+        "planner_calls:mistralai/ministral-14b-2512": 1,
+        "jev_screen_calls": 5,
+        "reddit_signals": 1,
+        "planner_calls:google/gemma-4-31b-it": 1,
+        "jev_exploration_calls": 2,
+        "source_health_jobs": 6,
+        "source_health_probes": 6,
+        "judge_calls": 10,
+        "jev_judge_calls": 10,
+        "youtube_units": 8
+      },
+      "estimated_cost_usd": {
+        "brave": 0.03,
+        "jev": 0.0068,
+        "note": "Brave and Jev only; chat-model calls are counted, not priced"
+      },
+      "metrics": {
+        "pool": 60,
+        "shown": 0,
+        "judged": 60,
+        "verified": 0,
+        "possible": 0,
+        "closest": 0,
+        "rejected": 60,
+        "near_misses": 18,
+        "unjudged": 0,
+        "basis": {
+          "metadata": 0,
+          "viewer_claims": 0,
+          "direct_evidence": 0
+        },
+        "last_round_share": null,
+        "duplicate_groups": [],
+        "sites": 0,
+        "failed_providers": [],
+        "requirement_satisfaction": 0,
+        "unknown_rate": null,
+        "decisions": {
+          "verified": 0,
+          "uncertain": 14,
+          "excluded": 46
+        },
+        "unmet": 7,
+        "gap_visits": 2,
+        "gap_searches": 2,
+        "coverage_gain_per_visit": 0.5,
+        "gap_stop": "rounds",
+        "jev_settled": 0,
+        "jev_forwarded": 52,
+        "jev_would_reject": 7,
+        "jev_reject_agreement": 1
+      },
+      "unmet": [
+        "No result could be verified for: Published within past 3 years (2023-09-24 to 2026-09-24)",
+        "No result could be verified for: From an official WhatsApp source",
+        "No result could be verified for: official whatsapp chat ui interface",
+        "No result found for 2023: Results together cover 2023–2026",
+        "No result found for 2024: Results together cover 2023–2026",
+        "No result found for 2025: Results together cover 2023–2026",
+        "No result found for 2026: Results together cover 2023–2026"
+      ],
+      "contract": {
+        "version": "req-v1",
+        "query": "official whatsapp chat ui interface from over past 3 years",
+        "search_date": "2026-09-24",
+        "intent": "Find official WhatsApp chat user interface designs and their evolution over the last three years.",
+        "deliverable": {
+          "formats": [
+            "any"
+          ],
+          "completeness": "any"
+        },
+        "requirements": [
+          {
+            "id": "R1",
+            "text": "Published within past 3 years (2023-09-24 to 2026-09-24)",
+            "kind": "date",
+            "hardness": "hard",
+            "scope": "each",
+            "evidence": "A publication date on the page, in its metadata or from the video platform.",
+            "date_range": {
+              "from": "2023-09-24",
+              "to": "2026-09-24"
+            }
+          },
+          {
+            "id": "R2",
+            "text": "Results together cover 2023–2026",
+            "kind": "date",
+            "hardness": "preferred",
+            "scope": "set",
+            "evidence": "At least one result dated in each year.",
+            "date_range": {
+              "from": "2023-09-24",
+              "to": "2026-09-24"
+            },
+            "set_items": [
+              "2023",
+              "2024",
+              "2025",
+              "2026"
+            ]
+          },
+          {
+            "id": "R3",
+            "text": "From an official WhatsApp source",
+            "kind": "authority",
+            "hardness": "hard",
+            "scope": "each",
+            "evidence": "Published on a domain the page itself identifies as WhatsApp's.",
+            "authority": {
+              "entity": "WhatsApp",
+              "names": [
+                "WhatsApp"
+              ],
+              "domains": [
+                "whatsapp.com"
+              ]
+            }
+          },
+          {
+            "id": "R4",
+            "text": "official whatsapp chat ui interface",
+            "kind": "subject",
+            "hardness": "hard",
+            "scope": "each",
+            "evidence": "screenshots or documentation of the actual app interface released by WhatsApp/Meta able to be verified against app versions; not concept art/mockups by independent designers"
+          }
+        ],
+        "entities": [
+          {
+            "name": "WhatsApp",
+            "kind": "product"
+          }
+        ],
+        "exclusions": [],
+        "ambiguities": [],
+        "assumptions": [],
+        "source": "model"
+      },
+      "gaps": {
+        "initial_gaps": [
+          {
+            "requirement_id": "R1",
+            "text": "Published within past 3 years (2023-09-24 to 2026-09-24)",
+            "key": "R1"
+          },
+          {
+            "requirement_id": "R3",
+            "text": "From an official WhatsApp source",
+            "key": "R3"
+          },
+          {
+            "requirement_id": "R4",
+            "text": "official whatsapp chat ui interface",
+            "key": "R4"
+          },
+          {
+            "requirement_id": "R2",
+            "item": "2023",
+            "text": "Results together cover 2023–2026: 2023",
+            "key": "R2:2023"
+          },
+          {
+            "requirement_id": "R2",
+            "item": "2024",
+            "text": "Results together cover 2023–2026: 2024",
+            "key": "R2:2024"
+          },
+          {
+            "requirement_id": "R2",
+            "item": "2025",
+            "text": "Results together cover 2023–2026: 2025",
+            "key": "R2:2025"
+          },
+          {
+            "requirement_id": "R2",
+            "item": "2026",
+            "text": "Results together cover 2023–2026: 2026",
+            "key": "R2:2026"
+          }
+        ],
+        "rounds": [
+          {
+            "gaps": [
+              "R1",
+              "R3",
+              "R4",
+              "R2:2023",
+              "R2:2024",
+              "R2:2025",
+              "R2:2026"
+            ],
+            "searches": [
+              {
+                "query": "whatsapp chat ui interface official whatsapp chat ui interface",
+                "target": "web",
+                "targets": [
+                  "R4"
+                ]
+              },
+              {
+                "query": "whatsapp chat ui interface 2023",
+                "target": "web",
+                "targets": [
+                  "R2:2023"
+                ]
+              }
+            ],
+            "visits": [
+              {
+                "url": "https://www.youtube.com/watch?v=aNWEfuxikSU",
+                "from_url": null,
+                "targets": [
+                  "R2:2024"
+                ],
+                "access": "ok",
+                "new_support": [
+                  "R1",
+                  "R2:2024"
+                ]
+              },
+              {
+                "url": "https://www.meta.com/design-at-meta/blog/whatsapp-user-interface-update/",
+                "from_url": null,
+                "targets": [
+                  "R3"
+                ],
+                "access": "ok",
+                "new_support": [
+                  "R1",
+                  "R2:2024"
+                ]
+              }
+            ],
+            "decisions_failed": 0
+          }
+        ],
+        "stop": "rounds",
+        "visits": 2,
+        "searches": 2,
+        "closed": [
+          "R2:2024"
+        ],
+        "coverage_gain_per_visit": 0.5,
+        "elapsed_ms": 15201
+      },
+      "providers": [
+        {
+          "provider": "brave",
+          "status": "ok",
+          "message": "Brave discovery completed."
+        },
+        {
+          "provider": "searxng",
+          "status": "ok",
+          "message": "Not needed: Brave answered every search."
+        },
+        {
+          "provider": "planner",
+          "status": "ok",
+          "message": "AI planned 4 searches for websites."
+        },
+        {
+          "provider": "gap_exploration",
+          "status": "ok",
+          "message": "Looked for evidence on 7 unmet requirements: 2 targeted searches, 2 pages or videos opened, 1 closed."
+        },
+        {
+          "provider": "candidate_pool",
+          "status": "partial",
+          "message": "86 candidates found; up to 60 candidates were selected for checking after all sources answered."
+        },
+        {
+          "provider": "jev_screener",
+          "status": "ok",
+          "message": "Screened 86 of 86 leads to prioritize evidence checks; final relevance is checked separately."
+        },
+        {
+          "provider": "youtube",
+          "status": "ok",
+          "message": "YouTube details and viewer comments checked."
+        },
+        {
+          "provider": "reddit",
+          "status": "ok",
+          "message": "Reddit discussions checked."
+        },
+        {
+          "provider": "pages",
+          "status": "ok",
+          "message": "7 of 20 result pages were checked, 5 in a browser."
+        },
+        {
+          "provider": "judge",
+          "status": "ok",
+          "message": "Results were checked for relevance by AI."
+        },
+        {
+          "provider": "relevance_filter",
+          "status": "ok",
+          "message": "No sufficiently supported matches were found. Weak, uncertain and unchecked candidates were excluded."
+        }
+      ],
+      "shown": [],
+      "closest": [
+        {
+          "url": "https://www.meta.com/design-at-meta/blog/whatsapp-user-interface-update/",
+          "title": "Keeping WhatsApp fresh, simple and approachable",
+          "uncertainties": [
+            "Not confirmed: From an official WhatsApp source"
+          ]
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=aNWEfuxikSU",
+          "title": "WhatsApp chat lists interface redesigned for Android | WhatsApp, Android, Beta version - YouTube",
+          "uncertainties": [
+            "Not confirmed: From an official WhatsApp source"
+          ]
+        },
+        {
+          "url": "https://design.facebook.com/blog/whatsapp-user-interface-update/",
+          "title": "Keeping WhatsApp fresh, simple and approachable",
+          "uncertainties": [
+            "Not confirmed: Published within past 3 years (2023-09-24 to 2026-09-24)",
+            "Not confirmed: From an official WhatsApp source"
+          ]
+        },
+        {
+          "url": "https://economictimes.indiatimes.com/news/new-updates/whatsapp-to-get-redesigned-interface-soon-heres-what-we-know-about-the-major-update/articleshow/99662295.cms",
+          "title": "WhatsApp New Design: WhatsApp to get redesigned interface soon; Here’s what we know about the major update - The Economic Times",
+          "uncertainties": [
+            "Not confirmed: Published within past 3 years (2023-09-24 to 2026-09-24)",
+            "Not confirmed: From an official WhatsApp source",
+            "Not confirmed: official whatsapp chat ui interface"
+          ]
+        },
+        {
+          "url": "https://www.creativebloq.com/news/new-whatsapp-ui-design",
+          "title": "Whatsapp's new UI design looks super sleek | Creative Bloq",
+          "uncertainties": [
+            "Not confirmed: Published within past 3 years (2023-09-24 to 2026-09-24)",
+            "Not confirmed: From an official WhatsApp source"
+          ]
+        },
+        {
+          "url": "https://www.reddit.com/r/coolguides/comments/1cos43d/a_cool_guide_to_whatsapps_interface_design/",
+          "title": "r/coolguides on Reddit: A cool guide to WhatsApp’s interface design evolution over the years",
+          "uncertainties": [
+            "Not confirmed: Published within past 3 years (2023-09-24 to 2026-09-24)",
+            "Not confirmed: From an official WhatsApp source"
+          ]
+        },
+        {
+          "url": "https://www.techi.com/whatsapp-chat-list-filters-update/",
+          "title": "WhatsApp Introduces Major UI Change for Chat List Filters",
+          "uncertainties": [
+            "Not confirmed: Published within past 3 years (2023-09-24 to 2026-09-24)",
+            "Not confirmed: From an official WhatsApp source"
+          ]
+        },
+        {
+          "url": "https://www.androidpolice.com/whatsapp-plans-big-ui-redesign-what-it-looks-like/",
+          "title": "WhatsApp plans a big UI redesign, here's what it looks like",
+          "uncertainties": [
+            "Not confirmed: Published within past 3 years (2023-09-24 to 2026-09-24)",
+            "Not confirmed: From an official WhatsApp source"
+          ]
+        },
+        {
+          "url": "https://www.reddit.com/r/whatsapp/comments/1c8oun6/evolution_of_whatsapp_ui/",
+          "title": "r/whatsapp on Reddit: Evolution of WhatsApp UI",
+          "uncertainties": [
+            "Not confirmed: Published within past 3 years (2023-09-24 to 2026-09-24)",
+            "Not confirmed: From an official WhatsApp source",
+            "Not confirmed: official whatsapp chat ui interface"
+          ]
+        },
+        {
+          "url": "https://medium.com/design-bootcamp/whatsapp-redefining-communication-with-intuitive-ux-and-ui-11ab19132cf5",
+          "title": "“WhatsApp: Redefining communication with intuitive UX and UI” | by Akansha Tandon | Bootcamp | Medium",
+          "uncertainties": [
+            "Not confirmed: Published within past 3 years (2023-09-24 to 2026-09-24)",
+            "Not confirmed: From an official WhatsApp source",
+            "Not confirmed: official whatsapp chat ui interface"
+          ]
+        },
+        {
+          "url": "https://uxplanet.org/why-whatsapp-redesigned-its-ux-73d5f799f8cd?gi=304c8211b6ec",
+          "title": "Why WhatsApp Redesigned Its UX. The redesigned UI of WhatsApp caused a… | by Dinesh Samala | UX Planet",
+          "uncertainties": [
+            "Not confirmed: Published within past 3 years (2023-09-24 to 2026-09-24)",
+            "Not confirmed: From an official WhatsApp source",
+            "Not confirmed: official whatsapp chat ui interface"
+          ]
+        },
+        {
+          "url": "https://imageappeal.medium.com/whatsapps-new-ui-redesign-here-s-what-you-need-to-know-4bfaf348972e",
+          "title": "WhatsApp’s New UI Redesign — Here’s What You Need to Know | by Image Appeal | Medium",
+          "uncertainties": [
+            "Not confirmed: Published within past 3 years (2023-09-24 to 2026-09-24)",
+            "Not confirmed: From an official WhatsApp source"
+          ]
+        }
+      ]
+    }
+  ]
+}

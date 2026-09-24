@@ -16,7 +16,7 @@ dependencies = [
 
 [project.optional-dependencies]
 transcribe = ["faster-whisper>=1.2,<2"]
-pages = ["trafilatura>=2.2,<3"]
+pages = ["trafilatura>=2.2,<3", "pypdf>=5,<7"]
 test = ["pytest>=9,<10", "pgserver>=0.1.4,<0.2", "numpy>=2"]
 
 [project.scripts]

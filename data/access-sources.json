@@ -1,0 +1,40 @@
+{
+  "about": "How books, magazines, journals and similar works can legitimately be read. The line is piracy, not copyright (decided 2026-09-24): stores, libraries, licensed subscriptions, open access, public domain and publishers all count as full-copy access; 'unauthorized' hosts are never served. A rule matches a host (itself or any subdomain) and, when 'path' is given, a URL path starting with that regex. First match wins; 'unauthorized' rules are checked first.",
+  "rules": [
+    {"host": "libgen.is", "kind": "unauthorized"}, {"host": "libgen.rs", "kind": "unauthorized"}, {"host": "libgen.li", "kind": "unauthorized"},
+    {"host": "libgen.st", "kind": "unauthorized"}, {"host": "library.lol", "kind": "unauthorized"},
+    {"host": "z-library.sk", "kind": "unauthorized"}, {"host": "z-lib.org", "kind": "unauthorized"}, {"host": "z-lib.io", "kind": "unauthorized"},
+    {"host": "z-library.se", "kind": "unauthorized"}, {"host": "zlibrary.to", "kind": "unauthorized"}, {"host": "1lib.sk", "kind": "unauthorized"},
+    {"host": "sci-hub.se", "kind": "unauthorized"}, {"host": "sci-hub.st", "kind": "unauthorized"}, {"host": "sci-hub.ru", "kind": "unauthorized"},
+    {"host": "sci-hub.ee", "kind": "unauthorized"}, {"host": "annas-archive.org", "kind": "unauthorized"}, {"host": "annas-archive.se", "kind": "unauthorized"},
+    {"host": "annas-archive.li", "kind": "unauthorized"}, {"host": "pdfdrive.com", "kind": "unauthorized"}, {"host": "pdfdrive.to", "kind": "unauthorized"},
+    {"host": "oceanofpdf.com", "kind": "unauthorized"}, {"host": "dokumen.pub", "kind": "unauthorized"}, {"host": "ebin.pub", "kind": "unauthorized"},
+    {"host": "epdf.pub", "kind": "unauthorized"}, {"host": "vdoc.pub", "kind": "unauthorized"}, {"host": "pdfroom.com", "kind": "unauthorized"},
+    {"host": "freepdfbook.com", "kind": "unauthorized"}, {"host": "pdfcoffee.com", "kind": "unauthorized"}, {"host": "idoc.pub", "kind": "unauthorized"},
+    {"host": "b-ok.cc", "kind": "unauthorized"}, {"host": "bookfi.net", "kind": "unauthorized"}, {"host": "ebookee.org", "kind": "unauthorized"},
+
+    {"host": "play.google.com", "path": "/store/books", "kind": "store"}, {"host": "books.google.com", "kind": "store"},
+    {"host": "books.apple.com", "kind": "store"}, {"host": "kobo.com", "kind": "store"}, {"host": "barnesandnoble.com", "kind": "store"},
+    {"host": "amazon.com", "kind": "store"}, {"host": "amazon.co.uk", "kind": "store"}, {"host": "amazon.in", "kind": "store"},
+    {"host": "amazon.ca", "kind": "store"}, {"host": "amazon.de", "kind": "store"}, {"host": "bookshop.org", "kind": "store"},
+    {"host": "ebooks.com", "kind": "store"}, {"host": "penguinrandomhouse.com", "kind": "store"}, {"host": "penguin.co.uk", "kind": "store"},
+    {"host": "harpercollins.com", "kind": "store"}, {"host": "simonandschuster.com", "kind": "store"}, {"host": "macmillan.com", "kind": "store"},
+    {"host": "hachettebookgroup.com", "kind": "store"}, {"host": "zinio.com", "kind": "subscription"}, {"host": "magzter.com", "kind": "subscription"},
+
+    {"host": "libbyapp.com", "kind": "library"}, {"host": "overdrive.com", "kind": "library"}, {"host": "hoopladigital.com", "kind": "library"},
+    {"host": "openlibrary.org", "kind": "library"}, {"host": "worldcat.org", "kind": "library"}, {"host": "search.worldcat.org", "kind": "library"},
+
+    {"host": "scribd.com", "path": "/(book|audiobook)/", "kind": "subscription"}, {"host": "everand.com", "kind": "subscription"},
+    {"host": "pressreader.com", "kind": "subscription"}, {"host": "readly.com", "kind": "subscription"}, {"host": "jstor.org", "kind": "subscription"},
+
+    {"host": "arxiv.org", "kind": "open_access"}, {"host": "ncbi.nlm.nih.gov", "path": "/pmc/", "kind": "open_access"},
+    {"host": "pmc.ncbi.nlm.nih.gov", "kind": "open_access"}, {"host": "europepmc.org", "kind": "open_access"}, {"host": "doaj.org", "kind": "open_access"},
+    {"host": "zenodo.org", "kind": "open_access"}, {"host": "biorxiv.org", "kind": "open_access"}, {"host": "medrxiv.org", "kind": "open_access"},
+    {"host": "core.ac.uk", "kind": "open_access"}, {"host": "plos.org", "kind": "open_access"}, {"host": "osf.io", "kind": "open_access"},
+    {"host": "ssrn.com", "kind": "open_access"}, {"host": "hal.science", "kind": "open_access"},
+
+    {"host": "gutenberg.org", "kind": "public_domain"}, {"host": "standardebooks.org", "kind": "public_domain"},
+    {"host": "wikisource.org", "kind": "public_domain"}, {"host": "babel.hathitrust.org", "kind": "public_domain"},
+    {"host": "fadedpage.com", "kind": "public_domain"}, {"host": "gutenberg.ca", "kind": "public_domain"}
+  ]
+}

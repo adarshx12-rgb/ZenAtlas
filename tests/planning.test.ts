@@ -211,7 +211,8 @@ test('a website request is planned, searched on several angles, page-checked and
    const done=await service.poll(started.search_id,'alice');
 
    assert.deepEqual(calls.sort(),['3d motion website examples','site:showcase.example.com three.js portfolio',q].sort());
-   assert.deepEqual(done.providers.map(p=>[p.provider,p.status]),[['mock','ok'],['planner','ok'],['pages','ok'],['judge','ok'],['relevance_filter','ok']]);
+   assert.deepEqual(done.providers.map(p=>[p.provider,p.status]),[['mock','ok'],['planner','ok'],['pages','ok'],['judge','ok'],['relevance_filter','ok']],
+     'a website request is a preference, not a hard format, so it leaves nothing for gap exploration');
    assert.deepEqual(done.results.map(r=>new URL(r.canonical_url).hostname),['studio.example.net','showcase.example.com']);
    assert.deepEqual(done.results[0].badges,['3D: three.js','Motion: GSAP']);
    assert.equal(done.results[0].judgement?.model,'test-judge');

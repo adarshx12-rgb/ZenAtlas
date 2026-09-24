@@ -68,7 +68,7 @@ test('an archive outage is partial, pagination survives, and zero budget makes n
    const config={...testConfig,DEEP_PAGES:2};
    const out=await runDiscovery(db,config,searchInput.parse({q:'historical footage',depth:'deep'}),[],{archives:[good,bad]},async()=>{});
    assert.equal(out.results.length,1);assert.equal(calls,1);
-   assert.deepEqual(out.providers.map(p=>[p.provider,p.status]),[['internet_archive','ok'],['library_of_congress','unavailable']]);
+   assert.deepEqual(out.providers.map(p=>[p.provider,p.status]),[['internet_archive','ok'],['library_of_congress','unavailable'],['gap_exploration','ok']]);
    const empty=await runDiscovery(db,{...config,ARCHIVE_DAILY_BUDGET:0},searchInput.parse({q:'other history',depth:'deep'}),[],{archives:[good]},async()=>{});
    assert.equal(empty.results.length,0);assert.equal(calls,1);assert.equal(empty.providers[0].status,'budget_exhausted');
  }finally{await db.close();}

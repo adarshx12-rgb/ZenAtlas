@@ -42,7 +42,7 @@ test('OpenRouter decision request references each candidate and ignores uncertai
    assert.equal(url, 'https://openrouter.ai/api/alpha/decisions');
    assert.equal(options?.token, 'test-key');
    assert.equal(options?.trustedOrigin, 'https://openrouter.ai');
-   assert.equal(options?.timeoutMs, 4000);
+   assert.equal(options?.timeoutMs, 8000);
    assert.equal(options?.redirects, 0);
    const body = options!.body as any;
    assert.equal(body.state.request, 'WWE commentator reactions');
@@ -104,7 +104,26 @@ test('invalid, missing, extra and inconsistent answers fail the entire screening
  }
 });
 
-test('budget exhaustion and a failed batch do not yield partial promotions or retry', async () => {
+test('screening sees the shared requirements and each lead\'s address and date; a reset connection is retried once', async () => {
+ let body: any, calls = 0;
+ const transport: typeof fetchJSON = async (_url, options) => {
+   calls++; body = options!.body;
+   if (calls === 1) { const e: any = new Error('reset'); e.code = 'ECONNRESET'; throw e; }
+   return reply(options!.body);
+ };
+ const lead = {...candidates(1)[0], item: {...candidates(1)[0].item, published_at: '2024-05-09T00:00:00.000Z'}};
+ const contract = {requirements: [{id: 'R1', text: 'Is an article'}], formats: ['article'], search_date: '2026-09-24'};
+ const out = await new JevScreener(budgetDB(), config, transport).screen('query', [lead], contract);
+ assert.equal(calls, 2);
+ assert.deepEqual(body.state.requirements, contract.requirements);
+ assert.deepEqual([body.state.formats, body.state.search_date], [['article'], '2026-09-24']);
+ assert.equal(body.state.candidates.c0.url, lead.item.url);
+ assert.equal(body.state.candidates.c0.domain, new URL(lead.item.url).hostname);
+ assert.equal(body.state.candidates.c0.published_at, '2024-05-09');
+ assert.equal(out.screened, 1);
+});
+
+test('budget exhaustion rejects; a failed batch keeps the other batches\' decisions without retrying', async () => {
  let calls = 0;
  const transport: typeof fetchJSON = async (_url, options) => {calls++; return reply(options!.body);};
  await assert.rejects(new JevScreener(budgetDB(0), config, transport).screen('query', candidates(1)), /budget_exhausted/);
@@ -112,8 +131,11 @@ test('budget exhaustion and a failed batch do not yield partial promotions or re
  await assert.rejects(new JevScreener(budgetDB(), {...config, JEV_SCREEN_DAILY_BUDGET: 0}, transport).screen('query', candidates(1)), /budget_exhausted/);
  assert.equal(calls, 0);
  const failing: typeof fetchJSON = async (_url, options) => {
-   calls++; if (calls === 2) throw new UpstreamError('timeout'); return reply(options!.body);
+   calls++; if ((options!.body as any).state.candidates.c0.title === 'Candidate 20') throw new UpstreamError('timeout'); return reply(options!.body);
  };
- await assert.rejects(new JevScreener(budgetDB(), config, failing).screen('query', candidates(25)), /timeout/);
- assert.equal(calls, 2);
+ const partial = await new JevScreener(budgetDB(), config, failing).screen('query', candidates(25));
+ assert.equal(calls, 2, 'a timeout is not retried');
+ assert.deepEqual([partial.failed_batches, partial.decisions?.length], [1, 20], 'the answered batch still counts');
+ const allFail: typeof fetchJSON = async () => { throw new UpstreamError('timeout'); };
+ await assert.rejects(new JevScreener(budgetDB(), config, allFail).screen('query', candidates(3)), /timeout/);
 });

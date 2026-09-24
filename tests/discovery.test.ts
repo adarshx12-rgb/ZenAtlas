@@ -57,7 +57,8 @@ test('Jev exploration adds checked outbound sources before judging, reuses pages
    const pages={async check(url:string){calls.push(url);return {status:'checked' as const,title:'Moon launch footage',description:'Original moon launch footage and source references.',
      text:'Moon launch footage',libraries:[],badges:[],links:url===root?[{url:found,title:'Original recording'}]:[]};}};
    const judge:Judge={async judge(_q,candidates){return {model:'final',verdicts:new Map(candidates.map(c=>[c.key,{key:c.key,relevance:c.url===found?9:4,reason:'TEST evidence',momentKeys:[]}]))};}};
-   const config={...testConfig,PAGE_CHECKS:8};
+   // The title-based explorer is the pipeline without a requirements contract (the evaluation baseline).
+   const config={...testConfig,PAGE_CHECKS:8,REQUIREMENTS_ENABLED:false};
    const out=await runDiscovery(db,config,searchInput.parse({q:'moon launch websites'}),[provider],{planner,explorer,pages,judge},async()=>{});
    assert.ok(out.results.some(r=>r.canonical_url===found));
    assert.deepEqual(out.trace.exploration?.new_urls,[found]);

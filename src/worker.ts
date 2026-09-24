@@ -36,7 +36,8 @@ export async function workOnce(db:DB,config:Config,adapters?:SourceAdapter[],pro
      for(const result of outcome.ingested) await enqueueEnrichment(db,config,result);
      await storePreviews(db,job,outcome.previews);
      await learnFrom(db,config,job,outcome.trace);
-     await complete(db,job,{results:outcome.results,closest:outcome.closest,providers:outcome.providers,dropped:outcome.dropped,searches:outcome.searches});
+     await complete(db,job,{results:outcome.results,closest:outcome.closest,providers:outcome.providers,dropped:outcome.dropped,searches:outcome.searches,
+       ...(outcome.contract?{contract:outcome.contract,unmet:outcome.unmet??[]}:{})});
    } else if(job.kind==='collect') {
      const source=(await db.query(`SELECT * FROM sources WHERE id=$1 AND status='active' AND adapter='json_feed' AND health_status<>'down'`,[job.payload.source_id])).rows[0];
      if(source && source.policy.metadata===true) {

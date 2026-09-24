@@ -60,6 +60,10 @@ export interface Result {
  evidence: 'metadata_match'|EvidenceType; moments: Moment[];
  origin: 'catalogue'|'discovery'; verified_at: string|null; scene_analysis?: SceneAnalysisStatus|null;
  badges?: string[]; judgement?: Judgement|null;
+ // Each hard requirement of the search's contract, with the evidence behind its status (see evidence.ts).
+ requirements?: {id: string; text: string; status: 'supported'|'contradicted'|'unknown'|'waived'; excerpt: string|null; method: string|null}[];
+ // Material uncertainties to show beside the reason: unconfirmed requirements and caveats such as another file format.
+ uncertainties?: string[];
  evidence_coverage?: {comments:string;captions:string;transcript_passages:number;analysed_scenes:number;basis:'metadata'|'viewer_claims'|'direct_evidence'};
  // A first-screen capture of the page is available from /api/search/:id/previews/:result while the search lasts.
  preview?: boolean;
@@ -79,4 +83,10 @@ export interface SearchResponse {
  // Complete visible snapshot in final rank order, across catalogue, quick and deep finds.
  ranked?: Result[];
  discovery_job_id: string|null; providers: ProviderStatus[]; ranking_version: string;
+ // How discovery interpreted the request, and what it could not satisfy (present once discovery has finished).
+ interpretation?: Interpretation;
+}
+export interface Interpretation {
+ intent: string; requirements: {id: string; text: string; hardness: 'hard'|'preferred'; scope: 'each'|'set'}[];
+ assumptions: string[]; ambiguities: string[]; unmet: string[];
 }

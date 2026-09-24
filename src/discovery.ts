@@ -17,9 +17,18 @@ import { matchesFilters } from './catalogue.js';
 import { makeJudge } from './judge.js';
 import type { SearchTrace } from './learning.js';
 import { makeScreener, screeningOrder, type Screener } from './screener.js';
-import { exploreSources, makeExplorer, type Explorer, type ExplorationTrace } from './exploration.js';
+import { exploreSources, makeExplorer, makeGapChooser, type Explorer, type ExplorationTrace } from './exploration.js';
+import { criteriaOf, explicitFormats, hardEach, normaliseContract, rulesContract, siteOnly, type RequirementsContract } from './requirements.js';
+import { coverage, decide, inspect, type Finding } from './evidence.js';
+import { exploreGaps, type GapCandidate, type GapChooser, type GapTrace } from './gaps.js';
+import { makeJevJudge } from './jev-judge.js';
+import { unauthorized } from './access.js';
+import { contentInput } from './types.js';
+import { YouTubeData, youtubeId, type VideoDetails, type YouTubeClient } from './youtube.js';
 
-export interface DiscoveryDeps extends SignalDeps { planner?: Planner; anilist?: AnimeClient; archives?: SourceAdapter[]; screener?: Screener; explorer?: Explorer }
+// today: the search date contracts resolve relative dates against (tests pin it). gapChooser: Jev's gap decisions.
+export interface DiscoveryDeps extends SignalDeps { planner?: Planner; anilist?: AnimeClient; archives?: SourceAdapter[]; screener?: Screener; explorer?: Explorer;
+ gapChooser?: GapChooser; today?: string }
 export interface DiscoveryProgress { results: Result[]; providers: ProviderStatus[]; stage: 'searching'|'following'|'checking' }
 // code: why it failed, such as an engine's "blocked by a CAPTCHA".
 type Health = (provider: string, ok: boolean, code?: string) => Promise<void>;
@@ -33,6 +42,8 @@ type Search = PlannedSearch & {page: number; engines: 'standard'|'extra'|'all'};
 const CLEAR_MATCH = 0.5;
 // A deep dive only asks for follow-up leads when this much of its search time is left.
 const FOLLOW_UP_MIN_MS = 15000;
+// Leads inspected before requirement gaps are measured (they are the first pages checked anyway).
+const GAP_INITIAL = 8;
 
 function summarise(name: string, outcomes: Outcome[]): ProviderStatus {
  const pages = outcomes.flatMap(o => o.page ? [o.page] : []);
@@ -96,7 +107,8 @@ function leadsMaterial(results: {url: string; title: string; creator: string|nul
 // searches it ran.
 export async function runDiscovery(db: DB, config: Config, input: SearchInput, adapters: SourceAdapter[]|undefined,
  deps: DiscoveryDeps, health: Health, progress: Progress = async () => {}): Promise<{results: Result[]; closest: Result[]; ingested: Result[]; dropped: string[];
- providers: ProviderStatus[]; previews: Map<string,Buffer>; searches: PlannedSearch[]; trace: SearchTrace}> {
+ providers: ProviderStatus[]; previews: Map<string,Buffer>; searches: PlannedSearch[]; trace: SearchTrace;
+ contract?: RequirementsContract|null; unmet?: string[]}> {
  const deep = input.depth === 'deep' && !input.source;
  const providers = adapters ?? configuredProviders(config);
  const archives = deep ? deps.archives ?? configuredArchives(config, input.q) : [];
@@ -104,6 +116,21 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
  const anilist = input.source ? undefined : deps.anilist ?? (config.ANILIST_ENABLED ? new AniListClient(db, config) : undefined);
  const limit = deep ? config.DEEP_RESULTS : config.DISCOVERY_RESULTS;
  const deadline = deep ? Date.now() + config.DEEP_SEARCH_SECONDS*1000 : Infinity;
+ const today = deps.today ?? new Date().toISOString().slice(0, 10);
+ // The shared requirements contract (REQUIREMENTS_ENABLED); a scoped source search runs exactly as asked.
+ const contracted = config.REQUIREMENTS_ENABLED && !input.source;
+ // Formats the user named decide which kind of engine is asked, before any planning finishes.
+ // A website-only request is a preference, not a hard format (see siteOnly), so it steers nothing here.
+ const named = contracted && !siteOnly(explicitFormats(input.q)) ? explicitFormats(input.q) : [];
+ const aim = (list: PlannedSearch[]): PlannedSearch[] => {
+   if (!named.length || (named.includes('video') && !named.every(f => f === 'video'))) return list;
+   const target: SearchTarget = named.every(f => f === 'video') ? 'videos' : 'web';
+   const out = list.map(s => ({...s, target}));
+   return out.filter((s, i) => out.findIndex(o => sameSearch(o, s)) === i);
+ };
+ // Video details are fetched once per search and shared by exploration and evidence checks.
+ const youtube = contracted ? memoYouTube(deps.youtube ?? (config.YOUTUBE_API_KEY ? new YouTubeData(db, config) : undefined)) : deps.youtube;
+ const officialChannels = new Set(config.OFFICIAL_YOUTUBE_CHANNELS.split(',').map(s => s.trim()).filter(Boolean));
  // Recognition is needed by the planner and judge, not by the query as typed.
  // Keep it in flight while the initial providers search.
  const context = Promise.all([
@@ -224,9 +251,9 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
  let anime: Awaited<ReturnType<typeof animeContext>>;
  if (!deep) {
    // A search scoped to one source (replacement-domain discovery) runs exactly as asked.
-   const typed = input.source ? [{query: input.q, target: 'videos' as const}] : fallbackPlan(input.q).searches;
-   const planning = input.source ? Promise.resolve({plan: {kind: 'videos' as const, searches: typed, criteria: [], model: null}, status: null})
-     : context.then(([, anime]) => planWith(planner, input.q, false, [], anime.anime));
+   const typed = input.source ? [{query: input.q, target: 'videos' as const}] : aim(fallbackPlan(input.q).searches);
+   const planning = input.source ? Promise.resolve({plan: {kind: 'videos' as const, searches: typed, criteria: [], model: null} as SearchPlan, status: null})
+     : context.then(([, anime]) => planWith(planner, input.q, false, [], anime.anime)).then(p => ({...p, plan: {...p.plan, searches: aim(p.plan.searches)}}));
    await Promise.all([
      run(typed.map(s => ({...s, page: 1, engines: 'standard'}))),
      planning.then(({plan}) => run(plan.searches.filter(s => !typed.some(t => sameSearch(t, s))).map(s => ({...s, page: 1, engines: 'standard'})))),
@@ -239,8 +266,8 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
  } else {
    [earlier, anime] = await context;
    // What an ordinary search asked; its first result pages are already known unless no quick search ran.
-   const ordinary = earlier.searches.length ? earlier.searches : fallbackPlan(input.q).searches;
-   const planning = planWith(planner, input.q, true, ordinary.map(s => s.query), anime.anime);
+   const ordinary = aim(earlier.searches.length ? earlier.searches : fallbackPlan(input.q).searches);
+   const planning = planWith(planner, input.q, true, ordinary.map(s => s.query), anime.anime).then(p => ({...p, plan: {...p.plan, searches: aim(p.plan.searches)}}));
    const specialists = uniqueSearches(specialistSearches(input.q, config.SPECIALIST_SEARCHES), config.SPECIALIST_SEARCHES, ordinary.map(s => s.query));
    await Promise.all([
      runArchives(),
@@ -259,16 +286,29 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
  if (anime.status) notes.push(anime.status);
  await arrivals;
  if (failure) throw failure;
+ // The contract: the planner's draft normalised against the search date, or the query's own words when planning failed.
+ const contract: RequirementsContract|null = contracted
+   ? plan.draft !== undefined ? normaliseContract(input.q, today, plan.draft) : rulesContract(input.q, today) : null;
+ if (contract) {
+   plan = {...plan, criteria: [...new Set([...criteriaOf(contract), ...plan.criteria])].slice(0, 5)};
+   if (named.length && named.every(f => f === 'video')) plan = {...plan, kind: 'videos'};
+   else if (named.length && !named.includes('video')) plan = {...plan, kind: 'websites'};
+ }
 
  // Reddit threads are read once: as leads for a deep dive and as evidence for the checks.
  const discussions = discussionsFor(db, config, deps);
  const reddit = deep && discussions ? await discussions(input.q).then(threads => ({threads, error: null}), error => ({threads: [], error})) : null;
- const signalDeps: SignalDeps = reddit ? {...deps, discussions: async () => { if (reddit.error) throw reddit.error; return reddit.threads; }} : deps;
+ const signalDeps: SignalDeps = {...(reddit ? {...deps, discussions: async () => { if (reddit.error) throw reddit.error; return reddit.threads; }} : deps),
+   ...(youtube ? {youtube} : {})};
  // Each round follows leads in the newest finds, until time runs short or the leads stop turning up anything new.
  const cachedPages = new Map<string,Promise<PageEvidence>>();
  const checker = deps.pages ?? (config.PAGE_CHECKS ? new PageChecker(config) : undefined);
+ // Gap exploration visits pages on top of the ordinary evidence checks, and every fetch is shared through this cache.
+ const gapping = !!contract && config.GAP_EXPLORATION && !/(?:^|\s)site:/i.test(input.q) &&
+   contract.requirements.some(r => r.hardness === 'hard' || r.scope === 'set');
+ const pageBudget = config.PAGE_CHECKS + (gapping ? config.JEV_EXPLORATION_VISITS + GAP_INITIAL : 0);
  const checkPage = async (url: string): Promise<PageEvidence> => {
-   if (!cachedPages.has(url) && checker && cachedPages.size < config.PAGE_CHECKS)
+   if (!cachedPages.has(url) && checker && cachedPages.size < pageBudget)
      cachedPages.set(url, checker.check(url).catch(() => ({status: 'unavailable', title: null, description: null, text: null, libraries: [], badges: []})));
    return cachedPages.get(url) ?? {status: 'unavailable', title: null, description: null, text: null, libraries: [], badges: []};
  };
@@ -277,7 +317,8 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
  // Reserve at least half the page budget for normal evidence checks. Scoped searches
  // remain scoped; exploration only follows real references and never approves a source.
  const explorationPages = Math.min(config.JEV_EXPLORATION_PAGES,Math.floor(config.PAGE_CHECKS/2));
- if (explorer && checker && explorationPages && !input.source && !/(?:^|\s)site:/i.test(input.q) && Date.now()<deadline) {
+ // The earlier title-based exploration remains only for the pipeline without a contract (the evaluation baseline).
+ if (!contract && explorer && checker && explorationPages && !input.source && !/(?:^|\s)site:/i.test(input.q) && Date.now()<deadline) {
    stage='following';await report();
    const seeds=rankDiscovery(input.q,leads.filter(l=>l.target==='web'),leads.length,0,true).map(l=>({
      url:l.item.url,title:l.item.title,description:l.item.description,published_at:l.item.published_at,from_url:null}));
@@ -317,13 +358,63 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
  if (leadError) notes.push({provider: 'leads', status: leadError instanceof UpstreamError && leadError.code === 'budget_exhausted' ? 'budget_exhausted' : 'unavailable',
    message: 'Following leads from the first finds is unavailable right now.'});
  else if (rounds) notes.push({provider: 'leads', status: 'ok', message: `AI followed ${followed} leads from what it found, in ${rounds} ${rounds === 1 ? 'round' : 'rounds'}.`});
+ // Exploration aimed at the requirements still unmet after the first retrieval and inspection.
+ let gapTrace: GapTrace|undefined, gapFindings: Finding[] = [];
+ if (contract && gapping && Date.now() < deadline) {
+   stage = 'following'; await report();
+   round = rounds + 1;
+   const toCandidate = (l: Lead): GapCandidate => ({url: l.item.url, title: l.item.title, description: l.item.description,
+     published_at: l.item.published_at, from_url: null, target: l.target});
+   const chooser = deps.gapChooser ?? makeGapChooser(db, config);
+   const out = await exploreGaps({contract, deadline, chooser, ran: ran.map(s => s.query),
+     initial: rankDiscovery(input.q, leads.filter(l => !unauthorized(l.item.url)), leads.length, 0, true).map(toCandidate),
+     initialInspect: GAP_INITIAL, rounds: deep ? config.GAP_ROUNDS : 1,
+     visits: deep ? config.JEV_EXPLORATION_VISITS : Math.ceil(config.JEV_EXPLORATION_VISITS / 2),
+     searches: deep ? config.GAP_SEARCHES : Math.ceil(config.GAP_SEARCHES / 2), target: config.GAP_TARGET_RESULTS,
+     skip: url => unauthorized(url),
+     inspect: async c => {
+       const id = youtubeId(c.url);
+       if (id && youtube) {
+         const d = (await youtube.videos([id]).catch(() => new Map<string,VideoDetails>())).get(id);
+         return {findings: inspect(contract, {url: c.url, title: c.title, description: c.description, published_at: c.published_at,
+           video: d ? {publishedAt: d.publishedAt, official: officialChannels.has(d.channelId), channel: d.channelTitle} : undefined}),
+           links: d ? descriptionLinks(d.description) : [], title: d?.title ?? c.title, description: d?.description ?? null};
+       }
+       const page = await checkPage(c.url);
+       // A page reached by following a link becomes a candidate of its own once it has been read.
+       if (c.from_url && page.status === 'checked' && page.title && !leads.some(l => l.item.url === c.url)) {
+         const item = contentInput.safeParse({url: c.url, title: page.title, description: page.description ?? page.text});
+         if (item.success) leads.push({item: item.data, provider: 'gap_exploration', position: 0, query: input.q, target: 'web', round});
+       }
+       return {findings: inspect(contract, {url: c.url, title: c.title, description: c.description, published_at: c.published_at, page}),
+         links: page.links ?? [], title: page.title, description: page.description};
+     },
+     search: async searches => {
+       const before = leads.length;
+       for (const s of searches) roundOf.set(`${s.target}:${s.query.toLowerCase()}`, round);
+       await run(searches.map(s => ({...s, page: 1, engines: 'standard' as const})));
+       await arrivals;
+       if (failure) throw failure;
+       ran.push(...searches);
+       return leads.slice(before).map(toCandidate);
+     }});
+   gapTrace = out.trace; gapFindings = out.findings;
+   const failed = out.trace.rounds.some(r => r.decisions_failed);
+   notes.push({provider: 'gap_exploration', status: failed ? 'partial' : 'ok',
+     message: out.trace.initial_gaps.length
+       ? `Looked for evidence on ${out.trace.initial_gaps.length} unmet requirement${out.trace.initial_gaps.length === 1 ? '' : 's'}: ${out.trace.searches} targeted searches, ${out.trace.visits} pages or videos opened, ${out.trace.closed.length} closed.${failed ? ' Some exploration decisions were unavailable; results were kept.' : ''}`
+       : 'The first results already covered every requirement.'});
+ }
  if (Date.now() >= deadline) notes.push({provider: 'search_deadline', status: 'partial',
    message: 'The search time limit was reached. Results include completed sources; some planned searches may not have run.'});
  // Previous quick finds compete in the same pool and are rechecked under the same criteria.
  for (const r of earlier.results) if (!leads.some(l => l.item.url === r.canonical_url)) leads.push({
    item: {...r, url: r.canonical_url, provider_id: null, rights_status: 'unknown', availability: 'unknown'},
    provider: 'previous_search', position: 0, query: input.q, target: plan.kind === 'websites' ? 'web' : 'videos'});
- const judge = deps.judge ?? makeJudge(db, config);
+ // Shadow libraries and unlicensed ebook dumps are never served (data/access-sources.json).
+ for (let i = leads.length - 1; i >= 0; i--) if (unauthorized(leads[i].item.url)) leads.splice(i, 1);
+ const baseJudge = deps.judge ?? makeJudge(db, config);
+ const judge = contract ? makeJevJudge(db, config, baseJudge) : baseJudge;
  const ranked = rankDiscovery(input.q, leads, leads.length, 0, !!judge);
  if (ranked.length > config.DISCOVERY_CANDIDATES) notes.push({provider: 'candidate_pool', status: 'partial',
    message: `${ranked.length} candidates found; up to ${config.DISCOVERY_CANDIDATES} candidates were selected for checking after all sources answered.`});
@@ -335,7 +426,8 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
  stage = 'checking'; await report();
  if (screener && picks.length) {
    try {
-     const screened = await screener.screen(input.q, picks);
+     const screened = await screener.screen(input.q, picks, contract ? {requirements: hardEach(contract).map(r => ({id: r.id, text: r.text})),
+       formats: contract.deliverable.formats, search_date: contract.search_date} : undefined);
      await health('jev_screener', true);
      picks = screeningOrder(picks, screened.promising);
      notes.push({provider: 'jev_screener', status: 'ok',
@@ -346,6 +438,15 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
        message: 'Candidate screening was unavailable; the original candidate order was used.'});
      await health('jev_screener', false, code);
    }
+ }
+ if (contract) {
+   // Inspected evidence steers admission with the same rule as the final decision: a lead that decision would exclude
+   // stays out; one with inspected support moves forward.
+   const hard = new Set(hardEach(contract).map(r => r.id));
+   const inspectedUrls = [...new Set(gapFindings.map(f => f.url))];
+   const bad = new Set(inspectedUrls.filter(url => decide(contract, gapFindings.filter(f => f.url === url)).status === 'excluded'));
+   const good = new Set(gapFindings.filter(f => !f.provisional && f.status === 'supported' && hard.has(f.requirement_id)).map(f => f.url));
+   picks = [...picks.filter(l => good.has(l.item.url) && !bad.has(l.item.url)), ...picks.filter(l => !good.has(l.item.url) && !bad.has(l.item.url))];
  }
  await store(picks);
  const statuses = [...[...providers, ...archives].map(p => {
@@ -361,7 +462,7 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
  const webUrls = new Set(leads.filter(l => l.target === 'web').map(l => l.item.url));
  const targets = new Map(found.map(r => [r.id, webUrls.has(leadUrl.get(r.id)!) ? 'web' as const : 'videos' as const]));
  const signals = await applySignals(db, {...config, JUDGE_CANDIDATES: found.length}, input.q, found, {...signalDeps, judge, pages: {check: checkPage}},
-   {kind: plan.kind, criteria: plan.criteria, targets, underrated: deep, anime: anime.anime});
+   {kind: plan.kind, criteria: plan.criteria, targets, underrated: deep, anime: anime.anime, ...(contract ? {contract, findings: gapFindings} : {})});
  // Semantic-only candidates were admitted for judging. If that check fails, they must not
  // displace supported keyword matches merely because the model had been configured.
  const lexical = new Set(rankDiscovery(input.q, leads, leads.length).map(l => l.item.url));
@@ -369,10 +470,61 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
    .slice(0, limit + earlier.results.length);
  const kept = new Set(results.map(r => r.canonical_url));
  for (const [id] of signals.previews) if (!results.some(r => r.id === id)) signals.previews.delete(id);
+ const unmet = contract ? unmetRequirements(contract, results, signals.findings) : [];
+ const base = traceOf(input, plan, searches, rounds, [...statuses, ...signals.providers], leads, found, leadUrl, signals.judged, results, roundOf);
+ const byUrl = new Map(found.map(r => [r.canonical_url, r.id]));
  return {results, closest:signals.closest.filter(r=>matchesFilters(r,input)), ingested: found, previews: signals.previews, searches,
    dropped: [...new Set([...found, ...earlier.results].filter(r => !kept.has(r.canonical_url)).map(r => r.canonical_url))], providers: [...statuses, ...signals.providers],
-   trace: {...traceOf(input, plan, searches, rounds, [...statuses, ...signals.providers], leads, found, leadUrl, signals.judged, results, roundOf),
-     ...(exploration?{exploration}:{})}};
+   contract, unmet,
+   trace: {...base, ...(exploration?{exploration}:{}),
+     ...(contract ? {contract, unmet, ...(gapTrace ? {gaps: gapTrace} : {}),
+       pool: base.pool.map(p => {
+         const id = byUrl.get(p.url), decision = id ? signals.decisions.get(id) : undefined;
+         return {...p, ...(decision ? {decision: {status: decision.status, contradicted: decision.contradicted, unconfirmed: decision.unconfirmed}} : {}),
+           ...(id && signals.jev.has(id) ? {jev: signals.jev.get(id)} : {}),
+           findings: signals.findings.filter(f => f.url === p.url).map(f => ({requirement_id: f.requirement_id, status: f.status, method: f.method,
+             access: f.access, provisional: f.provisional, excerpt: f.excerpt, ...(f.location.key ? {key: f.location.key} : {})}))};
+       })} : {})}};
+}
+
+// Requirements the shown results do not satisfy: set items nobody covers, and every hard requirement when nothing
+// could be verified. Shown results already meet every hard per-result requirement by construction.
+function unmetRequirements(contract: RequirementsContract, shown: Result[], findings: Finding[]): string[] {
+ const urls = new Set(shown.map(r => r.canonical_url));
+ const own = findings.filter(f => urls.has(f.url));
+ const out = coverage(contract, own, 1).gaps.filter(g => g.item).map(g => `No result found for ${g.item}: ${contract.requirements.find(r => r.id === g.requirement_id)!.text}`);
+ if (!shown.length) out.unshift(...hardEach(contract).map(r => `No result could be verified for: ${r.text}`));
+ return out;
+}
+
+// One details request per video per search, shared by exploration and the evidence checks.
+function memoYouTube(client: YouTubeClient|undefined): YouTubeClient|undefined {
+ if (!client) return undefined;
+ const cache = new Map<string, Promise<VideoDetails|undefined>>();
+ return {
+   async videos(ids) {
+     const missing = ids.filter(id => !cache.has(id));
+     if (missing.length) {
+       const batch = client.videos(missing);
+       for (const id of missing) cache.set(id, batch.then(m => m.get(id), () => { cache.delete(id); return undefined; }));
+     }
+     const out = new Map<string, VideoDetails>();
+     for (const id of ids) { const d = await cache.get(id); if (d) out.set(id, d); }
+     return out;
+   },
+   comments: (id, max) => client.comments(id, max),
+ };
+}
+
+// Real links a video's own description points to, for exploration to consider (never invented).
+function descriptionLinks(description: string): {url: string; title: string}[] {
+ const out = new Map<string, {url: string; title: string}>();
+ for (const match of description.matchAll(/https?:\/\/[^\s<>"')\]]+/g)) {
+   if (out.size >= 8) break;
+   try { const url = canonicalize(match[0].replace(/[.,;:!?]+$/, '')); if (!out.has(url)) out.set(url, {url, title: `Linked from the video description: ${new URL(url).hostname}`}); }
+   catch { /* Not a usable address. */ }
+ }
+ return [...out.values()];
 }
 
 const uniqueRan = (list: PlannedSearch[]) => list.filter((s, i) => list.findIndex(o => sameSearch(o, s)) === i);

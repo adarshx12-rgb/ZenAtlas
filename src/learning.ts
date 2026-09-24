@@ -10,6 +10,8 @@ import { canonicalize } from './urls.js';
 import { RANKING_VERSION } from './ranking.js';
 import { claim, complete, fail, renewLease } from './queue.js';
 import type { ExplorationTrace } from './exploration.js';
+import type { RequirementsContract } from './requirements.js';
+import type { GapTrace } from './gaps.js';
 
 // Learning loop, step 1. Every discovery search leaves a trace; a critic model audits it once results are shown,
 // testing any source it says was missed with a real search; once a week a reviewer re-checks a sample of audits.
@@ -21,6 +23,10 @@ export interface TraceEntry {
  round: number;
  relevance: number|null; reason: string|null; basis: 'metadata'|'viewer_claims'|'direct_evidence'|null;
  shown: boolean; rank: number|null; badges: string[];
+ // With a requirements contract: the decision behind the outcome, the evidence findings, and Jev's pre-judgement.
+ decision?: {status: 'verified'|'uncertain'|'excluded'; contradicted: string[]; unconfirmed: string[]};
+ findings?: {requirement_id: string; status: string; method: string; access: string; provisional: boolean; excerpt: string|null; key?: string}[];
+ jev?: unknown;
 }
 export interface SearchTrace {
  exploration?: ExplorationTrace;
@@ -28,6 +34,7 @@ export interface SearchTrace {
  plan: {kind: string; criteria: string[]; model: string|null};
  searches: {query: string; target: string; round: number}[];
  rounds: number; providers: ProviderStatus[]; pool: TraceEntry[];
+ contract?: RequirementsContract; unmet?: string[]; gaps?: GapTrace;
 }
 // The critic's model client: anything answering the ModelClient json() call.
 export interface CriticClient { models: string[]; json(bucket: string, system: string, text: string, schema: object): Promise<{model: string; value: unknown}> }
@@ -69,6 +76,32 @@ export function traceMetrics(trace: SearchTrace) {
    duplicate_groups: groups.filter(g => g.length > 1),
    sites: new Set(shown.map(p => p.site)).size,
    failed_providers: trace.providers.filter(p => ['unavailable', 'budget_exhausted'].includes(p.status)).map(p => p.provider),
+   ...(trace.contract ? requirementMetrics(trace, trace.contract) : {}),
+ };
+}
+
+// Requirement coverage of the shown results, how much stayed unknown, what exploration gained per visit, and how often
+// the LLM judge agreed with Jev's shadow rejections. Agreement between models is not accuracy.
+function requirementMetrics(trace: SearchTrace, contract: RequirementsContract) {
+ const shown = trace.pool.filter(p => p.shown);
+ const hard = contract.requirements.filter(r => r.hardness === 'hard' && r.scope === 'each');
+ const items = contract.requirements.filter(r => r.scope === 'set').flatMap(r => (r.set_items ?? []).map(item => ({id: r.id, item})));
+ const covered = items.filter(({id, item}) => shown.some(p => p.findings?.some(f => f.requirement_id === id && f.key === item && f.status === 'supported' && !f.provisional)));
+ const total = hard.length + items.length;
+ const hardFindings = shown.flatMap(p => (p.findings ?? []).filter(f => hard.some(r => r.id === f.requirement_id)));
+ const jev = trace.pool.map(p => p.jev as {outcome?: string}|undefined).filter(Boolean);
+ const shadow = trace.pool.filter(p => (p.jev as {outcome?: string}|undefined)?.outcome === 'would_reject' && p.relevance !== null);
+ return {
+   requirement_satisfaction: total ? ((shown.length ? hard.length : 0) + covered.length) / total : null,
+   unknown_rate: hardFindings.length ? hardFindings.filter(f => f.status === 'unknown').length / hardFindings.length : null,
+   decisions: {verified: trace.pool.filter(p => p.decision?.status === 'verified').length,
+     uncertain: trace.pool.filter(p => p.decision?.status === 'uncertain').length, excluded: trace.pool.filter(p => p.decision?.status === 'excluded').length},
+   unmet: trace.unmet?.length ?? 0,
+   gap_visits: trace.gaps?.visits ?? 0, gap_searches: trace.gaps?.searches ?? 0,
+   coverage_gain_per_visit: trace.gaps?.coverage_gain_per_visit ?? null, gap_stop: trace.gaps?.stop ?? null,
+   jev_settled: jev.filter(j => j!.outcome === 'settled').length, jev_forwarded: jev.filter(j => j!.outcome === 'forwarded').length,
+   jev_would_reject: jev.filter(j => j!.outcome === 'would_reject').length,
+   jev_reject_agreement: shadow.length ? shadow.filter(p => (p.relevance ?? 10) <= 4).length / shadow.length : null,
  };
 }
 export type TraceMetrics = ReturnType<typeof traceMetrics>;

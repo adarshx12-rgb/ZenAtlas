@@ -10,6 +10,57 @@ An optional **Closest matches** tab fetches up to 20 judged partial or uncertain
 
 A deep dive rechecks its previous quick finds together with new finds. Its better matches can move to the top. Catalogue items matching discoveries receive their checked details; when judging was attempted, completion removes catalogue entries outside the accepted pool, including on judge failure. While discovery runs, catalogue results are provisional. The browser displays one combined list, not separate quick/deep groups. `ranked` contains the full visible snapshot in display order; `results` remains paginated. Completion can change positions, so consumers should refresh their first page or use `ranked` when the job finishes. Catalogue-only pagination remains stable.
 
+## Shared requirements and evidence
+
+With `REQUIREMENTS_ENABLED=true` (the default), every discovery search works from one **requirements contract** (`src/requirements.ts`) instead of each stage re-reading the query. The planner drafts it in its existing call: intent, entities, the complete-work flag, hypothesised official domains, atomic requirements with stable IDs (`R1`, `R2`, …), whether each is hard or preferred, whether every result must meet it (`each`) or the results together must cover it (`set`), the evidence that would establish it, and any ambiguities and assumptions. Search is non-interactive, so the engine records assumptions rather than asking. Fixed rules then override the draft:
+
+- **Dates:** "past/last N years/months/weeks/days", "since YYYY", "YYYY–YYYY", "last year" and "this year" resolve against the search date. "Past 3 years" on 2026-09-24 becomes 2023-09-24 to 2026-09-24, plus a `set` requirement that the results cover 2023, 2024, 2025 and 2026. A bare year such as "roswell 1947" names the event, so it is not a publication window.
+- **Formats:** only words the user wrote ("article", "pdf", "video", "clip", "footage", "image"…) become hard format requirements. "Website" alone is only a preference: it usually names the subject, and a video presenting such sites still serves the request (hard-rejecting videos for these queries collapsed recall in relevance-v4).
+- **Syntax:** quoted phrases become hard requirements and `-term` an exclusion. "Official" adds an authority requirement; when the request lists several publishers ("official NASA, ESA and CSA sources"), any one of them counts.
+- If planning fails, these rules alone build the contract (`source: "rules"`). The original query is always kept verbatim.
+
+The contract reaches the screener, Jev, the judge, the decision rule, the trace and the browser.
+
+**Evidence.** Each finding (`src/evidence.ts`) links a candidate URL and a requirement ID to a status (supported, contradicted or unknown), an exact excerpt and where it came from, the inspection method (page fetch, browser render, PDF parse, video API, URL structure, search snippet, Jev or judge) and the access status. A failed fetch or a robots refusal is **unknown, never contradicted**. Snippets, URL guesses and model predictions are *provisional*: they steer admission and exploration but never verify or exclude a result. Fixed-rule inspectors read what was actually fetched:
+
+| Requirement | Evidence used |
+|---|---|
+| Format | Video host and watch-page URLs; `application/pdf`; schema.org `Article`/`NewsArticle`/`BlogPosting` JSON-LD or `og:type=article`. An undeclared page is not proof of either format; any ordinary page address is enough for a website request. |
+| Publication date | JSON-LD `datePublished`, `article:published_time`, a `<time datetime>` element, a byline date standing alone in its own element (optionally after "Posted"/"Published"; dates inside sentences and "Updated" dates are ignored), PDF creation date, the video platform's publish date. A search-result date is provisional. |
+| Official status | The page declares the organisation as its publisher (`og:site_name` or JSON-LD publisher, matched exactly after dropping words like "blog", "newsroom" or a domain suffix, so "WhatsApp.com" is WhatsApp), the page is on a hypothesised official domain and names the organisation, or the video is from an allow-listed official channel. A domain match alone is provisional. |
+| Complete work | Access kind (below), the work's title on the page, and summary/review/excerpt markers ("summary", "key takeaways", "StoryShots", "sample chapter"…) in the title or first PDF pages, which contradict it. |
+| Quoted phrase | The phrase in the inspected text. |
+
+**PDF inspection.** The page checker reads `.pdf` addresses and pages answering `application/pdf` (up to `PDF_MAX_BYTES`, 15 MB). The bytes go to the existing Python text helper, which now also runs `pypdf` and returns the page count, title, author, creation date and the first three pages' text. Without the helper a PDF is known but not inspected (unknown).
+
+**Decision.** Per candidate, for every hard `each` requirement: inspected evidence wins; for subject and property requirements, the judge's quote counts when it appears in that candidate's own evidence; provisional findings count for nothing. The judge can never establish format, date, official status or completeness from a title.
+
+| Evidence | Outcome |
+|---|---|
+| Any hard requirement contradicted | Excluded, with the reason in the trace. Contradicted before admission (for example a watch page for an article-only request, or a page dated outside the window) keeps it out of the checking pool. |
+| All hard requirements supported | Verified and ranked by relevance, as before (the judge's intent checks still apply). |
+| Otherwise | Not verified: listed under *Closest matches* with what is unconfirmed, and eligible for gap exploration. Without a judge configured, results stay listed with their uncertainties unless something contradicts them. |
+
+A legitimately available complete work in another file format ("Full work available (Buy); not as PDF") is shown with that note rather than hidden. Relevance, requirement coverage and model confidence are stored separately. Each result carries `requirements` (status, excerpt and method per requirement) and `uncertainties`; the search response carries `interpretation` (intent, requirements, assumptions and `unmet`, e.g. "No result found for 2023"), shown above the results as "Interpreted as". `RANKING_VERSION` is `relevance-v8-requirements`. `REQUIREMENTS_ENABLED=false` restores the previous pipeline.
+
+### Books, magazines and journals
+
+Books, magazines, journals and papers are reachable wherever they can legitimately be read: the line is piracy, not copyright. `data/access-sources.json` classifies addresses as `store` (labelled Buy), `library` (Borrow), `subscription`, `open_access`, `public_domain`, `publisher`, `unauthorized` or `unknown`. The first six count as full-copy access. **Unauthorized hosts (shadow libraries and unlicensed ebook dumps) are removed before ranking and never visited.** User-upload hosts (Scribd `/document/`, archive.org uploads) are `unknown`: a commercial work uploaded there never counts as legitimate access. The planner is told to look for publisher, store, library, subscription and open-access sources.
+
+### Gap-directed exploration
+
+After the first retrieval and follow-up rounds, exploration (`src/gaps.ts`) inspects the eight leading candidates, measures coverage, and works on the **gaps**: hard `each` requirements supported by fewer than `GAP_TARGET_RESULTS` (3) candidates, and uncovered `set` items. Each round:
+
+1. runs up to `GAP_SEARCHES` targeted searches **built from the contract by rule, never by a model** (for example the topic plus a missing year, `site:` a hypothesised official domain, the work plus "ebook" or "library borrow");
+2. asks Jev, given the contract, the current coverage, the gaps and each candidate's context (URL, domain, date, known format, referring page), which gap each real candidate or outbound link would most likely close;
+3. opens the chosen pages, PDFs and videos (video descriptions supply their real outbound links), inspects them and records every action with the gap it targets.
+
+It stops when the gaps are covered, when a round adds no new inspected support (no gain), or at the round, visit (`JEV_EXPLORATION_VISITS`, 12; half for quick searches), search, time or budget caps. URLs are deduplicated and never revisited; robots and public-address rules apply; hypothesised domains are only ever searched, then inspected. Without Jev, candidates are opened in ranked order. Pages reached through a link become candidates once read. Fetches are shared through one per-search cache (pages and YouTube details). `GAP_EXPLORATION=false` disables it (the ablation). The trace records `gaps` (initial gaps, each round's searches and visits with targets and new support, the stop reason) and metrics: `requirement_satisfaction`, `unknown_rate`, `gap_visits`, `coverage_gain_per_visit`.
+
+### Jev pre-judge
+
+With a contract and an OpenRouter key (`JEV_JUDGE_ENABLED=true`), Jev reads each candidate before the LLM judge (`src/jev-judge.ts`): one call per candidate, at most `JEV_JUDGE_CONCURRENCY` (12) at once, over up to 40 snippets cut **only from inspected content** (page and PDF text, platform descriptions, comments, transcripts, scenes), never from search snippets. It scores relevance on five levels and, per hard requirement, names the snippet that establishes it, or `unknown`/`mismatch`. A candidate is settled by Jev only when relevance is at least "specific supporting detail" with confidence ≥ `JEV_JUDGE_CONFIDENCE` (0.8) and every hard requirement is backed by a snippet at that confidence; its verdict quotes those snippets and keeps the evidence ceiling. Would-reject decisions stay in shadow while `JEV_JUDGE_REJECT=false` (default): they are recorded and forwarded to the LLM judge. Everything else goes to the LLM judge in batches of six. A timeout, bad answer or exhausted `JEV_JUDGE_DAILY_BUDGET` forwards the candidate; a dropped connection is retried once. The trace keeps each candidate's Jev record; `jev_reject_agreement` reports how often the LLM judge also scored a shadow rejection ≤ 4. That is agreement between models, not accuracy: switch rejections on only after reviewing it against human grades.
+
 ## Jev candidate screening
 
 The screener uses the existing `OPENROUTER_API_KEY` in the server's `.env`; no separate TypeSafe key is needed. Restart the worker after configuration changes. `JEV_SCREENING_ENABLED=false` disables it. No OpenRouter key means no screening calls and the original candidate order. The integration uses [OpenRouter's Decisions API](https://openrouter.ai/blog/insights/what-is-jev/) at `https://openrouter.ai/api/alpha/decisions`, with `JEV_MODEL=typesafe/jev-1.13`. It derives the endpoint from `OPENROUTER_BASE_URL` by replacing the trailing `/v1` with `/alpha/decisions`, and reuses the configured site attribution headers. It sends native `state` and `questions` and reads typed `answers`.
@@ -18,13 +69,17 @@ After provider collection and URL deduplication, Jev reads the original query an
 
 Every fourth pick uses the original order, leaving room for uncertain and unscreened leads. Screening never removes candidates; all remain in the queue, subject to the existing `DISCOVERY_CANDIDATES` admission limit and evidence budgets. Those limits mean some leads may still go unchecked. Jev decisions are not attached as relevance verdicts or evidence. The existing judge still controls final scores, explanations and displayed results. Deep-search follow-up page checks happen earlier and are unaffected.
 
-At most six batches of 20 run concurrently, each with `JEV_SCREEN_TIMEOUT_MS=4000` and no retries. `JEV_SCREEN_DAILY_BUDGET=600` counts attempted HTTP calls in its own daily budget. Missing/malformed answers, timeouts, API errors or budget exhaustion restore the entire original order. Search responses and provider health report `jev_screener` success or failure. Bounded sampling on success reports how many leads were screened.
+With a requirements contract, the screener also receives the hard requirements, the requested formats and the search date, and each lead's URL, domain and publication date, so official-source, time-window and format distinctions are no longer guessed from titles alone.
+
+At most six batches of 20 run concurrently, each with `JEV_SCREEN_TIMEOUT_MS=8000`; a dropped connection is retried once, nothing else is. `JEV_SCREEN_DAILY_BUDGET=600` counts attempted HTTP calls in its own daily budget. A failed batch leaves its own leads in their original order while the other batches' decisions still count (`failed_batches` is reported); only when every batch fails, or the budget is exhausted, is the entire original order kept. Search responses and provider health report `jev_screener` success or failure. Bounded sampling on success reports how many leads were screened.
 
 Local tests use controlled API responses; they do not establish live model quality. Evaluate real-query recall, final ranking quality, latency and cost before changing thresholds or using Jev to reject candidates outright.
 
 Run `node --env-file=.env --import tsx scripts/check-screener.ts` for a small live OpenRouter check. It sends two labelled fixture candidates through the real screener and normal daily call budget, prints the promoted fixture positions and elapsed time, and never ingests the fixtures. It requires the configured database and OpenRouter key. A passing call verifies connectivity and response parsing, not real-search relevance quality.
 
-## Jev source exploration
+## Jev source exploration (baseline pipeline only)
+
+This title-based exploration runs only with `REQUIREMENTS_ENABLED=false`, the evaluation baseline. With a contract, gap-directed exploration (above) replaces it and uses the same `JEV_EXPLORATION_ENABLED`, `JEV_EXPLORATION_DAILY_BUDGET`, `JEV_EXPLORATION_TIMEOUT_MS` and `JEV_EXPLORATION_CONFIDENCE` settings.
 
 With `OPENROUTER_API_KEY` configured, `JEV_EXPLORATION_ENABLED=true` adds source exploration to quick and deep discovery after initial providers finish. Jev assesses whether inspecting a page could reveal useful material or references; it does not decide whether that page satisfies the whole query. Its input includes the original query, current date, URLs/domains, titles, available descriptions/publication dates, and referring-page context for outbound links.
 
@@ -54,6 +109,8 @@ Discovery grants no source approval, media access, transcript retention or reuse
 
 ## Verification
 
-Run `npm run build` and `npm test` for the deterministic suite. The regressions cover delayed specialist responses, reversed arrival order, semantic matches, quick/deep reranking, rejected results, missing verdicts, archive parsing, source failures, budgets and safe references.
+Run `npm run build` and `npm test` for the deterministic suite. The regressions cover delayed specialist responses, reversed arrival order, semantic matches, quick/deep reranking, rejected results, missing verdicts, archive parsing, source failures, budgets and safe references. The requirements pipeline has its own offline suites: `requirements`, `access`, `evidence`, `inspection`, `gaps`, `jev-gaps`, `jev-judge`, `requirements-judge` and the end-to-end `pipeline` tests. They cover contract propagation, conflicting evidence, inaccessible pages, format mismatches, per-result versus set scope, summaries versus full books, official status and dates, bounded exploration and every stopping condition.
+
+`node --env-file=.env --import tsx scripts/evaluate-requirements.ts run output/<name>.json` compares the baseline (`REQUIREMENTS_ENABLED=false`), the full pipeline and the ablation without gap exploration on `evaluation/requirements-queries.json`. It is capped at 12 live searches (`--max N`) and spends the normal daily budgets. It records requirement satisfaction, unknown rate, gap visits, coverage gained per visit, latency, calls per budget and an estimated Brave and Jev cost, and writes `<name>.json.review.json` for a human reviewer. `report <name>.json [review.json]` prints the comparison; verified-result precision appears only from human grades, and model agreement is never reported as accuracy.
 
 Run `node --import tsx scripts/check-specialists.ts moon` for a read-only live API check. It does not read credentials or write catalogue data and returns a failing exit code if either API is unavailable. Live results and access vary; automated fixture tests cannot establish relevance quality for every real query.

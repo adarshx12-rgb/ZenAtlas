@@ -17,11 +17,20 @@ export interface JudgeCandidate {
  scenes?: {start:number;end:number;description:string;inspected_ranges:number[][]}[];
  evidence_status?: {comments:string;captions:string};
  page?: {status: string; title: string|null; description: string|null; text: string|null; libraries: string[]; screenshot?: boolean};
+ // Facts inspected deterministically (format, publication date, publisher, access): authoritative over metadata guesses.
+ inspected?: {format: string|null; published: string|null; publisher: string|null; access: string|null};
+ // Where description came from: the platform's API (inspected) or the search result (a snippet).
+ description_source?: 'api'|'search';
 }
 // anime: a confidently matched anime from AniList, for recognising fan-subbed, dubbed or renamed uploads of it.
-export interface JudgeContext { kind: 'videos'|'websites'|'mixed'; criteria: string[]; anime?: AnimeMatch|null }
-export interface Verdict { key: string; relevance: number; reason: string; momentKeys: string[]; lesserKnown?: boolean; intentChecks?:IntentCheck[] }
-export interface JudgeResult { model: string; verdicts: Map<string,Verdict> }
+// requirements: the shared contract's hard per-result requirements, checked one by one.
+export interface JudgeContext { kind: 'videos'|'websites'|'mixed'; criteria: string[]; anime?: AnimeMatch|null;
+ requirements?: {id: string; text: string; evidence: string}[] }
+export interface RequirementVerdict { id: string; status: 'supported'|'unknown'|'mismatch'; field: string; quote: string }
+export interface Verdict { key: string; relevance: number; reason: string; momentKeys: string[]; lesserKnown?: boolean; intentChecks?:IntentCheck[];
+ requirementChecks?: RequirementVerdict[] }
+// jev: the Jev pre-judge's record per candidate key, when it ran (see jev-judge.ts).
+export interface JudgeResult { model: string; verdicts: Map<string,Verdict>; jev?: Map<string,unknown> }
 // screenshots: JPEG first-screen captures by candidate key, for candidates whose page.screenshot is true.
 export interface Judge { judge(query: string, candidates: JudgeCandidate[], context?: JudgeContext, screenshots?: Map<string,Buffer>): Promise<JudgeResult> }
 
@@ -46,14 +55,19 @@ function quoted(quote:string,text:string):boolean {
 }
 export function groundedIntent(candidate:JudgeCandidate,checks:IntentCheck[]|undefined):boolean {
  if(!checks || checks.length!==intentDimensions.length || !intentDimensions.every(d=>checks.some(c=>c.dimension===d))) return false;
+ return checks.every(check=>groundedQuote(candidate,check));
+}
+// A supported check counts only when its quote appears in the named field of this candidate's own evidence.
+export function groundedQuote(candidate:JudgeCandidate,check:{status:string;field:string;quote:string}):boolean {
  const fields:Record<z.infer<typeof evidenceField>,string[]>={
    title:[candidate.title],url:[candidate.url??''],description:[candidate.description??''],comments:candidate.comments,
    moments:candidate.moments.flatMap(m=>m.viewers_said),transcripts:(candidate.transcripts??[]).map(t=>t.text),
    scenes:(candidate.scenes??[]).map(s=>s.description),
    page:candidate.page?.status==='checked'?[candidate.page.title??'',candidate.page.description??'',candidate.page.text??'']:[],
  };
- return checks.every(check=>check.status==='supported' && normaliseQuote(check.quote).length>=2 &&
-   fields[check.field].some(text=>quoted(check.quote,text)));
+ const field=evidenceField.safeParse(check.field);
+ return field.success && check.status==='supported' && normaliseQuote(check.quote).length>=2 &&
+   fields[field.data].some(text=>quoted(check.quote,text));
 }
 
 // Scores at or below this are dropped: 3-4 is "only tangential" on the rubric.
@@ -98,7 +112,15 @@ const verdicts = z.object({verdicts: z.array(z.object({
  key: z.string(), relevance: z.number().int().min(0).max(10), reason: z.string(), moment_keys: z.array(z.string()).default([]),
  lesser_known: z.boolean().default(false),
  intent_checks:z.array(intentCheck).max(4).optional(),
+ requirement_checks:z.array(z.object({id:z.string(),status:z.enum(['supported','unknown','mismatch']),field:z.string(),quote:z.string().max(500)})).max(12).optional(),
 }))});
+const REQUIREMENT_NOTE = `The request has also been broken into numbered requirements, listed after the request. For each candidate also return requirement_checks: exactly one entry per listed requirement id, with status supported, unknown or mismatch, the candidate field and a short exact verbatim quote from that field, under the same quoting rules as intent_checks. The inspected facts on a candidate (format, published date, publisher, access) were read from the page itself: rely on them over titles and snippets. A summary, review or excerpt of a work is a mismatch for a requirement that asks for the complete work.`;
+const requirementSchema = (ids: string[]) => ({...RESPONSE_SCHEMA, properties: {verdicts: {...RESPONSE_SCHEMA.properties.verdicts, items: {
+ ...RESPONSE_SCHEMA.properties.verdicts.items, properties: {...RESPONSE_SCHEMA.properties.verdicts.items.properties,
+   requirement_checks: {type: 'array', items: {type: 'object', properties: {id: {type: 'string', enum: ids},
+     status: {type: 'string', enum: ['supported', 'unknown', 'mismatch']}, field: {type: 'string', enum: evidenceField.options}, quote: {type: 'string'}},
+     required: ['id', 'status', 'field', 'quote']}}},
+ required: [...RESPONSE_SCHEMA.properties.verdicts.items.required, 'requirement_checks']}}}});
 
 // Ranks candidates with any model client. The bucket is the daily budget it spends.
 export class ModelJudge implements Judge {
@@ -108,11 +130,14 @@ export class ModelJudge implements Judge {
    const shown = new Set(candidates.filter(c => c.page?.screenshot && screenshots?.has(c.key)).map(c => c.key));
    const images = [...shown].map(key => ({label: `Screenshot for candidate ${key}:`, mimeType: 'image/jpeg' as const, data: screenshots!.get(key)!}));
    const listed = candidates.map(c => c.page?.screenshot && !shown.has(c.key) ? {...c, page: {...c.page, screenshot: false}} : c);
+   const required = context?.requirements?.length ? context.requirements : null;
    const text = [`Request: ${JSON.stringify(query)}`,
      ...(context ? [`Wanted: ${context.kind}`, `Criteria: ${JSON.stringify(context.criteria)}`] : []),
+     ...(required ? [`Requirements: ${JSON.stringify(required)}`] : []),
      ...(context?.anime ? [`Known anime match: ${JSON.stringify(animeSummary(context.anime, query))}`] : []),
      'Candidates follow, one JSON object per line.', '<candidates>', ...listed.map(c => JSON.stringify(c)), '</candidates>'].join('\n');
-   const reply = await this.client.json(this.bucket, SYSTEM_INSTRUCTION, text, RESPONSE_SCHEMA, images);
+   const reply = await this.client.json(this.bucket, required ? `${SYSTEM_INSTRUCTION}\n${REQUIREMENT_NOTE}` : SYSTEM_INSTRUCTION, text,
+     required ? requirementSchema(required.map(r => r.id)) : RESPONSE_SCHEMA, images);
    const parsed = verdicts.safeParse(reply.value);
    if (!parsed.success) throw new UpstreamError('malformed_response');
    const byKey = new Map(candidates.map(c => [c.key, c]));
@@ -125,8 +150,13 @@ export class ModelJudge implements Judge {
      const matches=ceiling>UNVERIFIED;
      const uncertainty=ceiling===TANGENTIAL?(v.relevance>ceiling?' Misses part of the request.':''):!matches?' Match not verified from the evidence.'
        :v.relevance<=ceiling?'':ceiling===6?' Metadata only; contents unverified.':' Supporting evidence only; exact match unverified.';
+     // One check per known requirement; a "supported" whose quote is not in this candidate's evidence is unknown.
+     const requirementChecks = required ? required.flatMap(r => {
+       const c = v.requirement_checks?.find(x => x.id === r.id);
+       return c ? [{...c, status: c.status === 'supported' && !groundedQuote(candidate, c) ? 'unknown' as const : c.status}] : [];
+     }) : undefined;
      result.set(v.key, {key: v.key, relevance: Math.min(v.relevance,ceiling), reason: v.reason.trim().slice(0, 240)+uncertainty,
-       ...(v.intent_checks?{intentChecks:v.intent_checks}:{}),
+       ...(v.intent_checks?{intentChecks:v.intent_checks}:{}), ...(requirementChecks ? {requirementChecks} : {}),
        momentKeys: matches ? [...new Set(v.moment_keys)].filter(k => allowed.has(k)) : [], lesserKnown: v.lesser_known});
    }
    return {model: reply.model, verdicts: result};

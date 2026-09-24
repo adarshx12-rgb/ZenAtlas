@@ -12,6 +12,9 @@ import type { SearchTarget } from './planner.js';
 import {PublicVideoEvidence,selectComments,type VideoEvidenceAdapter,type VideoEvidence} from './video-evidence.js';
 import {importTranscript} from './moments.js';
 import {retainedEvidence,queueSceneShortlist} from './retained-evidence.js';
+import { decide, detectFormat, inspect, type Decision, type Finding } from './evidence.js';
+import { hardEach, type RequirementsContract } from './requirements.js';
+import { accessKind, accessLabel, fullCopyAccess } from './access.js';
 
 export const VIEWER_ANALYSIS_VERSION = 'viewer-comments-v1';
 const MOMENTS_PER_VIDEO = 3;
@@ -24,7 +27,9 @@ export interface Discussion { title: string; url: string; snippet: string|null }
 export interface SignalDeps { youtube?: YouTubeClient; judge?: Judge; pages?: PageCheck; videoEvidence?:VideoEvidenceAdapter; discussions?: (query: string) => Promise<Discussion[]> }
 // What the search plan wanted, and which kind of search found each result (by result id).
 // underrated is retained for callers; obscurity is a badge, never a ranking boost.
-export interface SignalContext extends JudgeContext { targets: Map<string,SearchTarget>; underrated?: boolean }
+// contract: the search's shared requirements; findings: evidence already gathered for these candidates (exploration).
+export interface SignalContext extends JudgeContext { targets: Map<string,SearchTarget>; underrated?: boolean;
+ contract?: RequirementsContract; findings?: Finding[] }
 export const UNDERRATED_BADGE = 'Underrated find';
 // Uncertain verdicts remain in the trace, never as filler in the main results.
 const UNVERIFIED_SCORE = 5;
@@ -144,7 +149,8 @@ export interface Judged { id: string; relevance: number|null; reason: string|nul
 export async function applySignals(db: DB, config: Config, query: string, results: Result[], deps: SignalDeps = {}, context?: SignalContext) {
  const providers: ProviderStatus[] = [];
  const previews = new Map<string,Buffer>();
- if (!results.length) return {results, closest: [] as Result[], providers, previews, judged: [] as Judged[]};
+ const findings: Finding[] = [], decisions = new Map<string,Decision>(), jevRecords = new Map<string,unknown>();
+ if (!results.length) return {results, closest: [] as Result[], providers, previews, judged: [] as Judged[], findings, decisions, jev: jevRecords};
  const rows = (await db.query(`SELECT c.id,c.duration,(s.policy->>'viewer_signals')::boolean AS viewer_signals,
    (s.policy->>'transcripts')::boolean AS transcripts FROM content c
    JOIN sources s ON s.id=c.source_id WHERE c.id=ANY($1::uuid[]) AND s.status='active' AND s.health_status<>'down'
@@ -235,6 +241,22 @@ export async function applySignals(db: DB, config: Config, query: string, result
      message:`${checks.filter(e=>e.commentStatus==='available').length} comment/review samples and ${checks.filter(e=>e.captionStatus==='available').length} caption tracks available across ${checks.length} checked results.`});
  }
 
+ // Deterministic evidence for every candidate, from what was actually fetched; earlier findings (exploration) are kept.
+ const contract = context?.contract;
+ if (contract) {
+   const earlier = context?.findings ?? [];
+   for (const r of results) {
+     const e = extra.get(r.id), d = e?.details;
+     const fresh = inspect(contract, {url: r.canonical_url, title: r.title, description: r.description, published_at: r.published_at,
+       page: e?.page, video: d ? {publishedAt: d.publishedAt, official: !!e?.badges.includes('Official channel'), channel: d.channelTitle} : undefined});
+     const prior = earlier.filter(f => f.url === r.canonical_url);
+     // A fresh inspection supersedes an earlier provisional or unknown finding for the same requirement.
+     findings.push(...fresh, ...prior.filter(p => !fresh.some(f => f.requirement_id === p.requirement_id && (f.location.key ?? '') === (p.location.key ?? '')
+       && (p.provisional || p.status === 'unknown' || !f.provisional))));
+   }
+ }
+ const findingsOf = (url: string) => findings.filter(f => f.url === url);
+
  const terms = discoveryQuery(query).terms;
  const pool = results.slice(0, config.JUDGE_CANDIDATES);
  const keys = new Map(pool.map((r, i) => [r.id, `r${i + 1}`]));
@@ -264,8 +286,13 @@ export async function applySignals(db: DB, config: Config, query: string, result
          at: formatSeconds(Math.min(...s.cluster.mentions.map(m => m.seconds))), viewers_said: s.cluster.mentions.map(m => m.excerpt)})),
        discussions: (e?.discussions ?? []).map(t => t.title),
        ...(page ? {page: {status: page.status, title: page.title, description: page.description, text: page.text, libraries: page.libraries,
-         screenshot: previews.has(r.id)}} : {})};
+         screenshot: previews.has(r.id)}} : {}),
+       ...(contract ? {description_source: d?.description ? 'api' as const : 'search' as const,
+         inspected: {format: detectFormat(r.canonical_url, page).format, published: page?.meta?.published ?? d?.publishedAt?.slice(0, 10) ?? null,
+           publisher: page?.meta?.publisher ?? page?.meta?.site_name ?? null, access: accessKind(r.canonical_url)}} : {})};
    });
+   const listed = contract ? hardEach(contract).map(r => ({id: r.id, text: r.text, evidence: r.evidence})) : [];
+   const requirements = listed.length ? listed : undefined;
    // The planner's "websites" is a guess, and told as such to a judge it rejects every video, even ones presenting the
    // requested tools or sites. Mixed keeps the websites preference without excluding them.
    const wanted = context?.kind === 'websites' ? 'mixed' as const : context?.kind ?? 'videos';
@@ -273,12 +300,17 @@ export async function applySignals(db: DB, config: Config, query: string, result
    // Smaller batches in parallel answer faster, and a failed batch only leaves its own results unjudged.
    const judgeAll = (list: JudgeCandidate[], size: number) => Promise.allSettled(
      Array.from({length: Math.ceil(list.length/size)}, (_, b) => list.slice(b*size, (b + 1)*size)).map(batch =>
-       judge.judge(query, batch, context ? {kind: wanted, criteria: context.criteria, anime: context.anime} : undefined, screenshots).then(out => ({batch, out}))));
+       judge.judge(query, batch, context ? {kind: wanted, criteria: context.criteria, anime: context.anime, ...(requirements ? {requirements} : {})} : undefined,
+         screenshots).then(out => ({batch, out}))));
    const byKey = new Map<string,Verdict>();
+   const idOf = new Map([...keys].map(([id, key]) => [key, id]));
    const collect = (settled: PromiseSettledResult<{batch: JudgeCandidate[]; out: JudgeResult}>[]) => {
-     for (const s of settled) if (s.status === 'fulfilled') for (const [key, v] of s.value.out.verdicts) {
-       if (!s.value.batch.some(c => c.key === key)) continue;
-       byKey.set(key, v); modelOf.set(key, s.value.out.model);
+     for (const s of settled) if (s.status === 'fulfilled') {
+       for (const [key, record] of s.value.out.jev ?? []) if (idOf.has(key)) jevRecords.set(idOf.get(key)!, record);
+       for (const [key, v] of s.value.out.verdicts) {
+         if (!s.value.batch.some(c => c.key === key)) continue;
+         byKey.set(key, v); modelOf.set(key, v.reason.startsWith('Jev: ') ? config.JEV_MODEL : s.value.out.model);
+       }
      }
    };
    const settled = await judgeAll(candidates, Math.min(config.JUDGE_BATCH_SIZE,12));
@@ -312,8 +344,19 @@ export async function applySignals(db: DB, config: Config, query: string, result
    const evidence = e?.page?.status === 'checked' || chosen.length || r.evidence !== 'metadata_match' ? 1 : 0;
    const badges = [...(e?.badges ?? []), ...(underrated ? [UNDERRATED_BADGE] : [])];
    const evidenceData=retained.get(r.id);
+   // With a contract, the decision on hard requirements (inspected evidence first, grounded judge quotes second)
+   // decides what is shown; the judge's intent ceiling still bounds relevance.
+   const decision = contract ? decide(contract, findingsOf(r.canonical_url), v?.requirementChecks) : null;
+   if (decision) decisions.set(r.id, decision);
+   const access = contract?.deliverable.completeness === 'full' ? accessKind(r.canonical_url) : null;
+   if (access && fullCopyAccess(access) && decision?.requirements.some(q => q.status === 'supported' &&
+     contract!.requirements.find(x => x.id === q.id)?.kind === 'completeness')) badges.push(accessLabel(access)!);
+   const weak = !v || v.relevance <= UNVERIFIED_SCORE || !!v.intentChecks?.some(c=>c.status!=='supported');
+   // Without a judge (lexical mode) nothing can be verified, so results stay listed with their uncertainties unless
+   // inspected evidence contradicts them.
+   const dropped = decision ? (judge ? decision.status !== 'verified' || weak : decision.status === 'excluded') : !!judge && weak;
    const basis:'metadata'|'viewer_claims'|'direct_evidence'=evidenceData?.transcripts.length||evidenceData?.scenes.length||e?.page?.status==='checked'?'direct_evidence':e?.comments.length?'viewer_claims':'metadata';
-   return {score, evidence, base, dropped: !!judge && (!v || v.relevance <= UNVERIFIED_SCORE || v.intentChecks?.some(c=>c.status!=='supported')), result: {...r,
+   return {score, evidence, base, dropped, decision, result: {...r,
      evidence_coverage:{comments:e?.video?.commentStatus??(e?.comments.length?'available':'unavailable'),
        captions:e?.video?.captionStatus??(evidenceData?.transcripts.length?'available':'unavailable'),
        transcript_passages:evidenceData?.transcripts.length??0,analysed_scenes:evidenceData?.scenes.length??0,basis},
@@ -322,8 +365,11 @@ export async function applySignals(db: DB, config: Config, query: string, result
      moments: [...r.moments, ...chosen].sort((a, b) => a.start_seconds - b.start_seconds),
      badges: badges.length ? [...new Set(badges)] : r.badges,
      ...(previews.has(r.id) ? {preview: true} : {}),
-     judgement: v ? {relevance: v.relevance, reason: v.reason, model: modelOf.get(keys.get(r.id)!) ?? '',
-       ...(v.intentChecks?{intent_checks:v.intentChecks}:{})} : null}};
+     judgement: v ? {relevance: decision && decision.status !== 'verified' ? Math.min(v.relevance, decision.status === 'excluded' ? 4 : UNVERIFIED_SCORE) : v.relevance,
+       reason: v.reason, model: modelOf.get(keys.get(r.id)!) ?? '',
+       ...(v.intentChecks?{intent_checks:v.intentChecks}:{})} : null,
+     ...(decision ? {requirements: decision.requirements, uncertainties: [...decision.notes,
+       ...decision.requirements.filter(q => q.status === 'unknown').map(q => `Not confirmed: ${q.text}`)]} : {})}};
  });
  const order = (a: typeof scored[number], b: typeof scored[number]) => b.score - a.score || (a.score >= 0 ? b.evidence - a.evidence : 0) || b.base - a.base;
  const kept = scored.filter(s => !s.dropped);
@@ -334,7 +380,9 @@ export async function applySignals(db: DB, config: Config, query: string, result
  const ranked = kept.sort(order).map(s => s.result);
  // Optional leads are retained separately and fetched only through the closest-matches endpoint.
  // Explicit mismatches and unchecked results never qualify, even for this broader view.
- const closest: Result[] = scored.filter(s=>s.dropped && s.score>=3 && s.score<=UNVERIFIED_SCORE &&
+ // With a contract, uncertain candidates (hard requirements unconfirmed, none contradicted) are the closest matches.
+ const closest: Result[] = scored.filter(s=>s.dropped && s.decision?.status!=='excluded' && s.score>=3 &&
+   (s.score<=UNVERIFIED_SCORE || s.decision?.status==='uncertain') &&
    !s.result.judgement?.intent_checks?.some(c=>c.status==='mismatch')).sort(order).slice(0,20).map(s=>({
      ...s.result, moments:[], evidence:'metadata_match', preview:false,
      badges:[...new Set([...(s.result.badges??[]),'Closest match'])],
@@ -346,5 +394,5 @@ export async function applySignals(db: DB, config: Config, query: string, result
  // Every candidate's verdict, rejected ones included, for the search's learning trace.
  const judged: Judged[] = scored.map(s => ({id: s.result.id, relevance: s.result.judgement?.relevance ?? null, reason: s.result.judgement?.reason ?? null,
    basis: s.result.judgement ? s.result.evidence_coverage?.basis ?? null : null}));
- return {results: ranked, closest, providers, previews, judged};
+ return {results: ranked, closest, providers, previews, judged, findings, decisions, jev: jevRecords};
 }

@@ -1,6 +1,35 @@
 # Shared requirements, evidence inspection and gap-directed exploration — design
 
-Agreed with the user on 2026-09-24. **Not implemented yet**; an implementation plan follows this spec.
+Agreed with the user on 2026-09-24. **Implemented the same day** (`RANKING_VERSION` `relevance-v8-requirements`). Operating
+documentation: `docs/DISCOVERY_QUALITY.md` → "Shared requirements and evidence".
+
+### As built: deviations from this design, and why
+
+- **Judge checks.** The judge's four grounded intent checks are **kept**, and per-requirement checks are added beside
+  them rather than replacing them. Replacing them risked a repeat of the relevance-v4 recall collapse.
+- **What the judge can establish.** A judge quote never establishes format, date, official status or completeness,
+  which have inspectors. The end-to-end tests showed title quotes passing a robots-blocked page as "an article" and a
+  third-party page as "official". The judge's view counts only for subject and property requirements.
+- **"Website" is a preference, not a hard format.** It usually names the subject. As a hard format it would reject
+  videos presenting sites (the v4 lesson). Article, PDF, video and image stay hard.
+- **Official status.** A page that declares the organisation as its own publisher (`og:site_name` or JSON-LD
+  publisher, exact name match) counts even without a hypothesised domain. When a request lists several publishers,
+  any of them counts.
+- **Admission uses the same `decide()` rule** as the final decision, so a legitimate store page is not dropped for
+  being "not a PDF".
+- **Judge-less deployments** keep listing unverified results with their uncertainties (only contradictions
+  exclude), because nothing can be verified without a judge.
+- **Exploration settings.** `JEV_EXPLORATION_PAGES` still drives the title-based exploration, which now runs only in
+  the baseline pipeline. It is not an alias for `JEV_EXPLORATION_VISITS`.
+- **Video visits** read the platform description and its real links. Comments are still read later by the evidence
+  checks, not during exploration.
+- **Found in the first live evaluation run (aborted and fixed):** the planner's strict structured output only returns
+  *required* properties, so every draft field is now required; without a draft the owner comes from the word after
+  "official"; publishers declaring "WhatsApp.com" match WhatsApp; byline dates standing alone in their own element are read
+  (WhatsApp's blog declares no date metadata); model requirements restating the date phrase, or sets without items,
+  are dropped.
+- **Access policy:** see "Access to books, magazines and journals" below. It replaced the earlier "not available from
+  legal sources" rule on the user's instruction.
 
 This spec **supersedes** `2026-09-24-jev-exploration-prejudge-design.md`. Its video exploration, shared evidence
 cache, Jev pre-judge and screener fix are folded in here (§3, §4), adjusted to the requirements contract.
@@ -71,7 +100,7 @@ interface Requirement {
   formats?: Format[];
   authority?: {entity: string; domains: string[]};   // domains are hypotheses until inspected (see §2)
   set_items?: string[];           // for scope 'set': what must be covered, e.g. ["2023","2024","2025"]
-  legal_limit?: boolean;          // see "Legal limit" below
+  access?: 'legitimate';           // full copies only via legitimate access kinds (see "Access to books…" below)
 }
 ```
 
@@ -96,16 +125,28 @@ interface Requirement {
 Search is asynchronous and non-interactive, so the engine **never blocks to ask**. It records `ambiguities` and
 `assumptions`, and the UI shows "Interpreted as: …" with the assumptions. A clarification loop is out of scope.
 
-### Legal limit (legal-sources-only rule)
+### Access to books, magazines and journals (decided 2026-09-24)
 
-When the deliverable is `completeness: 'full'` of a commercial work the planner identifies (a book, film or paid
-media, the same test as the planner's existing piracy rule), that requirement gets `legal_limit: true`:
+The user wants books, magazines, journals and similar works to be reachable wherever they can legitimately be read.
+The line is piracy, not copyright. `src/access.ts` classifies each document URL from `data/access-sources.json`:
 
-- It can only be satisfied by a source with an active source-policy rule or a recognised public-domain or
-  publisher host.
-- Otherwise it is reported as **"not available from legal sources"**, never as "unknown", and exploration does not
-  chase it.
-- Other requirements are still searched: publisher pages, previews, library listings, reviews labelled as such.
+| Access kind | Examples | Counts as full-copy access |
+|---|---|---|
+| `store` | Publisher shops, Google Play Books, Apple Books, Kobo, Kindle store pages | Yes, labelled "Buy" |
+| `library` | Libby/OverDrive, Open Library borrow pages, WorldCat | Yes, labelled "Borrow" |
+| `subscription` | Licensed catalogue pages such as Scribd `/book/`, magazine newsstands (Readly, PressReader, Zinio) | Yes, labelled "Subscription" |
+| `open_access` | arXiv, PubMed Central, Europe PMC, DOAJ journals, Zenodo, bioRxiv, CORE | Yes, labelled "Open access" |
+| `public_domain` | Project Gutenberg, Standard Ebooks, HathiTrust full view, Wikisource | Yes, labelled "Public domain" |
+| `publisher` | A publisher's or magazine's own site and archive | Yes when the page itself serves the work |
+| `unauthorized` | Shadow libraries and unlicensed ebook dumps (LibGen, Z-Library, Sci-Hub, Anna's Archive, PDF Drive, OceanofPDF and similar) | **Never served**: dropped at admission |
+| `unknown` | Everything else, including user-upload hosts (Scribd `/document/`, archive.org uploads) | Only with inspected evidence of a full copy, and not for commercial works |
+
+- A `completeness: 'full'` requirement is satisfied by inspected evidence that the page serves or sells the full
+  work through a legitimate access kind. The result card shows the access label.
+- A requested file format is judged separately. A book sold only as EPUB or Kindle gets "Full book available; not
+  as PDF" rather than being hidden.
+- Summaries, reviews and excerpts are shown only when they match other requirements, are labelled as such, and
+  never satisfy `completeness: 'full'`.
 
 ## 2. Evidence record (`src/evidence.ts`)
 
@@ -178,7 +219,7 @@ admitted pool):
   support it with **non-provisional** findings and have no contradicted hard requirement.
 - **`set` requirements:** each `set_items` entry must be supported by at least one non-provisional finding.
 
-The unmet items are the **gaps**. A `legal_limit` requirement is never a gap.
+The unmet items are the **gaps**. Exploration never visits `unauthorized` hosts to close a gap.
 
 ### Loop (bounded)
 
@@ -319,7 +360,8 @@ Budget exhaustion is reported in provider status and health.
   - summary markers in a PDF contradict "full book".
 - **Regression behaviours:**
   - "robert greene art of seduction pdf": a summary PDF (fixture modelled on the StoryShots document) cannot be
-    verified, and "full copy" is reported as not available from legal sources;
+    verified as the full book; a store, library or subscription page for the book can satisfy "full copy"; an
+    `unauthorized` host is never admitted;
   - "rosswell ufo incident real article": videos cannot satisfy the article-only requirement;
   - "official whatsapp chat ui interface from over past 3 years": official status and dates require evidence; a
     result without a found date is unconfirmed, not verified; the set gap for an uncovered year is reported.

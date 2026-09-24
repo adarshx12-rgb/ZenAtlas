@@ -117,6 +117,11 @@ export async function fetchImage(input: string, options: Options = {}): Promise<
  return {url: response.url, contentType: response.contentType, data: response.data};
 }
 
+export async function fetchPDF(input: string, options: Options = {}): Promise<BinaryResponse> {
+ const response = await request(input, {accept: 'application/pdf', ...options}, ['application/pdf']);
+ return {url: response.url, contentType: response.contentType, data: response.data};
+}
+
 export async function probeURL(url:string,timeoutMs=5000):Promise<ProbeResponse>{
  const result=await fetchJSON(url,{method:'HEAD',probe:true,timeoutMs,redirects:2});
  // Some sites do not implement HEAD; consume headers only on the GET fallback.

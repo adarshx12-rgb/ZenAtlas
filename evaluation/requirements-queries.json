@@ -1,0 +1,29 @@
+{
+  "about": "Regression and coverage tasks for the requirements pipeline (docs/superpowers/specs/2026-09-24-requirements-evidence-exploration-design.md). Each query runs once per configuration through scripts/evaluate-requirements.ts. Checks describe what a human reviewer should confirm; they are not model judgments.",
+  "queries": [
+    {
+      "q": "official whatsapp chat ui interface from over past 3 years",
+      "depth": "quick",
+      "tests": "Official status and publication dates need evidence; results together should cover each year since 2023-09-24.",
+      "reviewer_checks": ["Result is published by WhatsApp or Meta itself", "Publication date is inside the window", "Shows or describes the chat interface"]
+    },
+    {
+      "q": "rosswell ufo incident real article",
+      "depth": "quick",
+      "tests": "Article-only format: videos cannot satisfy it. The misspelling must still reach Roswell material.",
+      "reviewer_checks": ["Is an article (not a video)", "About the 1947 Roswell incident", "A real publication rather than fiction"]
+    },
+    {
+      "q": "robert greene art of seduction pdf",
+      "depth": "quick",
+      "tests": "A summary cannot qualify as the full book; legitimate buy, borrow or subscription pages can; unauthorized copies are never served.",
+      "reviewer_checks": ["Gives access to the complete book (not a summary, review or excerpt)", "Access is legitimate (store, library, subscription, publisher)", "Is the requested book"]
+    },
+    {
+      "q": "timeline of the James Webb Space Telescope deployment with official NASA, ESA and CSA sources",
+      "depth": "quick",
+      "tests": "Harder multi-source task: result-set coverage. The results together should include an official source from each of NASA, ESA and CSA about the December 2021 - July 2022 deployment.",
+      "reviewer_checks": ["Published by NASA, ESA or CSA", "About the JWST deployment timeline", "Which agency it covers"]
+    }
+  ]
+}

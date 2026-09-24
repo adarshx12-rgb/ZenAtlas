@@ -164,6 +164,12 @@ h2{font-family:var(--font-display);font-size:26px;font-weight:400;letter-spacing
 .card p.quote{font-family:var(--font-display);font-style:italic;font-size:17px;color:var(--ink)}
 .card .details{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin:-2px 0 12px}
 .card p.why{background:var(--wash);border-radius:var(--r-md);padding:10px 12px;color:var(--ink)}
+.card .requirements{display:flex;flex-wrap:wrap;gap:6px}
+.badge.req.supported{color:var(--ink)}
+.badge.req.unknown,.badge.req.waived{opacity:.75}
+.card p.uncertain{margin:4px 0 0}
+.interpretation{background:var(--wash);border-radius:var(--r-md);padding:10px 12px;margin-bottom:12px}
+.interpretation ul{margin:4px 0 8px 18px;padding:0}
 .meta{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
 .badge{display:inline-block;font-size:9px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--rule-soft);border-radius:var(--r-sm);padding:4px 8px;margin:0 6px 6px 0;color:var(--ink-2)}
 .badge.highlight{border-color:var(--ink);color:var(--ink)}

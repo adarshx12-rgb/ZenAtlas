@@ -26,7 +26,7 @@ export const configSchema = z.object({
   JEV_SCREENING_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
   JEV_MODEL: z.string().regex(/^~?typesafe\/jev-[\w.-]{1,80}$/).default('typesafe/jev-1.13'),
   JEV_SCREEN_CANDIDATES: number(120, 20, 120),
-  JEV_SCREEN_TIMEOUT_MS: number(4000, 500, 10000),
+  JEV_SCREEN_TIMEOUT_MS: number(8000, 500, 15000),
   JEV_SCREEN_DAILY_BUDGET: number(600, 0, 100000),
   JEV_SCREEN_CONFIDENCE: z.coerce.number().min(0).max(1).default(0.8),
   JEV_EXPLORATION_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
@@ -35,6 +35,19 @@ export const configSchema = z.object({
   JEV_EXPLORATION_TIMEOUT_MS: number(4000, 500, 10000),
   JEV_EXPLORATION_DAILY_BUDGET: number(200, 0, 100000),
   JEV_EXPLORATION_CONFIDENCE: z.coerce.number().min(0).max(1).default(0.65),
+  // Shared requirements contract, evidence inspection and gap-directed exploration. false reproduces the previous
+  // pipeline (the evaluation baseline); GAP_EXPLORATION=false is the ablation without gap-directed exploration.
+  REQUIREMENTS_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
+  GAP_EXPLORATION: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
+  GAP_ROUNDS: number(2, 1, 4), GAP_SEARCHES: number(4, 0, 8), GAP_TARGET_RESULTS: number(3, 1, 10),
+  // Page and video visits per search for gap-directed exploration (quick searches use at most half).
+  JEV_EXPLORATION_VISITS: number(12, 0, 30),
+  // Jev pre-judge: settles confident, evidence-backed matches; rejections stay in shadow until JEV_JUDGE_REJECT=true.
+  JEV_JUDGE_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
+  JEV_JUDGE_REJECT: z.enum(['true', 'false']).default('false').transform(v => v === 'true'),
+  JEV_JUDGE_CONFIDENCE: z.coerce.number().min(0).max(1).default(0.8),
+  JEV_JUDGE_CONCURRENCY: number(12, 1, 24), JEV_JUDGE_TIMEOUT_MS: number(6000, 500, 20000),
+  JEV_JUDGE_DAILY_BUDGET: number(3000, 0, 100000),
   SPECIALIST_SEARCHES: number(3, 0, 6),
   ARCHIVE_DISCOVERY: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
   ARCHIVE_COLLECTIONS: z.string().default('prelinger,ephemera').refine(v =>
@@ -42,7 +55,7 @@ export const configSchema = z.object({
   LIBRARY_OF_CONGRESS_DISCOVERY: z.enum(['true', 'false']).default('false').transform(v => v === 'true'),
   ARCHIVE_DAILY_BUDGET: number(200, 0, 10000),
   UNDERRATED_MAX_VIEWS: number(50000, 0, 1000000000),
-  PLAN_SEARCHES: number(4, 1, 8), PAGE_CHECKS: number(20, 0, 40), PAGE_TIMEOUT_MS: number(6000, 1000, 20000),
+  PLAN_SEARCHES: number(4, 1, 8), PAGE_CHECKS: number(20, 0, 40), PAGE_TIMEOUT_MS: number(6000, 1000, 20000), PDF_MAX_BYTES: number(15*1024*1024, 1024*1024, 50*1024*1024),
   PAGE_RENDERS: number(0, 0, 20), PAGE_RENDER_TIMEOUT_MS: number(12000, 3000, 30000), PAGE_TEXT_PYTHON: optional,
   JUDGE_CANDIDATES: number(30, 1, 50),
   GOOGLE_SEARCH_API_KEY: optional, GOOGLE_SEARCH_ENGINE_ID: optional, BRAVE_SEARCH_API_KEY: optional,

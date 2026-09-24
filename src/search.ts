@@ -9,6 +9,7 @@ import { RANKING_VERSION } from './ranking.js';
 import { takeBudget } from './budgets.js';
 import { configuredProviders } from './providers.js';
 import { configuredArchives } from './specialists.js';
+import { contractSchema } from './requirements.js';
 
 // How long a search reports that discovery is still running before calling it delayed: the checks and AI ranking
 // can take up to three minutes after a deep dive's search time.
@@ -37,6 +38,7 @@ const withDetails = (item: Result, found: Result): Result => ({...item,
  duration: item.duration ?? found.duration, published_at: item.published_at ?? found.published_at, creator: item.creator ?? found.creator,
  badges: found.badges ?? item.badges, judgement: found.judgement ?? item.judgement,
  evidence_coverage: found.evidence_coverage ?? item.evidence_coverage,
+ ...(found.requirements ? {requirements: found.requirements, uncertainties: found.uncertainties} : {}),
  moments: [...item.moments, ...found.moments.filter(m => !item.moments.some(o => o.id === m.id))].sort((a, b) => a.start_seconds - b.start_seconds),
  ...(found.preview && found.id === item.id ? {preview: true} : {})});
 
@@ -217,6 +219,17 @@ export class SearchService {
      results:slice.flatMap(r=>shown.get(r.id)??[]),has_more:more,next_cursor:more?encodeCursor(this.config,snapshot.id,offset+filters.limit):null,
      discovered:found.flatMap(r=>shown.get(r.id)??[]),catalogue_total:all.length-found.length,
      ranked:all.flatMap(r=>shown.get(r.id)??[]),
-     discovery_job_id:snapshot.job_id,providers,ranking_version:snapshot.ranking_version};
+     discovery_job_id:snapshot.job_id,providers,ranking_version:snapshot.ranking_version,
+     ...(job?.status==='complete'&&job.result?.contract?{interpretation:interpretationOf(job.result.contract,job.result.unmet)}:{})};
  }
+}
+
+// The contract a discovery job worked from, reduced to what a person needs to see: the reading of the request,
+// its requirements, the assumptions made instead of asking, and what could not be satisfied.
+function interpretationOf(raw: unknown, unmet: unknown): SearchResponse['interpretation'] {
+ const contract = contractSchema.safeParse(raw);
+ if (!contract.success) return undefined;
+ const c = contract.data;
+ return {intent: c.intent, requirements: c.requirements.map(r => ({id: r.id, text: r.text, hardness: r.hardness, scope: r.scope})),
+   assumptions: c.assumptions, ambiguities: c.ambiguities, unmet: Array.isArray(unmet) ? unmet.filter((u): u is string => typeof u === 'string') : []};
 }

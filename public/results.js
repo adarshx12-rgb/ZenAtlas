@@ -58,6 +58,15 @@ function card(item){
  article.append(node('span',item.evidence.replaceAll('_',' '),'badge'),node('span',`Rights: ${item.rights_status}`,'badge'));
  if(item.judgement)article.append(node('p',`${item.badges?.includes('Closest match')?'Why this may be related':'Why this matches'} (${item.judgement.relevance}/10): ${item.judgement.reason}`,'why'));
  else if(item.origin==='discovery')article.append(node('p','Relevance has not been checked.','hint'));
+ // Each requirement with the evidence behind it; unconfirmed ones are said plainly, never shown as met.
+ if(item.requirements?.length){
+  const chips=node('div',undefined,'requirements');
+  const mark={supported:'✓',contradicted:'✗',unknown:'?',waived:'≈'};
+  for(const r of item.requirements){const chip=node('span',`${mark[r.status]??'?'} ${r.text}`,`badge req ${r.status}`);
+   chip.title=r.excerpt?`Evidence (${(r.method??'').replaceAll('_',' ')}): ${r.excerpt}`:'No evidence found yet';chips.append(chip);}
+  article.append(chips);
+ }
+ for(const note of item.uncertainties??[])article.append(node('p',note,'hint uncertain'));
  if(item.description)article.append(node('p',item.description));
  for(const moment of item.moments){
   const passage=node('div',undefined,'moment');
@@ -179,12 +188,25 @@ matchTabs.addEventListener('keydown',event=>{
  event.preventDefault();const view=event.key==='Home'?'matches':event.key==='End'?'closest':matchView==='closest'?'matches':'closest';
  selectMatchView(view);(view==='closest'?tabClosest:tabMatches).focus();
 });
+// How the engine read the request: its requirements, the assumptions it made instead of asking, and what it could
+// not satisfy. Every stage of the search worked from this reading.
+function interpretation(info){
+ const box=node('section',undefined,'interpretation');
+ box.append(node('strong','Interpreted as: '),node('span',info.intent));
+ const must=info.requirements.filter(r=>r.hardness==='hard'),nice=info.requirements.filter(r=>r.hardness!=='hard');
+ if(must.length){const list=node('ul');for(const r of must)list.append(node('li',`${r.text}${r.scope==='set'?' (across the results)':''}`));box.append(node('p','Every result must:','hint'),list);}
+ if(nice.length)box.append(node('p',`Preferred: ${nice.map(r=>r.text).join('; ')}`,'hint'));
+ for(const a of info.assumptions)box.append(node('p',`Assumed: ${a}`,'hint'));
+ if(info.unmet.length){const list=node('ul');for(const u of info.unmet)list.append(node('li',u));box.append(node('p','Not satisfied:','notice'),list);}
+ return box;
+}
 function render(data){
  lastSearchData=data;
  if(searchId!==data.search_id)resetClosest(false);
  searchId=data.search_id;catalogueTotal=data.catalogue_total;
  catalogueBox.replaceChildren();showFound(data.ranked??[...data.results.filter(r=>r.origin==='catalogue'),...data.discovered]);
- notices.replaceChildren(...data.providers.filter(p=>p.status!=='ok'||p.provider==='relevance_filter'||p.message.includes('did not')).map(p=>node('p',p.message,'notice')));
+ notices.replaceChildren(...(data.interpretation?[interpretation(data.interpretation)]:[]),
+  ...data.providers.filter(p=>p.status!=='ok'||p.provider==='relevance_filter'||p.message.includes('did not')).map(p=>node('p',p.message,'notice')));
  const busy=data.status==='discovering',partial=data.status==='partial',deepDone=data.depth==='deep';
  cancel.hidden=!busy;
  missing.hidden=busy;if(missing.dataset.search!==data.search_id){missing.dataset.search=data.search_id;missingStatus.textContent='';}
