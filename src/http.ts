@@ -122,6 +122,19 @@ export async function fetchPDF(input: string, options: Options = {}): Promise<Bi
  return {url: response.url, contentType: response.contentType, data: response.data};
 }
 
+// Documents for the Docs tab preview. Servers label office files inconsistently, so generic binary types are accepted
+// and the caller checks the file's own signature instead.
+const DOCUMENT_TYPES = ['application/pdf','application/msword','application/rtf','text/rtf','text/csv','text/plain',
+ 'application/vnd.ms-powerpoint','application/vnd.ms-excel','application/vnd.apple.keynote','application/x-iwork-keynote-sffkey',
+ 'application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.openxmlformats-officedocument.presentationml.presentation',
+ 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','application/vnd.oasis.opendocument.text',
+ 'application/vnd.oasis.opendocument.presentation','application/vnd.oasis.opendocument.spreadsheet',
+ 'application/octet-stream','binary/octet-stream','application/x-download','application/force-download','application/zip'];
+export async function fetchDocument(input: string, options: Options = {}): Promise<BinaryResponse> {
+ const response = await request(input, {accept: '*/*', redirects: 3, ...options}, DOCUMENT_TYPES);
+ return {url: response.url, contentType: response.contentType, data: response.data};
+}
+
 export async function probeURL(url:string,timeoutMs=5000):Promise<ProbeResponse>{
  const result=await fetchJSON(url,{method:'HEAD',probe:true,timeoutMs,redirects:2});
  // Some sites do not implement HEAD; consume headers only on the GET fallback.

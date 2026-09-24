@@ -19,6 +19,11 @@ export const configSchema = z.object({
   SEARXNG_DEEP_ENGINES: z.string().default('bilibili,acfun,privacywall videos,sepiasearch,wikicommons.videos'),
   SEARXNG_DEEP_WEB_ENGINES: z.string().default('yep,resulthunter,privacywall,hackernews'),
   SEARXNG_DAILY_BUDGET: number(2000, 0, 100000),
+  // Docs tab previews (src/doc-preview.ts). The converter is LibreOffice's soffice; empty previews PDFs only.
+  DOC_PREVIEW_CONVERTER: optional, DOC_PREVIEW_CACHE_DIR: optional,
+  DOC_PREVIEW_MAX_MB: number(25, 1, 200), DOC_PREVIEW_CACHE_MB: number(500, 10, 100000), DOC_PREVIEW_DAILY_BUDGET: number(500, 0, 100000),
+  // Pages shown in a preview; the whole document opens at its source. 0 previews every page.
+  DOC_PREVIEW_PAGES: number(5, 0, 1000),
   DEEP_PLAN_SEARCHES: number(6, 1, 16), DEEP_PAGES: number(2, 1, 5), DEEP_FOLLOW_UPS: number(4, 0, 10), DEEP_ROUNDS: number(2, 1, 5),
   DEEP_RESULTS: number(40, 1, 80), DEEP_SEARCH_SECONDS: number(120, 20, 600),
   // Shared candidate pool, selected only after all launched providers finish. Display limits apply after judging.

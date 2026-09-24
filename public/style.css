@@ -138,6 +138,50 @@ main.bleed{max-width:none;margin:0 0 96px;padding:0}
 .tab:hover{color:var(--ink)}
 .tab--active{color:var(--ink);border-bottom-color:var(--ink)}
 
+/* ---- web and document list ------------------------------------------------------ */
+.web-list{display:flex;flex-direction:column;gap:22px;max-width:760px;margin-top:4px}
+.web-list:empty{display:none}
+.web-item h3{font-size:17px;line-height:1.35;margin:4px 0 6px;font-weight:500}
+.web-item h3 a{color:var(--ink);text-decoration:none;overflow-wrap:anywhere}
+.web-item h3 a:hover{text-decoration:underline}
+.web-item p{margin:0;color:var(--ink-2);line-height:1.5;overflow-wrap:anywhere}
+.web-item-source{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12px;color:var(--ink-3)}
+.web-item-host{overflow-wrap:anywhere}
+
+/* ---- document viewer ------------------------------------------------------------
+   List and document side by side on wide screens; on phones the viewer stacks above the list. */
+.docs-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:28px;align-items:start}
+.docs-layout:has(.doc-viewer:not([hidden])){grid-template-columns:minmax(0,5fr) minmax(0,7fr)}
+.doc-viewer{position:sticky;top:16px;margin:0;padding:0;font:inherit;letter-spacing:normal;line-height:1.4;text-transform:none;color:var(--ink);border:1px solid var(--rule-soft);border-radius:var(--r-md);background:var(--paper);overflow:hidden}
+.doc-viewer-bar{display:flex;gap:12px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--rule-soft);font-size:13px}
+.doc-viewer-bar strong{flex:1;min-width:0;font-family:var(--font-body,inherit);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.doc-viewer-bar a{white-space:nowrap}
+.doc-viewer p:empty{display:none}
+.doc-viewer p{margin:0;padding:24px 16px;color:var(--ink-2)}
+.doc-tools{display:flex;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--rule-soft);font-size:12px}
+.doc-tools span{margin-right:auto;font-variant-numeric:tabular-nums}
+.doc-tools button{padding:4px 12px;min-height:0}
+/* PDF.js needs an absolutely positioned scroll container. */
+.doc-pages{position:relative;height:78vh;background:#525659}
+.doc-scroll{position:absolute;inset:0;overflow:auto}
+.web-item-open{all:unset;cursor:pointer;color:var(--ink);overflow-wrap:anywhere}
+.web-item-open:hover{text-decoration:underline}
+.web-item-open:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.web-item.selected{padding-left:12px;border-left:2px solid var(--ink)}
+.web-item-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
+.web-item-actions button{padding:6px 14px;min-height:0}
+.doc-action{display:inline-block;padding:6px 14px;border:1px solid var(--ink);border-radius:999px;color:var(--ink);text-decoration:none;font-size:13px;white-space:nowrap}
+.doc-action:hover{background:var(--ink);color:var(--paper)}
+.doc-viewer-bar .doc-action{padding:4px 12px;font-size:12px}
+#doc-page::after{content:attr(data-total);color:var(--ink-3)}
+.doc-more{margin:8px auto 24px;max-width:420px;padding:20px;text-align:center;background:var(--paper);border-radius:var(--r-md);color:var(--ink)}
+.doc-more p{margin:0 0 12px;padding:0}
+@media (max-width:899px){
+ .docs-layout:has(.doc-viewer:not([hidden])){grid-template-columns:minmax(0,1fr)}
+ .doc-viewer{position:static;order:-1}
+ .doc-pages{height:70vh}
+}
+
 /* ---- image grid -------------------------------------------------------------
    Columns rather than grid: image results arrive at wildly different aspect ratios, and
    masonry keeps each one uncropped instead of forcing a common box. */

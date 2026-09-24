@@ -234,6 +234,7 @@ All names are in `.env.example` and parsed in `src/config.ts`:
 | `REDDIT_SIGNALS` | `true`; Reddit thread lookup through SearXNG |
 | `ANILIST_ENABLED`, `ANILIST_DAILY_BUDGET` | `true`; no key needed. 2000 AniList requests/day, shared by all three recognition stages (up to 7 requests for one search) |
 | `SEARXNG_WEB_ENGINES`, `SEARXNG_DAILY_BUDGET` | `google,bing,brave,yahoo` for planned web searches; 2000 SearXNG requests/day |
+| `DOC_PREVIEW_CONVERTER`, `DOC_PREVIEW_CACHE_DIR`, `DOC_PREVIEW_MAX_MB`, `DOC_PREVIEW_CACHE_MB`, `DOC_PREVIEW_DAILY_BUDGET`, `DOC_PREVIEW_PAGES` | empty (PDF previews only; set LibreOffice's `soffice` for office files); system temp; 25 MB per document; 500 MB cache; 500 uncached previews/day; first 5 pages previewed, the whole document opens at its source |
 | `SEARXNG_DEEP_ENGINES`, `SEARXNG_DEEP_WEB_ENGINES` | Extra engines for deep dives only: `bilibili,acfun,privacywall videos`; `yep,resulthunter,privacywall,hackernews` (each must be enabled in the instance) |
 | `DEEP_PLAN_SEARCHES`, `DEEP_PAGES`, `DEEP_RESULTS` | 6 AI-planned searches per deep dive; result pages 1–2 per search; 40 additional display slots after checking, shared with the previous quick results |
 | `DEEP_FOLLOW_UPS`, `DEEP_ROUNDS`, `DEEP_SEARCH_SECONDS` | Up to 4 follow-up searches per round, 2 rounds; 120 seconds of searching before the checks |

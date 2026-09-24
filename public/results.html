@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ZenAtlas · Search results</title><meta name="description" content="ZenAtlas is a search engine for video links and evidence-backed moments."><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/style.css"><script type="module" src="/results.js"></script></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ZenAtlas · Search results</title><meta name="description" content="ZenAtlas is a search engine for video links and evidence-backed moments."><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/pdfjs/web/pdf_viewer.css"><link rel="stylesheet" href="/style.css"><script type="module" src="/results.js"></script></head>
 <body>
 <header><a href="/" class="brand">ZenAtlas</a><span>SEARCH ENGINE</span></header>
 <main class="wide">
@@ -10,12 +10,15 @@
   <div class="filters">
    <label>Search mode<select name="mode"><option value="auto">Catalogue + discovery</option><option value="catalogue">Catalogue only</option><option value="refresh">Fresh discovery</option></select></label>
    <label>Evidence<select name="evidence"><option value="any">All evidence</option><option value="transcript_supported">Transcript supported</option><option value="video_analysed">Video analysed</option><option value="viewer_timestamp">Viewer timestamps</option></select></label>
+   <label hidden>Document type<select name="doc_type"><option value="">Any document</option><option value="pdf">PDF</option><option value="word">Word (doc, docx, odt, rtf)</option><option value="slides">Slides (ppt, pptx, odp, key)</option><option value="sheets">Spreadsheets (xls, xlsx, ods, csv)</option><option value="ebook">E-books (epub)</option></select></label>
    <label>Language<select name="language"><option value="">Any language</option><option value="en">English</option><option value="hi">Hindi</option></select></label>
   </div>
  </form>
  <nav class="tabs-bar" aria-label="Result type">
   <a id="tab-videos" class="tab" href="/results.html" aria-current="page">Videos</a>
+  <a id="tab-web" class="tab" href="/results.html?tab=web">Web</a>
   <a id="tab-images" class="tab" href="/results.html?tab=images">Images</a>
+  <a id="tab-docs" class="tab" href="/results.html?tab=docs">Docs</a>
  </nav>
  <div class="results-heading"><h2 id="results-heading">Search results</h2><button id="cancel" class="secondary" hidden>Stop discovery updates</button></div>
  <p id="status" role="status" aria-live="polite">Enter a query to search the catalogue.</p>
@@ -35,6 +38,16 @@
  </section>
  <section id="image-results" class="image-grid" aria-label="Image results" hidden></section>
  <button id="image-more" class="secondary" hidden>Load more images</button>
+ <div id="docs-layout" class="docs-layout">
+  <section id="web-results" class="web-list" aria-label="Web results" hidden></section>
+  <aside id="doc-viewer" class="doc-viewer" aria-label="Document preview" hidden>
+   <div class="doc-viewer-bar"><strong id="doc-viewer-title"></strong><span id="doc-viewer-source"></span><button id="doc-viewer-close" type="button" class="secondary">Close</button></div>
+   <p id="doc-viewer-status" role="status" aria-live="polite"></p>
+   <div id="doc-tools" class="doc-tools" hidden><span id="doc-page">1 / 1</span><button id="doc-zoom-out" type="button" class="secondary" aria-label="Zoom out">−</button><button id="doc-fit" type="button" class="secondary">Fit width</button><button id="doc-zoom-in" type="button" class="secondary" aria-label="Zoom in">+</button></div>
+   <div id="doc-frame" class="doc-pages" hidden><div id="doc-scroll" class="doc-scroll" tabindex="0" aria-label="Document pages"><div id="doc-pdf" class="pdfViewer"></div><div id="doc-more" class="doc-more" hidden></div></div></div>
+  </aside>
+ </div>
+ <button id="web-more" class="secondary" hidden>Load more results</button>
  <button id="more" class="secondary" hidden>Load more results</button>
  <button id="retry" class="secondary" hidden>Retry search</button>
  <form id="missing" class="missing" hidden><label for="missing-note">Missing something? Name a site, creator or video this search should have found.</label>

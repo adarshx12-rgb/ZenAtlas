@@ -8,6 +8,13 @@ const missing=document.querySelector('#missing'),missingNote=document.querySelec
 const videoGrid=document.querySelector('#results'),imageGrid=document.querySelector('#image-results');
 const imageMore=document.querySelector('#image-more'),resultsHeading=document.querySelector('#results-heading');
 const tabVideos=document.querySelector('#tab-videos'),tabImages=document.querySelector('#tab-images');
+const tabWeb=document.querySelector('#tab-web'),tabDocs=document.querySelector('#tab-docs');
+const webList=document.querySelector('#web-results'),webMore=document.querySelector('#web-more');
+const TABS={videos:tabVideos,web:tabWeb,images:tabImages,docs:tabDocs};
+const docViewer=document.querySelector('#doc-viewer'),docFrame=document.querySelector('#doc-frame'),docStatus=document.querySelector('#doc-viewer-status');
+const docTitle=document.querySelector('#doc-viewer-title'),docSource=document.querySelector('#doc-viewer-source');
+const docMore=document.querySelector('#doc-more'),docTools=document.querySelector('#doc-tools'),docPage=document.querySelector('#doc-page'),docScroll=document.querySelector('#doc-scroll');
+let docRequest=null,pdfjs=null,pdfViewer=null,pdfDocument=null;
 const matchTabs=document.querySelector('#match-tabs'),tabMatches=document.querySelector('#tab-matches'),tabClosest=document.querySelector('#tab-closest');
 const closestPanel=document.querySelector('#closest-panel'),closestBox=document.querySelector('#closest-results');
 const closestStatus=document.querySelector('#closest-status'),closestRetry=document.querySelector('#closest-retry');
@@ -15,7 +22,7 @@ let matchView='matches',closestSearch=null,closestLoaded=false,closestRequest=nu
 const controller=new SearchController();
 // Images come from a separate discovery-only endpoint, so they keep their own paging state
 // rather than sharing the search snapshot's cursor.
-let imagePage=1,imageBusy=false;
+let imagePage=1,imageBusy=false,webPage=1,webBusy=false;
 const IMAGE_PAGE=48;
 let searchId=null,next=null,params=null,pollTimer=null,current=null,pageEnd=0,catalogueTotal=0;
 // Result id -> its card and the data it was drawn from, so a changed result is redrawn in place.
@@ -142,7 +149,7 @@ function resetClosest(resetView=true){
  if(resetView)matchView='matches';
 }
 function showMatchView(){
- const images=tabOf(window.location.search)==='images',closest=matchView==='closest';
+ const images=tabOf(window.location.search)!=='videos',closest=matchView==='closest';
  matchTabs.hidden=images;closestPanel.hidden=images||!closest;videoGrid.hidden=images||closest;
  status.hidden=!images&&closest;
  if(!images)resultsHeading.textContent=closest?'Closest matches':'Search results';
@@ -152,7 +159,7 @@ function showMatchView(){
  if(closest&&!images)more.hidden=true;
 }
 async function loadClosest(){
- if(matchView!=='closest'||tabOf(window.location.search)==='images')return;
+ if(matchView!=='closest'||tabOf(window.location.search)!=='videos')return;
  if(!searchId){closestStatus.textContent='Run a search to see closest matches.';return;}
  if(!current||!controller.current(current.generation)){closestStatus.textContent='Discovery updates were stopped. Start another search to see closest matches.';return;}
  if(closestSearch!==searchId){resetClosest(false);closestSearch=searchId;}
@@ -244,7 +251,7 @@ async function search(){clearTimeout(pollTimer);const previous=searchId;current=
  if(previous)void api(`/api/search/${previous}`,{method:'DELETE',headers:{'X-Requested-With':'CreatorSearch'}}).catch(()=>{});
  searchId=null;next=null;cards.clear();catalogueBox.replaceChildren();foundBox.replaceChildren();deepBox.replaceChildren();deepHeading.hidden=true;notices.replaceChildren();
  more.hidden=true;retry.hidden=true;cancel.hidden=true;deepRow.hidden=true;status.textContent='Searching the catalogue…';
- params=new URLSearchParams([...new FormData(form)].filter(([,v])=>v!==''));params.set('limit',String(PAGE));
+ params=new URLSearchParams([...new FormData(form)].filter(([,v])=>v!==''));params.delete('doc_type');params.set('limit',String(PAGE));
  try{await session();const data=await api(`/api/search?${params}`,{signal:token.signal});if(controller.current(token.generation))follow(token,data);}
  catch(error){if(controller.current(token.generation)){status.textContent=error.message;retry.hidden=false;}}
 }
@@ -261,7 +268,8 @@ async function digDeeper(){if(!searchId)return;
 function applyParamsFromURL(){for(const [key,value] of new URLSearchParams(window.location.search)){const field=form.elements.namedItem(key);if(field)field.value=value;}}
 
 // ---- images ---------------------------------------------------------------------------------
-const tabOf=search=>new URLSearchParams(search).get('tab')==='images'?'images':'videos';
+// Videos run the full evidence pipeline; web, images and docs are discovery-only lists from their own endpoints.
+const tabOf=search=>{const tab=new URLSearchParams(search).get('tab');return tab in TABS?tab:'videos';};
 const labelOf=field=>form.elements.namedItem(field)?.closest('label');
 
 // Keeps the tab links pointing at the current query, so they stay shareable and middle-clickable
@@ -269,20 +277,24 @@ const labelOf=field=>form.elements.namedItem(field)?.closest('label');
 function syncTabs(tab){
  const base=new URLSearchParams([...new FormData(form)].filter(([,v])=>v!==''));
  base.delete('tab');
- const videos=new URLSearchParams(base),images=new URLSearchParams(base);
- images.set('tab','images');
- tabVideos.href=`/results.html?${videos}`;tabImages.href=`/results.html?${images}`;
- tabVideos.classList.toggle('tab--active',tab==='videos');
- tabImages.classList.toggle('tab--active',tab==='images');
- if(tab==='videos')tabVideos.setAttribute('aria-current','page');else tabVideos.removeAttribute('aria-current');
- if(tab==='images')tabImages.setAttribute('aria-current','page');else tabImages.removeAttribute('aria-current');
- // Catalogue mode, evidence and the deep dive are all properties of the video pipeline; images
- // never touch it, so the controls would be inert.
- const images_=tab==='images';
- for(const field of ['mode','evidence'])labelOf(field)?.toggleAttribute('hidden',images_);
- videoGrid.hidden=images_;imageGrid.hidden=!images_;
- resultsHeading.textContent=images_?'Image results':'Search results';
- if(images_){deepRow.hidden=true;cancel.hidden=true;more.hidden=true;missing.hidden=true;}else{imageMore.hidden=true;}
+ base.delete('doc_type');
+ for(const [name,anchor] of Object.entries(TABS)){
+  const query=new URLSearchParams(base);if(name!=='videos')query.set('tab',name);
+  if(name==='docs'&&form.elements.namedItem('doc_type').value)query.set('doc_type',form.elements.namedItem('doc_type').value);
+  anchor.href=`/results.html?${query}`;anchor.classList.toggle('tab--active',tab===name);
+  if(tab===name)anchor.setAttribute('aria-current','page');else anchor.removeAttribute('aria-current');
+ }
+ // Catalogue mode, evidence and the deep dive are all properties of the video pipeline; the other
+ // tabs never touch it, so the controls would be inert.
+ const list=tab!=='videos',pages=tab==='web'||tab==='docs';
+ for(const field of ['mode','evidence'])labelOf(field)?.toggleAttribute('hidden',list);
+ labelOf('doc_type')?.toggleAttribute('hidden',tab!=='docs');
+ videoGrid.hidden=list;imageGrid.hidden=tab!=='images';webList.hidden=!pages;
+ resultsHeading.textContent={videos:'Search results',web:'Web results',images:'Image results',docs:'Documents'}[tab];
+ if(list){deepRow.hidden=true;cancel.hidden=true;more.hidden=true;missing.hidden=true;}
+ if(tab!=='images')imageMore.hidden=true;
+ if(!pages)webMore.hidden=true;
+ if(tab!=='docs')closePreview();
  showMatchView();
 }
 
@@ -333,26 +345,153 @@ async function runImageSearch(){
  catch(error){if(controller.current(token.generation)){status.textContent=error.message;retry.hidden=false;}}
 }
 
+// ---- web and documents ----------------------------------------------------------------------
+const DOC_LABELS={pdf:'PDF',doc:'Word',docx:'Word',odt:'OpenDocument',rtf:'RTF',ppt:'PowerPoint',pptx:'PowerPoint',odp:'OpenDocument slides',
+ key:'Keynote',xls:'Excel',xlsx:'Excel',ods:'OpenDocument sheet',csv:'CSV',epub:'EPUB'};
+// Every Docs result is the document file itself. Clicking its title previews the first pages here (/api/doc fetches it
+// from its source, converted to PDF when it is an office file); the whole document is one click away at its source,
+// where a PDF opens in the browser and other files download.
+const fullDocument=item=>{
+ const a=link(item.url,item.doc_type==='pdf'?'Open full document ↗':`Download ${item.doc_type?.toUpperCase()??'file'} ↓`);
+ a.className='doc-action';return a;
+};
+// PDF.js draws the pages itself, so previews look the same everywhere, including phone browsers that cannot show a PDF inline.
+// It loads only when the first document is opened.
+const PDFJS='/vendor/pdfjs/';
+async function pdfViewerReady(){
+ if(pdfViewer)return pdfViewer;
+ const lib=await import(`${PDFJS}build/pdf.min.mjs`);
+ lib.GlobalWorkerOptions.workerSrc=`${PDFJS}build/pdf.worker.min.mjs`;
+ globalThis.pdfjsLib=lib; // pdf_viewer.mjs reads the core library from here.
+ const viewer=await import(`${PDFJS}web/pdf_viewer.mjs`);
+ const eventBus=new viewer.EventBus();
+ const linkService=new viewer.PDFLinkService({eventBus,externalLinkTarget:viewer.LinkTarget.BLANK,externalLinkRel:'noopener noreferrer nofollow'});
+ pdfViewer=new viewer.PDFViewer({container:docScroll,viewer:document.querySelector('#doc-pdf'),eventBus,linkService});
+ linkService.setViewer(pdfViewer);
+ pdfjs={lib,linkService};
+ eventBus.on('pagesinit',()=>{pdfViewer.currentScaleValue='page-width';});
+ eventBus.on('pagechanging',({pageNumber})=>{docPage.textContent=`${pageNumber} / ${pdfViewer.pagesCount}`;});
+ // Keep "fit width" true when the panel changes size (window resize, phone rotation).
+ new ResizeObserver(()=>{if(pdfViewer.pagesCount&&pdfViewer.currentScaleValue==='page-width')pdfViewer.currentScaleValue='page-width';}).observe(docScroll);
+ return pdfViewer;
+}
+async function showPdf(bytes){
+ const viewer=await pdfViewerReady();
+ const next=await pdfjs.lib.getDocument({data:bytes,cMapUrl:`${PDFJS}cmaps/`,cMapPacked:true,standardFontDataUrl:`${PDFJS}standard_fonts/`,
+  wasmUrl:`${PDFJS}wasm/`,iccUrl:`${PDFJS}iccs/`}).promise;
+ const previous=pdfDocument;pdfDocument=next;
+ viewer.setDocument(next);pdfjs.linkService.setDocument(next,null);
+ docPage.textContent=`1 / ${next.numPages}`;
+ void previous?.destroy();
+}
+// Closes the preview with the way to the rest: "Showing 5 of 30 pages" and the one-click full document.
+function previewEnd(item,shown,total){
+ docMore.replaceChildren();docMore.hidden=!(total>shown);
+ if(docMore.hidden)return;
+ docMore.append(node('p',`Preview: the first ${shown} of ${total} pages.`),fullDocument(item));
+}
+function closePreview(){docRequest?.abort();docRequest=null;docViewer.hidden=true;docFrame.hidden=true;docTools.hidden=true;docMore.hidden=true;
+ if(pdfDocument){pdfViewer.setDocument(null);void pdfDocument.destroy();pdfDocument=null;}
+ for(const row of webList.querySelectorAll('.web-item.selected'))row.classList.remove('selected');}
+async function openPreview(item,row){
+ docRequest?.abort();const request=docRequest=new AbortController();
+ for(const other of webList.querySelectorAll('.web-item.selected'))other.classList.remove('selected');
+ row.classList.add('selected');
+ docViewer.hidden=false;docFrame.hidden=true;docTools.hidden=true;docMore.hidden=true;
+ docTitle.textContent=item.title;docSource.replaceChildren(fullDocument(item));
+ docStatus.textContent=item.doc_type==='pdf'?'Loading the document…':'Fetching and converting the document…';
+ if(!window.matchMedia('(min-width: 900px)').matches)docViewer.scrollIntoView({block:'start'});
+ const src=`/api/doc?${new URLSearchParams({url:item.url,t:item.preview})}`;
+ try{
+  const response=await fetch(src,{credentials:'same-origin',signal:request.signal});
+  if(!response.ok){const data=await response.json().catch(()=>null);throw Error(data?.error?.message??'This document could not be shown. Open it from its source.');}
+  const bytes=new Uint8Array(await response.arrayBuffer());
+  if(request!==docRequest)return;
+  docFrame.hidden=false;
+  await showPdf(bytes);
+  if(request!==docRequest)return;
+  const total=Number(response.headers.get('X-Document-Pages')),shown=Number(response.headers.get('X-Preview-Pages'));
+  previewEnd(item,shown,total);
+  if(total>shown)docPage.dataset.total=` · preview of ${total} pages`;else delete docPage.dataset.total;
+  docStatus.textContent='';docTools.hidden=false;
+ }catch(error){
+  if(error.name==='AbortError'||request!==docRequest)return;
+  docFrame.hidden=true;
+  docStatus.textContent=error.name==='InvalidPDFException'?'This document could not be read. Open it from its source.':error.message;
+ }
+}
+function webItem(item){
+ const url=safeURL(item.url);if(!url)return null;
+ const row=node('article',undefined,'web-item');
+ const head=node('div',undefined,'web-item-source');
+ head.append(node('span',item.source_name,'web-item-host'));
+ if(item.doc_type)head.append(node('span',DOC_LABELS[item.doc_type]??item.doc_type.toUpperCase(),'badge'));
+ if(item.access)head.append(node('span',item.access,'badge'));
+ if(item.published)head.append(node('span',new Date(item.published).toLocaleDateString(),'meta'));
+ const title=node('h3');
+ if(item.preview){
+  const open=node('button',item.title,'web-item-open');open.type='button';
+  open.addEventListener('click',()=>void openPreview(item,row));
+  title.append(open);
+ }else title.append(link(url.href,item.title));
+ row.append(head,title);
+ if(item.snippet)row.append(node('p',item.snippet));
+ // A document result opens the file in one click; a web result's title is already its link.
+ if(item.doc_type){const actions=node('div',undefined,'web-item-actions');
+  if(item.preview){const open=node('button','Preview','secondary');open.type='button';open.addEventListener('click',()=>void openPreview(item,row));actions.append(open);}
+  actions.append(fullDocument(item));row.append(actions);}
+ return row;
+}
+async function searchWebPage(token,kind,append){
+ const query=new URLSearchParams({q:form.elements.namedItem('q').value,kind,page:String(webPage)});
+ const language=form.elements.namedItem('language')?.value;if(language)query.set('language',language);
+ const docType=form.elements.namedItem('doc_type')?.value;if(kind==='docs'&&docType)query.set('doc_type',docType);
+ const data=await api(`/api/web?${query}`,{signal:token.signal});
+ if(!controller.current(token.generation))return;
+ if(!append){webList.replaceChildren();closePreview();}
+ webList.append(...data.results.map(webItem).filter(Boolean));
+ // On a wide screen the first document that can be shown opens straight away, beside the list.
+ const first=data.results.find(r=>r.preview);
+ if(!append&&first&&window.matchMedia('(min-width: 900px)').matches)void openPreview(first,webList.querySelector('.web-item:has(.web-item-open)'));
+ notices.replaceChildren(...data.providers.filter(p=>p.status!=='ok').map(p=>node('p',p.message,'notice')));
+ webMore.hidden=!data.next_cursor;
+ const count=webList.children.length,noun=kind==='docs'?['document','documents']:['result','results'];
+ status.textContent=count?`${count} ${noun[count===1?0:1]}`:kind==='docs'?'No documents found. Try another query or document type.':'No results found. Try another query.';
+}
+async function runWebSearch(kind){
+ clearTimeout(pollTimer);current=controller.begin();const token=current;
+ resetClosest();lastSearchData=null;showMatchView();
+ webPage=1;webList.replaceChildren();closePreview();notices.replaceChildren();
+ webMore.hidden=true;retry.hidden=true;status.textContent=kind==='docs'?'Searching for documents…':'Searching the web…';
+ try{await session();await searchWebPage(token,kind,false);}
+ catch(error){if(controller.current(token.generation)){status.textContent=error.message;retry.hidden=false;}}
+}
+function runTab(tab){if(tab==='images')void runImageSearch();else if(tab==='web'||tab==='docs')void runWebSearch(tab);else void search();}
+
 function runFromURL(){
  applyParamsFromURL();
  const tab=tabOf(window.location.search);
  syncTabs(tab);
- if(!form.elements.namedItem('q').value){status.textContent=tab==='images'?'Enter a query to search for images.':'Enter a query to search the catalogue.';return;}
- if(tab==='images')void runImageSearch();else void search();
+ if(!form.elements.namedItem('q').value){status.textContent={videos:'Enter a query to search the catalogue.',web:'Enter a query to search the web.',
+  images:'Enter a query to search for images.',docs:'Enter a query to search for documents.'}[tab];return;}
+ runTab(tab);
 }
 form.addEventListener('submit',event=>{event.preventDefault();
  const tab=tabOf(window.location.search);
  const query=new URLSearchParams([...new FormData(form)].filter(([,v])=>v!==''));
- // A search typed while the Images tab is open stays on Images.
- if(tab==='images')query.set('tab','images');
+ // A search typed while another tab is open stays on that tab.
+ if(tab!=='videos')query.set('tab',tab);
+ if(tab!=='docs')query.delete('doc_type');
  window.history.pushState(null,'',`/results.html?${query}`);
  syncTabs(tab);
- if(tab==='images')void runImageSearch();else void search();
+ runTab(tab);
 });
-retry.addEventListener('click',()=>{if(tabOf(window.location.search)==='images')void runImageSearch();else void search();});
+retry.addEventListener('click',()=>runTab(tabOf(window.location.search)));
+// Changing the document type re-runs the document search straight away.
+form.elements.namedItem('doc_type').addEventListener('change',()=>{if(tabOf(window.location.search)==='docs'&&form.elements.namedItem('q').value)form.requestSubmit();});
 // Tabs are real links, so let the browser handle modified clicks (new tab, new window) and only
 // take over the plain click to swap results without a reload.
-for(const tab of [tabVideos,tabImages])tab.addEventListener('click',event=>{
+for(const tab of Object.values(TABS))tab.addEventListener('click',event=>{
  if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||event.button!==0)return;
  event.preventDefault();
  window.history.pushState(null,'',tab.href);
@@ -366,6 +505,18 @@ imageMore.addEventListener('click',async()=>{
  catch(error){if(controller.current(token.generation)){imagePage-=1;status.textContent=error.message;}}
  finally{imageBusy=false;imageMore.disabled=false;}
 });
+webMore.addEventListener('click',async()=>{
+ if(webBusy)return;
+ webBusy=true;webMore.disabled=true;
+ const token=current;webPage+=1;
+ try{await searchWebPage(token,tabOf(window.location.search),true);}
+ catch(error){if(controller.current(token.generation)){webPage-=1;status.textContent=error.message;}}
+ finally{webBusy=false;webMore.disabled=false;}
+});
+document.querySelector('#doc-viewer-close').addEventListener('click',closePreview);
+document.querySelector('#doc-zoom-in').addEventListener('click',()=>pdfViewer?.increaseScale());
+document.querySelector('#doc-zoom-out').addEventListener('click',()=>pdfViewer?.decreaseScale());
+document.querySelector('#doc-fit').addEventListener('click',()=>{if(pdfViewer)pdfViewer.currentScaleValue='page-width';});
 deep.addEventListener('click',()=>void digDeeper());
 // A page can hold only results already on screen (for example after a deep search restarts paging), so keep going until something new appears.
 more.addEventListener('click',async()=>{if(!next)return;const token=current;more.disabled=true;

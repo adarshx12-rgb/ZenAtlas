@@ -15,6 +15,8 @@ import {addSource,setAlternative} from './source-health.js';
 import { listPolicyRules, setPolicyRule } from './policy-rules.js';
 import { dependencyReport } from './watchdog.js';
 import { imageSearchInput, searchImages } from './images.js';
+import { searchWeb, webSearchInput } from './web.js';
+import { DocumentPreviews, PreviewError } from './doc-preview.js';
 import { auditReport } from './learning.js';
 
 // Learning-loop feedback on a search: a vote on one of its results (with an optional reason), opening a result,
@@ -100,6 +102,23 @@ export async function createApp(db:DB,config:Config) {
  // Images are discovery-only, so they need none of the search service's snapshot, polling or
  // deep-dive machinery — one request in, one page of results out.
  app.get('/api/images',async req=>searchImages(db,config,imageSearchInput.parse(req.query)));
+ // Web pages and documents (PDF, Word, slides…) are discovery-only lists too.
+ app.get('/api/web',async req=>searchWeb(db,config,webSearchInput.parse(req.query)));
+ // The document itself, as a PDF, for the Docs tab's viewer; only links /api/web signed are fetched.
+ const previews=new DocumentPreviews(db,config);
+ app.get('/api/doc',async(req,reply)=>{
+   const input=z.object({url:z.string().url().max(2048),t:z.string().max(64)}).strict().parse(req.query);
+   try {
+     const preview=await previews.get(input.url,input.t);
+     // The first pages only; the headers tell the viewer how much of the document the source holds.
+     return reply.header('Cache-Control','private, max-age=3600').header('Content-Type','application/pdf')
+       .header('Content-Disposition','inline; filename="preview.pdf"')
+       .header('X-Document-Pages',String(preview.pages)).header('X-Preview-Pages',String(preview.shown)).send(preview.pdf);
+   } catch(error) {
+     if(error instanceof PreviewError) throw new ApiError(error.status,error.code,error.message);
+     throw error;
+   }
+ });
  app.get('/api/search/:id',async req=>service.poll(id(req.params),owner(req)));
  app.get('/api/search/:id/closest',async req=>service.closest(id(req.params),owner(req)));
  app.delete('/api/search/:id',async req=>service.cancel(id(req.params),owner(req)));
@@ -199,5 +218,8 @@ export async function createApp(db:DB,config:Config) {
    return auditReport(db,z.object({limit:z.coerce.number().int().min(1).max(200).default(50)}).strict().parse(req.query).limit);});
  app.get('/admin',async(_req,reply)=>reply.redirect('/admin.html'));
  await app.register(staticFiles,{root:resolve('public'),index:'index.html'});
+ // PDF.js for the Docs tab viewer, served from the installed package so its version follows package-lock.json.
+ await app.register(staticFiles,{root:resolve('node_modules/pdfjs-dist'),prefix:'/vendor/pdfjs/',decorateReply:false,index:false,
+   allowedPath:path=>/^\/(build\/pdf(\.worker)?\.min\.mjs|web\/pdf_viewer\.(mjs|css)|web\/images\/[\w.-]+|cmaps\/[\w.-]+|standard_fonts\/[\w.-]+|wasm\/[\w.-]+|iccs\/[\w.-]+)$/.test(path)});
  return app;
 }
