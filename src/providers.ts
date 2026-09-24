@@ -50,17 +50,32 @@ export class GoogleSearch implements SourceAdapter {
 }
 export class BraveSearch implements SourceAdapter {
  name='brave';capabilities=caps;
- constructor(private config:Config,private transport=fetchJSON){}
+ constructor(private config:Config,private transport=fetchJSON,private target:'videos'|'web'='web'){}
+ // Video searches use Brave's video index, which carries duration, creator, date and thumbnail.
+ forTarget(target:'videos'|'web'){return new BraveSearch(this.config,this.transport,target);}
  async search(query:string,_filters:SearchInput,cursor='0'):Promise<DiscoveryPage>{
    const offset=z.coerce.number().int().min(0).max(9).parse(cursor);
-   const url=new URL('https://api.search.brave.com/res/v1/web/search');
+   const url=new URL(`https://api.search.brave.com/res/v1/${this.target==='videos'?'videos':'web'}/search`);
    url.search=new URLSearchParams({q:query,count:String(Math.min(20,this.config.DISCOVERY_RESULTS)),offset:String(offset),safesearch:'moderate',text_decorations:'false'}).toString();
-   const data=z.object({web:z.object({results:z.array(z.unknown()).max(100)}).optional(),query:z.object({more_results_available:z.boolean().optional()}).optional()})
+   const data=z.object({web:z.object({results:z.array(z.unknown()).max(100)}).optional(),results:z.array(z.unknown()).max(100).optional(),
+     query:z.object({more_results_available:z.boolean().optional()}).optional()})
      .parse(await this.transport(url.href,{trustedOrigin:url.origin,headers:{'X-Subscription-Token':this.config.BRAVE_SEARCH_API_KEY},timeoutMs:this.config.PROVIDER_TIMEOUT_MS,redirects:0}));
-   return {results:normaliseRows(data.web?.results??[],{url:'url',description:'description'},this.config.DISCOVERY_RESULTS),
-     next_cursor:data.query?.more_results_available&&offset<9?String(offset+1):null,
+   const results=this.target==='videos'?videoRows(data.results??[],this.config.DISCOVERY_RESULTS)
+     :normaliseRows(data.web?.results??[],{url:'url',description:'description'},this.config.DISCOVERY_RESULTS);
+   return {results,next_cursor:data.query?.more_results_available&&offset<9?String(offset+1):null,
      status:{provider:this.name,status:'ok',message:'Brave discovery completed.'}};
  }
+}
+function videoRows(rows:unknown[],limit:number){
+ const items=[];
+ for(const raw of rows.slice(0,limit))try{
+   const row=z.looseObject({url:z.string(),title:z.string()}).parse(raw) as Record<string,any>;
+   const video=row.video&&typeof row.video==='object'?row.video:{};
+   items.push(contentInput.parse({url:canonicalize(row.url),title:row.title,description:text(row.description,10000),
+     creator:text(video.creator??video.author?.name,300),published_at:isoDate(row.page_age),duration:seconds(video.duration),
+     thumbnail:mediaURL(row.thumbnail?.src)}));
+ }catch{/* Preserve valid results when one upstream entry is malformed. */}
+ return items;
 }
 export function configuredProviders(config:Config,purpose:'content'|'sources'='content'):SourceAdapter[]{
  const providers:SourceAdapter[]=[];

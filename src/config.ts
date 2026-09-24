@@ -9,14 +9,14 @@ export const configSchema = z.object({
   SESSION_SECRET: z.string().min(32).refine(v => !v.startsWith('replace-'), 'Replace the session secret'),
   ADMIN_TOKEN: z.string().min(32).refine(v => !v.startsWith('replace-'), 'Replace the admin token'),
   SEARXNG_BASE_URL: optional, SEARXNG_TOKEN: optional,
-  SEARXNG_ENGINES: z.string().default('youtube,dailymotion,sepiasearch,odysee,bing videos,google videos,duckduckgo videos,brave.videos,wikicommons.videos'),
+  SEARXNG_ENGINES: z.string().default('youtube,dailymotion,odysee,bing videos,google videos,duckduckgo videos,brave.videos'),
   SEARXNG_SOURCE_ENGINES: z.string().default('google,bing'),
   SEARXNG_WEB_ENGINES: z.string().default('google,bing,brave,yahoo'),
   // Image search (see src/images.ts). Reddit and Pinterest have no SearXNG engine, but these
   // four index both, so their images still come back.
   SEARXNG_IMAGE_ENGINES: z.string().default('bing images,google images,duckduckgo images,brave.images'),
   // Extra engines that only deep dives use, chosen because ordinary searches rarely reach their sources.
-  SEARXNG_DEEP_ENGINES: z.string().default('bilibili,acfun,privacywall videos'),
+  SEARXNG_DEEP_ENGINES: z.string().default('bilibili,acfun,privacywall videos,sepiasearch,wikicommons.videos'),
   SEARXNG_DEEP_WEB_ENGINES: z.string().default('yep,resulthunter,privacywall,hackernews'),
   SEARXNG_DAILY_BUDGET: number(2000, 0, 100000),
   DEEP_PLAN_SEARCHES: number(6, 1, 16), DEEP_PAGES: number(2, 1, 5), DEEP_FOLLOW_UPS: number(4, 0, 10), DEEP_ROUNDS: number(2, 1, 5),
@@ -50,7 +50,9 @@ export const configSchema = z.object({
   DISCOVERY_DAILY_BUDGET: number(100, 0, 10000),
   // Brave is a metered API, so it has its own daily limit rather than sharing DISCOVERY_DAILY_BUDGET, which also caps
   // discovery jobs, Reddit lookups and scheduled collections.
-  BRAVE_DAILY_BUDGET: number(250, 0, 100000), COVERAGE_MIN_RESULTS: number(5, 1, 100),
+  BRAVE_DAILY_BUDGET: number(250, 0, 100000),
+  // With Brave configured it answers every search; SearXNG's standard engines fill in only when Brave fails or returns fewer results than this.
+  BRAVE_MIN_RESULTS: number(10, 1, 20), COVERAGE_MIN_RESULTS: number(5, 1, 100),
   COVERAGE_MIN_SOURCES: number(1, 1, 20),
   COVERAGE_MIN_SCORE: z.coerce.number().min(0).max(1).default(0.03),
   SEARCH_TTL_SECONDS: number(1800, 60, 3600), DISCOVERY_CACHE_SECONDS: number(600, 60, 3600),

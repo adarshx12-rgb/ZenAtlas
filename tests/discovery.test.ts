@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {database,fixture,testConfig} from './helpers.js';
 import {rankDiscovery,type DiscoveryCandidate} from '../src/ranking.js';
-import {SearXNG} from '../src/providers.js';
+import {BraveSearch,SearXNG} from '../src/providers.js';
 import {SearchService} from '../src/search.js';
 import {workOnce} from '../src/worker.js';
 import {createApp} from '../src/app.js';
@@ -19,6 +19,30 @@ import type {Explorer} from '../src/exploration.js';
 const lead=(url:string,title:string,provider='searxng',position=0,description:string|null=null):DiscoveryCandidate=>
  ({item:contentInput.parse({url,title,description}),provider,position});
 const urls=(list:DiscoveryCandidate[])=>list.map(c=>c.item.url);
+
+test('ordinary providers start while anime recognition is pending; planning still waits for its context',async()=>{
+ const db=await database();
+ let finishRecognition!:(value:AnimeMatch|null)=>void,notifyStarted!:()=>void;
+ const recognition=new Promise<AnimeMatch|null>(resolve=>{finishRecognition=resolve;});
+ const providerStarted=new Promise<void>(resolve=>{notifyStarted=resolve;});
+ let planned=false,startedBeforeRecognition=false;
+ const adapter:SourceAdapter={name:'concurrent-fixture',capabilities:{transcripts:false,comments:false,embeds:false,accessible_media:false},
+   async search(){notifyStarted();return {results:[],next_cursor:null,status:{provider:'concurrent-fixture',status:'ok',message:'TEST'}};}};
+ const planner:Planner={async plan(query,options){planned=true;assert.deepEqual(options,{anime:null});
+   return {kind:'videos',searches:[{query,target:'videos'}],criteria:[],model:'test'};}};
+ const run=runDiscovery(db,testConfig,searchInput.parse({q:'moon launch'}),[adapter],
+   {planner,anilist:{lookup:()=>recognition}},async()=>{});
+ let timer:ReturnType<typeof setTimeout>|undefined;
+ try {
+   startedBeforeRecognition=await Promise.race([providerStarted.then(()=>true),new Promise<boolean>(resolve=>{timer=setTimeout(()=>resolve(false),2000);})]);
+   assert.equal(planned,false,'planning must retain recognition context');
+ } finally {
+   clearTimeout(timer);finishRecognition(null);
+   try {await run;} finally {await db.close();}
+ }
+ assert.equal(startedBeforeRecognition,true,'an optional lookup must not hold up the initial provider search');
+ assert.equal(planned,true);
+});
 
 test('Jev exploration adds checked outbound sources before judging, reuses pages, and respects scoped searches',async()=>{
  const db=await database();
@@ -256,6 +280,61 @@ test('SearXNG sends each engine one request at a time, even from searches runnin
    if(new URL(url).searchParams.get('engines')!=='one')throw new Error('down');return {results:[]};});
  const partial=await broken.search('dd',searchInput.parse({q:'dd'}));
  assert.deepEqual([partial.status.status,partial.status.message],['partial','1 of 3 search engines answered; Two (returned an error), Three (returned an error) did not.']);
+});
+
+test('Brave searches videos through its video index with usable metadata, and pages by offset',async()=>{
+ const asked:string[]=[];
+ const brave=new BraveSearch({...testConfig,BRAVE_SEARCH_API_KEY:'k'},async(url:string)=>{asked.push(url);return {type:'videos',query:{more_results_available:true},results:[
+   {url:'https://www.youtube.com/watch?v=LZnAo_2cpYY',title:'Evidence of the Yeti',description:'A footprint on Everest',page_age:'2013-11-14T17:49:16',
+     video:{duration:'02:34',creator:'National Geographic'},thumbnail:{src:'https://imgs.search.brave.com/thumb.jpg'}},
+   {url:'javascript:alert(1)',title:'unsafe'}]};});
+ const page=await brave.forTarget('videos').search('yeti footage',searchInput.parse({q:'yeti footage'}),'1');
+ const url=new URL(asked[0]);
+ assert.deepEqual([url.pathname,url.searchParams.get('q'),url.searchParams.get('offset')],['/res/v1/videos/search','yeti footage','1']);
+ assert.deepEqual(page.results.map(r=>[r.title,r.creator,r.duration,r.published_at,r.thumbnail]),
+   [['Evidence of the Yeti','National Geographic',154,'2013-11-14T17:49:16.000Z','https://imgs.search.brave.com/thumb.jpg']],'a malformed row is dropped, not the page');
+ assert.equal(page.next_cursor,'2');
+ await brave.forTarget('web').search('yeti',searchInput.parse({q:'yeti'}));
+ assert.equal(new URL(asked[1]).pathname,'/res/v1/web/search','web searches keep the web index');
+});
+
+test('with Brave configured, SearXNG standard engines only fill in where Brave fails or finds too little, without waiting on each other',async()=>{
+ const db=await database();
+ try{
+   const config={...testConfig,BRAVE_SEARCH_API_KEY:'k',BRAVE_MIN_RESULTS:3,SEARXNG_BASE_URL:'http://mix.example:8080',
+     SEARXNG_ENGINES:'std',SEARXNG_DEEP_ENGINES:'niche',DEEP_PAGES:2,DEEP_FOLLOW_UPS:0};
+   const rows=(site:string,n:number)=>Array.from({length:n},(_,i)=>({url:`https://${site}.example.org/v/${i}`,title:`Yeti footage ${site} ${i}`}));
+   const braveAsked:string[]=[],sxAsked:string[]=[];
+   let releaseBrave!:()=>void;let braveGate:Promise<void>=Promise.resolve();
+   const brave=new BraveSearch(config,async(url:string)=>{const u=new URL(url);const q=u.searchParams.get('q')!;
+     braveAsked.push(`${q}:${u.searchParams.get('offset')}`);await braveGate;
+     if(q.includes('broken'))throw new UpstreamError('unavailable');
+     return {results:q.includes('thin')?rows('thin',1):rows(`brave-${q.replace(/\W/g,'')}-${u.searchParams.get('offset')}`,5)};});
+   const searxng=new SearXNG(config,async(url:string)=>{const p=new URL(url).searchParams;sxAsked.push(`${p.get('engines')}:${p.get('pageno')}:${p.get('q')}`);
+     return {results:rows(`${p.get('engines')}-${p.get('pageno')}`,2)};});
+   const planner=(queries:string[]):Planner=>({async plan(){return {kind:'videos',searches:queries.map(query=>({query,target:'videos' as const})),criteria:[],model:'t'};}});
+
+   // Quick: Brave answers well, so SearXNG is not asked at all.
+   const quick=await runDiscovery(db,config,searchInput.parse({q:'yeti footage'}),[brave,searxng],{planner:planner(['yeti footage'])},async()=>{});
+   assert.equal(sxAsked.length,0,'a good Brave answer needs no SearXNG');
+   assert.ok(quick.results.length>0);
+   assert.deepEqual(quick.providers.find(p=>p.provider==='searxng'),{provider:'searxng',status:'ok',message:'Not needed: Brave answered every search.'});
+
+   // Quick: a thin and a failed Brave answer each bring in SearXNG's standard engines for that search only.
+   sxAsked.splice(0);
+   const mixed=await runDiscovery(db,config,searchInput.parse({q:'yeti thin'}),[brave,searxng],{planner:planner(['yeti thin','yeti broken','yeti fine'])},async()=>{});
+   assert.deepEqual(sxAsked.sort(),['std:1:yeti broken','std:1:yeti thin']);
+   assert.match(mixed.providers.find(p=>p.provider==='searxng')!.message,/Filled in for 2 of 3 searches where Brave failed or found too little\.$/);
+
+   // Deep: niche engines start alongside Brave (before it answers); Brave pages by offset; niche engines only take first pages.
+   sxAsked.splice(0);braveAsked.splice(0);braveGate=new Promise<void>(r=>{releaseBrave=r;});
+   const deep=runDiscovery(db,config,searchInput.parse({q:'yeti footage',depth:'deep'}),[brave,searxng],{planner:planner(['yeti expedition'])},async()=>{});
+   for(let i=0;i<50&&!sxAsked.length;i++)await new Promise(r=>setTimeout(r,10));
+   assert.ok(sxAsked.some(k=>k.startsWith('niche:1:')),'niche engines do not wait for Brave');
+   releaseBrave();await deep;
+   assert.deepEqual(sxAsked.filter(k=>!k.startsWith('niche:1:')),[],'no standard engines or later niche pages while Brave answers well');
+   for(const key of ['yeti footage:0','yeti footage:1','yeti expedition:0','yeti expedition:1'])assert.ok(braveAsked.includes(key),`Brave asked ${key}`);
+ }finally{await db.close();}
 });
 
 test('a deep dive searches niche engines, later pages and leads, and reranks quick and deep results together',async()=>{

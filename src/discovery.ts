@@ -1,7 +1,7 @@
 import type { DB } from './db.js';
 import type { Config } from './config.js';
 import type { DiscoveryPage, EngineFailure, ProviderStatus, Result, SearchInput, SourceAdapter } from './types.js';
-import { configuredProviders, engineStatus, SearXNG } from './providers.js';
+import { BraveSearch, configuredProviders, engineStatus, SearXNG } from './providers.js';
 import { providerBudget, takeBudget } from './budgets.js';
 import { canonicalize } from './urls.js';
 import { rankDiscovery, type DiscoveryCandidate } from './ranking.js';
@@ -104,7 +104,9 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
  const anilist = input.source ? undefined : deps.anilist ?? (config.ANILIST_ENABLED ? new AniListClient(db, config) : undefined);
  const limit = deep ? config.DEEP_RESULTS : config.DISCOVERY_RESULTS;
  const deadline = deep ? Date.now() + config.DEEP_SEARCH_SECONDS*1000 : Infinity;
- const [earlier, anime] = await Promise.all([
+ // Recognition is needed by the planner and judge, not by the query as typed.
+ // Keep it in flight while the initial providers search.
+ const context = Promise.all([
    deep ? quickJob(db, input) : Promise.resolve({results: [] as Result[], searches: [] as PlannedSearch[]}),
    animeContext(anilist, input.q),
  ]);
@@ -113,8 +115,8 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
  const tried = new Set<string>();
  const leadUrl = new Map<string,string>();
  const notes: ProviderStatus[] = [];
- if (anime.status) notes.push(anime.status);
  const outcomes: Outcome[] = [];
+ let fallbacks = 0, braveSearches = 0;
  let stage: DiscoveryProgress['stage'] = 'searching';
  // Publish stages, not provisional rankings. Every source gets to finish before selection.
  const report = () => progress({results: [], providers: notes, stage});
@@ -169,54 +171,73 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
      }
    }
  }));
- const run = async (searches: Search[]) => {
-   const jobs = searches.flatMap(search => providers.flatMap(provider => {
-     if (!(provider instanceof SearXNG)) return search.page === 1 && search.engines !== 'extra' ? [{search, provider, adapter: provider}] : [];
-     const adapter = provider.forTarget(search.target, search.engines);
-     return adapter.engines.length ? [{search, provider, adapter}] : [];
-   }));
-   outcomes.push(...(await Promise.all(jobs.map(async ({search, provider, adapter}): Promise<Outcome|null> => {
-     if (Date.now() > deadline) return null;
-     if (!await takeBudget(db, `discovery:${provider.name}`, providerBudget(config, provider.name))) return {provider, page: null, failure: 'budget_exhausted'};
-     const filters = {...input, q: search.query};
-     try {
-       let page: DiscoveryPage;
-       if (adapter instanceof SearXNG) {
-         page = await adapter.search(search.query, filters, String(search.page), {deadline,
-           onPage: answer => arrived(answer, search, `${provider.name}:${answer.engines?.asked[0] ?? ''}`)});
-       } else {
-         page = await adapter.search(search.query, filters);
-         arrived(page, search, provider.name);
-       }
-       await health(provider.name, page.status.status === 'ok', page.status.status);
-       for (const engine of page.engines?.asked ?? []) {
-         const failed = page.engines!.failed.find(f => f.engine === engine);
-         await health(`${provider.name}:${engine}`, !failed, failed?.reason);
-       }
-       return {provider, page};
-     } catch (error) {
-       await health(provider.name, false, error instanceof UpstreamError ? error.code : 'unavailable');
-       return {provider, page: null, failure: 'unavailable'};
+ const ask = async (provider: SourceAdapter, adapter: SourceAdapter, search: Search, cursor?: string): Promise<Outcome|null> => {
+   if (Date.now() > deadline) return null;
+   if (!await takeBudget(db, `discovery:${provider.name}`, providerBudget(config, provider.name))) return {provider, page: null, failure: 'budget_exhausted'};
+   const filters = {...input, q: search.query};
+   try {
+     let page: DiscoveryPage;
+     if (adapter instanceof SearXNG) {
+       page = await adapter.search(search.query, filters, String(search.page), {deadline,
+         onPage: answer => arrived(answer, search, `${provider.name}:${answer.engines?.asked[0] ?? ''}`)});
+     } else {
+       page = await adapter.search(search.query, filters, cursor);
+       arrived(page, search, provider.name);
      }
-   }))).flatMap(o => o ? [o] : []));
+     await health(provider.name, page.status.status === 'ok', page.status.status);
+     for (const engine of page.engines?.asked ?? []) {
+       const failed = page.engines!.failed.find(f => f.engine === engine);
+       await health(`${provider.name}:${engine}`, !failed, failed?.reason);
+     }
+     return {provider, page};
+   } catch (error) {
+     await health(provider.name, false, error instanceof UpstreamError ? error.code : 'unavailable');
+     return {provider, page: null, failure: 'unavailable'};
+   }
+ };
+ // With Brave configured, Brave answers every search and page. SearXNG's niche engines run beside it on first pages of
+ // deep dives; its standard engines fill in for a search only once Brave has failed or found too little for it.
+ const brave = providers.find((p): p is BraveSearch => p instanceof BraveSearch);
+ const run = async (searches: Search[]) => {
+   const jobs = searches.flatMap(search => providers.flatMap((provider): (() => Promise<(Outcome|null)[]>)[] => {
+     if (provider instanceof SearXNG) {
+       const adapter = provider.forTarget(search.target, brave ? 'extra' : search.engines);
+       if (brave && (search.page !== 1 || search.engines === 'standard')) return [];
+       return adapter.engines.length ? [async () => [await ask(provider, adapter, search)]] : [];
+     }
+     if (provider === brave) return search.engines === 'extra' ? [] : [async () => {
+       const answer = await ask(provider, brave.forTarget(search.target), search, String(search.page - 1));
+       const searxng = providers.find(p => p instanceof SearXNG) as SearXNG|undefined;
+       if (!answer || !searxng || (answer.page && answer.page.results.length >= config.BRAVE_MIN_RESULTS)) return [answer];
+       fallbacks++;
+       return [answer, await ask(searxng, searxng.forTarget(search.target, 'standard'), search)];
+     }];
+     return search.page === 1 && search.engines !== 'extra' ? [async () => [await ask(provider, provider, search)]] : [];
+   }));
+   if (brave) braveSearches += searches.filter(s => s.engines !== 'extra').length;
+   outcomes.push(...(await Promise.all(jobs.map(job => job()))).flat().flatMap(o => o ? [o] : []));
  };
 
  let plan: SearchPlan;
  let ran: PlannedSearch[];
+ let earlier: Awaited<ReturnType<typeof quickJob>>;
+ let anime: Awaited<ReturnType<typeof animeContext>>;
  if (!deep) {
    // A search scoped to one source (replacement-domain discovery) runs exactly as asked.
    const typed = input.source ? [{query: input.q, target: 'videos' as const}] : fallbackPlan(input.q).searches;
    const planning = input.source ? Promise.resolve({plan: {kind: 'videos' as const, searches: typed, criteria: [], model: null}, status: null})
-     : planWith(planner, input.q, false, [], anime.anime);
+     : context.then(([, anime]) => planWith(planner, input.q, false, [], anime.anime));
    await Promise.all([
      run(typed.map(s => ({...s, page: 1, engines: 'standard'}))),
      planning.then(({plan}) => run(plan.searches.filter(s => !typed.some(t => sameSearch(t, s))).map(s => ({...s, page: 1, engines: 'standard'})))),
    ]);
    const planned = await planning;
+   [earlier, anime] = await context;
    plan = planned.plan;
    if (planned.status) notes.push(planned.status);
    ran = [...typed, ...plan.searches.filter(s => !typed.some(t => sameSearch(t, s)))];
  } else {
+   [earlier, anime] = await context;
    // What an ordinary search asked; its first result pages are already known unless no quick search ran.
    const ordinary = earlier.searches.length ? earlier.searches : fallbackPlan(input.q).searches;
    const planning = planWith(planner, input.q, true, ordinary.map(s => s.query), anime.anime);
@@ -235,6 +256,7 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
    if (planned.status) notes.push(planned.status);
    ran = uniqueRan([...ordinary, ...specialists, ...plan.searches]);
  }
+ if (anime.status) notes.push(anime.status);
  await arrivals;
  if (failure) throw failure;
 
@@ -326,7 +348,13 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
    }
  }
  await store(picks);
- const statuses = [...[...providers, ...archives].map(p => summarise(p.name, outcomes.filter(o => o.provider === p))), ...notes];
+ const statuses = [...[...providers, ...archives].map(p => {
+   const own = outcomes.filter(o => o.provider === p);
+   if (!brave || !(p instanceof SearXNG)) return summarise(p.name, own);
+   if (!own.length) return {provider: p.name, status: 'ok' as const, message: 'Not needed: Brave answered every search.'};
+   const status = summarise(p.name, own);
+   return fallbacks ? {...status, message: `${status.message} Filled in for ${fallbacks} of ${braveSearches} searches where Brave failed or found too little.`} : status;
+ }), ...notes];
  const searches = uniqueRan(ran);
 
  stage = 'checking'; await report();
