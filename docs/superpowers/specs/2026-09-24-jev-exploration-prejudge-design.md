@@ -1,6 +1,6 @@
 # Jev exploration and pre-judge — design
 
-Agreed with the user on 2026-09-24. **Not implemented yet**; an implementation plan follows this spec.
+**Superseded** by `2026-09-24-requirements-evidence-exploration-design.md`, which folds this design in. Kept for history.
 
 ## Goal
 
