@@ -60,16 +60,23 @@ export async function retrieve(db: DB, config: Config, input: SearchInput, owner
  const rows = (await db.query(`SELECT c.*,s.display_name AS source_name,s.reliability,
    coalesce((SELECT CASE WHEN f.useful THEN 1 ELSE -1 END FROM feedback f WHERE f.owner=$2 AND f.content_id=c.id),0) AS personal
    FROM content c JOIN sources s ON s.id=c.source_id WHERE c.id=ANY($1::uuid[])`,[ids,owner])).rows;
- const moments = (await db.query(`SELECT * FROM moments WHERE content_id=ANY($1::uuid[]) AND status='active'
-   AND ($4='any' OR evidence_type=$4)
-   AND (search_vector @@ websearch_to_tsquery('english',$2) OR id=ANY($3::uuid[])) ORDER BY start_seconds,id`,[ids,input.q,semantic.flatMap(r=>r.moment_ids??[]),input.evidence])).rows;
+ // A transcript window spans minutes, so its start is a poor timestamp. Focus on the window's segment sharing the
+ // most query terms (any term, so windows found semantically or across segments still focus); none shares one → no focus.
+ const moments = (await db.query(`SELECT m.*,f.start_seconds AS focus_start,f.end_seconds AS focus_end FROM moments m
+   CROSS JOIN (SELECT nullif(replace(plainto_tsquery('english',$2)::text,' & ',' | '),'')::tsquery AS terms) q
+   LEFT JOIN LATERAL (SELECT t.start_seconds,t.end_seconds FROM transcript_segments t
+     WHERE m.evidence_type='transcript_supported' AND t.id=ANY(m.evidence_refs) AND to_tsvector('english',t.text) @@ q.terms
+     ORDER BY ts_rank(to_tsvector('english',t.text),q.terms) DESC,t.start_seconds LIMIT 1) f ON true
+   WHERE m.content_id=ANY($1::uuid[]) AND m.status='active' AND ($4='any' OR m.evidence_type=$4)
+   AND (m.search_vector @@ websearch_to_tsquery('english',$2) OR m.id=ANY($3::uuid[])) ORDER BY m.start_seconds,m.id`,[ids,input.q,semantic.flatMap(r=>r.moment_ids??[]),input.evidence])).rows;
  const scenes = (await db.query(`${sceneSelect} WHERE v.content_id=ANY($1::uuid[]) AND ${activeScene}
    AND ($4='any' OR $4='video_analysed')
    AND (v.search_vector @@ websearch_to_tsquery('english',$2) OR v.id=ANY($3::uuid[]))`,[ids,input.q,semantic.flatMap(r=>r.scene_ids??[]),input.evidence])).rows;
  const results = rows.map(row=>{
    const found: Moment[] = [...moments.filter(m=>m.content_id===row.id).map(m=>({id:m.id,
      start_seconds:m.start_seconds,end_seconds:m.end_seconds,summary:m.summary,evidence_type:m.evidence_type,
-     analysis_version:m.analysis_version,inspected_ranges:m.inspected_ranges,evidence_refs:m.evidence_refs})),
+     analysis_version:m.analysis_version,inspected_ranges:m.inspected_ranges,evidence_refs:m.evidence_refs,
+     ...(m.focus_start===null?{}:{focus:[m.focus_start,m.focus_end] as [number,number]})})),
      ...scenes.filter(v=>v.content_id===row.id).map(sceneMoment)]
      .sort((a,b)=>a.start_seconds-b.start_seconds||a.id.localeCompare(b.id)).slice(0,5);
    return {id:row.id,title:row.title,canonical_url:row.canonical_url,source_id:row.source_id,source_name:row.source_name,

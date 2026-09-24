@@ -74,7 +74,9 @@ function card(item){
    passage.append(node('strong',`Viewers point to ${duration(moment.start_seconds)} – ${duration(moment.end_seconds)}`));
    for(const said of moment.summary.split(' · '))passage.append(node('p',`“${said}”`,'quote'));
   }else{
-   passage.append(node('strong',`${moment.start_seconds}s – ${moment.end_seconds}s · ${moment.evidence_type.replaceAll('_',' ')}${moment.scene?` · ${moment.scene.model}`:''}`));
+   const [from,to]=moment.focus??[moment.start_seconds,moment.end_seconds];
+   passage.append(node('strong',`${duration(from)} – ${duration(to)} · ${moment.evidence_type.replaceAll('_',' ')}${moment.scene?` · ${moment.scene.model}`:''}`));
+   if(moment.focus)passage.append(node('div',`Best match within the transcript passage ${duration(moment.start_seconds)} – ${duration(moment.end_seconds)}`,'meta'));
    passage.append(node('p',moment.summary));
   }
   if(moment.scene){
@@ -83,7 +85,7 @@ function card(item){
    const offset=moment.scene.timeline_offset_seconds;
    passage.append(node('div',`Version ${moment.scene.media_version}${offset?` · media ${moment.scene.media_start_seconds}s – ${moment.scene.media_end_seconds}s, offset ${offset>0?'+':''}${offset}s`:''}`,'meta'));
   }
-  const url=new URL(item.canonical_url);if(url.hostname==='www.youtube.com'&&url.pathname==='/watch'){url.searchParams.set('t',String(Math.floor(moment.start_seconds)));passage.append(link(url.href,'Open timestamp ↗'));}
+  const url=new URL(item.canonical_url);if(url.hostname==='www.youtube.com'&&url.pathname==='/watch'){url.searchParams.set('t',String(Math.floor(moment.focus?.[0]??moment.start_seconds)));passage.append(link(url.href,'Open timestamp ↗'));}
   article.append(passage);
  }
  if(item.scene_analysis&&item.scene_analysis.status!=='complete')article.append(node('p',item.scene_analysis.message,'notice'));

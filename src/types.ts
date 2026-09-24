@@ -51,6 +51,8 @@ export interface Moment {
  id: string; start_seconds: number; end_seconds: number; summary: string;
  evidence_type: EvidenceType; analysis_version: string;
  inspected_ranges: [number,number][]; evidence_refs: string[]; scene?: SceneDetails;
+ // Transcript windows span minutes; focus is the segment inside the window that best matches the query.
+ focus?: [number,number];
 }
 export interface Result {
  id: string; title: string; canonical_url: string; source_id: string; source_name: string;

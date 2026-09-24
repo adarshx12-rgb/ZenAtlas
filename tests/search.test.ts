@@ -44,6 +44,11 @@ test('PostgreSQL catalogue/API, ownership, filters, evidence and stable paginati
      segments:[{start:0,end:10,text:'The kitchen has oak cabinets.'},{start:50,end:65,text:'The bright bedroom has a balcony.'}]});
    const moments=await service.start({q:'balcony',mode:'catalogue'},'alice');
    assert.equal(moments.results[0].evidence,'transcript_supported');assert.equal(moments.results[0].moments[0].end_seconds,65);
+   // The window starts at 0s, but the timestamp points at the segment inside it that matches the query.
+   assert.deepEqual(moments.results[0].moments[0].focus,[50,65]);
+   assert.deepEqual((await service.start({q:'kitchen cabinets',mode:'catalogue'},'alice')).results[0].moments[0].focus,[0,10]);
+   assert.deepEqual((await service.start({q:'bright bedroom kitchen',mode:'catalogue'},'alice')).results[0].moments[0].focus,[50,65],
+     'a window matched as a whole still focuses on the segment sharing the most query terms');
    await assert.rejects(importTranscript(db,{content_id:first.id,language:'en',origin:'TEST FIXTURE',content_version:'2',timing_quality:'provided',retention_permitted:true,
      segments:[{start:100,end:150,text:'Invalid beyond duration'}]}));
    assert.equal((await service.start({q:'balcony',mode:'catalogue'},'alice')).results.length,1,'failed import rolls back');
