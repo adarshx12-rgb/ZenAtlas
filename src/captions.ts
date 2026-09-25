@@ -8,29 +8,36 @@ import { takeBudget } from './budgets.js';
 import { contentHash } from './embeddings.js';
 import { importTranscript } from './moments.js';
 
-// Existing YouTube captions, read by scene-worker/src/zenatlas_scenes/captions.py (youtube-transcript-api).
-// Only caption text is fetched, never audio or video. Creator captions win over auto-generated ones.
+// Existing YouTube captions, read by scene-worker/src/zenatlas_scenes/captions.py. Only caption text is fetched, never
+// audio or video. Creator captions win over auto-generated ones. YouTube is asked directly; while it blocks us, Supadata
+// (SUPADATA_API_KEY) returns the same captions from its own servers, within SUPADATA_DAILY_BUDGET.
+const kind = z.enum(['youtube_manual', 'youtube_auto', 'youtube_unknown']);
+const language = z.string().regex(/^[a-z]{2,3}$|^und$/);
 const answer = z.discriminatedUnion('status', [
- z.object({status: z.literal('ok'), kind: z.enum(['youtube_manual', 'youtube_auto']), language: z.string().regex(/^[a-z]{2,3}$|^und$/),
-   track: z.string().max(40), segments: z.array(z.object({start: z.number().finite().min(0), end: z.number().finite(), text: z.string().min(1)})).min(1)}),
+ z.object({status: z.literal('ok'), kind, language, track: z.string().max(40),
+   segments: z.array(z.object({start: z.number().finite().min(0), end: z.number().finite(), text: z.string().min(1)})).min(1)}),
  z.object({status: z.literal('none'), reason: z.string().max(100)}),
- z.object({status: z.literal('error'), code: z.string().max(100)}),
+ // A YouTube block after the track list was read still says which track (and kind) it chose.
+ z.object({status: z.literal('error'), code: z.string().max(100), kind: kind.optional(), track: z.string().max(40).optional(), language: language.optional()}),
 ]);
 export type CaptionAnswer = z.infer<typeof answer>;
-export type CaptionFetcher = (videoId: string, language: string|null) => Promise<CaptionAnswer>;
+export type CaptionVia = 'youtube'|'supadata';
+export type CaptionFetcher = (videoId: string, language: string|null, via: CaptionVia) => Promise<CaptionAnswer>;
 
-// YouTube blocks addresses that fetch too much. A block pauses the whole caption lane rather than failing jobs one by one.
-const BLOCKED = new Set(['IpBlocked', 'RequestBlocked', 'PoTokenRequired']);
+// YouTube blocks addresses that fetch too much; Supadata stops when credits run out or the key is wrong.
+const YOUTUBE_BLOCKS = new Set(['IpBlocked', 'RequestBlocked', 'PoTokenRequired']);
+const SUPADATA_STOPS = new Set(['SupadataLimit', 'SupadataUnauthorized']);
+// The first block pauses direct YouTube requests for an hour; each further block within a day doubles it, up to a day.
 export const CAPTION_PAUSE_MINUTES = 60;
-// Each fetch is two YouTube requests (the track list, then the chosen track).
+// Each direct fetch is three YouTube requests (watch page, player API, the chosen track).
 export const CAPTION_FETCHES_PER_MINUTE = 6;
-const TIMEOUT_MS = 30_000;
 
-export function pythonCaptions(command: string, proxy = ''): CaptionFetcher {
- return (videoId, language) => new Promise(resolve => {
-   const env = {...process.env, YOUTUBE_CAPTIONS_PROXY: proxy, PYTHONIOENCODING: 'utf-8'};
-   execFile(command, ['-m', 'zenatlas_scenes.captions', videoId, ...(language ? [language] : [])],
-     {timeout: TIMEOUT_MS, maxBuffer: 32 * 1024 * 1024, windowsHide: true, env}, (error, stdout) => {
+export function pythonCaptions(command: string, options: {proxy?: string; supadataKey?: string} = {}): CaptionFetcher {
+ return (videoId, language, via) => new Promise(resolve => {
+   const env = {...process.env, YOUTUBE_CAPTIONS_PROXY: options.proxy ?? '', SUPADATA_API_KEY: options.supadataKey ?? '', PYTHONIOENCODING: 'utf-8'};
+   execFile(command, ['-m', 'zenatlas_scenes.captions', videoId, ...(language ? [language] : []), ...(via === 'supadata' ? ['--via=supadata'] : [])],
+     // Supadata processes long videos asynchronously and the helper polls for up to 90 seconds.
+     {timeout: via === 'supadata' ? 150_000 : 30_000, maxBuffer: 32 * 1024 * 1024, windowsHide: true, env}, (error, stdout) => {
        const line = stdout.trim().split('\n').at(-1) ?? '';
        try { resolve(answer.parse(JSON.parse(line))); }
        catch { resolve({status: 'error', code: error ? 'helper_failed' : 'helper_unparsable'}); }
@@ -58,13 +65,24 @@ export async function queueCaptions(db: DB, config: Config, results: Result[]) {
 }
 
 // Requeues without spending an attempt: waiting out a block or the per-minute limit is not a failure.
-async function requeue(db: DB, job: any, runAfter: string, code: string) {
+async function requeue(db: DB, job: any, runAfter: Date, code: string) {
  await db.query(`UPDATE jobs SET status='queued',attempts=greatest(attempts-1,0),run_after=$3::timestamptz,error_code=$4,lease_until=NULL,updated_at=now()
-   WHERE id=$1 AND lease_token=$2 AND status='running'`, [job.id, job.lease_token, runAfter, code]);
+   WHERE id=$1 AND lease_token=$2 AND status='running'`, [job.id, job.lease_token, runAfter.toISOString(), code]);
+}
+async function pausedUntil(db: DB, lane: string): Promise<Date|null> {
+ return (await db.query('SELECT until FROM lane_pauses WHERE lane=$1 AND until>now()', [lane])).rows[0]?.until ?? null;
+}
+// With escalate, a block within a day of the last pause ending doubles the pause (up to a day); otherwise it is `minutes`.
+async function pause(db: DB, lane: string, reason: string, minutes: number, escalate: boolean): Promise<Date> {
+ return (await db.query(`INSERT INTO lane_pauses(lane,until,strikes,reason) VALUES($1,now()+$2*interval '1 minute',1,$3)
+   ON CONFLICT(lane) DO UPDATE SET
+     until=now()+least(1440,$2*CASE WHEN $4 AND lane_pauses.until>now()-interval '1 day' THEN power(2,lane_pauses.strikes) ELSE 1 END)*interval '1 minute',
+     strikes=CASE WHEN lane_pauses.until>now()-interval '1 day' THEN lane_pauses.strikes+1 ELSE 1 END,reason=$3
+   RETURNING until`, [lane, minutes, reason, escalate])).rows[0].until;
 }
 
 export type CaptionOutcome = {status: string; [key: string]: unknown};
-// Returns the job result, or null when the job was requeued (paused lane or per-minute limit).
+// Returns the job result, or null when the job was requeued (paused lanes or the per-minute limit).
 export async function captionJob(db: DB, config: Config, job: any, fetch: CaptionFetcher): Promise<CaptionOutcome|null> {
  const row = (await db.query(`SELECT c.id,c.canonical_url,c.language,c.duration FROM content c JOIN sources s ON s.id=c.source_id
    WHERE c.id=$1 AND ${eligible}`, [job.payload?.content_id])).rows[0];
@@ -72,29 +90,44 @@ export async function captionJob(db: DB, config: Config, job: any, fetch: Captio
  const id = youtubeId(row.canonical_url);
  if (!id) return {status: 'not_youtube'};
  if ((await db.query('SELECT 1 FROM transcript_segments WHERE content_id=$1 LIMIT 1', [row.id])).rows.length) return {status: 'already_transcribed'};
- const paused = (await db.query(`SELECT max(run_after) AS until FROM jobs WHERE kind='youtube_captions' AND error_code='youtube_blocked'
-   AND status='queued' AND run_after>now()`)).rows[0]?.until;
- if (paused) { await requeue(db, job, paused.toISOString(), 'youtube_blocked'); return null; }
  if (!await takeBudget(db, 'youtube_caption_fetches', CAPTION_FETCHES_PER_MINUTE, 'minute')) {
-   await requeue(db, job, new Date(Date.now() + 60_000).toISOString(), 'rate_limited'); return null;
+   await requeue(db, job, new Date(Date.now() + 60_000), 'rate_limited'); return null;
  }
- const fetched = await fetch(id, row.language);
- if (fetched.status === 'none') return {status: 'no_captions', reason: fetched.reason};
- if (fetched.status === 'error') {
-   if (!BLOCKED.has(fetched.code)) throw new Error(`captions_${fetched.code}`);
-   const until = new Date(Date.now() + CAPTION_PAUSE_MINUTES * 60_000).toISOString();
-   await requeue(db, job, until, 'youtube_blocked');
-   await db.query(`UPDATE jobs SET run_after=greatest(run_after,$1::timestamptz) WHERE kind='youtube_captions' AND status='queued'`, [until]);
-   console.error(JSON.stringify({event: 'youtube_captions_paused', code: fetched.code, until}));
-   return null;
+ const settle = async (fetched: Exclude<CaptionAnswer, {status: 'error'}>, via: CaptionVia): Promise<CaptionOutcome> => {
+   if (fetched.status === 'none') return {status: 'no_captions', reason: fetched.reason, via};
+   // Captions may run a moment past the duration YouTube reports; the stored timeline never exceeds it.
+   const limit = row.duration > 0 ? row.duration : Infinity;
+   const segments = fetched.segments.filter(s => s.start < limit).map(s => ({start: s.start, end: Math.min(s.end, limit), text: s.text.slice(0, 4000)}))
+     .filter(s => s.end > s.start);
+   if (!segments.length) return {status: 'no_captions', reason: 'outside_duration', via};
+   const version = `youtube:${fetched.kind}:${fetched.track}:${contentHash(JSON.stringify(segments)).slice(0, 16)}`;
+   const stored = await importTranscript(db, {content_id: row.id, language: fetched.language, origin: `${row.canonical_url}#captions=${fetched.track}`,
+     content_version: version, timing_quality: 'provided', retention_permitted: true, source_kind: fetched.kind, segments});
+   return {status: 'imported', kind: fetched.kind, language: fetched.language, via, ...stored};
+ };
+
+ let chosen: {kind?: z.infer<typeof kind>; language?: string} = {};
+ if (!await pausedUntil(db, 'youtube_captions')) {
+   const direct = await fetch(id, row.language, 'youtube');
+   if (direct.status !== 'error') {
+     await db.query(`DELETE FROM lane_pauses WHERE lane='youtube_captions'`);
+     return settle(direct, 'youtube');
+   }
+   if (!YOUTUBE_BLOCKS.has(direct.code)) throw new Error(`captions_${direct.code}`);
+   const until = await pause(db, 'youtube_captions', direct.code, CAPTION_PAUSE_MINUTES, true);
+   console.error(JSON.stringify({event: 'youtube_captions_paused', code: direct.code, until}));
+   chosen = {kind: direct.kind, language: direct.language};
  }
- // Captions may run a moment past the duration YouTube reports; the stored timeline never exceeds it.
- const limit = row.duration > 0 ? row.duration : Infinity;
- const segments = fetched.segments.filter(s => s.start < limit).map(s => ({start: s.start, end: Math.min(s.end, limit), text: s.text.slice(0, 4000)}))
-   .filter(s => s.end > s.start);
- if (!segments.length) return {status: 'no_captions', reason: 'outside_duration'};
- const version = `youtube:${fetched.kind}:${fetched.track}:${contentHash(JSON.stringify(segments)).slice(0, 16)}`;
- const stored = await importTranscript(db, {content_id: row.id, language: fetched.language, origin: `${row.canonical_url}#captions=${fetched.track}`,
-   content_version: version, timing_quality: 'provided', retention_permitted: true, source_kind: fetched.kind, segments});
- return {status: 'imported', kind: fetched.kind, language: fetched.language, ...stored};
+ // YouTube is blocking direct requests. Supadata costs a credit per video, so it is used only now and within its budget.
+ if (config.SUPADATA_API_KEY && !await pausedUntil(db, 'supadata') && await takeBudget(db, 'supadata_requests', config.SUPADATA_DAILY_BUDGET)) {
+   const relayed = await fetch(id, chosen.language ?? row.language, 'supadata');
+   // Supadata does not report the caption kind; the kind YouTube's track list showed before the block is kept.
+   if (relayed.status === 'ok') return settle({...relayed, kind: chosen.kind ?? relayed.kind}, 'supadata');
+   if (relayed.status === 'none') return settle(relayed, 'supadata');
+   if (!SUPADATA_STOPS.has(relayed.code)) throw new Error(`captions_${relayed.code}`);
+   const until = await pause(db, 'supadata', relayed.code, 1440, false);
+   console.error(JSON.stringify({event: 'supadata_paused', code: relayed.code, until}));
+ }
+ await requeue(db, job, (await pausedUntil(db, 'youtube_captions')) ?? new Date(Date.now() + CAPTION_PAUSE_MINUTES * 60_000), 'youtube_blocked');
+ return null;
 }

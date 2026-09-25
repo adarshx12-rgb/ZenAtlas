@@ -16,10 +16,14 @@ async function youtube(db: DB, id: string, title = `Fixture video ${id}`, langua
  return (await ingest(db, contentInput.parse({url: `https://www.youtube.com/watch?v=${id}`, title, description: 'Fixture description',
    language, duration: 60, availability: 'available'}), {fixture: true}))!;
 }
-function fetcher(answers: Record<string, CaptionAnswer>) {
- const asked: string[] = [];
- const fetch: CaptionFetcher = async id => { asked.push(id); return answers[id] ?? {status: 'none', reason: 'NoTranscriptFound'}; };
- return {fetch, asked};
+// YouTube answers by video id; Supadata answers (only used while YouTube blocks) likewise. `relayed` records Supadata calls.
+function fetcher(answers: Record<string, CaptionAnswer>, supadata: Record<string, CaptionAnswer> = {}) {
+ const asked: string[] = [], relayed: string[] = [];
+ const fetch: CaptionFetcher = async (id, language, via) => {
+   if (via === 'supadata') { relayed.push(`${id}:${language}`); return supadata[id] ?? {status: 'none', reason: 'transcript-unavailable'}; }
+   asked.push(id); return answers[id] ?? {status: 'none', reason: 'NoTranscriptFound'};
+ };
+ return {fetch, asked, relayed};
 }
 const ok = (kind: 'youtube_manual'|'youtube_auto', text: string): CaptionAnswer =>
  ({status: 'ok', kind, language: 'en', track: 'en', segments: [{start: 5, end: 8, text}, {start: 8, end: 12, text: 'and then the credits roll'}]});
@@ -75,13 +79,63 @@ test('a YouTube block pauses the whole caption lane without spending attempts; m
    assert.equal(jobs.length, 3);
    assert.ok(jobs.every(j => j.status === 'queued' && j.attempts === 0 && j.paused), JSON.stringify(jobs));
 
+   assert.equal((await db.query(`SELECT strikes FROM lane_pauses WHERE lane='youtube_captions'`)).rows[0].strikes, 1);
+   // An hour later: the pause has ended.
    await db.query(`UPDATE jobs SET run_after=now() WHERE kind='youtube_captions'`);
+   await db.query(`UPDATE lane_pauses SET until=now()-interval '1 second'`);
    const done = fetcher({eeeeeeeeeee: ok('youtube_auto', 'hello again')});
    while (await workOnce(db, config, undefined, undefined, undefined, done.fetch));
    assert.equal((await job(db, silent.id)).status, 'complete');
-   assert.deepEqual((await job(db, silent.id)).result, {status: 'no_captions', reason: 'NoTranscriptFound'});
+   assert.deepEqual((await job(db, silent.id)).result, {status: 'no_captions', reason: 'NoTranscriptFound', via: 'youtube'});
    assert.equal((await job(db, first.id)).result.status, 'imported');
    assert.equal(await queueCaptions(db, config, [silent]), 0, 'a video without captions is not asked again');
+   assert.equal((await db.query('SELECT count(*)::int AS n FROM lane_pauses')).rows[0].n, 0, 'a successful fetch clears the pause');
+ } finally { await db.close(); }
+});
+
+test('while YouTube blocks, Supadata fetches within its budget and keeps the kind the track list showed', async () => {
+ const db = await database();
+ try {
+   const known = await youtube(db, 'iiiiiiiiiii'), unknown = await youtube(db, 'jjjjjjjjjjj'), over = await youtube(db, 'kkkkkkkkkkk');
+   await queueCaptions(db, config, [known, unknown, over]);
+   const {fetch, asked, relayed} = fetcher(
+     {iiiiiiiiiii: {status: 'error', code: 'IpBlocked', kind: 'youtube_auto', track: 'es', language: 'es'}},
+     {iiiiiiiiiii: {...ok('youtube_unknown', 'hola a todos'), language: 'es', track: 'es'}, jjjjjjjjjjj: ok('youtube_unknown', 'hello everyone')});
+   const withSupadata = {...config, SUPADATA_API_KEY: 'key', SUPADATA_DAILY_BUDGET: 2};
+   while (await workOnce(db, withSupadata, undefined, undefined, undefined, fetch));
+   assert.deepEqual(asked, ['iiiiiiiiiii'], 'YouTube is asked once, then left alone while paused');
+   assert.deepEqual(relayed, ['iiiiiiiiiii:es', 'jjjjjjjjjjj:hi'], 'the blocked track language, else the video language');
+   assert.deepEqual((await job(db, known.id)).result.via, 'supadata');
+   assert.deepEqual((await db.query(`SELECT DISTINCT source_kind,language FROM transcript_segments WHERE content_id=$1`, [known.id])).rows,
+     [{source_kind: 'youtube_auto', language: 'es'}]);
+   assert.deepEqual((await db.query(`SELECT DISTINCT source_kind FROM transcript_segments WHERE content_id=$1`, [unknown.id])).rows,
+     [{source_kind: 'youtube_unknown'}], 'blocked before the track list: kind unknown');
+   const waiting = await job(db, over.id);
+   assert.deepEqual([waiting.status, waiting.attempts, waiting.error_code], ['queued', 0, 'youtube_blocked'], 'over budget: waits for YouTube');
+ } finally { await db.close(); }
+});
+
+test('Supadata running out pauses it for a day; repeated YouTube blocks lengthen the pause', async () => {
+ const db = await database();
+ try {
+   const first = await youtube(db, 'lllllllllll'), second = await youtube(db, 'mmmmmmmmmmm');
+   await queueCaptions(db, config, [first, second]);
+   const {fetch, relayed} = fetcher({lllllllllll: {status: 'error', code: 'RequestBlocked'}, mmmmmmmmmmm: {status: 'error', code: 'RequestBlocked'}},
+     {lllllllllll: {status: 'error', code: 'SupadataLimit'}});
+   const withSupadata = {...config, SUPADATA_API_KEY: 'key', SUPADATA_DAILY_BUDGET: 10};
+   while (await workOnce(db, withSupadata, undefined, undefined, undefined, fetch));
+   assert.deepEqual(relayed, ['lllllllllll:hi'], 'after running out, Supadata is not asked again');
+   const lanes = (await db.query(`SELECT lane,strikes,round(extract(epoch FROM until-now())/60) AS minutes FROM lane_pauses ORDER BY lane`)).rows;
+   assert.deepEqual(lanes.map(l => [l.lane, l.strikes]), [['supadata', 1], ['youtube_captions', 1]]);
+   assert.ok(lanes[0].minutes > 1400 && lanes[1].minutes <= 60, JSON.stringify(lanes));
+
+   // The hour passes, YouTube blocks again: the next pause is two hours.
+   await db.query(`UPDATE lane_pauses SET until=now()-interval '1 second' WHERE lane='youtube_captions'`);
+   await db.query(`UPDATE jobs SET run_after=now() WHERE kind='youtube_captions'`);
+   while (await workOnce(db, withSupadata, undefined, undefined, undefined, fetch));
+   const again = (await db.query(`SELECT strikes,round(extract(epoch FROM until-now())/60) AS minutes FROM lane_pauses WHERE lane='youtube_captions'`)).rows[0];
+   assert.equal(again.strikes, 2);
+   assert.ok(again.minutes > 110 && again.minutes <= 120, JSON.stringify(again));
  } finally { await db.close(); }
 });
 

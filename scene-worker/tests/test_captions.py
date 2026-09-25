@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from youtube_transcript_api import NoTranscriptFound, RequestBlocked, TranscriptsDisabled
 
-from zenatlas_scenes.captions import captions, choose_track, cues
+from zenatlas_scenes.captions import captions, choose_track, cues, supadata
 
 
 @dataclass
@@ -80,3 +80,58 @@ def test_only_real_video_ids_are_requested():
     assert captions("../../etc", None, api) == {"status": "error", "code": "invalid_video_id"}
     assert api.asked == []
     json.dumps(captions("dQw4w9WgXcQ", None, api))
+
+
+class Response:
+    def __init__(self, status: int, body: dict):
+        self.status_code, self._body, self.headers = status, body, {"content-type": "application/json"}
+
+    def json(self):
+        return self._body
+
+
+class Http:
+    def __init__(self, *responses: Response):
+        self.responses, self.calls = list(responses), []
+
+    def get(self, url, params=None, headers=None, timeout=None):
+        self.calls.append((url, params, headers))
+        return self.responses.pop(0)
+
+
+def test_a_block_after_the_track_list_reports_the_chosen_track():
+    class Blocked(Track):
+        def fetch(self):
+            raise RequestBlocked("dQw4w9WgXcQ")
+    answer = captions("dQw4w9WgXcQ", "hi", Api([Blocked("hi", True)]))
+    assert answer == {"status": "error", "code": "RequestBlocked", "kind": "youtube_auto", "track": "hi", "language": "hi"}
+
+
+def test_supadata_returns_cleaned_native_captions_in_seconds():
+    http = Http(Response(200, {"lang": "hi", "availableLangs": ["hi"], "content": [
+        {"text": "[संगीत]", "offset": 0, "duration": 1000, "lang": "hi"}, {"text": "नमस्ते मेरे भाई", "offset": 1000, "duration": 4560, "lang": "hi"},
+        {"text": "पहली चीज", "offset": 4000, "duration": 2000, "lang": "hi"}]}))
+    answer = supadata("dQw4w9WgXcQ", "hi", "key", http)
+    assert answer == {"status": "ok", "kind": "youtube_unknown", "language": "hi", "track": "hi",
+                      "segments": [{"start": 1.0, "end": 4.0, "text": "नमस्ते मेरे भाई"}, {"start": 4.0, "end": 6.0, "text": "पहली चीज"}]}
+    url, params, headers = http.calls[0]
+    assert params == {"url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "mode": "native", "lang": "hi"}, "never AI-generated"
+    assert headers == {"x-api-key": "key"}
+
+
+def test_supadata_long_videos_are_polled_until_the_job_completes():
+    http = Http(Response(202, {"jobId": "job-1"}), Response(200, {"status": "active"}),
+                Response(200, {"status": "completed", "lang": "en", "content": [{"text": "hello", "offset": 500, "duration": 1500}]}))
+    answer = supadata("dQw4w9WgXcQ", None, "key", http, sleep=lambda s: None)
+    assert answer["segments"] == [{"start": 0.5, "end": 2.0, "text": "hello"}]
+    assert [c[0] for c in http.calls][1:] == ["https://api.supadata.ai/v1/transcript/job-1"] * 2
+
+
+def test_supadata_answers_map_to_final_or_retryable_outcomes():
+    unavailable = Response(206, {"error": "transcript-unavailable"})
+    assert supadata("dQw4w9WgXcQ", None, "key", Http(unavailable))["status"] == "none"
+    assert supadata("dQw4w9WgXcQ", None, "key", Http(Response(403, {})))["status"] == "none", "a sign-in-only video is final"
+    assert supadata("dQw4w9WgXcQ", None, "key", Http(Response(429, {"error": "limit-exceeded"}))) == {"status": "error", "code": "SupadataLimit"}
+    assert supadata("dQw4w9WgXcQ", None, "key", Http(Response(401, {}))) == {"status": "error", "code": "SupadataUnauthorized"}
+    assert supadata("dQw4w9WgXcQ", None, "", Http()) == {"status": "error", "code": "SupadataUnauthorized"}
+    assert supadata("dQw4w9WgXcQ", None, "key", Http(Response(500, {}))) == {"status": "error", "code": "Supadata500"}

@@ -25,10 +25,23 @@ The source must permit transcripts (`policy.transcripts`), exactly as for other 
   `no_captions` and is not asked again.
 - At most 6 fetches per minute (`CAPTION_FETCHES_PER_MINUTE`); extra jobs wait a minute without spending an attempt.
 - `YOUTUBE_CAPTIONS_DAILY_BUDGET` caps jobs queued per day.
-- When YouTube blocks the address (`IpBlocked`, `RequestBlocked`), the whole lane pauses for an hour
-  (`CAPTION_PAUSE_MINUTES`) without spending attempts. The worker logs `youtube_captions_paused`. YouTube blocks many
-  cloud addresses, so a VPS usually needs `YOUTUBE_CAPTIONS_PROXY`.
+- When YouTube blocks the address (`IpBlocked`, `RequestBlocked`), direct requests pause for an hour
+  (`CAPTION_PAUSE_MINUTES`, recorded in `lane_pauses`). Each further block within a day doubles the pause, up to a day,
+  and a successful fetch clears it. Waiting never spends job attempts. The worker logs `youtube_captions_paused`.
+  YouTube blocks many cloud addresses, so a VPS usually needs `YOUTUBE_CAPTIONS_PROXY` or Supadata.
 - Any other helper failure is retried like any job: three attempts with backoff.
+
+## Supadata fallback
+
+While direct requests are paused, and only then, jobs use [Supadata](https://supadata.ai) (`SUPADATA_API_KEY`), which
+fetches the same YouTube captions on its own servers with `mode=native` (never AI-generated). Each video costs one
+credit, including videos without captions, so `SUPADATA_DAILY_BUDGET` caps calls per day (default 3: the free plan has
+100 credits a month). Past the budget, jobs wait for YouTube again.
+
+Supadata does not say whether captions are creator-made or auto-generated. When YouTube blocked only the caption
+download, its track list already showed the kind and language, and those are kept. When it blocked the track list too,
+the transcript is stored as `youtube_unknown`, weighted like auto captions. Running out of credits or a rejected key
+pauses Supadata for a day (`supadata_paused` in the log).
 
 The library reads YouTube's web-player caption endpoint, not the official Data API, which can only download captions
 for videos the signed-in account owns. A change on YouTube's side can break it until the library is updated.

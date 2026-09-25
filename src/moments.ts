@@ -5,13 +5,14 @@ export const transcriptInput = z.object({
  content_version:z.string().min(1).max(100),timing_quality:z.enum(['provided','aligned','human_verified']),
  retention_permitted:z.literal(true),
  // YouTube caption kind; creator captions (youtube_manual) outrank auto-generated ones (youtube_auto) at equal match.
- source_kind:z.enum(['youtube_manual','youtube_auto']).optional(),
+ source_kind:z.enum(['youtube_manual','youtube_auto','youtube_unknown']).optional(),
  segments:z.array(z.object({start:z.number().finite().min(0),end:z.number().finite().positive(),text:z.string().min(1).max(4000)})
    .refine(v=>v.end>v.start)).min(1).max(10000),
 }).strict();
 // Auto-generated captions mishear words, so their matches count slightly less than creator captions or other transcripts.
+// Captions of unknown kind (youtube_unknown) are weighted as auto captions, the more common case.
 export const AUTO_CAPTION_WEIGHT = 0.9;
-export const captionWeight = (alias:string) => `(CASE WHEN ${alias}.source_kind='youtube_auto' THEN ${AUTO_CAPTION_WEIGHT} ELSE 1 END)`;
+export const captionWeight = (alias:string) => `(CASE WHEN ${alias}.source_kind IN ('youtube_auto','youtube_unknown') THEN ${AUTO_CAPTION_WEIGHT} ELSE 1 END)`;
 type Segment = {id:string;start_seconds:number;end_seconds:number;text:string};
 export function transcriptWindows(segments: Segment[], maxChars=6000, overlap=2): Segment[][] {
  const windows:Segment[][]=[]; let start=0;

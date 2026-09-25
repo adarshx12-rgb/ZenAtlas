@@ -40,7 +40,7 @@ export async function workOnce(db:DB,config:Config,adapters?:SourceAdapter[],pro
      await complete(db,job,{results:outcome.results,closest:outcome.closest,providers:outcome.providers,dropped:outcome.dropped,searches:outcome.searches,
        ...(outcome.contract?{contract:outcome.contract,unmet:outcome.unmet??[]}:{})});
    } else if(job.kind==='youtube_captions') {
-     const outcome=await captionJob(db,config,job,captions??pythonCaptions(captionCommand(config),config.YOUTUBE_CAPTIONS_PROXY));
+     const outcome=await captionJob(db,config,job,captions??pythonCaptions(captionCommand(config),{proxy:config.YOUTUBE_CAPTIONS_PROXY,supadataKey:config.SUPADATA_API_KEY}));
      if(outcome) {
        await complete(db,job,outcome);
        const row=outcome.status==='imported'?(await db.query('SELECT id,title,description FROM content WHERE id=$1',[job.payload.content_id])).rows[0]:null;
