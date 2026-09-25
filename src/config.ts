@@ -87,6 +87,12 @@ export const configSchema = z.object({
   VIDEO_EVIDENCE_CHECKS: number(12, 0, 40),
   SCENE_AUTO_QUEUE: z.enum(['true','false']).default('true').transform(v => v === 'true'),
   SCENE_SHORTLIST: number(3, 0, 10),
+  // Existing YouTube captions (creator-made first, else auto-generated), fetched in the background for top results
+  // without a transcript. Only caption text is read, never media. See docs/YOUTUBE_CAPTIONS.md.
+  YOUTUBE_CAPTIONS: z.enum(['true','false']).default('false').transform(v => v === 'true'),
+  YOUTUBE_CAPTIONS_SHORTLIST: number(5, 0, 20), YOUTUBE_CAPTIONS_DAILY_BUDGET: number(200, 0, 5000),
+  // Python with the scene-worker "captions" extra; empty uses PAGE_TEXT_PYTHON.
+  CAPTIONS_PYTHON: optional, YOUTUBE_CAPTIONS_PROXY: optional,
   OFFICIAL_YOUTUBE_CHANNELS: optional,
   REDDIT_SIGNALS: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
   // No key needed: a public AniList lookup gives the planner and judge an anime's official titles, synonyms and

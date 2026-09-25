@@ -13,9 +13,10 @@ import { canonicalize } from './urls.js';
 import { runDiscovery, type DiscoveryDeps } from './discovery.js';
 import { providerHealth } from './health.js';
 import { saveTrace } from './learning.js';
+import { captionCommand, captionJob, pythonCaptions, type CaptionFetcher } from './captions.js';
 
 export { providerHealth };
-export async function workOnce(db:DB,config:Config,adapters?:SourceAdapter[],probe?:typeof probeURL,deps?:DiscoveryDeps) {
+export async function workOnce(db:DB,config:Config,adapters?:SourceAdapter[],probe?:typeof probeURL,deps?:DiscoveryDeps,captions?:CaptionFetcher) {
  const job=await claim(db); if(!job) return false;
  let collectingDomain:string|undefined;
  let renewing: Promise<void>|undefined;
@@ -38,6 +39,13 @@ export async function workOnce(db:DB,config:Config,adapters?:SourceAdapter[],pro
      await learnFrom(db,config,job,outcome.trace);
      await complete(db,job,{results:outcome.results,closest:outcome.closest,providers:outcome.providers,dropped:outcome.dropped,searches:outcome.searches,
        ...(outcome.contract?{contract:outcome.contract,unmet:outcome.unmet??[]}:{})});
+   } else if(job.kind==='youtube_captions') {
+     const outcome=await captionJob(db,config,job,captions??pythonCaptions(captionCommand(config),config.YOUTUBE_CAPTIONS_PROXY));
+     if(outcome) {
+       await complete(db,job,outcome);
+       const row=outcome.status==='imported'?(await db.query('SELECT id,title,description FROM content WHERE id=$1',[job.payload.content_id])).rows[0]:null;
+       if(row) await enqueueEnrichment(db,config,row as Result);
+     }
    } else if(job.kind==='collect') {
      const source=(await db.query(`SELECT * FROM sources WHERE id=$1 AND status='active' AND adapter='json_feed' AND health_status<>'down'`,[job.payload.source_id])).rows[0];
      if(source && source.policy.metadata===true) {

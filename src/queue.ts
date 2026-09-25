@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { DB } from './db.js';
 
-export type JobKind = 'discovery'|'collect'|'enrich'|'source_health'|'source_discovery'|'audit'|'critic_review';
+export type JobKind = 'discovery'|'collect'|'enrich'|'source_health'|'source_discovery'|'audit'|'critic_review'|'youtube_captions';
 export async function enqueue(db: DB, kind: JobKind, key: string, payload: unknown) {
  return (await db.query(`INSERT INTO jobs(kind,dedupe_key,payload) VALUES($1,$2,$3)
  ON CONFLICT(dedupe_key) DO UPDATE SET dedupe_key=excluded.dedupe_key RETURNING *`,[kind,key,JSON.stringify(payload)])).rows[0];

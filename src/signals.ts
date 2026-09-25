@@ -12,6 +12,7 @@ import type { SearchTarget } from './planner.js';
 import {PublicVideoEvidence,selectComments,type VideoEvidenceAdapter,type VideoEvidence} from './video-evidence.js';
 import {importTranscript} from './moments.js';
 import {retainedEvidence,queueSceneShortlist} from './retained-evidence.js';
+import {queueCaptions} from './captions.js';
 import { decide, detectFormat, inspect, type Decision, type Finding } from './evidence.js';
 import { hardEach, type RequirementsContract } from './requirements.js';
 import { accessKind, accessLabel, fullCopyAccess } from './access.js';
@@ -391,6 +392,8 @@ export async function applySignals(db: DB, config: Config, query: string, result
  for (const id of previews.keys()) if (!shown.has(id)) previews.delete(id);
  const queued=await queueSceneShortlist(db,config,ranked,query).catch(()=>0);
  if(queued) providers.push({provider:'scene_analysis',status:'partial',message:`${queued} videos queued for scene analysis; these pending analyses are not evidence in this ranking.`});
+ const captioned=await queueCaptions(db,config,ranked).catch(()=>0);
+ if(captioned) providers.push({provider:'youtube_captions',status:'partial',message:`${captioned} videos queued for caption fetching; their transcripts help later searches, not this one.`});
  // Every candidate's verdict, rejected ones included, for the search's learning trace.
  const judged: Judged[] = scored.map(s => ({id: s.result.id, relevance: s.result.judgement?.relevance ?? null, reason: s.result.judgement?.reason ?? null,
    basis: s.result.judgement ? s.result.evidence_coverage?.basis ?? null : null}));

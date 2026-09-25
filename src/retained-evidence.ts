@@ -4,13 +4,14 @@ import type {Result} from './types.js';
 import {activeScene,sceneSelect,sceneMoment} from './scenes.js';
 import {youtubeId} from './youtube.js';
 import {takeBudget} from './budgets.js';
+import {captionWeight} from './moments.js';
 
 export async function retainedEvidence(db:DB,ids:string[],query:string) {
  const rows=(await db.query(`SELECT c.id,x.* FROM content c JOIN sources s ON s.id=c.source_id
  CROSS JOIN LATERAL (SELECT m.id AS evidence_id,m.start_seconds,m.end_seconds,m.summary,m.evidence_type
    FROM moments m WHERE m.content_id=c.id AND m.status='active' AND m.evidence_type='transcript_supported'
    AND (s.policy->>'transcripts')::boolean=true
-   ORDER BY ts_rank_cd(m.search_vector,websearch_to_tsquery('english',$2)) DESC,m.start_seconds LIMIT 3) x
+   ORDER BY ts_rank_cd(m.search_vector,websearch_to_tsquery('english',$2))*${captionWeight('m')} DESC,m.start_seconds LIMIT 3) x
  WHERE c.id=ANY($1::uuid[]) AND c.expires_at>now() AND c.availability<>'unavailable'
  AND s.status='active' AND s.health_status<>'down' AND split_part(split_part(c.canonical_url,'://',2),'/',1)=s.active_domain`,[ids,query])).rows;
  const scenes=(await db.query(`${sceneSelect} WHERE v.content_id=ANY($1::uuid[]) AND ${activeScene}

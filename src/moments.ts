@@ -4,9 +4,14 @@ export const transcriptInput = z.object({
  content_id:z.string().uuid(),language:z.string().min(2).max(20),origin:z.string().min(1).max(500),
  content_version:z.string().min(1).max(100),timing_quality:z.enum(['provided','aligned','human_verified']),
  retention_permitted:z.literal(true),
+ // YouTube caption kind; creator captions (youtube_manual) outrank auto-generated ones (youtube_auto) at equal match.
+ source_kind:z.enum(['youtube_manual','youtube_auto']).optional(),
  segments:z.array(z.object({start:z.number().finite().min(0),end:z.number().finite().positive(),text:z.string().min(1).max(4000)})
    .refine(v=>v.end>v.start)).min(1).max(10000),
 }).strict();
+// Auto-generated captions mishear words, so their matches count slightly less than creator captions or other transcripts.
+export const AUTO_CAPTION_WEIGHT = 0.9;
+export const captionWeight = (alias:string) => `(CASE WHEN ${alias}.source_kind='youtube_auto' THEN ${AUTO_CAPTION_WEIGHT} ELSE 1 END)`;
 type Segment = {id:string;start_seconds:number;end_seconds:number;text:string};
 export function transcriptWindows(segments: Segment[], maxChars=6000, overlap=2): Segment[][] {
  const windows:Segment[][]=[]; let start=0;
@@ -28,7 +33,7 @@ export async function importTranscript(db:DB,raw:unknown) {
    if(content.duration && input.segments.some(s=>s.end>content.duration)) throw new Error('Caption exceeds video duration');
    const existing=(await tx.query('SELECT * FROM transcript_segments WHERE content_id=$1 ORDER BY start_seconds,end_seconds,id',[input.content_id])).rows;
    if(existing.length===input.segments.length && existing.every((s,i)=>s.content_version===input.content_version && s.origin===input.origin &&
-     s.language===input.language && s.start_seconds===input.segments[i].start && s.end_seconds===input.segments[i].end && s.text===input.segments[i].text)) {
+     s.language===input.language && s.source_kind===(input.source_kind??null) && s.start_seconds===input.segments[i].start && s.end_seconds===input.segments[i].end && s.text===input.segments[i].text)) {
      return {segments:existing.length,moments:(await tx.query("SELECT count(*)::int AS n FROM moments WHERE content_id=$1 AND evidence_type='transcript_supported'",[input.content_id])).rows[0].n,
        analysis_version:`transcript-extractive-v1:${input.content_version}`};
    }
@@ -36,17 +41,17 @@ export async function importTranscript(db:DB,raw:unknown) {
    await tx.query('DELETE FROM transcript_segments WHERE content_id=$1',[input.content_id]);
    const segments:Segment[]=[];
    for(const segment of input.segments) segments.push((await tx.query(`INSERT INTO transcript_segments
-     (content_id,start_seconds,end_seconds,text,language,origin,content_version,timing_quality)
-     VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,[input.content_id,segment.start,segment.end,segment.text,input.language,input.origin,input.content_version,input.timing_quality])).rows[0]);
+     (content_id,start_seconds,end_seconds,text,language,origin,content_version,timing_quality,source_kind)
+     VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,[input.content_id,segment.start,segment.end,segment.text,input.language,input.origin,input.content_version,input.timing_quality,input.source_kind??null])).rows[0]);
    const version=`transcript-extractive-v1:${input.content_version}`;
    // Every segment is inspected. Overlapping windows preserve neighbouring context; global search ranks all windows.
    // Text is quoted evidence, never a generated assertion about a visual event or story payoff.
    const windows=transcriptWindows(segments);
    for(const window of windows) await tx.query(`INSERT INTO moments(content_id,start_seconds,end_seconds,summary,evidence_refs,
-     evidence_type,analysis_method,analysis_version,inspected_ranges)
-     VALUES($1,$2,$3,$4,$5,'transcript_supported','extractive_windows',$6,$7)`,
+     evidence_type,analysis_method,analysis_version,inspected_ranges,source_kind)
+     VALUES($1,$2,$3,$4,$5,'transcript_supported','extractive_windows',$6,$7,$8)`,
      [input.content_id,window[0].start_seconds,Math.max(...window.map(s=>s.end_seconds)),window.map(s=>s.text).join(' '),
-       window.map(s=>s.id),version,JSON.stringify(window.map(s=>[s.start_seconds,s.end_seconds]))]);
+       window.map(s=>s.id),version,JSON.stringify(window.map(s=>[s.start_seconds,s.end_seconds])),input.source_kind??null]);
    return {segments:segments.length,moments:windows.length,analysis_version:version};
  });
 }

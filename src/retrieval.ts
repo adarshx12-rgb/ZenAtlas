@@ -4,6 +4,7 @@ import type { SearchInput, Result, ProviderStatus, Moment } from './types.js';
 import { rank } from './ranking.js';
 import { embed } from './embeddings.js';
 import { activeScene, sceneMoment, sceneSelect } from './scenes.js';
+import { captionWeight } from './moments.js';
 
 const eligible = `s.status='active' AND s.health_status<>'down' AND split_part(split_part(c.canonical_url,'://',2),'/',1)=s.active_domain
  AND (s.policy->>'metadata')::boolean=true AND c.availability<>'unavailable'
@@ -22,7 +23,7 @@ export async function retrieve(db: DB, config: Config, input: SearchInput, owner
    AND c.search_vector @@ websearch_to_tsquery('english',$1) ORDER BY score DESC,c.id LIMIT 200`,args)).rows;
  // Transcript windows and analysed scenes form one timestamped-evidence ranking list.
  const momentMatches = (await db.query(`SELECT id,max(score) AS score FROM (
-   SELECT c.id,ts_rank_cd(m.search_vector,websearch_to_tsquery('english',$1),32) AS score
+   SELECT c.id,ts_rank_cd(m.search_vector,websearch_to_tsquery('english',$1),32)*${captionWeight('m')} AS score
    FROM content c JOIN sources s ON s.id=c.source_id JOIN moments m ON m.content_id=c.id
    WHERE ${eligible} AND m.status='active' AND m.search_vector @@ websearch_to_tsquery('english',$1)
    UNION ALL
