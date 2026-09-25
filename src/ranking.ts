@@ -1,13 +1,13 @@
 import type { ContentInput, Result } from './types.js';
 export const RANKING_VERSION = 'relevance-v8-requirements';
 // RRF combines ordinal ranks, never incomparable raw lexical/cosine scores.
-export function reciprocalRankFusion(lists: string[][], k = 60): Map<string,number> {
+export function reciprocalRankFusion(lists: string[][], k = 60, weights: number[] = []): Map<string,number> {
  const scores = new Map<string,number>();
- for (const list of lists) for (const [i,id] of [...new Set(list)].entries()) scores.set(id,(scores.get(id)??0)+1/(k+i+1));
+ for (const [l,list] of lists.entries()) for (const [i,id] of [...new Set(list)].entries()) scores.set(id,(scores.get(id)??0)+(weights[l]??1)/(k+i+1));
  return scores;
 }
-export function rank(rows: (Result & {reliability:number;personal:number})[], lists:string[][]): Result[] {
- const scores = reciprocalRankFusion(lists);
+export function rank(rows: (Result & {reliability:number;personal:number})[], lists:string[][], weights: number[] = []): Result[] {
+ const scores = reciprocalRankFusion(lists, 60, weights);
  const remaining = rows.map(r=>({row:r,score:(scores.get(r.id)??0)*(1+0.05*r.reliability+0.03*Math.sign(r.personal))}));
  const counts = new Map<string,number>(); const result: Result[] = [];
  while (remaining.length) {

@@ -25,7 +25,7 @@ function fetcher(answers: Record<string, CaptionAnswer>, supadata: Record<string
  };
  return {fetch, asked, relayed};
 }
-const ok = (kind: 'youtube_manual'|'youtube_auto', text: string): CaptionAnswer =>
+const ok = (kind: 'youtube_manual'|'youtube_auto'|'youtube_unknown', text: string): Extract<CaptionAnswer, {status: 'ok'}> =>
  ({status: 'ok', kind, language: 'en', track: 'en', segments: [{start: 5, end: 8, text}, {start: 8, end: 12, text: 'and then the credits roll'}]});
 const job = (db: DB, id: string) => db.query(`SELECT * FROM jobs WHERE kind='youtube_captions' AND payload->>'content_id'=$1`, [id]).then(r => r.rows[0]);
 

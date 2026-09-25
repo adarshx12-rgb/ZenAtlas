@@ -5,6 +5,7 @@ import { rank } from './ranking.js';
 import { embed } from './embeddings.js';
 import { activeScene, sceneMoment, sceneSelect } from './scenes.js';
 import { captionWeight } from './moments.js';
+import { queryKeys } from './phonetic.js';
 
 const eligible = `s.status='active' AND s.health_status<>'down' AND split_part(split_part(c.canonical_url,'://',2),'/',1)=s.active_domain
  AND (s.policy->>'metadata')::boolean=true AND c.availability<>'unavailable'
@@ -16,6 +17,8 @@ const eligible = `s.status='active' AND s.health_status<>'down' AND split_part(s
    OR ($5='video_analysed' AND EXISTS(SELECT 1 FROM video_scenes v WHERE v.content_id=c.id AND ${activeScene}
    AND v.search_vector @@ websearch_to_tsquery('english',$1))))`;
 
+// Sound matches count half as much as an exact list, so exact evidence still outranks them.
+export const PHONETIC_WEIGHT = 0.5;
 export async function retrieve(db: DB, config: Config, input: SearchInput, owner: string) {
  const args = [input.q,input.language??null,input.source??null,input.after??null,input.evidence];
  const lexical = (await db.query(`SELECT c.id,ts_rank_cd(c.search_vector,websearch_to_tsquery('english',$1),32) AS score
@@ -31,6 +34,13 @@ export async function retrieve(db: DB, config: Config, input: SearchInput, owner
    FROM content c JOIN sources s ON s.id=c.source_id JOIN video_scenes v ON v.content_id=c.id
    WHERE ${eligible} AND ${activeScene} AND v.search_vector @@ websearch_to_tsquery('english',$1)
  ) evidence GROUP BY id ORDER BY score DESC,id LIMIT 200`,args)).rows;
+ // Sound-tolerant matches (src/phonetic.ts): a caption line and the next holding the sound of every query word, as when Hindi
+ // captions spell English words in Devanagari or auto-captions mishear them. A half-weight ranking list: exact matches win.
+ const keys = queryKeys(input.q);
+ const phonetic = keys.length ? (await db.query(`SELECT c.id FROM content c JOIN sources s ON s.id=c.source_id JOIN moments m ON m.content_id=c.id
+   WHERE ${eligible} AND m.status='active' AND m.evidence_type='transcript_supported' AND (s.policy->>'transcripts')::boolean=true
+   AND m.sound_keys @> $6::text[] AND EXISTS(SELECT 1 FROM transcript_segments t WHERE t.id=ANY(m.evidence_refs) AND t.sound_keys @> $6::text[])
+   GROUP BY c.id ORDER BY max(${captionWeight('m')}) DESC,c.id LIMIT 200`,[...args,keys])).rows : [];
  let semantic: {id:string;moment_ids?:string[];scene_ids?:string[]}[] = []; const providers: ProviderStatus[] = [];
  if (config.SEMANTIC_ENABLED) {
    try {
@@ -56,7 +66,7 @@ export async function retrieve(db: DB, config: Config, input: SearchInput, owner
      if (!vector) providers.push({provider:'embeddings',status:'disabled',message:'Semantic search is unavailable; keyword search is active.'});
    } catch { providers.push({provider:'embeddings',status:'unavailable',message:'Semantic search is unavailable; keyword search is active.'}); }
  }
- const ids = [...new Set([...lexical,...momentMatches,...semantic].map(r=>r.id))];
+ const ids = [...new Set([...lexical,...momentMatches,...semantic,...phonetic].map(r=>r.id))];
  if (!ids.length) return {results:[],strong:0,strongSources:0,providers};
  const rows = (await db.query(`SELECT c.*,s.display_name AS source_name,s.reliability,
    coalesce((SELECT CASE WHEN f.useful THEN 1 ELSE -1 END FROM feedback f WHERE f.owner=$2 AND f.content_id=c.id),0) AS personal
@@ -66,10 +76,14 @@ export async function retrieve(db: DB, config: Config, input: SearchInput, owner
  const moments = (await db.query(`SELECT m.*,f.start_seconds AS focus_start,f.end_seconds AS focus_end FROM moments m
    CROSS JOIN (SELECT nullif(replace(plainto_tsquery('english',$2)::text,' & ',' | '),'')::tsquery AS terms) q
    LEFT JOIN LATERAL (SELECT t.start_seconds,t.end_seconds FROM transcript_segments t
-     WHERE m.evidence_type='transcript_supported' AND t.id=ANY(m.evidence_refs) AND to_tsvector('english',t.text) @@ q.terms
-     ORDER BY ts_rank(to_tsvector('english',t.text),q.terms) DESC,t.start_seconds LIMIT 1) f ON true
+     WHERE m.evidence_type='transcript_supported' AND t.id=ANY(m.evidence_refs)
+     AND (to_tsvector('english',t.text) @@ q.terms OR (cardinality($5::text[])>0 AND t.sound_keys @> $5::text[]))
+     ORDER BY coalesce(ts_rank(to_tsvector('english',t.text),q.terms),0) DESC,t.start_seconds LIMIT 1) f ON true
    WHERE m.content_id=ANY($1::uuid[]) AND m.status='active' AND ($4='any' OR m.evidence_type=$4)
-   AND (m.search_vector @@ websearch_to_tsquery('english',$2) OR m.id=ANY($3::uuid[])) ORDER BY m.start_seconds,m.id`,[ids,input.q,semantic.flatMap(r=>r.moment_ids??[]),input.evidence])).rows;
+   AND (m.search_vector @@ websearch_to_tsquery('english',$2) OR m.id=ANY($3::uuid[])
+     OR (cardinality($5::text[])>0 AND m.evidence_type='transcript_supported' AND m.sound_keys @> $5::text[]
+       AND EXISTS(SELECT 1 FROM transcript_segments t WHERE t.id=ANY(m.evidence_refs) AND t.sound_keys @> $5::text[])))
+   ORDER BY m.start_seconds,m.id`,[ids,input.q,semantic.flatMap(r=>r.moment_ids??[]),input.evidence,keys])).rows;
  const scenes = (await db.query(`${sceneSelect} WHERE v.content_id=ANY($1::uuid[]) AND ${activeScene}
    AND ($4='any' OR $4='video_analysed')
    AND (v.search_vector @@ websearch_to_tsquery('english',$2) OR v.id=ANY($3::uuid[]))`,[ids,input.q,semantic.flatMap(r=>r.scene_ids??[]),input.evidence])).rows;
@@ -88,5 +102,6 @@ export async function retrieve(db: DB, config: Config, input: SearchInput, owner
  });
  const strongIds = new Set([...lexical,...momentMatches].filter(r=>r.score >= config.COVERAGE_MIN_SCORE).map(r=>r.id));
  const strongSources = new Set(rows.filter(r=>strongIds.has(r.id)).map(r=>r.source_id)).size;
- return {results:rank(results,[lexical.map(r=>r.id),momentMatches.map(r=>r.id),semantic.map(r=>r.id)]),strong:strongIds.size,strongSources,providers};
+ return {results:rank(results,[lexical.map(r=>r.id),momentMatches.map(r=>r.id),semantic.map(r=>r.id),phonetic.map(r=>r.id)],[1,1,1,PHONETIC_WEIGHT]),
+   strong:strongIds.size,strongSources,providers};
 }

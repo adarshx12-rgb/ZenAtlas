@@ -45,3 +45,20 @@ pauses Supadata for a day (`supadata_paused` in the log).
 
 The library reads YouTube's web-player caption endpoint, not the official Data API, which can only download captions
 for videos the signed-in account owns. A change on YouTube's side can break it until the library is updated.
+
+## Sound-tolerant matching
+
+Hindi auto-captions write English words in Devanagari ("anticipation gap" is "एंटीसिपेशन गैप"), and auto-captions
+mishear words, so exact keywords miss them. `src/phonetic.ts` handles both:
+
+- Devanagari caption lines are romanized as a Hindi speaker would type them (`transcript_segments.search_text`).
+- Every word becomes a sound key, its consonant skeleton: aspirates merge, `-tion` becomes `sn`, `w` becomes `v`, and
+  vowels drop ("anticipation" and "एंटीसिपेशन" are both `ANTSPSN`). A line stores the keys of itself and the next line
+  (`sound_keys`), so a phrase split across two lines matches; a moment stores the keys of its lines.
+- A query matches by sound when one caption line pair holds the key of every word that is not a stopword. Queries with
+  search operators (quotes, `-`, `OR`) and queries whose keys total under 5 characters (a lone "gap") never match by sound.
+- Sound matches are a separate ranking list at half weight (`PHONETIC_WEIGHT` in `src/retrieval.ts`), so exact matches
+  rank first. The moment points at the line where the matched phrase starts. Quotes are always the stored caption text.
+
+Keys are computed when a transcript is imported; transcripts imported before migration 013 get them on their next
+import. `scripts/evaluate-transcripts.ts` measures moment search with and without transcripts on a copy of the catalogue.
