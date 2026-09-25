@@ -9,7 +9,7 @@ def test_defaults_are_conservative():
     settings = Settings.from_env({"DATABASE_URL": "postgresql://fixture"})
     assert settings.gemini_model == "gemini-3.8-flash" and settings.media_root is None
     assert (settings.lease_seconds, settings.gemini_timeout_seconds, settings.daily_request_budget) == (900, 600, 20)
-    assert not settings.transcribe_fallback and settings.whisper_model == "small"
+    assert not settings.transcribe_fallback and settings.whisper_model == "large-v3-turbo"
 
 
 @pytest.mark.parametrize(("env", "message"), [

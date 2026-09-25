@@ -83,7 +83,7 @@ class Settings:
         lease = _integer(env, "SCENE_LEASE_SECONDS", 900, 120, 7200)
         if lease < timeout + 60:
             raise ConfigError("SCENE_LEASE_SECONDS must exceed GEMINI_TIMEOUT_SECONDS by at least 60 seconds")
-        whisper_model = env.get("WHISPER_MODEL", "").strip() or "small"
+        whisper_model = env.get("WHISPER_MODEL", "").strip() or "large-v3-turbo"
         compute_type = env.get("WHISPER_COMPUTE_TYPE", "").strip() or "int8"
         if not WHISPER_NAME_PATTERN.fullmatch(whisper_model) or not WHISPER_NAME_PATTERN.fullmatch(compute_type):
             raise ConfigError("WHISPER_MODEL and WHISPER_COMPUTE_TYPE must be simple names")

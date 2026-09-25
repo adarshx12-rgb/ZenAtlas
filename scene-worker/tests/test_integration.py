@@ -288,7 +288,7 @@ def test_retained_transcripts_are_reused_with_offsets_and_speech_to_text_is_the_
     assert rows(owner, "SELECT dialogue,dialogue_source FROM video_scenes WHERE media_version_id=%s AND status='active'", (version["id"],)) == [
         {"dialogue": "TEST FIXTURE recognised speech", "dialogue_source": "faster_whisper"}]
     latest = rows(owner, "SELECT analysis_version FROM scene_analyses WHERE media_version_id=%s ORDER BY completed_at DESC LIMIT 1", (version["id"],))
-    assert latest[0]["analysis_version"].endswith(":asr:small")
+    assert latest[0]["analysis_version"].endswith(":asr:large-v3-turbo")
 
 
 def test_media_without_an_audio_track_never_uses_speech_to_text(database, tmp_path, monkeypatch, capsys):
