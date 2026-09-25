@@ -16,11 +16,13 @@ function errorDetail(body: Buffer) {
 }
 type Options = { timeoutMs?: number; maxBytes?: number; method?: 'GET'|'POST'|'HEAD'; body?: unknown;
  token?: string; trustedOrigin?: string; contentTypes?: string[]; redirects?: number;
- headers?: Record<string,string>; probe?: boolean; accept?: string };
+ headers?: Record<string,string>; probe?: boolean; accept?: string;
+ // peek: read only this many bytes of a 200 response, whatever its content type, then close the connection.
+ peek?: number };
 export interface ProbeResponse {status:number;url:string;redirects:{from:string;to:string;status:number}[]}
 export interface TextResponse {url:string;contentType:string;text:string}
 export interface BinaryResponse {url:string;contentType:string;data:Buffer}
-type Raw = {status:number;url:string;contentType:string;data:Buffer;redirects:ProbeResponse['redirects']};
+type Raw = {status:number;url:string;contentType:string;data:Buffer;redirects:ProbeResponse['redirects'];length?:number|null};
 
 // Pin the validated DNS answer into the connection. Redirects repeat validation and never inherit credentials.
 async function request(input: string, options: Options, defaultTypes: string[]): Promise<Raw> {
@@ -35,10 +37,10 @@ async function request(input: string, options: Options, defaultTypes: string[]):
    if (!trusted) publicURL(target);
    const remaining = deadline - (Date.now() - started);
    if (remaining <= 0) throw new UpstreamError('timeout');
-   const response = await new Promise<{status: number; location?: string; contentType: string; data: Buffer}>((resolve, reject) => {
+   const response = await new Promise<{status: number; location?: string; contentType: string; data: Buffer; length?: number|null}>((resolve, reject) => {
      let req: http.ClientRequest | undefined;
      const timer = setTimeout(() => { req?.destroy(); reject(new UpstreamError('timeout')); }, remaining);
-     const finish = (error?: Error, value?: {status: number; location?: string; contentType: string; data: Buffer}) => {
+     const finish = (error?: Error, value?: {status: number; location?: string; contentType: string; data: Buffer; length?: number|null}) => {
        clearTimeout(timer); if (error) reject(error); else resolve(value!);
      };
      void (async () => {
@@ -71,6 +73,17 @@ async function request(input: string, options: Options, defaultTypes: string[]):
            return;
          }
          const type = (res.headers['content-type'] ?? '').split(';')[0].trim().toLowerCase();
+         if (options.peek) {
+           if (res.headers['content-encoding'] && res.headers['content-encoding'] !== 'identity') { res.destroy(); finish(new UpstreamError('unsupported_content')); return; }
+           const declared = Number(res.headers['content-length']), limit = options.peek, head: Buffer[] = [];
+           let read = 0;
+           const done = () => { res.destroy(); finish(undefined, {status, contentType: type, data: Buffer.concat(head).subarray(0, limit),
+             length: res.headers['content-length'] !== undefined && Number.isFinite(declared) && declared >= 0 ? declared : null}); };
+           res.on('data', (chunk: Buffer) => { head.push(chunk); read += chunk.length; if (read >= limit) done(); });
+           res.on('end', done);
+           res.on('error', () => finish(new UpstreamError('network_error')));
+           return;
+         }
          if (!(options.contentTypes ?? defaultTypes).includes(type) ||
            (res.headers['content-encoding'] && res.headers['content-encoding'] !== 'identity')) {
            res.destroy(); finish(new UpstreamError('unsupported_content')); return;
@@ -95,7 +108,7 @@ async function request(input: string, options: Options, defaultTypes: string[]):
      chain.push({from:url.href,to:next.href,status:response.status});target=next.href;
      continue;
    }
-   return {status:response.status,url:url.href,contentType:response.contentType,data:response.data,redirects:chain};
+   return {status:response.status,url:url.href,contentType:response.contentType,data:response.data,redirects:chain,length:response.length};
  }
  throw new UpstreamError('too_many_redirects');
 }
@@ -133,6 +146,14 @@ const DOCUMENT_TYPES = ['application/pdf','application/msword','application/rtf'
 export async function fetchDocument(input: string, options: Options = {}): Promise<BinaryResponse> {
  const response = await request(input, {accept: '*/*', redirects: 3, ...options}, DOCUMENT_TYPES);
  return {url: response.url, contentType: response.contentType, data: response.data};
+}
+
+// The first bytes of a file and its declared size, without downloading the rest: enough to tell a real document from a
+// page posing as one. Non-200 answers throw UpstreamError with their status.
+export interface PeekResponse { url: string; status: number; contentType: string; length: number|null; head: Buffer }
+export async function peekDocument(input: string, options: Options = {}): Promise<PeekResponse> {
+ const response = await request(input, {accept: '*/*', redirects: 3, peek: 4096, ...options}, []);
+ return {url: response.url, status: response.status, contentType: response.contentType, length: response.length ?? null, head: response.data};
 }
 
 export async function probeURL(url:string,timeoutMs=5000):Promise<ProbeResponse>{

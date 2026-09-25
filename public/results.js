@@ -461,11 +461,12 @@ function headingParts(text,query){
 }
 function webItem(item){
  const url=safeURL(item.url);if(!url)return null;
- const row=node('article',undefined,'web-item');
+ const row=node('article',undefined,'web-item');row.dataset.id=item.id;
  const head=node('div',undefined,'web-item-source');
  const source=link(url.href,item.source_name);source.className='web-item-host';head.append(source);
  if(item.doc_type)head.append(node('span',DOC_LABELS[item.doc_type]??item.doc_type.toUpperCase(),'badge'));
  if(item.access)head.append(node('span',item.access,'badge'));
+ if(item.check==='blocked'){const b=node('span','Unverified','badge');b.title='This site refused an automated check, so the file could not be confirmed.';head.append(b);}
  if(item.published)head.append(node('span',new Date(item.published).toLocaleDateString(),'meta'));
  const title=node('h3'),heading=cleanTitle(item.title,url.hostname,item.source_name);
  const query=form.elements.namedItem('q').value;
@@ -491,14 +492,38 @@ async function searchWebPage(token,kind,append){
  const data=await api(`/api/web?${query}`,{signal:token.signal});
  if(!controller.current(token.generation))return;
  if(!append){webList.replaceChildren();closePreview();}
- webList.append(...data.results.map(webItem).filter(Boolean));
+ const rows=data.results.map(webItem).filter(Boolean),page=webPage;
+ for(const row of rows)row.dataset.page=String(page);
+ webList.append(...rows);
  // On a wide screen the first document that can be shown opens straight away, beside the list.
  const first=data.results.find(r=>r.preview);
  if(!append&&first&&window.matchMedia('(min-width: 900px)').matches)void openPreview(first,webList.querySelector('.web-item:has(.web-item-open)'));
  notices.replaceChildren(...data.providers.filter(p=>p.status!=='ok').map(p=>node('p',p.message,'notice')));
  webMore.hidden=!data.next_cursor;
  const count=webList.children.length,noun=kind==='docs'?['document','documents']:['result','results'];
- status.textContent=count?`${count} ${noun[count===1?0:1]}`:kind==='docs'?'No documents found. Try another query or document type.':'No results found. Try another query.';
+ status.textContent=count?`${count} ${noun[count===1?0:1]}${data.review?' · checking relevance…':''}`
+  :kind==='docs'?'No documents found. Try another query or document type.':'No results found. Try another query.';
+ if(data.review)void reviewDocuments(token,page,data.review,data.results);
+}
+// The Docs tab's second stage: the server judges this page's documents; ones that do not match are removed and the
+// rest reordered by relevance, in place. A failed review leaves the verified list as it is.
+async function reviewDocuments(token,page,review,items){
+ let out;
+ try{out=await api(`/api/web/review?token=${encodeURIComponent(review)}`,{signal:token.signal});}
+ catch{if(controller.current(token.generation))status.textContent=status.textContent.replace(' · checking relevance…','');return;}
+ if(!controller.current(token.generation))return;
+ const rows=[...webList.querySelectorAll(`.web-item[data-page="${page}"]`)],byId=new Map(rows.map(r=>[r.dataset.id,r]));
+ const kept=out.results.map(r=>byId.get(r.id)).filter(Boolean);
+ let before=rows[0]?.previousElementSibling??null;
+ for(const row of rows)if(!kept.includes(row)){if(row.classList.contains('selected'))closePreview();row.remove();}
+ for(const row of kept){if(before)before.after(row);else webList.prepend(row);before=row;}
+ for(const p of out.providers)if(p.status!=='ok')notices.append(node('p',p.message,'notice'));
+ const count=webList.children.length;
+ status.textContent=count?`${count} ${count===1?'document':'documents'}${out.removed?` · ${out.removed} removed as not matching`:''}`
+  :'No document matched the request. Try another query or document type.';
+ // The first document opens beside the list again if the review removed the one that was open.
+ const first=page===1&&!webList.querySelector('.web-item.selected')&&out.results.find(r=>r.preview&&byId.has(r.id));
+ if(first&&window.matchMedia('(min-width: 900px)').matches)void openPreview(items.find(i=>i.id===first.id)??first,byId.get(first.id));
 }
 async function runWebSearch(kind){
  clearTimeout(pollTimer);current=controller.begin();const token=current;

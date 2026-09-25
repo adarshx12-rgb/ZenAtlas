@@ -9,10 +9,13 @@ import { publicURL } from './urls.js';
 import { engineStatus } from './providers.js';
 import { accessKind, accessLabel } from './access.js';
 import { previewToken } from './doc-preview.js';
+import { saveReview, verifyDocuments } from './doc-review.js';
+import type { PeekResponse } from './http.js';
 
 // Web and document search are discovery-only, like image search: results come straight from the engines and never
 // enter the catalogue. Brave answers first; SearXNG fills in when Brave is missing, fails or finds too little.
-// Shadow libraries (data/access-sources.json) are dropped here as everywhere else.
+// Shadow libraries (data/access-sources.json) are dropped here as everywhere else. Documents are then verified (spam,
+// dead links and pages posing as files removed) and handed a review token for /api/web/review (src/doc-review.ts).
 
 const DOCUMENT_TYPES = {
  pdf: ['pdf'], word: ['doc', 'docx', 'odt', 'rtf'], slides: ['ppt', 'pptx', 'odp', 'key'],
@@ -37,8 +40,11 @@ export interface WebResult {
  published: string | null; doc_type: string | null; access: string | null; engine: string;
  // Signed permission for /api/doc to fetch and show this document; null when it cannot be previewed here.
  preview: string | null;
+ // Documents only: 'checked' when the file was confirmed to be a document, 'blocked' when its site refused the check.
+ check?: 'checked' | 'blocked';
 }
-export interface WebSearchResponse { query: string; results: WebResult[]; providers: ProviderStatus[]; next_cursor: string | null }
+// review: a single-use token for /api/web/review, which removes irrelevant documents and orders the rest.
+export interface WebSearchResponse { query: string; results: WebResult[]; providers: ProviderStatus[]; next_cursor: string | null; review?: string | null }
 
 // The file type a URL serves, from its path alone: a query string such as ?file=x.pdf names a viewer page, not a document.
 export function documentType(url: string): string | null {
@@ -69,7 +75,8 @@ const plain = (value: unknown, max: number) => {
 const isoDate = (value: unknown) => { const d = typeof value === 'string' ? new Date(value) : null; return d && !isNaN(+d) ? d.toISOString() : null; };
 
 type Row = {url: string; title: unknown; snippet: unknown; published: unknown; engine: string};
-type Deps = {transport: typeof fetchJSON; budget: (db: DB, key: string, limit: number) => Promise<boolean>};
+type Deps = {transport: typeof fetchJSON; budget: (db: DB, key: string, limit: number) => Promise<boolean>;
+ peek?: (url: string, options: {timeoutMs: number}) => Promise<PeekResponse>};
 
 export async function searchWeb(db: DB, config: Config, input: WebSearchInput,
  deps: Deps = {transport: fetchJSON, budget: takeBudget}): Promise<WebSearchResponse> {
@@ -147,5 +154,14 @@ export async function searchWeb(db: DB, config: Config, input: WebSearchInput,
  }
 
  if (!providers.length) providers.push({provider: 'web', status: 'disabled', message: 'Web search is not configured on this instance.'});
- return {query: input.q, results, providers, next_cursor: more && input.page < 10 ? String(input.page + 1) : null};
+ const next_cursor = more && input.page < 10 ? String(input.page + 1) : null;
+ if (!docs || !results.length) return {query: input.q, results, providers, next_cursor};
+ const verified = await verifyDocuments(results, config, deps.peek);
+ const {spam, dead, not_document} = verified.removed, removed = spam + dead + not_document;
+ providers.push({provider: 'document_check', status: 'ok', message: removed
+   ? `${removed} links were removed: ${dead} dead or unreachable, ${not_document} not actually documents, ${spam} spam.`
+   : 'Every document link was checked.'});
+ const docsOut = verified.results.map(({bytes: _bytes, ...d}) => d);
+ return {query: input.q, results: docsOut, providers, next_cursor,
+   review: verified.results.length ? saveReview({query: input.q, docs: verified.results}) : null};
 }
