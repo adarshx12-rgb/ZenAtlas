@@ -420,20 +420,62 @@ async function openPreview(item,row){
   docStatus.textContent=error.name==='InvalidPDFException'?'This document could not be read. Open it from its source.':error.message;
  }
 }
+// Search engines add the site's name to titles ("… · GitHub", "YouTube - …"). Leading or trailing segments that only
+// repeat the site are dropped so the heading keeps the meaningful part; the full title stays in the tooltip.
+function cleanTitle(title,host,source){
+ // Names compare without spaces or punctuation, against the site and each label of its host ("Chrome Web Store" is
+ // chromewebstore.google.com, "Medium" is annabyang.medium.com).
+ const bare=text=>text.toLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
+ const labels=host.toLowerCase().replace(/^www\./,'').split('.');
+ const brands=new Set([bare(labels.join('.')),...labels.slice(0,-1).map(bare),bare(source??'')].filter(Boolean));
+ let text=title.trim();
+ for(let changed=true;changed;){
+  changed=false;
+  const tail=text.match(/^(.*\S)\s+[·|–—-]\s+([^·|–—]+)$/);
+  if(tail&&brands.has(bare(tail[2]))){text=tail[1];changed=true;continue;}
+  // A leading name is often the product itself ("Youtube to Transcript - …"), so only a one-word site name ("GitHub - …") goes.
+  const head=text.match(/^(\S+)\s+[·|–—-]\s+(\S.*)$/);
+  if(head&&brands.has(bare(head[1]))){text=head[2];changed=true;}
+ }
+ return text||title;
+}
+const QUERY_STOPWORDS=new Set(['the','and','for','with','from','that','this','what','how','are','was','you','your','into','about','videos','video']);
+const queryWords=query=>[...new Set(query.toLowerCase().match(/[\p{L}\p{N}]{3,}/gu)??[])].filter(w=>!QUERY_STOPWORDS.has(w));
+// A heading's main keyword is its name: the text before ": " or the first " · ", " - " or " | ". It goes on the pink
+// stroke. Of the description after it, the one sentence sharing the most query words (the first on a tie) goes on marine
+// blue, if it is a real sentence of four words or more; the rest stays plain. A heading with no name part is all name.
+function headingParts(text,query){
+ const split=text.match(/^(.{1,80}?)(:\s+|\s+[·|–—-]\s+)(\S.*)$/);
+ if(!split)return [node('span',text,'title-key')];
+ const [,name,separator,description]=split,words=queryWords(query);
+ const pieces=description.split(/((?<=[.!?])\s+)/),sentences=pieces.filter((_,i)=>i%2===0);
+ const score=s=>words.filter(w=>s.toLowerCase().includes(w)).length;
+ const lead=sentences.reduce((best,s)=>score(s)>score(best)?s:best,sentences[0]);
+ const parts=[node('span',name,'title-key'),document.createTextNode(separator)];
+ let marked=false;
+ for(const [i,piece] of pieces.entries()){
+  if(i%2===0&&!marked&&piece===lead&&piece.split(/\s+/).length>=4){parts.push(node('span',piece,'title-lead'));marked=true;}
+  else if(piece)parts.push(document.createTextNode(piece));
+ }
+ return parts;
+}
 function webItem(item){
  const url=safeURL(item.url);if(!url)return null;
  const row=node('article',undefined,'web-item');
  const head=node('div',undefined,'web-item-source');
- head.append(node('span',item.source_name,'web-item-host'));
+ const source=link(url.href,item.source_name);source.className='web-item-host';head.append(source);
  if(item.doc_type)head.append(node('span',DOC_LABELS[item.doc_type]??item.doc_type.toUpperCase(),'badge'));
  if(item.access)head.append(node('span',item.access,'badge'));
  if(item.published)head.append(node('span',new Date(item.published).toLocaleDateString(),'meta'));
- const title=node('h3');
+ const title=node('h3'),heading=cleanTitle(item.title,url.hostname,item.source_name);
+ const query=form.elements.namedItem('q').value;
  if(item.preview){
-  const open=node('button',item.title,'web-item-open');open.type='button';
+  // The parts sit in spans: a button cannot break into per-line highlight bars, inline spans can.
+  const open=node('button',undefined,'web-item-open');open.type='button';open.append(...headingParts(heading,query));
   open.addEventListener('click',()=>void openPreview(item,row));
   title.append(open);
- }else title.append(link(url.href,item.title));
+ }else{const a=link(url.href,'');a.append(...headingParts(heading,query));title.append(a);}
+ if(heading!==item.title)title.title=item.title;
  row.append(head,title);
  if(item.snippet)row.append(node('p',item.snippet));
  // A document result opens the file in one click; a web result's title is already its link.
