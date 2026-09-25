@@ -1,18 +1,19 @@
-import { randomUUID } from 'node:crypto';
 import type { DB } from './db.js';
 import type { Config } from './config.js';
 import { contentInput, type ProviderStatus } from './types.js';
 import { peekDocument, UpstreamError, type PeekResponse } from './http.js';
-import { PageChecker, type PageCheck, type PageEvidence } from './pages.js';
+import { PageChecker, pageTools, type PageCheck, type PageEvidence } from './pages.js';
+import { DocumentPreviews, previewToken } from './doc-preview.js';
 import { makeJudge, type Judge, type JudgeCandidate, type Verdict } from './judge.js';
 import { makeJevJudge } from './jev-judge.js';
 import { makeScreener, screeningOrder, type Screener } from './screener.js';
 import { accessKind } from './access.js';
 import type { WebResult } from './web.js';
 
-// The Docs tab in two stages. Verification (inside the search request) removes spam links, dead links and pages
-// posing as documents, reading only the first 4 KB of each file. Review (a follow-up request) reads the text of real
-// PDFs, then the Jev pre-judge and the LLM judge remove documents that are not what was asked for and order the rest.
+// Checking documents for the Docs tab. Verification (inside the search request) removes spam links, dead links and pages
+// posing as documents, reading only the first 4 KB of each file. Review (during the document hunt, src/doc-hunt.ts)
+// reads the text of real documents, then the Jev pre-judge and the LLM judge remove documents that are not what was
+// asked for and order the rest.
 
 export type DocCheck = {status: 'document'; kind: string; bytes: number|null} | {status: 'blocked'|'dead'|'not_document'};
 // check: 'checked' when the file was confirmed to be a document; 'blocked' when the site refused the check.
@@ -66,29 +67,25 @@ export async function verifyDocuments(results: WebResult[], config: Config, peek
  return {results: kept, removed};
 }
 
-// Verified documents wait here, by a random token, for their review request; single use, gone after ten minutes.
-const reviews = new Map<string, {expires: number; query: string; docs: VerifiedDoc[]}>();
-const REVIEW_MS = 10 * 60_000, MAX_REVIEWS = 500;
-export function saveReview(entry: {query: string; docs: VerifiedDoc[]}): string {
- const now = Date.now();
- for (const [token, r] of reviews) if (r.expires < now || reviews.size >= MAX_REVIEWS) reviews.delete(token);
- const token = randomUUID();
- reviews.set(token, {...entry, expires: now + REVIEW_MS});
- return token;
-}
-export function takeReview(token: string): {query: string; docs: VerifiedDoc[]}|null {
- const entry = reviews.get(token);
- reviews.delete(token);
- return entry && entry.expires >= Date.now() ? entry : null;
-}
-
 export type ReviewedDoc = VerifiedDoc & {judgement?: {relevance: number; reason: string}};
 // Documents are judged in one pool this size; the screener orders a longer list first, and the rest stay unjudged.
 export const REVIEW_POOL = 20;
 // Documents at or below this relevance are removed (4 is "only tangential"). Unlike video results, a plausible 5 stays:
 // short document queries are often ambiguous, and an unconfirmed detail is not a miss.
 const TANGENTIAL = 4;
-type ReviewDeps = {judge?: Judge; pages?: PageCheck; screener?: Screener};
+// office: reads an office document's text; absent when no converter or text helper is configured.
+type ReviewDeps = {judge?: Judge; pages?: PageCheck; screener?: Screener; office?: (url: string) => Promise<PageEvidence|null>};
+const OFFICE = new Set(['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'odt', 'odp', 'ods', 'rtf', 'key']);
+export const OFFICE_READS = 4;
+export function officeReader(db: DB, config: Config): ((url: string) => Promise<PageEvidence|null>)|undefined {
+ const extractor = config.DOC_PREVIEW_CONVERTER ? pageTools(config).extractor : undefined;
+ if (!extractor?.pdf) return undefined;
+ const previews = new DocumentPreviews(db, config);
+ return async url => {
+   const pdf = await extractor.pdf!((await previews.get(url, previewToken(config.SESSION_SECRET, url))).pdf);
+   return pdf?.text ? {status: 'checked', title: pdf.title, description: null, text: pdf.text, libraries: [], badges: [], pdf} : null;
+ };
+}
 
 export async function reviewDocuments(db: DB, config: Config, query: string, docs: VerifiedDoc[], deps: ReviewDeps = {}) {
  const providers: ProviderStatus[] = [];
@@ -116,6 +113,11 @@ export async function reviewDocuments(db: DB, config: Config, query: string, doc
    const page = await pages.check(d.url).catch(() => null);
    if (page?.status === 'checked') text.set(d.url, page);
  });
+ // Word, slides and spreadsheets are read through the preview converter (its first pages as a PDF), one at a time,
+ // since LibreOffice is heavy; at most OFFICE_READS of them per review.
+ const office = judged.filter(d => d.check === 'checked' && OFFICE.has(d.doc_type ?? '')).slice(0, OFFICE_READS);
+ const read = office.length ? ('office' in deps ? deps.office : officeReader(db, config)) : undefined;
+ if (read) await mapLimit(office, 1, async d => { const page = await read(d.url).catch(() => null); if (page) text.set(d.url, page); });
  const keys = new Map(judged.map((d, i) => [`d${i + 1}`, d]));
  const candidates: JudgeCandidate[] = [...keys].map(([key, d]) => {
    const page = text.get(d.url);

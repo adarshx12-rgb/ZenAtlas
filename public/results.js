@@ -9,7 +9,7 @@ const videoGrid=document.querySelector('#results'),imageGrid=document.querySelec
 const imageMore=document.querySelector('#image-more'),resultsHeading=document.querySelector('#results-heading');
 const tabVideos=document.querySelector('#tab-videos'),tabImages=document.querySelector('#tab-images');
 const tabWeb=document.querySelector('#tab-web'),tabDocs=document.querySelector('#tab-docs');
-const webList=document.querySelector('#web-results'),webMore=document.querySelector('#web-more');
+const webList=document.querySelector('#web-results'),webMore=document.querySelector('#web-more'),huntSites=document.querySelector('#hunt-sites');
 const TABS={videos:tabVideos,web:tabWeb,images:tabImages,docs:tabDocs};
 const docViewer=document.querySelector('#doc-viewer'),docFrame=document.querySelector('#doc-frame'),docStatus=document.querySelector('#doc-viewer-status');
 const docTitle=document.querySelector('#doc-viewer-title'),docSource=document.querySelector('#doc-viewer-source');
@@ -289,7 +289,7 @@ function syncTabs(tab){
  const list=tab!=='videos',pages=tab==='web'||tab==='docs';
  for(const field of ['mode','evidence'])labelOf(field)?.toggleAttribute('hidden',list);
  labelOf('doc_type')?.toggleAttribute('hidden',tab!=='docs');
- videoGrid.hidden=list;imageGrid.hidden=tab!=='images';webList.hidden=!pages;
+ videoGrid.hidden=list;imageGrid.hidden=tab!=='images';webList.hidden=!pages;huntSites.hidden=true;
  resultsHeading.textContent={videos:'Search results',web:'Web results',images:'Image results',docs:'Documents'}[tab];
  if(list){deepRow.hidden=true;cancel.hidden=true;more.hidden=true;missing.hidden=true;}
  if(tab!=='images')imageMore.hidden=true;
@@ -382,8 +382,10 @@ async function showPdf(bytes){
  const previous=pdfDocument;pdfDocument=next;
  viewer.setDocument(next);pdfjs.linkService.setDocument(next,null);
  docPage.textContent=`1 / ${next.numPages}`;
- void previous?.destroy();
+ releaseDocument(previous);
 }
+// Frees a loaded PDF; in this pdf.js version that goes through its loading task, and a failure must never break the page.
+function releaseDocument(doc){try{void (doc?.loadingTask?.destroy?.()??doc?.destroy?.());}catch{/* already released */}}
 // Closes the preview with the way to the rest: "Showing 5 of 30 pages" and the one-click full document.
 function previewEnd(item,shown,total){
  docMore.replaceChildren();docMore.hidden=!(total>shown);
@@ -391,7 +393,7 @@ function previewEnd(item,shown,total){
  docMore.append(node('p',`Preview: the first ${shown} of ${total} pages.`),fullDocument(item));
 }
 function closePreview(){docRequest?.abort();docRequest=null;docViewer.hidden=true;docFrame.hidden=true;docTools.hidden=true;docMore.hidden=true;
- if(pdfDocument){pdfViewer.setDocument(null);void pdfDocument.destroy();pdfDocument=null;}
+ if(pdfDocument){pdfViewer.setDocument(null);releaseDocument(pdfDocument);pdfDocument=null;}
  for(const row of webList.querySelectorAll('.web-item.selected'))row.classList.remove('selected');}
 async function openPreview(item,row){
  docRequest?.abort();const request=docRequest=new AbortController();
@@ -478,6 +480,8 @@ function webItem(item){
  }else{const a=link(url.href,'');a.append(...headingParts(heading,query));title.append(a);}
  if(heading!==item.title)title.title=item.title;
  row.append(head,title);
+ // A document found inside a website shows the pages that led to it.
+ if(item.found_via?.length)row.append(node('div',`Found via ${item.found_via.map(v=>v.title).join(' › ')}`,'web-item-via'));
  if(item.snippet)row.append(node('p',item.snippet));
  // A document result opens the file in one click; a web result's title is already its link.
  if(item.doc_type){const actions=node('div',undefined,'web-item-actions');
@@ -501,34 +505,56 @@ async function searchWebPage(token,kind,append){
  notices.replaceChildren(...data.providers.filter(p=>p.status!=='ok').map(p=>node('p',p.message,'notice')));
  webMore.hidden=!data.next_cursor;
  const count=webList.children.length,noun=kind==='docs'?['document','documents']:['result','results'];
- status.textContent=count?`${count} ${noun[count===1?0:1]}${data.review?' · checking relevance…':''}`
+ status.textContent=count?`${count} ${noun[count===1?0:1]}${data.hunt?' · searching further…':''}`
+  :data.hunt?'Searching inside websites for documents…'
   :kind==='docs'?'No documents found. Try another query or document type.':'No results found. Try another query.';
- if(data.review)void reviewDocuments(token,page,data.review,data.results);
+ if(data.hunt)void followHunt(token,page,data.hunt);
 }
-// The Docs tab's second stage: the server judges this page's documents; ones that do not match are removed and the
-// rest reordered by relevance, in place. A failed review leaves the verified list as it is.
-async function reviewDocuments(token,page,review,items){
- let out;
- try{out=await api(`/api/web/review?token=${encodeURIComponent(review)}`,{signal:token.signal});}
- catch{if(controller.current(token.generation))status.textContent=status.textContent.replace(' · checking relevance…','');return;}
- if(!controller.current(token.generation))return;
- const rows=[...webList.querySelectorAll(`.web-item[data-page="${page}"]`)],byId=new Map(rows.map(r=>[r.dataset.id,r]));
- const kept=out.results.map(r=>byId.get(r.id)).filter(Boolean);
- let before=rows[0]?.previousElementSibling??null;
- for(const row of rows)if(!kept.includes(row)){if(row.classList.contains('selected'))closePreview();row.remove();}
- for(const row of kept){if(before)before.after(row);else webList.prepend(row);before=row;}
- for(const p of out.providers)if(p.status!=='ok')notices.append(node('p',p.message,'notice'));
- const count=webList.children.length;
- status.textContent=count?`${count} ${count===1?'document':'documents'}${out.removed?` · ${out.removed} removed as not matching`:''}`
-  :'No document matched the request. Try another query or document type.';
- // The first document opens beside the list again if the review removed the one that was open.
- const first=page===1&&!webList.querySelector('.web-item.selected')&&out.results.find(r=>r.preview&&byId.has(r.id));
- if(first&&window.matchMedia('(min-width: 900px)').matches)void openPreview(items.find(i=>i.id===first.id)??first,byId.get(first.id));
+const VERDICTS={searching:'Searching…',document:'Document found',web_only:'On the page, no file',access:'Buy or borrow',not_found:'Not found'};
+// The websites the document hunt looked inside, each with what it found there.
+function renderSites(sites){
+ huntSites.hidden=!sites.length;
+ huntSites.replaceChildren(...(sites.length?[node('h3','Websites searched','hunt-sites-title'),...sites.map(s=>{
+  const row=node('div',undefined,`hunt-site hunt-${s.verdict}`),host=link(s.url,s.host);host.className='web-item-host';
+  row.append(host,node('span',s.title,'hunt-site-title'),node('span',s.verdict==='access'&&s.note?s.note:VERDICTS[s.verdict]??s.verdict,'hunt-site-verdict'));
+  return row;})]:[]));
+}
+// The Docs tab's document hunt, polled until it completes. Documents Jev finds inside websites appear as they are
+// confirmed; at the end, documents the review rejected are removed and the rest ordered by relevance, in place.
+async function followHunt(token,page,hunt){
+ const rowsOf=()=>new Map([...webList.querySelectorAll(`.web-item[data-page="${page}"]`)].map(r=>[r.dataset.id,r]));
+ for(let polls=0;polls<150;polls++){
+  let snap;
+  try{snap=await api(`/api/docs/hunt?token=${encodeURIComponent(hunt)}`,{signal:token.signal});}
+  catch{if(controller.current(token.generation))status.textContent=status.textContent.replace(' · searching further…','');return;}
+  if(!controller.current(token.generation))return;
+  if(page===1)renderSites(snap.sites);
+  const rows=rowsOf(),last=[...rows.values()].at(-1);
+  const fresh=snap.documents.filter(d=>!rows.has(d.id)).map(d=>{const row=webItem(d);if(row)row.dataset.page=String(page);return row;}).filter(Boolean);
+  if(fresh.length){if(last)last.after(...fresh);else webList.append(...fresh);}
+  if(snap.status==='complete'){
+   const now=rowsOf(),kept=snap.documents.map(d=>now.get(d.id)).filter(Boolean);
+   let before=[...now.values()][0]?.previousElementSibling??null;
+   for(const row of now.values())if(!kept.includes(row)){if(row.classList.contains('selected'))closePreview();row.remove();}
+   for(const row of kept){if(before)before.after(row);else webList.prepend(row);before=row;}
+   for(const p of snap.providers)if(p.status!=='ok')notices.append(node('p',p.message,'notice'));
+   const count=webList.children.length,inside=snap.documents.filter(d=>d.found_via?.length).length;
+   status.textContent=count?`${count} ${count===1?'document':'documents'}${inside?` · ${inside} found inside websites`:''}${snap.removed?` · ${snap.removed} removed as not matching`:''}`
+    :'No document matched the request. Try another query or document type.';
+   // The first document opens beside the list if none is open (the review may have removed the one that was).
+   const first=page===1&&!webList.querySelector('.web-item.selected')&&snap.documents.find(d=>d.preview);
+   if(first&&window.matchMedia('(min-width: 900px)').matches)void openPreview(first,rowsOf().get(first.id));
+   return;
+  }
+  const n=webList.children.length,sites=snap.sites.length;
+  status.textContent=`${n?`${n} ${n===1?'document':'documents'} · `:''}${sites?`searching inside ${sites} ${sites===1?'website':'websites'} · ${snap.checked_pages} pages checked`:'checking relevance'}…`;
+  await new Promise(resolve=>setTimeout(resolve,1200));
+ }
 }
 async function runWebSearch(kind){
  clearTimeout(pollTimer);current=controller.begin();const token=current;
  resetClosest();lastSearchData=null;showMatchView();
- webPage=1;webList.replaceChildren();closePreview();notices.replaceChildren();
+ webPage=1;webList.replaceChildren();closePreview();notices.replaceChildren();huntSites.replaceChildren();huntSites.hidden=true;
  webMore.hidden=true;retry.hidden=true;status.textContent=kind==='docs'?'Searching for documents…':'Searching the web…';
  try{await session();await searchWebPage(token,kind,false);}
  catch(error){if(controller.current(token.generation)){status.textContent=error.message;retry.hidden=false;}}

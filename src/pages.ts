@@ -21,7 +21,8 @@ export interface PageMeta { og_type?: string; schema_types?: string[]; published
 export interface PdfEvidence { pages: number|null; title: string|null; author: string|null; created: string|null; text: string|null }
 export interface PageCheck { check(url: string): Promise<PageEvidence> }
 // renders: at most this many pages per checker are opened in the browser (default PAGE_RENDERS).
-export interface PageTools { renderer?: Renderer; extractor?: TextExtractor; renders?: number }
+// links: at most this many outbound links are kept per page (default 8; document hunting reads more).
+export interface PageTools { renderer?: Renderer; extractor?: TextExtractor; renders?: number; links?: number }
 type Transport = (url: string, options: Parameters<typeof fetchText>[1]) => Promise<TextResponse>;
 type BinaryTransport = (url: string, options: Parameters<typeof fetchPDF>[1]) => Promise<BinaryResponse>;
 
@@ -74,18 +75,33 @@ const clean = (text: string|undefined|null, max: number) => {
  return value ? value.slice(0, max) : null;
 };
 
-// Bounded references for follow-up planning, not an unrestricted recursive crawler.
-export function pageReferences(html: string, base: string): {url: string; title: string}[] {
+// Bounded references for follow-up planning, not an unrestricted recursive crawler. A link to a document file keeps
+// even a short label ("PDF", "Download"), named by its file when it has none.
+const DOCUMENT_FILE = /\.(?:pdf|docx?|pptx?|xlsx?|odt|odp|ods|rtf|epub|csv|key)$/i;
+// Besides <a href>, pages link through script-driven attributes (data-target="11.php" on a menu item), drop-down options
+// and embedded viewers; those count when their value is a path rather than an in-page target such as "#modal".
+const REFERENCES: RegExp[] = [
+ /<a\b[^>]*\bhref\s*=\s*(?:"([^"]*)"|'([^']*)')[^>]*>([\s\S]*?)<\/a>/gi,
+ /<\w+\b[^>]*\bdata-(?:target|href|url|link|file|src)\s*=\s*(?:"([^"]*)"|'([^']*)')[^>]*>([^<]{0,200})/gi,
+ /<option\b[^>]*\bvalue\s*=\s*(?:"([^"]*)"|'([^']*)')[^>]*>([^<]{0,200})/gi,
+ /<(?:iframe|embed)\b[^>]*\bsrc\s*=\s*(?:"([^"]*)"|'([^']*)')[^>]*>()/gi,
+ /<object\b[^>]*\bdata\s*=\s*(?:"([^"]*)"|'([^']*)')[^>]*>()/gi,
+];
+export function pageReferences(html: string, base: string, limit = 8): {url: string; title: string}[] {
  const found = new Map<string,{url: string; title: string}>();
- for (const match of html.matchAll(/<a\b[^>]*\bhref\s*=\s*(?:"([^"]*)"|'([^']*)')[^>]*>([\s\S]*?)<\/a>/gi)) {
-   if (found.size >= 8) break;
+ const matches = REFERENCES.flatMap((pattern, kind) => [...html.matchAll(pattern)].map(m => ({m, kind})))
+   .filter(({m, kind}) => kind === 0 || /^[^#\s:]*[./]|^https?:/i.test(m[1] ?? m[2] ?? ''))
+   .sort((a, b) => a.m.index! - b.m.index!);
+ for (const {m: match} of matches) {
+   if (found.size >= limit) break;
    try {
      const raw = decode(match[1] ?? match[2]);
-     if (!raw || raw.startsWith('#')) continue;
+     if (!raw || raw.startsWith('#') || /^javascript:/i.test(raw)) continue;
      const link = publicURL(new URL(raw, base).href);
      link.hash = '';
-     const title = clean(match[3].replace(/<[^>]*>/g, ' '), 120);
-     if (!title || title.length < 4 || /^(?:home|login|sign in|register|privacy|terms|share|contact|next|previous)$/i.test(title)) continue;
+     const file = DOCUMENT_FILE.test(link.pathname);
+     const title = clean(match[3].replace(/<[^>]*>/g, ' '), 120) ?? (file ? clean(decodeURIComponent(link.pathname.split('/').pop() ?? ''), 120) : null);
+     if (!title || (!file && title.length < 4) || /^(?:home|login|sign in|register|privacy|terms|share|contact|next|previous)$/i.test(title)) continue;
      if (link.href === base) continue;
      if (!found.has(link.href)) found.set(link.href, {url: link.href, title});
    } catch { /* Ignore non-public and non-HTTP references. */ }
@@ -238,7 +254,7 @@ export class PageChecker implements PageCheck {
      return {status: 'checked', title: live?.title ?? source.title, description: live?.description ?? source.description,
        text: clean(main, TEXT_CHARS) ?? live?.text ?? source.text, libraries, badges: badgesFor(libraries),
        rendered: !!rendered, screenshot: rendered?.screenshot ?? null,
-       links: pageReferences(rendered?.html ?? page.text, page.url),
+       links: pageReferences(rendered?.html ?? page.text, page.url, this.tools.links),
        // What the page declares about itself; the served HTML and the rendered page complement each other.
        ...(source.meta || live?.meta ? {meta: {...source.meta, ...live?.meta}} : {})};
    } catch { return {status: 'unavailable', ...empty}; }

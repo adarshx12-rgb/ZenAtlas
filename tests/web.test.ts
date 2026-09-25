@@ -2,7 +2,6 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {testConfig} from './helpers.js';
 import {searchWeb, webSearchInput, documentType} from '../src/web.js';
-import {takeReview} from '../src/doc-review.js';
 import {UpstreamError} from '../src/http.js';
 
 const config={...testConfig,BRAVE_SEARCH_API_KEY:'brave-key',SEARXNG_BASE_URL:'http://searxng.test',BRAVE_MIN_RESULTS:2};
@@ -12,7 +11,10 @@ const searxng=(...rows:{url:string;title?:string;content?:string}[])=>({results:
 function deps(answers:Record<string,unknown>,budget=true){
  const asked:string[]=[];
  // Every document link answers as a real PDF unless a test says otherwise.
- return {asked,deps:{budget:async()=>budget,peek:async()=>({url:'',status:200,contentType:'application/pdf',length:100,head:Buffer.from('%PDF-1.4')}),
+ // Hunts are recorded, never started: a real one would search the web in the background.
+ const hunts:{query:string;docs:number;explore:boolean}[]=[];
+ return {asked,hunts,deps:{budget:async()=>budget,peek:async()=>({url:'',status:200,contentType:'application/pdf',length:100,head:Buffer.from('%PDF-1.4')}),
+   hunt:(query:string,docs:unknown[],explore:boolean)=>{hunts.push({query,docs:docs.length,explore});return 'hunt-token';},
    transport:async(url:string)=>{
    asked.push(url);const host=new URL(url).hostname;
    if(!(host in answers))throw new Error(`unexpected ${url}`);
@@ -75,8 +77,8 @@ test('document type is read from the path, not the query string',()=>{
  assert.equal(documentType('https://arxiv.org/pdf/2401.00001v2'),'pdf');
 });
 
-test('document search removes spam, dead links and pages posing as files, and hands out a review token',async()=>{
- const {deps:d}=deps({'api.search.brave.com':brave(
+test('document search removes spam, dead links and pages posing as files, and starts a document hunt',async()=>{
+ const {deps:d,hunts}=deps({'api.search.brave.com':brave(
    {url:'https://real.example/yearbook-2018.pdf',title:'Year Book 2018'},
    {url:'https://www.spam.example/public/default.aspx/Year%20Book%202018.pdf',title:'Year Book 2018 free'},
    {url:'https://gone.example/yearbook.pdf',title:'Year Book'},
@@ -90,7 +92,11 @@ test('document search removes spam, dead links and pages posing as files, and ha
  const out=await searchWeb({} as any,config,webSearchInput.parse({q:'year book 2018',kind:'docs'}),{...d,peek});
  assert.deepEqual(out.results.map(r=>[r.url,r.check]),[['https://real.example/yearbook-2018.pdf','checked'],['https://shy.example/yearbook.pdf','blocked']]);
  assert.match(out.providers.find(p=>p.provider==='document_check')!.message,/3 links were removed: 1 dead or unreachable, 1 not actually documents, 1 spam/);
- assert.equal(takeReview(out.review!)?.docs.length,2);
+ assert.equal(out.hunt,'hunt-token');
+ assert.deepEqual(hunts,[{query:'year book 2018',docs:2,explore:true}],'the first page explores websites too');
+ await searchWeb({} as any,config,webSearchInput.parse({q:'year book 2018',kind:'docs',page:2}),{...d,peek});
+ assert.deepEqual(hunts[1],{query:'year book 2018',docs:2,explore:false},'later pages only review their own documents');
  const web=await searchWeb({} as any,config,webSearchInput.parse({q:'year book'}),{...d,peek:async()=>{throw new Error('pages are not probed');}});
- assert.equal(web.review,undefined,'web results are not verified or reviewed');
+ assert.equal(web.hunt,undefined,'web results are not verified or hunted');
+ assert.equal(hunts.length,2);
 });

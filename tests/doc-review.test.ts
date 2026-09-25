@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import { database, testConfig } from './helpers.js';
-import { spamLink, sniff, checkDocument, verifyDocuments, reviewDocuments, saveReview, takeReview, type VerifiedDoc } from '../src/doc-review.js';
+import { spamLink, sniff, checkDocument, verifyDocuments, reviewDocuments, type VerifiedDoc } from '../src/doc-review.js';
 import { UpstreamError, type PeekResponse } from '../src/http.js';
 import type { Judge, JudgeCandidate, JudgeContext } from '../src/judge.js';
 import type { WebResult } from '../src/web.js';
@@ -89,18 +89,13 @@ test('review: inspected text reaches the judge, weak or wrong documents are remo
  } finally { await db.close(); }
 });
 
-test('review without a judge keeps the verified order and says so; tokens are single-use and expire', async () => {
+test('review without a judge keeps the verified order and says so', async () => {
  const db = await database();
  try {
    const docs: VerifiedDoc[] = [{...doc('https://a.example/x.pdf', 'X'), check: 'checked', bytes: 10}];
    const out = await reviewDocuments(db, testConfig, 'x', docs, {judge: undefined, pages: {check: async () => { throw new Error('no'); }}, screener: undefined});
    assert.deepEqual(out.results.map(r => r.url), ['https://a.example/x.pdf']);
    assert.equal(out.providers[0].status, 'disabled');
-
-   const token = saveReview({query: 'x', docs});
-   assert.equal(takeReview(token)?.query, 'x');
-   assert.equal(takeReview(token), null, 'single use');
-   assert.equal(takeReview('not-a-token'), null);
  } finally { await db.close(); }
 });
 
@@ -116,5 +111,22 @@ test('more than 20 documents: the screener picks which ones are judged; the rest
    assert.ok(judged.includes('Doc 22') && judged.includes('Doc 23'), 'promising documents are judged even from the end of the list');
    assert.equal(out.results.length, 24);
    assert.deepEqual(out.results.slice(20).map(r => r.judgement), [undefined, undefined, undefined, undefined]);
+ } finally { await db.close(); }
+});
+
+test('Word, slides and spreadsheets are read through the converter, one at a time, so the judge sees their text', async () => {
+ const db = await database();
+ try {
+   const docs: VerifiedDoc[] = [
+     {...doc('https://a.example/minutes-2018.docx', 'Minutes', {doc_type: 'docx'}), check: 'checked', bytes: 5000},
+     {...doc('https://a.example/deck.pptx', 'Deck', {doc_type: 'pptx'}), check: 'blocked', bytes: null},
+   ];
+   const read: string[] = [];
+   const office = async (url: string) => { read.push(url); return {status: 'checked' as const, title: 'Minutes', description: null,
+     text: 'Board minutes for March 2018', libraries: [], badges: []}; };
+   const judge = new FakeJudge({Minutes: 8, Deck: 6});
+   await reviewDocuments(db, testConfig, 'board minutes 2018', docs, {judge, office, screener: undefined, pages: {check: async () => { throw new Error('no'); }}});
+   assert.deepEqual(read, ['https://a.example/minutes-2018.docx'], 'a file whose site refused the check is not fetched again');
+   assert.equal(judge.calls[0].candidates.find(c => c.title === 'Minutes')?.page?.text, 'Board minutes for March 2018');
  } finally { await db.close(); }
 });

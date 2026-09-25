@@ -16,7 +16,7 @@ import { listPolicyRules, setPolicyRule } from './policy-rules.js';
 import { dependencyReport } from './watchdog.js';
 import { imageSearchInput, searchImages } from './images.js';
 import { searchWeb, webSearchInput } from './web.js';
-import { reviewDocuments, takeReview } from './doc-review.js';
+import { huntSnapshot, huntState } from './doc-hunt.js';
 import { DocumentPreviews, PreviewError } from './doc-preview.js';
 import { auditReport } from './learning.js';
 
@@ -105,12 +105,11 @@ export async function createApp(db:DB,config:Config) {
  app.get('/api/images',async req=>searchImages(db,config,imageSearchInput.parse(req.query)));
  // Web pages and documents (PDF, Word, slides…) are discovery-only lists too.
  app.get('/api/web',async req=>searchWeb(db,config,webSearchInput.parse(req.query)));
- // The Docs tab's second stage: judges the documents a search verified, removing ones that do not match.
- app.get('/api/web/review',async req=>{
-   const review=takeReview(z.object({token:z.string().uuid()}).strict().parse(req.query).token);
-   if(!review) throw new ApiError(404,'review_expired','This document review has expired; search again.');
-   const out=await reviewDocuments(db,config,review.query,review.docs);
-   return {results:out.results.map(({bytes:_bytes,...d})=>d),removed:out.removed,providers:out.providers};
+ // The Docs tab's document hunt, polled while it runs: websites searched with their verdicts, documents found and reviewed.
+ app.get('/api/docs/hunt',async req=>{
+   const state=huntState(z.object({token:z.string().uuid()}).strict().parse(req.query).token);
+   if(!state) throw new ApiError(404,'hunt_expired','This document search has expired; search again.');
+   return huntSnapshot(state);
  });
  // The document itself, as a PDF, for the Docs tab's viewer; only links /api/web signed are fetched.
  const previews=new DocumentPreviews(db,config);

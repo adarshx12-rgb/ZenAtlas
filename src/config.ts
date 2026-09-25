@@ -38,6 +38,12 @@ export const configSchema = z.object({
   JEV_EXPLORATION_PAGES: number(4, 0, 8), JEV_EXPLORATION_ROUNDS: number(2, 1, 3),
   JEV_EXPLORATION_CANDIDATES: number(40, 10, 40),
   JEV_EXPLORATION_TIMEOUT_MS: number(4000, 500, 10000),
+  // Document hunting (src/doc-hunt.ts): after a Docs search, Jev looks inside up to DOC_HUNT_SITES discovered websites for
+  // the requested document, visiting at most DOC_HUNT_VISITS pages over DOC_HUNT_ROUNDS rounds within DOC_HUNT_TIMEOUT_MS.
+  DOC_HUNT_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
+  DOC_HUNT_SITES: number(6, 0, 12), DOC_HUNT_VISITS: number(14, 1, 40), DOC_HUNT_ROUNDS: number(3, 1, 5),
+  DOC_HUNT_TIMEOUT_MS: number(20000, 5000, 60000), DOC_HUNT_MAX_DOCS: number(8, 1, 20),
+  JEV_DOC_HUNT_DAILY_BUDGET: number(400, 0, 100000),
   JEV_EXPLORATION_DAILY_BUDGET: number(200, 0, 100000),
   JEV_EXPLORATION_CONFIDENCE: z.coerce.number().min(0).max(1).default(0.65),
   // Shared requirements contract, evidence inspection and gap-directed exploration. false reproduces the previous

@@ -9,13 +9,15 @@ import { publicURL } from './urls.js';
 import { engineStatus } from './providers.js';
 import { accessKind, accessLabel } from './access.js';
 import { previewToken } from './doc-preview.js';
-import { saveReview, verifyDocuments } from './doc-review.js';
+import { verifyDocuments, type VerifiedDoc } from './doc-review.js';
+import { startHunt } from './doc-hunt.js';
 import type { PeekResponse } from './http.js';
 
 // Web and document search are discovery-only, like image search: results come straight from the engines and never
 // enter the catalogue. Brave answers first; SearXNG fills in when Brave is missing, fails or finds too little.
 // Shadow libraries (data/access-sources.json) are dropped here as everywhere else. Documents are then verified (spam,
-// dead links and pages posing as files removed) and handed a review token for /api/web/review (src/doc-review.ts).
+// dead links and pages posing as files removed), and a document hunt starts (src/doc-hunt.ts): on the first page Jev looks
+// inside the websites the search found, then everything found is reviewed. The page polls /api/docs/hunt with its token.
 
 const DOCUMENT_TYPES = {
  pdf: ['pdf'], word: ['doc', 'docx', 'odt', 'rtf'], slides: ['ppt', 'pptx', 'odp', 'key'],
@@ -43,8 +45,8 @@ export interface WebResult {
  // Documents only: 'checked' when the file was confirmed to be a document, 'blocked' when its site refused the check.
  check?: 'checked' | 'blocked';
 }
-// review: a single-use token for /api/web/review, which removes irrelevant documents and orders the rest.
-export interface WebSearchResponse { query: string; results: WebResult[]; providers: ProviderStatus[]; next_cursor: string | null; review?: string | null }
+// hunt: a token for /api/docs/hunt, which reports documents found inside websites and the review of every document.
+export interface WebSearchResponse { query: string; results: WebResult[]; providers: ProviderStatus[]; next_cursor: string | null; hunt?: string | null }
 
 // The file type a URL serves, from its path alone: a query string such as ?file=x.pdf names a viewer page, not a document.
 export function documentType(url: string): string | null {
@@ -76,7 +78,8 @@ const isoDate = (value: unknown) => { const d = typeof value === 'string' ? new 
 
 type Row = {url: string; title: unknown; snippet: unknown; published: unknown; engine: string};
 type Deps = {transport: typeof fetchJSON; budget: (db: DB, key: string, limit: number) => Promise<boolean>;
- peek?: (url: string, options: {timeoutMs: number}) => Promise<PeekResponse>};
+ peek?: (url: string, options: {timeoutMs: number}) => Promise<PeekResponse>;
+ hunt?: (query: string, docs: VerifiedDoc[], explore: boolean) => string};
 
 export async function searchWeb(db: DB, config: Config, input: WebSearchInput,
  deps: Deps = {transport: fetchJSON, budget: takeBudget}): Promise<WebSearchResponse> {
@@ -155,13 +158,15 @@ export async function searchWeb(db: DB, config: Config, input: WebSearchInput,
 
  if (!providers.length) providers.push({provider: 'web', status: 'disabled', message: 'Web search is not configured on this instance.'});
  const next_cursor = more && input.page < 10 ? String(input.page + 1) : null;
- if (!docs || !results.length) return {query: input.q, results, providers, next_cursor};
+ if (!docs) return {query: input.q, results, providers, next_cursor};
  const verified = await verifyDocuments(results, config, deps.peek);
  const {spam, dead, not_document} = verified.removed, removed = spam + dead + not_document;
- providers.push({provider: 'document_check', status: 'ok', message: removed
+ if (results.length) providers.push({provider: 'document_check', status: 'ok', message: removed
    ? `${removed} links were removed: ${dead} dead or unreachable, ${not_document} not actually documents, ${spam} spam.`
    : 'Every document link was checked.'});
- const docsOut = verified.results.map(({bytes: _bytes, ...d}) => d);
- return {query: input.q, results: docsOut, providers, next_cursor,
-   review: verified.results.length ? saveReview({query: input.q, docs: verified.results}) : null};
+ // The first page also explores the websites the search found, even when it found no document files itself.
+ const explore = input.page === 1 && config.DOC_HUNT_ENABLED;
+ const hunt = verified.results.length || explore
+   ? (deps.hunt ?? ((q, found, e) => startHunt(db, config, q, found, e)))(input.q, verified.results, explore) : null;
+ return {query: input.q, results: verified.results.map(({bytes: _bytes, ...d}) => d), providers, next_cursor, hunt};
 }

@@ -183,6 +183,20 @@ main.bleed{max-width:none;margin:0 0 96px;padding:0}
  .web-item,.web-item:hover,.web-item h3,.web-item-host{transition:none;transform:none!important}
 }
 .web-item p{margin:0;color:var(--ink);font-size:15px;line-height:1.7;overflow-wrap:anywhere}
+.web-item-via{margin:-2px 0 8px;font-family:var(--font-mono);font-size:10px;letter-spacing:.04em;color:var(--ink-3);overflow-wrap:anywhere}
+/* Websites the document hunt looked inside: host, page title and what was found there, one quiet row each. */
+.hunt-sites{max-width:760px;margin:0 0 18px;padding:14px 18px;border:1px solid rgb(0 0 0 / .06);border-radius:var(--r-lg);background:rgb(0 0 0 / .012)}
+.hunt-sites-title{margin:0 0 8px;font-family:var(--font-mono);font-size:10px;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.hunt-site{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:7px 0;border-top:1px solid rgb(0 0 0 / .05);font-size:13px}
+.hunt-site:first-of-type{border-top:0}
+.hunt-site .web-item-host{font-family:var(--font-mono);font-size:11px;margin-left:0}
+.hunt-site-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-2)}
+.hunt-site-verdict{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:999px;border:1px solid var(--rule-soft);color:var(--ink-2);white-space:nowrap}
+.hunt-document .hunt-site-verdict{border-color:var(--pink);background:rgb(255 105 180 / .14);color:var(--ink)}
+.hunt-access .hunt-site-verdict{border-color:var(--blue);background:rgb(141 180 255 / .2);color:var(--ink)}
+.hunt-searching .hunt-site-verdict{border-style:dashed}
+.hunt-not_found .hunt-site-verdict{color:var(--ink-3)}
+@media (max-width:560px){.hunt-site{grid-template-columns:minmax(0,1fr) auto}.hunt-site-title{display:none}}
 .web-item-source{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-family:var(--font-mono);font-size:11px;letter-spacing:.02em;color:var(--ink)}
 .web-item .badge{margin:0;background:rgb(255 255 255 / .6)}
 
