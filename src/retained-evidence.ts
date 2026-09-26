@@ -30,6 +30,9 @@ export async function quoteMoments(db: DB, quotes: Map<string, string[]>): Promi
  if (!quotes.size) return out;
  const rows = (await db.query(`SELECT id,content_id,start_seconds,end_seconds,text FROM transcript_segments
    WHERE content_id=ANY($1::uuid[]) ORDER BY content_id,start_seconds`, [[...quotes.keys()]])).rows;
+ // Each moment carries the id of the stored transcript window around the quote, so it is checked and revoked like any other.
+ const windows = (await db.query(`SELECT id,content_id,start_seconds,end_seconds FROM moments
+   WHERE content_id=ANY($1::uuid[]) AND evidence_type='transcript_supported' AND status='active'`, [[...quotes.keys()]])).rows;
  for (const [id, list] of quotes) {
    const segments = rows.filter(r => r.content_id === id), offsets: number[] = [];
    let text = '';
@@ -39,10 +42,11 @@ export async function quoteMoments(db: DB, quotes: Map<string, string[]>): Promi
      const wanted = fold(quote), at = wanted.length >= 8 ? text.indexOf(wanted) : -1;
      if (at < 0) continue;
      const first = segments[offsets.findLastIndex(o => o <= at)], last = segments[offsets.findLastIndex(o => o < at + wanted.length)];
-     if (seen.has(String(first.id))) continue;
-     seen.add(String(first.id));
      const start = Number(first.start_seconds), end = Number(last.end_seconds);
-     moments.push({id: `quote:${first.id}`, start_seconds: start, end_seconds: end, summary: quote.slice(0, 300), evidence_type: 'transcript_supported',
+     const window = windows.find(w => w.content_id === id && Number(w.start_seconds) <= start && start <= Number(w.end_seconds));
+     if (!window || seen.has(String(first.id))) continue;
+     seen.add(String(first.id));
+     moments.push({id: String(window.id), start_seconds: start, end_seconds: end, summary: quote.slice(0, 300), evidence_type: 'transcript_supported',
        analysis_version: 'judge-quote-v1', inspected_ranges: [[start, end]], evidence_refs: [String(first.id)], focus: [start, end]});
    }
    if (moments.length) out.set(id, moments.slice(0, 3));

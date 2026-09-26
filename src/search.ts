@@ -182,7 +182,8 @@ export class SearchService {
      AND c.availability<>'unavailable' AND c.expires_at>now()`,[ids])).rows.map(r=>r.id);
    const candidateSources = (await this.db.query(`SELECT id FROM sources WHERE id=ANY($1::uuid[]) AND status='candidate' AND health_status<>'down'`,
      [[...new Set(items.map(r=>r.source_id))]])).rows.map(r=>r.id);
-   const momentIds=items.flatMap(r=>r.moments.map(m=>m.id));
+   // Only stored evidence ids are checked; anything else is not a moment this snapshot may show.
+   const momentIds=items.flatMap(r=>r.moments.map(m=>m.id)).filter(id=>/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id));
    const activeMoments=momentIds.length?(await this.db.query(`SELECT m.id FROM moments m JOIN content c ON c.id=m.content_id
      JOIN sources s ON s.id=c.source_id WHERE m.id=ANY($1::uuid[]) AND m.status='active'
      AND (m.evidence_type<>'transcript_supported' OR (s.policy->>'transcripts')::boolean=true)

@@ -27,6 +27,8 @@ test('a transcript passage the judge quoted becomes a timestamped moment at the 
   assert.equal(moments[0].start_seconds,55.85);
   assert.equal(moments[0].evidence_type,'transcript_supported');
   assert.equal(moments[0].summary,'The first story is about connecting the dots.');
+  assert.equal((await db.query(`SELECT count(*)::int AS n FROM moments WHERE id=$1 AND status='active'`,[moments[0].id])).rows[0].n,1,
+   'the id is the stored transcript window, so revoking the transcript removes the moment');
  } finally {await db.close();}
 });
 
