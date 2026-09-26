@@ -11,7 +11,7 @@ council of three seats that work together, each with a fallback from another pro
 | Seat | Job | Models (main → fallback) | Budget bucket |
 |---|---|---|---|
 | Scorer | Scores every candidate (existing batched judge; Jev pre-judge stays in front) | `JUDGE_MODELS`: google/gemini-3.5-flash-lite → google/gemini-3.8-flash → openai/gpt-4.1-mini → qwen/qwen3-vl-30b; Gemini key last | `judge_calls` (`JUDGE_DAILY_BUDGET`) |
-| Checker | Independently re-scores the top `COUNCIL_CHECK_TOP` (15) the Scorer rated 3 or more, without seeing the Scorer's verdicts | `COUNCIL_CHECKER_MODELS`: openai/gpt-5.6-luna → openai/gpt-5.4-mini → qwen/qwen3.7-plus (confirmed by the seat benchmark; 35 s limit) | `council_checker_calls` |
+| Checker | Independently re-scores the top `COUNCIL_CHECK_TOP` (15) the Scorer rated 3 or more, without seeing the Scorer's verdicts | `COUNCIL_CHECKER_MODELS`: openai/gpt-5.6-terra → mistralai/mistral-medium-3.1 → openai/gpt-5.4-mini (confirmed by the seat benchmarks; 35 s limit) | `council_checker_calls` |
 | Chair | Decides only disputed candidates, seeing both verdicts and the evidence | `COUNCIL_CHAIR_MODELS`: anthropic/claude-sonnet-5 → google/gemini-3.1-pro-preview | `council_chair_calls` |
 
 All seats use the same judge prompt and schema (`ModelJudge`), so verdicts share one scale and one set of evidence rules.
@@ -58,9 +58,23 @@ label accuracy, stability across runs, latency, failures and token cost. The sea
 | grok-4.7 (60 s limit) | 34.5% | 35.3% | – | 50.6 s | 11 of 18 even at 60 s | 0.0217 |
 | qwen3.8-flash | – | – | – | – | all at 20 s | – |
 
-Decisions: the Scorer stays on gemini-3.5-flash-lite (as accurate as 3.8-flash at a third of the time); the Checker is
-gpt-5.6-luna (best ordering, steadiest, cheapest) with its own 35 s limit, then gpt-5.4-mini (fast) and qwen3.7-plus;
-grok-4.7 and qwen3.8-flash are too slow for any seat.
+Decisions: the Scorer stays on gemini-3.5-flash-lite (as accurate as 3.8-flash at a third of the time). Live, luna took
+19-26 s per search as Checker, so a second benchmark (35 s limit, same cases) compared alternatives:
+
+| Model | Labels | Pairs | Spread | Median | p90 | Failures | $/search (3 calls) |
+|---|---|---|---|---|---|---|---|
+| gpt-5.6-terra | 98.9% | 94.1% | 0.52 | 6.8 s | 12.3 s | 0 | 0.043 |
+| mistral-medium-3.1 | 98.9% | 86.3% | 0.52 | 7.2 s | 9.9 s | 0 | 0.009 |
+| claude-haiku-4.5 | 97.7% | 90.2% | 1.14 | 11.7 s | 28.9 s | 0 | 0.026 |
+| gpt-5.4-mini | 90.8% | 90.2% | 1.21 | 3.8 s | 4.5 s | 0 | 0.015 |
+| gpt-5.6-luna | 87.4% | 88.2% | 0.34 | 13.9 s | 28.5 s | 1 | 0.006 |
+| gpt-5.6-sol | 87.4% | 88.2% | 0.14 | 15.5 s | 32.1 s | 1 | 0.052 |
+| llama-4-maverick | 66.7% | 60.8% | 0.79 | 11.5 s | 15.0 s | 5 | 0.004 |
+| deepseek-v4.1-flash | 33.3% | 27.5% | 1.70 | 27.5 s | 34.9 s | 12 | 0.008 |
+
+The Checker is gpt-5.6-terra (most accurate, best ordering, steady, ~7 s), then mistral-medium-3.1 (another provider)
+and gpt-5.4-mini. With 29 labelled items, differences under ~5 points are noise (luna measured 93% and 87% on two runs).
+grok-4.7, qwen3.8-flash, llama-4-maverick and deepseek-v4.1-flash are unfit for any seat.
 
 ## Out of scope
 

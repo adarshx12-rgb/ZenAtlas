@@ -79,9 +79,10 @@ export const configSchema = z.object({
   // Judge council (src/council.ts): a Checker from another provider re-scores the top COUNCIL_CHECK_TOP; a Chair decides
   // where the two disagree by COUNCIL_DISAGREEMENT or more. Each seat: main model first, then its fallbacks.
   COUNCIL_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
-  // Chosen by the 2026-09-26 seat benchmark (scripts/council-bench.ts): luna was steadiest and cheapest at 93% label
-  // accuracy but needs ~16 s (p90 27 s); gpt-5.4-mini is the fast fallback; qwen3.7-plus is accurate but ~40 s.
-  COUNCIL_CHECKER_MODELS: z.string().regex(/^[\w.,\/:\s-]*$/).default('openai/gpt-5.6-luna,openai/gpt-5.4-mini,qwen/qwen3.7-plus'),
+  // Chosen by the 2026-09-26 seat benchmarks (scripts/council-bench.ts): gpt-5.6-terra was most accurate (99% labels, 94%
+  // ordered pairs) and steady at ~7 s; mistral-medium-3.1 (another provider, cheapest of the accurate ones) and
+  // gpt-5.4-mini (~4 s) follow. Luna took 19-26 s live.
+  COUNCIL_CHECKER_MODELS: z.string().regex(/^[\w.,\/:\s-]*$/).default('openai/gpt-5.6-terra,mistralai/mistral-medium-3.1,openai/gpt-5.4-mini'),
   COUNCIL_CHECKER_TIMEOUT_MS: number(35000, 5000, 120000), COUNCIL_CHAIR_TIMEOUT_MS: number(45000, 5000, 120000),
   COUNCIL_CHAIR_MODELS: z.string().regex(/^[\w.,\/:\s-]*$/).default('anthropic/claude-sonnet-5,google/gemini-3.1-pro-preview'),
   COUNCIL_CHECK_TOP: number(15, 5, 30), COUNCIL_DISAGREEMENT: number(2, 1, 5),
