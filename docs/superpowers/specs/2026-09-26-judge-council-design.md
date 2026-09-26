@@ -10,8 +10,8 @@ council of three seats that work together, each with a fallback from another pro
 
 | Seat | Job | Models (main → fallback) | Budget bucket |
 |---|---|---|---|
-| Scorer | Scores every candidate (existing batched judge; Jev pre-judge stays in front) | `JUDGE_MODELS`: google/gemini-3.8-flash → qwen/qwen3.8-flash → previous judge chain; Gemini key last | `judge_calls` (`JUDGE_DAILY_BUDGET`) |
-| Checker | Independently re-scores the top `COUNCIL_CHECK_TOP` (15) the Scorer rated 3 or more, without seeing the Scorer's verdicts | `COUNCIL_CHECKER_MODELS`: openai/gpt-5.6-luna → qwen/qwen3.7-plus (to be confirmed by measurement) | `council_checker_calls` |
+| Scorer | Scores every candidate (existing batched judge; Jev pre-judge stays in front) | `JUDGE_MODELS`: google/gemini-3.5-flash-lite → google/gemini-3.8-flash → openai/gpt-4.1-mini → qwen/qwen3-vl-30b; Gemini key last | `judge_calls` (`JUDGE_DAILY_BUDGET`) |
+| Checker | Independently re-scores the top `COUNCIL_CHECK_TOP` (15) the Scorer rated 3 or more, without seeing the Scorer's verdicts | `COUNCIL_CHECKER_MODELS`: openai/gpt-5.6-luna → openai/gpt-5.4-mini → qwen/qwen3.7-plus (confirmed by the seat benchmark; 35 s limit) | `council_checker_calls` |
 | Chair | Decides only disputed candidates, seeing both verdicts and the evidence | `COUNCIL_CHAIR_MODELS`: anthropic/claude-sonnet-5 → google/gemini-3.1-pro-preview | `council_chair_calls` |
 
 All seats use the same judge prompt and schema (`ModelJudge`), so verdicts share one scale and one set of evidence rules.
@@ -44,6 +44,23 @@ A replay harness (`scripts/council-bench.ts`) judges fixed candidate sets built 
 labelled right and wrong answers (official vs re-upload, canonical vs mirror, authority vs vendor page, constraint
 violations). It runs each Checker candidate (gpt-5.6-luna, gpt-5.4-mini, qwen3.7-plus, grok-4.7) 3 times and reports
 label accuracy, stability across runs, latency, failures and token cost. The seats are confirmed from these numbers.
+
+## Seat benchmark results (2026-09-26, 6 cases, 3 runs each; `output/council-bench/`)
+
+| Model | Labels | Pairs | Spread | Median | Failures at 20 s | $/call |
+|---|---|---|---|---|---|---|
+| gemini-3.5-flash-lite | 96.6% | 88.2% | 0.69 | 5.0 s | 0 | 0.0046 |
+| gemini-3.8-flash | 94.3% | 88.2% | 0.28 | 14.5 s | 1 | 0.0089 |
+| gpt-5.6-luna (60 s limit) | 93.1% | 94.1% | 0.38 | 16.2 s | 4 at 20 s | 0.0020 |
+| gpt-5.4-mini | 94.3% | 90.2% | 1.41 | 4.2 s | 0 | 0.0048 |
+| qwen3.7-plus (60 s limit) | 95.4% | 94.1% | 1.10 | 39.8 s | all at 20 s | 0.0038 |
+| gpt-4.1-mini | 79.3% | 70.6% | 0.92 | 6.3 s | 0 (15 missing verdicts) | 0.0018 |
+| grok-4.7 (60 s limit) | 34.5% | 35.3% | – | 50.6 s | 11 of 18 even at 60 s | 0.0217 |
+| qwen3.8-flash | – | – | – | – | all at 20 s | – |
+
+Decisions: the Scorer stays on gemini-3.5-flash-lite (as accurate as 3.8-flash at a third of the time); the Checker is
+gpt-5.6-luna (best ordering, steadiest, cheapest) with its own 35 s limit, then gpt-5.4-mini (fast) and qwen3.7-plus;
+grok-4.7 and qwen3.8-flash are too slow for any seat.
 
 ## Out of scope
 

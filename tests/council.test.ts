@@ -71,6 +71,10 @@ test('seats come from settings; the checker never reuses a scorer model',()=>{
  const seats=makeCouncil({} as any,config)!;
  assert.deepEqual((seats.checker as any).client.models,['qwen/qwen3.7-plus']);
  assert.deepEqual((seats.chair as any).client.models,['anthropic/claude-sonnet-5']);
+ assert.equal((seats.checker as any).client.config.JUDGE_TIMEOUT_MS,config.COUNCIL_CHECKER_TIMEOUT_MS,'the checker gets its own time limit');
+ assert.equal((seats.chair as any).client.config.JUDGE_TIMEOUT_MS,config.COUNCIL_CHAIR_TIMEOUT_MS);
+ assert.deepEqual([testConfig.COUNCIL_CHECKER_MODELS,testConfig.COUNCIL_CHECKER_TIMEOUT_MS,testConfig.COUNCIL_CHAIR_TIMEOUT_MS],
+  ['openai/gpt-5.6-luna,openai/gpt-5.4-mini,qwen/qwen3.7-plus',35000,45000],'defaults chosen by the 2026-09-26 seat benchmark');
  assert.equal(makeCouncil({} as any,{...config,COUNCIL_ENABLED:false}),null);
  assert.equal(makeCouncil({} as any,{...config,OPENROUTER_API_KEY:''}),null);
 });

@@ -20,11 +20,13 @@ export function makeCouncil(db: DB, config: Config): CouncilSeats|null {
  // A second opinion from the model that gave the first is no second opinion.
  const scorer = new Set(judgeModels(config));
  const checkers = list(config.COUNCIL_CHECKER_MODELS).filter(m => !scorer.has(m)), chairs = list(config.COUNCIL_CHAIR_MODELS);
- const seat = (models: string[], bucket: string, budget: number, maxTokens: number) => models.length
-   ? new ModelJudge(new OpenAICompatibleClient(db, {...config, JUDGE_DAILY_BUDGET: budget}, models, undefined, maxTokens), config, bucket) : undefined;
- return {checker: seat(checkers, 'council_checker_calls', config.COUNCIL_CHECKER_DAILY_BUDGET, 8192),
-   // The Chair reasons before answering (Sonnet 5 thinks adaptively), so it gets room to finish.
-   chair: seat(chairs, 'council_chair_calls', config.COUNCIL_CHAIR_DAILY_BUDGET, 16000)};
+ // Each seat has its own budget and time limit: the Checker judges up to 15 candidates in one call, and the Chair reasons
+ // before answering (Sonnet 5 thinks adaptively), so both get longer than a batch of the Scorer.
+ const seat = (models: string[], bucket: string, budget: number, timeout: number, maxTokens: number) => models.length
+   ? new ModelJudge(new OpenAICompatibleClient(db, {...config, JUDGE_DAILY_BUDGET: budget, JUDGE_TIMEOUT_MS: timeout}, models, undefined, maxTokens), config, bucket)
+   : undefined;
+ return {checker: seat(checkers, 'council_checker_calls', config.COUNCIL_CHECKER_DAILY_BUDGET, config.COUNCIL_CHECKER_TIMEOUT_MS, 8192),
+   chair: seat(chairs, 'council_chair_calls', config.COUNCIL_CHAIR_DAILY_BUDGET, config.COUNCIL_CHAIR_TIMEOUT_MS, 16000)};
 }
 
 const mismatch = (v: Verdict) => !!v.intentChecks?.some(c => c.status === 'mismatch');
