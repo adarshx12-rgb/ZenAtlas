@@ -9,8 +9,9 @@ import { contentHash } from './embeddings.js';
 import { importTranscript } from './moments.js';
 
 // Existing YouTube captions, read by scene-worker/src/zenatlas_scenes/captions.py. Only caption text is fetched, never
-// audio or video. Creator captions win over auto-generated ones. YouTube is asked directly; while it blocks us, Supadata
-// (SUPADATA_API_KEY) returns the same captions from its own servers, within SUPADATA_DAILY_BUDGET.
+// audio or video. Supadata (SUPADATA_API_KEY) is asked first, within SUPADATA_DAILY_BUDGET: it fetches from its own servers,
+// so YouTube blocking this address does not stop it, but it cannot say whether captions are creator-made (kind unknown).
+// YouTube is asked directly when Supadata is spent, paused or fails; its track list tells creator from auto captions.
 const kind = z.enum(['youtube_manual', 'youtube_auto', 'youtube_unknown']);
 const language = z.string().regex(/^[a-z]{2,3}$|^und$/);
 const answer = z.discriminatedUnion('status', [
@@ -106,7 +107,16 @@ export async function captionJob(db: DB, config: Config, job: any, fetch: Captio
    return {status: 'imported', kind: fetched.kind, language: fetched.language, via, ...stored};
  };
 
- let chosen: {kind?: z.infer<typeof kind>; language?: string} = {};
+ // Supadata first (it fetches from its own servers, so YouTube's blocks on this address do not matter), within its daily
+ // budget. Anything but captions or a definite "none" falls back to asking YouTube directly.
+ if (config.SUPADATA_API_KEY && !await pausedUntil(db, 'supadata') && await takeBudget(db, 'supadata_requests', config.SUPADATA_DAILY_BUDGET)) {
+   const relayed = await fetch(id, row.language, 'supadata');
+   if (relayed.status !== 'error') return settle(relayed, 'supadata');
+   if (SUPADATA_STOPS.has(relayed.code)) {
+     const until = await pause(db, 'supadata', relayed.code, 1440, false);
+     console.error(JSON.stringify({event: 'supadata_paused', code: relayed.code, until}));
+   }
+ }
  if (!await pausedUntil(db, 'youtube_captions')) {
    const direct = await fetch(id, row.language, 'youtube');
    if (direct.status !== 'error') {
@@ -116,17 +126,6 @@ export async function captionJob(db: DB, config: Config, job: any, fetch: Captio
    if (!YOUTUBE_BLOCKS.has(direct.code)) throw new Error(`captions_${direct.code}`);
    const until = await pause(db, 'youtube_captions', direct.code, CAPTION_PAUSE_MINUTES, true);
    console.error(JSON.stringify({event: 'youtube_captions_paused', code: direct.code, until}));
-   chosen = {kind: direct.kind, language: direct.language};
- }
- // YouTube is blocking direct requests. Supadata costs a credit per video, so it is used only now and within its budget.
- if (config.SUPADATA_API_KEY && !await pausedUntil(db, 'supadata') && await takeBudget(db, 'supadata_requests', config.SUPADATA_DAILY_BUDGET)) {
-   const relayed = await fetch(id, chosen.language ?? row.language, 'supadata');
-   // Supadata does not report the caption kind; the kind YouTube's track list showed before the block is kept.
-   if (relayed.status === 'ok') return settle({...relayed, kind: chosen.kind ?? relayed.kind}, 'supadata');
-   if (relayed.status === 'none') return settle(relayed, 'supadata');
-   if (!SUPADATA_STOPS.has(relayed.code)) throw new Error(`captions_${relayed.code}`);
-   const until = await pause(db, 'supadata', relayed.code, 1440, false);
-   console.error(JSON.stringify({event: 'supadata_paused', code: relayed.code, until}));
  }
  await requeue(db, job, (await pausedUntil(db, 'youtube_captions')) ?? new Date(Date.now() + CAPTION_PAUSE_MINUTES * 60_000), 'youtube_blocked');
  return null;

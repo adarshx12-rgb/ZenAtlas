@@ -16,7 +16,7 @@ async function youtube(db: DB, id: string, title = `Fixture video ${id}`, langua
  return (await ingest(db, contentInput.parse({url: `https://www.youtube.com/watch?v=${id}`, title, description: 'Fixture description',
    language, duration: 60, availability: 'available'}), {fixture: true}))!;
 }
-// YouTube answers by video id; Supadata answers (only used while YouTube blocks) likewise. `relayed` records Supadata calls.
+// YouTube answers by video id; Supadata (asked first when a key is set) likewise. `relayed` records Supadata calls.
 function fetcher(answers: Record<string, CaptionAnswer>, supadata: Record<string, CaptionAnswer> = {}) {
  const asked: string[] = [], relayed: string[] = [];
  const fetch: CaptionFetcher = async (id, language, via) => {
@@ -93,25 +93,24 @@ test('a YouTube block pauses the whole caption lane without spending attempts; m
  } finally { await db.close(); }
 });
 
-test('while YouTube blocks, Supadata fetches within its budget and keeps the kind the track list showed', async () => {
+test('Supadata is asked first within its budget; YouTube is the fallback once the budget is spent or Supadata fails', async () => {
  const db = await database();
  try {
-   const known = await youtube(db, 'iiiiiiiiiii'), unknown = await youtube(db, 'jjjjjjjjjjj'), over = await youtube(db, 'kkkkkkkkkkk');
-   await queueCaptions(db, config, [known, unknown, over]);
-   const {fetch, asked, relayed} = fetcher(
-     {iiiiiiiiiii: {status: 'error', code: 'IpBlocked', kind: 'youtube_auto', track: 'es', language: 'es'}},
-     {iiiiiiiiiii: {...ok('youtube_unknown', 'hola a todos'), language: 'es', track: 'es'}, jjjjjjjjjjj: ok('youtube_unknown', 'hello everyone')});
-   const withSupadata = {...config, SUPADATA_API_KEY: 'key', SUPADATA_DAILY_BUDGET: 2};
+   const a = await youtube(db, 'iiiiiiiiiii'), b = await youtube(db, 'jjjjjjjjjjj'), flaky = await youtube(db, 'nnnnnnnnnnn'), over = await youtube(db, 'kkkkkkkkkkk');
+   await queueCaptions(db, config, [a, b, flaky, over]);
+   const {fetch, asked, relayed} = fetcher({nnnnnnnnnnn: ok('youtube_manual', 'fallback captions'), kkkkkkkkkkk: ok('youtube_auto', 'over budget')},
+     {iiiiiiiiiii: {...ok('youtube_unknown', 'hola a todos'), language: 'es', track: 'es'}, jjjjjjjjjjj: ok('youtube_unknown', 'hello everyone'),
+      nnnnnnnnnnn: {status: 'error', code: 'SupadataTimeout'}});
+   const withSupadata = {...config, SUPADATA_API_KEY: 'key', SUPADATA_DAILY_BUDGET: 3};
    while (await workOnce(db, withSupadata, undefined, undefined, undefined, fetch));
-   assert.deepEqual(asked, ['iiiiiiiiiii'], 'YouTube is asked once, then left alone while paused');
-   assert.deepEqual(relayed, ['iiiiiiiiiii:es', 'jjjjjjjjjjj:hi'], 'the blocked track language, else the video language');
-   assert.deepEqual((await job(db, known.id)).result.via, 'supadata');
-   assert.deepEqual((await db.query(`SELECT DISTINCT source_kind,language FROM transcript_segments WHERE content_id=$1`, [known.id])).rows,
-     [{source_kind: 'youtube_auto', language: 'es'}]);
-   assert.deepEqual((await db.query(`SELECT DISTINCT source_kind FROM transcript_segments WHERE content_id=$1`, [unknown.id])).rows,
-     [{source_kind: 'youtube_unknown'}], 'blocked before the track list: kind unknown');
-   const waiting = await job(db, over.id);
-   assert.deepEqual([waiting.status, waiting.attempts, waiting.error_code], ['queued', 0, 'youtube_blocked'], 'over budget: waits for YouTube');
+   assert.deepEqual(relayed.sort(), ['iiiiiiiiiii:hi', 'jjjjjjjjjjj:hi', 'nnnnnnnnnnn:hi'], 'Supadata first, in the video language');
+   assert.deepEqual(asked.sort(), ['kkkkkkkkkkk', 'nnnnnnnnnnn'], 'YouTube only after a Supadata failure or once its budget is spent');
+   assert.deepEqual([(await job(db, a.id)).result.via, (await job(db, flaky.id)).result.via, (await job(db, over.id)).result.via],
+     ['supadata', 'youtube', 'youtube']);
+   assert.deepEqual((await db.query(`SELECT DISTINCT source_kind,language FROM transcript_segments WHERE content_id=$1`, [a.id])).rows,
+     [{source_kind: 'youtube_unknown', language: 'es'}], 'Supadata does not say whether captions are creator-made');
+   assert.deepEqual((await db.query(`SELECT DISTINCT source_kind FROM transcript_segments WHERE content_id=$1`, [flaky.id])).rows,
+     [{source_kind: 'youtube_manual'}]);
  } finally { await db.close(); }
 });
 
