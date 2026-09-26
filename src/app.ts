@@ -19,6 +19,7 @@ import { searchWeb, webSearchInput } from './web.js';
 import { huntSnapshot, huntState } from './doc-hunt.js';
 import { webReviewSnapshot, webReviewState } from './web-review.js';
 import { chooseMode } from './mode-router.js';
+import { validWalledToken, walledPreview } from './walled.js';
 import { DocumentPreviews, PreviewError } from './doc-preview.js';
 import { auditReport } from './learning.js';
 
@@ -107,6 +108,12 @@ export async function createApp(db:DB,config:Config) {
  app.get('/api/images',async req=>searchImages(db,config,imageSearchInput.parse(req.query)));
  // Web pages and documents (PDF, Word, slides…) are discovery-only lists too.
  app.get('/api/web',async req=>searchWeb(db,config,webSearchInput.parse(req.query)));
+ // The login-free preview of a login-walled result. Only URLs the engine returned carry a valid token.
+ app.get('/api/walled',async req=>{
+   const {url,t}=z.object({url:z.string().url().max(2048),t:z.string().max(64)}).strict().parse(req.query);
+   if(!config.WALLED_PREVIEW_ENABLED||!validWalledToken(config.SESSION_SECRET,url,t)) throw new ApiError(403,'invalid_token','This preview link is not valid; search again.');
+   return walledPreview(db,config,url);
+ });
  // Which tab a new search opens on: format words, then Jev, then a small model; videos when unsure.
  app.get('/api/mode',async req=>chooseMode(db,config,z.object({q:z.string().trim().min(2).max(400)}).strict().parse(req.query).q));
  // The Web tab's relevance review, polled while it runs; complete, it lists the pages kept, ranked, with their reasons.

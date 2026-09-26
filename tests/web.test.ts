@@ -113,3 +113,13 @@ test('web results start a relevance review; document search and callers that opt
  assert.equal((await searchWeb({} as any,config,webSearchInput.parse({q:'query',kind:'docs'}),{...d,review})).review,undefined);
  assert.equal(started.length,1);
 });
+
+test('results from login-walled sites carry a signed preview token; other results do not',async()=>{
+ const {walledToken}=await import('../src/walled.js');
+ const {deps:d}=deps({'api.search.brave.com':brave({url:'https://x.com/leaks/status/123'},{url:'https://example.org/a'})});
+ const out=await searchWeb({} as any,config,webSearchInput.parse({q:'doomsday leaks'}),{...d,review:false});
+ assert.deepEqual(out.results[0].walled,{site:'X',host:'x.com',token:walledToken(config.SESSION_SECRET,'https://x.com/leaks/status/123')});
+ assert.equal(out.results[1].walled,undefined);
+ const off=await searchWeb({} as any,{...config,WALLED_PREVIEW_ENABLED:false},webSearchInput.parse({q:'doomsday leaks'}),{...d,review:false});
+ assert.equal(off.results[0].walled,undefined);
+});

@@ -15,6 +15,7 @@ import { findDocuments, type SourceFindings } from './doc-sources.js';
 import { viewerOf } from './doc-viewers.js';
 import { refreshBlocklists, unsafeLink } from './safety.js';
 import { startWebReview } from './web-review.js';
+import { walledSite, walledToken } from './walled.js';
 import type { PeekResponse } from './http.js';
 
 // Web and document search are discovery-only, like image search: results come straight from the engines and never
@@ -52,6 +53,8 @@ export interface WebResult {
  viewer?: string;
  // Set by a relevance review (the Docs hunt, the Web review).
  judgement?: {relevance: number; reason: string};
+ // A login-walled site's result: opens in the login-free preview (/api/walled with this token).
+ walled?: {site: string; host: string; token: string};
 }
 // hunt: a token for /api/docs/hunt, which reports documents found inside websites and the review of every document.
 // review (web only): a token for /api/web/review, which removes pages that do not match and ranks the rest.
@@ -122,9 +125,11 @@ export async function searchWeb(db: DB, config: Config, input: WebSearchInput,
      if (docs && unsafeLink(url, typeof row.title === 'string' ? row.title : '')) { unsafe++; continue; }
      seen.add(url);
      const host = new URL(url).hostname.replace(/^www\./, '');
+     const walled = !docs && config.WALLED_PREVIEW_ENABLED ? walledSite(url) : null;
      results.push({id: createHash('sha1').update(url).digest('hex'), url, source_name: host,
        title: plain(row.title, 300) ?? host, snippet: plain(row.snippet, 600), published: isoDate(row.published),
        doc_type: type, access: accessLabel(kind), engine: row.engine, ...(viewer ? {viewer: viewer.name} : {}),
+       ...(walled ? {walled: {...walled, token: walledToken(config.SESSION_SECRET, url)}} : {}),
        preview: type && type !== 'epub' && type !== 'viewer' && (type === 'pdf' || config.DOC_PREVIEW_CONVERTER) ? previewToken(config.SESSION_SECRET, url) : null});
    }
  };

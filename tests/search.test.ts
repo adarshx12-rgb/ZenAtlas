@@ -62,6 +62,8 @@ test('PostgreSQL catalogue/API, ownership, filters, evidence and stable paginati
    assert.equal((await app.inject('/api/search?q=x&unsupported=true')).statusCode,400);
    assert.equal((await app.inject('/api/admin/sources')).statusCode,403);
    assert.equal((await app.inject('/api/thumbnail')).statusCode,400,'url is required');
+   assert.equal((await app.inject('/api/walled?url=https%3A%2F%2Fx.com%2Fa%2Fstatus%2F1&t=forged')).statusCode,403,'only engine results can be previewed');
+   assert.equal((await app.inject('/api/walled?url=https%3A%2F%2Fx.com%2Fa%2Fstatus%2F1')).statusCode,400,'the token is required');
    const badThumb=await app.inject('/api/thumbnail?url=http://127.0.0.1/x.jpg');
    assert.equal(badThumb.statusCode,400);assert.equal(badThumb.json().error.code,'unsafe_url');
    const feedback={method:'POST' as const,url:'/api/feedback',headers:{cookie,'x-requested-with':'CreatorSearch'},payload:{search_id:data.search_id,content_id:first.id,useful:true}};
