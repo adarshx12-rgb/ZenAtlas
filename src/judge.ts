@@ -23,6 +23,8 @@ export interface JudgeCandidate {
  description_source?: 'api'|'search';
  // Web only: Jev's first reading (relevance 0-4, accuracy 0-1), advisory for the LLM judge.
  jev_check?: {relevance: number; accuracy: number|null};
+ // Chair only: the two council judges' verdicts it is asked to settle.
+ council?: {first: {relevance: number; reason: string}; second: {relevance: number; reason: string}};
 }
 // anime: a confidently matched anime from AniList, for recognising fan-subbed, dubbed or renamed uploads of it.
 // requirements: the shared contract's hard per-result requirements, checked one by one.

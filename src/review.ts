@@ -3,6 +3,7 @@ import type { PageEvidence } from './pages.js';
 import type { Judge, JudgeCandidate, JudgeResult, Verdict } from './judge.js';
 import { screeningOrder, type Screener } from './screener.js';
 import { accessKind } from './access.js';
+import { councilReview, type CouncilSeats } from './council.js';
 
 // The relevance review shared by the Docs and Web tabs: the screener orders long lists, the caller reads the text of the
 // first textPool items, then the judge (Jev in front of the LLM judge) scores up to reviewPool items. Items at relevance 4
@@ -12,7 +13,9 @@ export type Judgement = {relevance: number; reason: string};
 // noun: what the items are called in messages. keepUnjudged: an item the judge returned no verdict for stays, unranked,
 // after the ranked ones (web: a failed LLM batch is not a rejection); otherwise it is removed (Docs: nothing unvouched is shown).
 export interface ReviewPlan<T extends Reviewable> { noun: string; criteria: string[]; requirement: {text: string; evidence: string};
- textPool: number; reviewPool: number; read: (items: T[]) => Promise<Map<string, PageEvidence>>; judge: Judge; screener?: Screener; keepUnjudged: boolean }
+ textPool: number; reviewPool: number; read: (items: T[]) => Promise<Map<string, PageEvidence>>; judge: Judge; screener?: Screener; keepUnjudged: boolean;
+ // The judge council's Checker and Chair (src/council.ts), re-checking the top councilTop verdicts; absent or null: one judge.
+ council?: CouncilSeats|null; councilTop?: number; log?: (line: Record<string, unknown>) => void }
 // trace: per judged item, the judge's relevance and Jev's record, for metrics.
 // lead: the item's own text could not be read, so it was judged on its title and snippet only: a lead, not a verified match.
 export interface ReviewOutcome<T> { results: (T & {judgement?: Judgement; lead?: true})[]; removed: number; providers: ProviderStatus[];
@@ -47,6 +50,11 @@ export async function reviewResults<T extends Reviewable>(query: string, items: 
  catch {
    providers.push({provider: 'judge', status: 'unavailable', message: `Relevance checking is unavailable right now; ${plan.noun} are shown in search order.`});
    return {results: items, removed: 0, providers, trace: []};
+ }
+ if (plan.council) {
+   const reviewed = await councilReview(query, candidates, out.verdicts, context, undefined, plan.council, {top: plan.councilTop ?? 15, log: plan.log});
+   out = {...out, verdicts: reviewed.verdicts};
+   providers.push(...reviewed.providers);
  }
  const scored = [...keys].map(([key, d], i) => ({d, i, v: out.verdicts.get(key) as Verdict|undefined, jev: out.jev?.get(key)}));
  const kept = scored.filter(s => s.v && s.v.relevance > TANGENTIAL && !s.v.intentChecks?.some(c => c.status === 'mismatch'))

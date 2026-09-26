@@ -7,6 +7,7 @@ import { UpstreamError } from './http.js';
 import { takeBudget } from './budgets.js';
 import { YouTubeData, youtubeId, type VideoDetails, type ViewerComment, type YouTubeClient } from './youtube.js';
 import { makeJudge, type Judge, type JudgeCandidate, type JudgeContext, type JudgeResult, type Verdict } from './judge.js';
+import { councilReview, makeCouncil, type CouncilSeats } from './council.js';
 import { PageChecker, type PageCheck, type PageEvidence } from './pages.js';
 import type { SearchTarget } from './planner.js';
 import {PublicVideoEvidence,selectComments,type VideoEvidenceAdapter,type VideoEvidence} from './video-evidence.js';
@@ -25,7 +26,8 @@ const LEAD_IN_SECONDS = 5;
 export interface TimestampMention { commentId: string; seconds: number; excerpt: string; likes: number; weight: number }
 export interface MomentCluster { start: number; end: number; score: number; mentions: TimestampMention[] }
 export interface Discussion { title: string; url: string; snippet: string|null }
-export interface SignalDeps { youtube?: YouTubeClient; judge?: Judge; pages?: PageCheck; videoEvidence?:VideoEvidenceAdapter; discussions?: (query: string) => Promise<Discussion[]> }
+// council: the judge council's Checker and Chair (src/council.ts); null turns it off, absent builds it from settings.
+export interface SignalDeps { youtube?: YouTubeClient; judge?: Judge; council?: CouncilSeats|null; pages?: PageCheck; videoEvidence?:VideoEvidenceAdapter; discussions?: (query: string) => Promise<Discussion[]> }
 // What the search plan wanted, and which kind of search found each result (by result id).
 // underrated is retained for callers; obscurity is a badge, never a ranking boost.
 // contract: the search's shared requirements; findings: evidence already gathered for these candidates (exploration).
@@ -299,10 +301,10 @@ export async function applySignals(db: DB, config: Config, query: string, result
    const wanted = context?.kind === 'websites' ? 'mixed' as const : context?.kind ?? 'videos';
    const screenshots = new Map([...previews].flatMap(([id, image]) => keys.has(id) ? [[keys.get(id)!, image] as const] : []));
    // Smaller batches in parallel answer faster, and a failed batch only leaves its own results unjudged.
+   const judgeContext = context ? {kind: wanted, criteria: context.criteria, anime: context.anime, ...(requirements ? {requirements} : {})} : undefined;
    const judgeAll = (list: JudgeCandidate[], size: number) => Promise.allSettled(
      Array.from({length: Math.ceil(list.length/size)}, (_, b) => list.slice(b*size, (b + 1)*size)).map(batch =>
-       judge.judge(query, batch, context ? {kind: wanted, criteria: context.criteria, anime: context.anime, ...(requirements ? {requirements} : {})} : undefined,
-         screenshots).then(out => ({batch, out}))));
+       judge.judge(query, batch, judgeContext, screenshots).then(out => ({batch, out}))));
    const byKey = new Map<string,Verdict>();
    const idOf = new Map([...keys].map(([id, key]) => [key, id]));
    const collect = (settled: PromiseSettledResult<{batch: JudgeCandidate[]; out: JudgeResult}>[]) => {
@@ -319,6 +321,14 @@ export async function applySignals(db: DB, config: Config, query: string, result
    // Lighter fallback models often skip candidates in long batches; the skipped ones are asked once more in short batches.
    const skipped = settled.flatMap(s => s.status === 'fulfilled' ? s.value.batch.filter(c => !byKey.has(c.key)) : []);
    if (skipped.length) collect(await judgeAll(skipped, RETRY_BATCH));
+   // The council re-checks the top verdicts across all batches: a second opinion, and a Chair where the two disagree.
+   const council = 'council' in deps ? deps.council : makeCouncil(db, config);
+   if (council && byKey.size) {
+     const reviewed = await councilReview(query, candidates, byKey, judgeContext, screenshots, council,
+       {top: config.COUNCIL_CHECK_TOP, disagreement: config.COUNCIL_DISAGREEMENT});
+     for (const [key, v] of reviewed.verdicts) byKey.set(key, v);
+     providers.push(...reviewed.providers);
+   }
    const failed = settled.flatMap(s => s.status === 'rejected' ? [s.reason] : []);
    if (failed.length < settled.length) {
      verdicts = new Map(pool.flatMap(r => { const v = byKey.get(keys.get(r.id)!); return v ? [[r.id, v] as const] : []; }));

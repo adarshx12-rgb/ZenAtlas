@@ -76,6 +76,13 @@ export const configSchema = z.object({
   WALLED_PREVIEW_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
   WALLED_PREVIEW_DAILY_BUDGET: number(3000, 0, 100000),
   REDDIT_CLIENT_ID: optional, REDDIT_CLIENT_SECRET: optional,
+  // Judge council (src/council.ts): a Checker from another provider re-scores the top COUNCIL_CHECK_TOP; a Chair decides
+  // where the two disagree by COUNCIL_DISAGREEMENT or more. Each seat: main model first, then its fallbacks.
+  COUNCIL_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
+  COUNCIL_CHECKER_MODELS: z.string().regex(/^[\w.,\/:\s-]*$/).default('openai/gpt-5.6-luna,qwen/qwen3.7-plus'),
+  COUNCIL_CHAIR_MODELS: z.string().regex(/^[\w.,\/:\s-]*$/).default('anthropic/claude-sonnet-5,google/gemini-3.1-pro-preview'),
+  COUNCIL_CHECK_TOP: number(15, 5, 30), COUNCIL_DISAGREEMENT: number(2, 1, 5),
+  COUNCIL_CHECKER_DAILY_BUDGET: number(1500, 0, 100000), COUNCIL_CHAIR_DAILY_BUDGET: number(400, 0, 100000),
   // Mode routing (src/mode-router.ts): format words, then Jev at MODE_JEV_CONFIDENCE, then MODE_ROUTER_MODEL pick the tab a
   // new search opens on, within MODE_ROUTER_TIMEOUT_MS; otherwise videos.
   MODE_ROUTER_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
