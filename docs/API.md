@@ -97,6 +97,30 @@ The IDs above are placeholders. Feedback requires a result in the caller's activ
 
 `kind` defaults to `vote`, which needs `useful`; `reason` (`off_topic`, `low_quality`, `wrong_format`, `duplicate`) only goes with `useful:false`. A vote or open replaces the previous one for that result. `missing` takes a 3–500 character `note` and no `url`. The URL must be a result of that search (otherwise 403); another session's search is 404. Unlike `/api/feedback`, any result can be rated, retained or not; a vote on a retained record also updates the personal `feedback` row.
 
+## GET /api/web
+
+Web and document search (discovery only; results never enter the catalogue).
+
+| Parameter | Meaning |
+| --- | --- |
+| `q` | Required, 2–400 characters after normalization |
+| `kind` | `web` (default) or `docs` |
+| `doc_type` | Docs only: `any` (default), `pdf`, `word`, `slides`, `sheets`, `ebook` |
+| `language` | Optional ISO-like code |
+| `page` | 1–10, default 1 |
+
+Response: `{query, results, providers, next_cursor, hunt?, review?}`. Each result has `id`, `title`, `url`, `source_name`,
+`snippet`, `published`, `doc_type`, `access`, `engine`, `preview`, and when reviewed `judgement {relevance, reason}`.
+`hunt` (Docs) is polled at `GET /api/docs/hunt?token=`; see [DOCS_SEARCH.md](DOCS_SEARCH.md). `review` (Web) is polled at
+`GET /api/web/review`.
+
+## GET /api/web/review
+
+`token` (UUID from `/api/web`). Returns `{status: 'running'|'complete', results, removed, providers}`. While running,
+`results` are the search results as returned; once complete, pages that do not match are gone and the rest are ranked,
+each with `judgement`. Pages that could not be scored follow the ranked ones without `judgement`. Unknown or expired
+tokens (kept 10 minutes) return 404 `review_expired`. See [WEB_SEARCH.md](WEB_SEARCH.md).
+
 ## Administration
 
 - `GET /api/admin/audits`: the learning loop's report (bearer token required; optional `limit`, 1–200, default 50). `summary` covers searcher feedback and the last 7 days of audits (averages, depth verdicts, missing-source probe outcomes, reviewer agreement); `audits` lists recent audited searches with metrics, findings, probes, review and feedback.

@@ -183,6 +183,7 @@ main.bleed{max-width:none;margin:0 0 96px;padding:0}
  .web-item,.web-item:hover,.web-item h3,.web-item-host{transition:none;transform:none!important}
 }
 .web-item p{margin:0;color:var(--ink);font-size:15px;line-height:1.7;overflow-wrap:anywhere}
+.web-item p.why{margin:4px 0 8px;background:var(--wash);border-radius:var(--r-md);padding:8px 12px;font-size:13px;line-height:1.5;color:var(--ink-2)}
 .web-item-via{margin:-2px 0 8px;font-family:var(--font-mono);font-size:10px;letter-spacing:.04em;color:var(--ink-3);overflow-wrap:anywhere}
 /* Websites the document hunt looked inside: host, page title and what was found there, one quiet row each. */
 .hunt-sites{max-width:760px;margin:0 0 18px;padding:14px 18px;border:1px solid rgb(0 0 0 / .06);border-radius:var(--r-lg);background:rgb(0 0 0 / .012)}

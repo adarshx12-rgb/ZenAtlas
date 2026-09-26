@@ -505,10 +505,11 @@ async function searchWebPage(token,kind,append){
  notices.replaceChildren(...data.providers.filter(p=>p.status!=='ok').map(p=>node('p',p.message,'notice')));
  webMore.hidden=!data.next_cursor;
  const count=webList.children.length,noun=kind==='docs'?['document','documents']:['result','results'];
- status.textContent=count?`${count} ${noun[count===1?0:1]}${data.hunt?' · searching further…':''}`
+ status.textContent=count?`${count} ${noun[count===1?0:1]}${data.hunt?' · searching further…':''}${data.review?' · checking relevance…':''}`
   :data.hunt?'Searching inside websites for documents…'
   :kind==='docs'?'No documents found. Try another query or document type.':'No results found. Try another query.';
  if(data.hunt)void followHunt(token,page,data.hunt);
+ if(data.review)void followReview(token,page,data.review);
 }
 const VERDICTS={searching:'Searching…',document:'Document found',web_only:'On the page, no file',access:'Buy or borrow',not_found:'Not found'};
 // The websites the document hunt looked inside, each with what it found there.
@@ -518,6 +519,38 @@ function renderSites(sites){
   const row=node('div',undefined,`hunt-site hunt-${s.verdict}`),host=link(s.url,s.host);host.className='web-item-host';
   row.append(host,node('span',s.title,'hunt-site-title'),node('span',s.verdict==='access'&&s.note?s.note:VERDICTS[s.verdict]??s.verdict,'hunt-site-verdict'));
   return row;})]:[]));
+}
+// Removes the rows of one result page that a review rejected and orders the kept ones in place, as the review ranked them.
+function reorderPage(page,items){
+ const now=new Map([...webList.querySelectorAll(`.web-item[data-page="${page}"]`)].map(r=>[r.dataset.id,r])),kept=items.map(d=>now.get(d.id)).filter(Boolean);
+ let before=[...now.values()][0]?.previousElementSibling??null;
+ for(const row of now.values())if(!kept.includes(row)){if(row.classList.contains('selected'))closePreview();row.remove();}
+ for(const row of kept){if(before)before.after(row);else webList.prepend(row);before=row;}
+ return kept;
+}
+// The Web tab's relevance review, polled until it completes: pages that do not match are removed, the rest ranked, each
+// with the judge's reason. A failed or expired poll leaves the search results as they are.
+async function followReview(token,page,review){
+ const settle=()=>{if(controller.current(token.generation))status.textContent=status.textContent.replace(' · checking relevance…','');};
+ for(let polls=0;polls<50;polls++){
+  await new Promise(resolve=>setTimeout(resolve,1200));
+  if(!controller.current(token.generation))return;
+  let snap;
+  try{snap=await api(`/api/web/review?token=${encodeURIComponent(review)}`,{signal:token.signal});}catch{settle();return;}
+  if(!controller.current(token.generation))return;
+  if(snap.status!=='complete')continue;
+  const byId=new Map(snap.results.map(r=>[r.id,r]));
+  for(const row of reorderPage(page,snap.results)){
+   row.querySelector('.why')?.remove();
+   const r=byId.get(row.dataset.id);
+   if(r?.judgement)row.querySelector('h3').after(node('p',`Why this matches (${r.judgement.relevance}/10): ${r.judgement.reason}`,'why'));
+  }
+  for(const p of snap.providers)if(p.status!=='ok')notices.append(node('p',p.message,'notice'));
+  const count=webList.children.length;
+  status.textContent=count?`${count} ${count===1?'result':'results'}${snap.removed?` · ${snap.removed} removed as not matching`:''}`:'No page matched the request. Try another query.';
+  return;
+ }
+ settle();
 }
 // The Docs tab's document hunt, polled until it completes. Documents Jev finds inside websites appear as they are
 // confirmed; at the end, documents the review rejected are removed and the rest ordered by relevance, in place.
@@ -533,10 +566,7 @@ async function followHunt(token,page,hunt){
   const fresh=snap.documents.filter(d=>!rows.has(d.id)).map(d=>{const row=webItem(d);if(row)row.dataset.page=String(page);return row;}).filter(Boolean);
   if(fresh.length){if(last)last.after(...fresh);else webList.append(...fresh);}
   if(snap.status==='complete'){
-   const now=rowsOf(),kept=snap.documents.map(d=>now.get(d.id)).filter(Boolean);
-   let before=[...now.values()][0]?.previousElementSibling??null;
-   for(const row of now.values())if(!kept.includes(row)){if(row.classList.contains('selected'))closePreview();row.remove();}
-   for(const row of kept){if(before)before.after(row);else webList.prepend(row);before=row;}
+   reorderPage(page,snap.documents);
    for(const p of snap.providers)if(p.status!=='ok')notices.append(node('p',p.message,'notice'));
    const count=webList.children.length,inside=snap.documents.filter(d=>d.found_via?.length).length;
    status.textContent=count?`${count} ${count===1?'document':'documents'}${inside?` · ${inside} found inside websites`:''}${snap.removed?` · ${snap.removed} removed as not matching`:''}`
