@@ -73,3 +73,27 @@ test('would-reject stays in shadow by default and rejects only when switched on;
  const plain=await new JevJudge(db,config,inner,jev(body=>confident(body))).judge('q',[inspected('a')],{kind:'videos',criteria:[]});
  assert.equal(plain.verdicts.get('a')!.reason,'llm','without a contract Jev does not settle anything');
 });
+
+test('gate mode: a confident match still goes to the LLM judge with Jev findings; unreliable pages are rejected',async()=>{
+ const seen:JudgeCandidate[]=[];
+ const inner:Judge={async judge(_q,cs){seen.push(...cs);return {model:'llm',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,relevance:7,reason:'llm',momentKeys:[]}]))};}};
+ const asked:any[]=[];
+ const transport=jev(body=>{asked.push(body);const r=confident(body);r.answers.accuracy={type:'noul',noul:body.state.candidate.key==='bad'?0.1:0.9};return r;});
+ const out=await new JevJudge(db,{...config,JEV_JUDGE_REJECT:true},inner,transport,{settle:false,accuracy:true})
+   .judge('roswell article',[inspected('a'),inspected('bad')],context);
+ assert.equal(out.verdicts.get('a')!.reason,'llm','a confident match is not settled by Jev');
+ assert.deepEqual([(out.jev!.get('a') as any).outcome,(out.jev!.get('a') as any).accuracy],['would_settle',0.9]);
+ assert.deepEqual(seen.map(c=>[c.key,c.jev_check]),[['a',{relevance:4,accuracy:0.9}]]);
+ assert.equal(out.verdicts.get('bad')!.reason,'Jev: unreliable information.');
+ assert.ok(out.verdicts.get('bad')!.relevance<=4);
+ assert.equal((out.jev!.get('bad') as any).outcome,'rejected');
+ assert.ok(asked.every(b=>b.questions.accuracy?.type==='noul'));
+});
+
+test('default mode asks no accuracy question and attaches nothing to candidates',async()=>{
+ const seen:JudgeCandidate[]=[];
+ const inner:Judge={async judge(_q,cs){seen.push(...cs);return {model:'llm',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,relevance:7,reason:'llm',momentKeys:[]}]))};}};
+ const transport=jev(body=>{assert.equal(body.questions.accuracy,undefined);return confident(body,2,'unknown',0.6);});
+ await new JevJudge(db,config,inner,transport).judge('q',[inspected('a')],context);
+ assert.equal(seen[0].jev_check,undefined);
+});

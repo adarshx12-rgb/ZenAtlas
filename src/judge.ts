@@ -21,6 +21,8 @@ export interface JudgeCandidate {
  inspected?: {format: string|null; published: string|null; publisher: string|null; access: string|null};
  // Where description came from: the platform's API (inspected) or the search result (a snippet).
  description_source?: 'api'|'search';
+ // Web only: Jev's first reading (relevance 0-4, accuracy 0-1), advisory for the LLM judge.
+ jev_check?: {relevance: number; accuracy: number|null};
 }
 // anime: a confidently matched anime from AniList, for recognising fan-subbed, dubbed or renamed uploads of it.
 // requirements: the shared contract's hard per-result requirements, checked one by one.

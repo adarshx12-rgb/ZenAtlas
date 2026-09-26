@@ -65,6 +65,12 @@ export const configSchema = z.object({
   JEV_JUDGE_CONFIDENCE: z.coerce.number().min(0).max(1).default(0.8),
   JEV_JUDGE_CONCURRENCY: number(12, 1, 24), JEV_JUDGE_TIMEOUT_MS: number(6000, 500, 20000),
   JEV_JUDGE_DAILY_BUDGET: number(3000, 0, 100000),
+  // Web tab review (src/web-review.ts): pages read within WEB_REVIEW_READ_MS; Jev removes pages below WEB_JEV_ACCURACY_MIN
+  // and, unless WEB_JEV_SETTLE, forwards even confident matches to the LLM judge.
+  WEB_REVIEW_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
+  WEB_REVIEW_READ_MS: number(15000, 2000, 30000),
+  WEB_JEV_ACCURACY_MIN: z.coerce.number().min(0).max(1).default(0.3),
+  WEB_JEV_SETTLE: z.enum(['true', 'false']).default('false').transform(v => v === 'true'),
   SPECIALIST_SEARCHES: number(3, 0, 6),
   ARCHIVE_DISCOVERY: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
   ARCHIVE_COLLECTIONS: z.string().default('prelinger,ephemera').refine(v =>
