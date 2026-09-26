@@ -12,7 +12,8 @@ import { PageChecker, type PageCheck, type PageEvidence } from './pages.js';
 import type { SearchTarget } from './planner.js';
 import {PublicVideoEvidence,selectComments,type VideoEvidenceAdapter,type VideoEvidence} from './video-evidence.js';
 import {importTranscript} from './moments.js';
-import {retainedEvidence,queueSceneShortlist} from './retained-evidence.js';
+import {retainedEvidence,queueSceneShortlist,quoteMoments} from './retained-evidence.js';
+import { MOMENT_QUERY, captionCommand, fetchCaptionsNow, pythonCaptions, type CaptionFetcher } from './captions.js';
 import {queueCaptions} from './captions.js';
 import { decide, detectFormat, inspect, type Decision, type Finding } from './evidence.js';
 import { hardEach, type RequirementsContract } from './requirements.js';
@@ -27,7 +28,8 @@ export interface TimestampMention { commentId: string; seconds: number; excerpt:
 export interface MomentCluster { start: number; end: number; score: number; mentions: TimestampMention[] }
 export interface Discussion { title: string; url: string; snippet: string|null }
 // council: the judge council's Checker and Chair (src/council.ts); null turns it off, absent builds it from settings.
-export interface SignalDeps { youtube?: YouTubeClient; judge?: Judge; council?: CouncilSeats|null; pages?: PageCheck; videoEvidence?:VideoEvidenceAdapter; discussions?: (query: string) => Promise<Discussion[]> }
+// captions: fetches captions during a moment search (src/captions.ts); null turns it off, absent builds it from settings.
+export interface SignalDeps { youtube?: YouTubeClient; judge?: Judge; council?: CouncilSeats|null; captions?: CaptionFetcher|null; pages?: PageCheck; videoEvidence?:VideoEvidenceAdapter; discussions?: (query: string) => Promise<Discussion[]> }
 // What the search plan wanted, and which kind of search found each result (by result id).
 // underrated is retained for callers; obscurity is a badge, never a ranking boost.
 // contract: the search's shared requirements; findings: evidence already gathered for these candidates (exploration).
@@ -235,8 +237,17 @@ export async function applySignals(db: DB, config: Config, query: string, result
      }
    });
  };
- const [youtubeStatus, reddit, pageStatus] = await Promise.all([youtubeTask(), redditTask(), pageTask(),adapterTask()]);
- for (const status of [youtubeStatus, reddit.status, pageStatus]) if (status) providers.push(status);
+ // A moment search gets the top videos' captions now, so the judge can quote them and this search can show the timestamp.
+ const captionsNowTask = async (): Promise<ProviderStatus|null> => {
+   const fetcher = 'captions' in deps ? deps.captions : config.YOUTUBE_CAPTIONS && captionCommand(config)
+     ? pythonCaptions(captionCommand(config), {proxy: config.YOUTUBE_CAPTIONS_PROXY, supadataKey: config.SUPADATA_API_KEY}) : null;
+   if (!fetcher || !MOMENT_QUERY.test(query)) return null;
+   const got = await fetchCaptionsNow(db, config, results, fetcher, config.CAPTIONS_NOW, config.CAPTIONS_NOW_MS).catch(() => null);
+   return got?.tried ? {provider: 'captions_now', status: got.imported ? 'ok' : 'partial',
+     message: `Captions were fetched for ${got.imported} of ${got.tried} video${got.tried === 1 ? '' : 's'} during this search to find the moment.`} : null;
+ };
+ const [youtubeStatus, reddit, pageStatus, , captionsNow] = await Promise.all([youtubeTask(), redditTask(), pageTask(), adapterTask(), captionsNowTask()]);
+ for (const status of [youtubeStatus, reddit.status, pageStatus, captionsNow]) if (status) providers.push(status);
  const retained=await retainedEvidence(db,results.map(r=>r.id),query);
  for(const provider of ['peertube','archive']) {
    const checks=[...extra.values()].flatMap(e=>e.video?.provider===provider?[e.video]:[]);
@@ -340,6 +351,12 @@ export async function applySignals(db: DB, config: Config, query: string, result
    }
  }
 
+ // A transcript passage the judge quoted as evidence becomes a timestamp at the caption line where the quote starts.
+ const quoted = await quoteMoments(db, new Map(results.flatMap(r => {
+   const v = verdicts?.get(r.id);
+   const quotes = [...(v?.intentChecks ?? []), ...(v?.requirementChecks ?? [])].filter(c => c.status === 'supported' && c.field === 'transcripts').map(c => c.quote);
+   return quotes.length ? [[r.id, [...new Set(quotes)]] as const] : [];
+ }))).catch(() => new Map<string, Moment[]>());
  const scored = results.map((r, i) => {
    const e = extra.get(r.id), v = verdicts?.get(r.id), d = e?.details;
    const clusters = e?.stored ?? [];
@@ -373,7 +390,8 @@ export async function applySignals(db: DB, config: Config, query: string, result
        transcript_passages:evidenceData?.transcripts.length??0,analysed_scenes:evidenceData?.scenes.length??0,basis},
      duration: r.duration ?? d?.duration ?? null, published_at: r.published_at ?? d?.publishedAt ?? null, creator: r.creator ?? (d?.channelTitle || null),
      language: r.language ?? d?.language ?? null,
-     moments: [...r.moments, ...chosen].sort((a, b) => a.start_seconds - b.start_seconds),
+     moments: [...r.moments, ...chosen, ...(quoted.get(r.id) ?? []).filter(q => !r.moments.some(m => Math.abs(m.start_seconds - q.start_seconds) < 1))]
+       .sort((a, b) => a.start_seconds - b.start_seconds),
      badges: badges.length ? [...new Set(badges)] : r.badges,
      ...(previews.has(r.id) ? {preview: true} : {}),
      judgement: v ? {relevance: decision && decision.status !== 'verified' ? Math.min(v.relevance, decision.status === 'excluded' ? 4 : UNVERIFIED_SCORE) : v.relevance,

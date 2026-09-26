@@ -1,6 +1,6 @@
 import type {DB} from './db.js';
 import type {Config} from './config.js';
-import type {Result} from './types.js';
+import type {Moment,Result} from './types.js';
 import {activeScene,sceneSelect,sceneMoment} from './scenes.js';
 import {youtubeId} from './youtube.js';
 import {takeBudget} from './budgets.js';
@@ -20,6 +20,34 @@ export async function retainedEvidence(db:DB,ids:string[],query:string) {
  ORDER BY ts_rank_cd(v.search_vector,websearch_to_tsquery('english',$2)) DESC,v.start_seconds`,[ids,query])).rows;
  return new Map(ids.map(id=>[id,{transcripts:rows.filter(r=>r.id===id).map(r=>({start:r.start_seconds,end:r.end_seconds,text:r.summary.slice(0,2400)})),
    scenes:scenes.filter(r=>r.content_id===id).slice(0,3).map(sceneMoment)}]));
+}
+
+// Where a judge's verbatim transcript quote starts in the stored captions: the caption line it begins on, never a guessed
+// time. Quotes not found word for word (after whitespace and case folding) give no moment.
+const fold = (s: string) => s.normalize('NFKC').replace(/\s+/g, ' ').trim().toLowerCase();
+export async function quoteMoments(db: DB, quotes: Map<string, string[]>): Promise<Map<string, Moment[]>> {
+ const out = new Map<string, Moment[]>();
+ if (!quotes.size) return out;
+ const rows = (await db.query(`SELECT id,content_id,start_seconds,end_seconds,text FROM transcript_segments
+   WHERE content_id=ANY($1::uuid[]) ORDER BY content_id,start_seconds`, [[...quotes.keys()]])).rows;
+ for (const [id, list] of quotes) {
+   const segments = rows.filter(r => r.content_id === id), offsets: number[] = [];
+   let text = '';
+   for (const s of segments) { offsets.push(text.length); text += `${fold(s.text)} `; }
+   const moments: Moment[] = [], seen = new Set<string>();
+   for (const quote of list) {
+     const wanted = fold(quote), at = wanted.length >= 8 ? text.indexOf(wanted) : -1;
+     if (at < 0) continue;
+     const first = segments[offsets.findLastIndex(o => o <= at)], last = segments[offsets.findLastIndex(o => o < at + wanted.length)];
+     if (seen.has(String(first.id))) continue;
+     seen.add(String(first.id));
+     const start = Number(first.start_seconds), end = Number(last.end_seconds);
+     moments.push({id: `quote:${first.id}`, start_seconds: start, end_seconds: end, summary: quote.slice(0, 300), evidence_type: 'transcript_supported',
+       analysis_version: 'judge-quote-v1', inspected_ranges: [[start, end]], evidence_refs: [String(first.id)], focus: [start, end]});
+   }
+   if (moments.length) out.set(id, moments.slice(0, 3));
+ }
+ return out;
 }
 
 // Register only the canonical YouTube timeline, or reuse an explicitly registered local media version.

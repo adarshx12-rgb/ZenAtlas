@@ -91,6 +91,17 @@ export async function captionJob(db: DB, config: Config, job: any, fetch: Captio
  const id = youtubeId(row.canonical_url);
  if (!id) return {status: 'not_youtube'};
  if ((await db.query('SELECT 1 FROM transcript_segments WHERE content_id=$1 LIMIT 1', [row.id])).rows.length) return {status: 'already_transcribed'};
+ const outcome = await fetchAndStore(db, config, row, id, fetch);
+ if (waiting(outcome)) { await requeue(db, job, outcome.wait, outcome.code); return null; }
+ return outcome;
+}
+
+type Waiting = {status: 'waiting'; wait: Date; code: string};
+const waiting = (o: CaptionOutcome|Waiting): o is Waiting => o.status === 'waiting';
+// Fetches one video's captions (Supadata first, then YouTube) and stores them. A wait means both routes are paused or
+// rate limited for now; the caller decides whether to requeue (a job) or move on (a search).
+async function fetchAndStore(db: DB, config: Config, row: {id: string; canonical_url: string; language: string|null; duration: number}, id: string,
+ fetch: CaptionFetcher): Promise<CaptionOutcome|Waiting> {
  const settle = async (fetched: Exclude<CaptionAnswer, {status: 'error'}>, via: CaptionVia): Promise<CaptionOutcome> => {
    if (fetched.status === 'none') return {status: 'no_captions', reason: fetched.reason, via};
    // Captions may run a moment past the duration YouTube reports; the stored timeline never exceeds it.
@@ -118,7 +129,7 @@ export async function captionJob(db: DB, config: Config, job: any, fetch: Captio
  }
  if (!await pausedUntil(db, 'youtube_captions')) {
    if (!await takeBudget(db, 'youtube_caption_fetches', CAPTION_FETCHES_PER_MINUTE, 'minute')) {
-     await requeue(db, job, new Date(Date.now() + 60_000), 'rate_limited'); return null;
+     return {status: 'waiting', wait: new Date(Date.now() + 60_000), code: 'rate_limited'};
    }
    const direct = await fetch(id, row.language, 'youtube');
    if (direct.status !== 'error') {
@@ -129,6 +140,24 @@ export async function captionJob(db: DB, config: Config, job: any, fetch: Captio
    const until = await pause(db, 'youtube_captions', direct.code, CAPTION_PAUSE_MINUTES, true);
    console.error(JSON.stringify({event: 'youtube_captions_paused', code: direct.code, until}));
  }
- await requeue(db, job, (await pausedUntil(db, 'youtube_captions')) ?? new Date(Date.now() + CAPTION_PAUSE_MINUTES * 60_000), 'youtube_blocked');
- return null;
+ return {status: 'waiting', wait: (await pausedUntil(db, 'youtube_captions')) ?? new Date(Date.now() + CAPTION_PAUSE_MINUTES * 60_000), code: 'youtube_blocked'};
+}
+
+// During a search that asks for a moment ("the part where...", "timestamp"): the top YouTube results without a transcript
+// get their captions now, in parallel and within budgetMs, so the judge can quote them and the same search can show the
+// timestamp. Results still loading when the time is up finish in the background and help later searches.
+export const MOMENT_QUERY = /\bthe (?:part|moment|bit|scene|point|section)\b|\bmoments?\b|\btimestamps?\b|\bat what (?:point|time|minute)\b|\bwhere (?:he|she|they|it|someone) (?:says|talks|explains|mentions|describes)\b/i;
+export async function fetchCaptionsNow(db: DB, config: Config, results: Result[], fetch: CaptionFetcher, max: number, budgetMs: number) {
+ const ids = results.filter(r => youtubeId(r.canonical_url)).map(r => r.id);
+ const rows = ids.length ? (await db.query(`SELECT c.id,c.canonical_url,c.language,c.duration FROM content c JOIN sources s ON s.id=c.source_id
+   WHERE c.id=ANY($1::uuid[]) AND ${eligible} AND NOT EXISTS(SELECT 1 FROM transcript_segments t WHERE t.content_id=c.id)`, [ids])).rows : [];
+ const wanted = ids.flatMap(id => rows.filter(r => r.id === id)).slice(0, max);
+ let imported = 0, timer: NodeJS.Timeout|undefined;
+ const work = Promise.all(wanted.map(async row => {
+   const outcome = await fetchAndStore(db, config, row, youtubeId(row.canonical_url)!, fetch).catch(() => null);
+   if (outcome?.status === 'imported') imported++;
+ }));
+ await Promise.race([work, new Promise(resolve => { timer = setTimeout(resolve, budgetMs); })]);
+ clearTimeout(timer);
+ return {tried: wanted.length, imported};
 }
