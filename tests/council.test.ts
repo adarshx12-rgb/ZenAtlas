@@ -62,7 +62,9 @@ test('the chair is told what it is doing through the criteria; one log line per 
   {checker:seat({a:9,b:2},[],'luna'),chair},{top:15,log:l=>lines.push(l)});
  assert.ok(contexts[0]!.criteria.some(c=>/two judges/i.test(c)));
  assert.ok(contexts[0]!.criteria.includes('c1'));
- assert.deepEqual(lines,[{event:'council',checked:2,disputed:1,chaired:1,agreement:0.5,checker:'luna',chair:'chair'}]);
+ const [{checker_ms,chair_ms,...rest}]=lines;
+ assert.deepEqual(rest,{event:'council',checked:2,disputed:1,chaired:1,agreement:0.5,checker:'luna',chair:'chair'});
+ assert.ok(Number.isInteger(checker_ms)&&Number.isInteger(chair_ms),'each step is timed');
 });
 
 test('seats come from settings; the checker never reuses a scorer model',()=>{
@@ -105,4 +107,20 @@ test('Docs and Web reviews pass their judged items through the council too',asyn
   read:async()=>new Map(),judge,keepUnjudged:true,council:{checker:seat({d1:2,d2:8},[],'checker'),chair:seat({d1:3},[],'chair')},councilTop:15,log:()=>{}} as any);
  assert.deepEqual(out.results.map(r=>[r.title,r.judgement?.relevance]),[['Page 2',8]],'page 1 was disputed and the chair rejected it');
  void scorer;
+});
+
+test('the checker and the chair judge in small parallel batches, so one long call cannot time out the whole council',async()=>{
+ const keys=Array.from({length:12},(_,i)=>`k${i}`);
+ const candidates=keys.map(cand);
+ const scorer=new Map(keys.map(k=>[k,v(k,9)]));
+ const checkerBatches:number[]=[],chairBatches:number[]=[];
+ const checker:Judge={async judge(_q,cs){checkerBatches.push(cs.length);return {model:'checker',verdicts:new Map(cs.map(c=>[c.key,v(c.key,2)]))};}};
+ const chair:Judge={async judge(_q,cs){chairBatches.push(cs.length);return {model:'chair',verdicts:new Map(cs.map(c=>[c.key,v(c.key,7)]))};}};
+ const out=await councilReview('q',candidates,scorer,undefined,undefined,{checker,chair},{top:12,...quiet});
+ assert.deepEqual(checkerBatches.sort(),[2,5,5]);
+ assert.deepEqual(chairBatches.sort(),[3,3,3,3]);
+ assert.ok(keys.every(k=>out.verdicts.get(k)!.relevance===7));
+ const oneFails:Judge={async judge(_q,cs){if(cs.some(c=>c.key==='k0'))throw new Error('timeout');return {model:'checker',verdicts:new Map(cs.map(c=>[c.key,v(c.key,9)]))};}};
+ const partial=await councilReview('q',candidates,scorer,undefined,undefined,{checker:oneFails},{top:12,...quiet});
+ assert.equal(partial.records.size,7,'a failed batch only leaves its own candidates with one opinion');
 });
