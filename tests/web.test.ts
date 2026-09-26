@@ -15,6 +15,7 @@ function deps(answers:Record<string,unknown>,budget=true){
  const hunts:{query:string;docs:number;explore:boolean}[]=[];
  return {asked,hunts,deps:{budget:async()=>budget,peek:async()=>({url:'',status:200,contentType:'application/pdf',length:100,head:Buffer.from('%PDF-1.4')}),
    hunt:(query:string,docs:unknown[],explore:boolean)=>{hunts.push({query,docs:docs.length,explore});return 'hunt-token';},
+   sources:async()=>({docs:[],sites:[],providers:[]}),
    transport:async(url:string)=>{
    asked.push(url);const host=new URL(url).hostname;
    if(!(host in answers))throw new Error(`unexpected ${url}`);

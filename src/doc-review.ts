@@ -9,6 +9,7 @@ import { makeJevJudge } from './jev-judge.js';
 import { makeScreener, screeningOrder, type Screener } from './screener.js';
 import { accessKind } from './access.js';
 import type { WebResult } from './web.js';
+import { viewerOf } from './doc-viewers.js';
 
 // Checking documents for the Docs tab. Verification (inside the search request) removes spam links, dead links and pages
 // posing as documents, reading only the first 4 KB of each file. Review (during the document hunt, src/doc-hunt.ts)
@@ -46,6 +47,8 @@ export function sniff(head: Buffer, contentType: string): 'pdf'|'zip'|'ole'|'rtf
 export async function checkDocument(url: string, timeoutMs: number, peek: Peek = peekDocument): Promise<DocCheck> {
  try {
    const file = await peek(url, {timeoutMs});
+   // A viewer page (Scribd, SlideShare, Google Docs...) is a web page by nature: that it loads is the check.
+   if (viewerOf(url)) return {status: 'document', kind: 'viewer', bytes: null};
    const kind = sniff(file.head, file.contentType);
    return kind === 'html' || kind === 'unknown' ? {status: 'not_document'} : {status: 'document', kind, bytes: file.length};
  } catch (error) {
@@ -68,13 +71,15 @@ export async function verifyDocuments(results: WebResult[], config: Config, peek
 }
 
 export type ReviewedDoc = VerifiedDoc & {judgement?: {relevance: number; reason: string}};
-// Documents are judged in one pool this size; the screener orders a longer list first, and the rest stay unjudged.
-export const REVIEW_POOL = 20;
+// Up to REVIEW_POOL documents are judged; beyond that they are not shown, since nothing vouches for them. The text of the
+// first TEXT_POOL is read (within TEXT_BUDGET_MS); the others are judged on their title and snippet. With more than
+// TEXT_POOL documents the Jev screener decides the order, so its promising picks are read first.
+export const REVIEW_POOL = 60, TEXT_POOL = 20, TEXT_BUDGET_MS = 15000;
 // Documents at or below this relevance are removed (4 is "only tangential"). Unlike video results, a plausible 5 stays:
 // short document queries are often ambiguous, and an unconfirmed detail is not a miss.
 const TANGENTIAL = 4;
 // office: reads an office document's text; absent when no converter or text helper is configured.
-type ReviewDeps = {judge?: Judge; pages?: PageCheck; screener?: Screener; office?: (url: string) => Promise<PageEvidence|null>};
+type ReviewDeps = {judge?: Judge; pages?: PageCheck; screener?: Screener; office?: (url: string) => Promise<PageEvidence|null>; textBudgetMs?: number};
 const OFFICE = new Set(['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'odt', 'odp', 'ods', 'rtf', 'key']);
 export const OFFICE_READS = 4;
 export function officeReader(db: DB, config: Config): ((url: string) => Promise<PageEvidence|null>)|undefined {
@@ -97,37 +102,44 @@ export async function reviewDocuments(db: DB, config: Config, query: string, doc
  }
  let pool = docs;
  const screener = 'screener' in deps ? deps.screener : makeScreener(db, config);
- if (screener && docs.length > REVIEW_POOL) {
+ if (screener && docs.length > TEXT_POOL) {
    try {
      const leads = docs.map((d, i) => ({item: contentInput.parse({url: d.url, title: d.title, description: d.snippet, published_at: d.published}),
        provider: d.engine, position: i, doc: d}));
      pool = screeningOrder(leads, (await screener.screen(query, leads)).promising).map(l => l.doc);
    } catch { providers.push({provider: 'jev_screener', status: 'unavailable', message: 'Documents were reviewed in search order.'}); }
  }
- const judged = pool.slice(0, REVIEW_POOL), rest = pool.slice(REVIEW_POOL);
+ const judged = pool.slice(0, REVIEW_POOL), unreviewed = pool.length - judged.length, reading = judged.slice(0, TEXT_POOL);
 
- // Text of real PDFs small enough to read; larger ones and other formats are judged on their title and snippet.
+ // Text of real PDFs small enough to read and of viewer pages (the reader's text, title and description); Word, slides
+ // and spreadsheets through the preview converter, one at a time since LibreOffice is heavy, at most OFFICE_READS.
+ // Both run together within TEXT_BUDGET_MS; a document not read by then is judged on its title and snippet.
  const pages = deps.pages ?? new PageChecker(config);
  const text = new Map<string, PageEvidence>();
- await mapLimit(judged.filter(d => d.check === 'checked' && d.doc_type === 'pdf' && (d.bytes === null || d.bytes <= config.PDF_MAX_BYTES)), 6, async d => {
-   const page = await pages.check(d.url).catch(() => null);
-   if (page?.status === 'checked') text.set(d.url, page);
- });
- // Word, slides and spreadsheets are read through the preview converter (its first pages as a PDF), one at a time,
- // since LibreOffice is heavy; at most OFFICE_READS of them per review.
- const office = judged.filter(d => d.check === 'checked' && OFFICE.has(d.doc_type ?? '')).slice(0, OFFICE_READS);
+ const office = reading.filter(d => d.check === 'checked' && OFFICE.has(d.doc_type ?? '')).slice(0, OFFICE_READS);
  const read = office.length ? ('office' in deps ? deps.office : officeReader(db, config)) : undefined;
- if (read) await mapLimit(office, 1, async d => { const page = await read(d.url).catch(() => null); if (page) text.set(d.url, page); });
+ const reads = Promise.all([
+   mapLimit(reading.filter(d => d.check === 'checked' && (d.doc_type === 'viewer' || d.doc_type === 'pdf' && (d.bytes === null || d.bytes <= config.PDF_MAX_BYTES))), 6, async d => {
+     const page = await pages.check(d.url).catch(() => null);
+     if (page?.status === 'checked') text.set(d.url, page);
+   }),
+   read ? mapLimit(office, 1, async d => { const page = await read(d.url).catch(() => null); if (page) text.set(d.url, page); }) : null,
+ ]);
+ let timer: NodeJS.Timeout|undefined;
+ await Promise.race([reads, new Promise(resolve => { timer = setTimeout(resolve, deps.textBudgetMs ?? TEXT_BUDGET_MS); })]);
+ clearTimeout(timer);
+ const inspected = new Map(text);
  const keys = new Map(judged.map((d, i) => [`d${i + 1}`, d]));
  const candidates: JudgeCandidate[] = [...keys].map(([key, d]) => {
-   const page = text.get(d.url);
+   const page = inspected.get(d.url);
    return {key, kind: 'website', site: d.source_name, url: d.url, title: d.title, channel: null, official: false, duration: null, live: null,
      description: d.snippet, comments: [], moments: [], discussions: [], description_source: 'search',
      inspected: {format: d.doc_type, published: page?.meta?.published ?? d.published?.slice(0, 10) ?? null, publisher: null, access: accessKind(d.url)},
      ...(page ? {page: {status: page.status, title: page.title, description: page.description, text: page.text, libraries: []}} : {})};
  });
  const context = {kind: 'websites' as const, criteria: ['A document file that is itself what the request asks for',
-   'When the request is ambiguous (a name and a year can mean a book, an issue or a newspaper), a document that genuinely fits any reasonable reading matches; a different edition or year does not'],
+   'When the request is ambiguous (a name and a year can mean a book, an issue or a newspaper), a document that genuinely fits any reasonable reading matches; a different edition or year does not',
+   'A copy shared by a third party (Scribd, SlideShare, Academia.edu, a course or personal site) counts like any other; only an upload that is clearly a complete copy of a commercially published book does not'],
    requirements: [{id: 'R1', text: `The document itself is what the request asks for: "${query.slice(0, 150)}" (its subject, edition, year and language as stated)`,
      evidence: 'The document text or title shows its subject, edition or year.'}]};
  let verdicts: Map<string, Verdict>;
@@ -140,8 +152,9 @@ export async function reviewDocuments(db: DB, config: Config, query: string, doc
  const kept = scored.filter(s => s.v && s.v.relevance > TANGENTIAL && !s.v.intentChecks?.some(c => c.status === 'mismatch'))
    .sort((a, b) => b.v!.relevance - a.v!.relevance || a.i - b.i);
  const removed = judged.length - kept.length;
- providers.push({provider: 'judge', status: 'ok', message: `${judged.length} documents were checked for relevance; ${removed} did not match.`});
- return {results: [...kept.map(s => ({...s.d, judgement: {relevance: s.v!.relevance, reason: s.v!.reason}})), ...rest] as ReviewedDoc[], removed, providers};
+ providers.push({provider: 'judge', status: 'ok', message: `${judged.length} documents were checked for relevance; ${removed} did not match`
+   + `${unreviewed ? `; ${unreviewed} more were not reviewed and are not shown` : ''}.`});
+ return {results: kept.map(s => ({...s.d, judgement: {relevance: s.v!.relevance, reason: s.v!.reason}})) as ReviewedDoc[], removed: removed + unreviewed, providers};
 }
 
 async function mapLimit<T>(items: T[], limit: number, fn: (item: T) => Promise<void>) {

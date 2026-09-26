@@ -136,3 +136,30 @@ test('links are read from script menus, drop-downs and embedded viewers, never f
    {url: 'https://board.example/files/report-2018.pdf', title: '2018'}, {url: 'https://board.example/viewer/annual-2018.pdf', title: 'annual-2018.pdf'},
    {url: 'https://board.example/about', title: 'About the board'}]);
 });
+
+test('leads may cross to the same organisation or a repository; viewer pages and unsafe links are handled while hunting', async () => {
+ const { setBlocklist } = await import('../src/safety.js');
+ setBlocklist(['malware.example']);
+ try {
+   const pages: Record<string, PageEvidence> = {
+     'https://spb.state.gov.in/': page('Planning Board', [{url: 'https://finance.state.gov.in/publications', title: 'Publications'},
+       {url: 'https://dspace.stateuni.ac.in/handle/123/456', title: 'Reports archive'}, {url: 'https://othersite.example/archive', title: 'Archive of others'},
+       {url: 'https://www.scribd.com/document/77/Report-2018', title: 'Report 2018 (Scribd)'}, {url: 'https://malware.example/report-2018.pdf', title: 'Report 2018 fast download'}]),
+     'https://finance.state.gov.in/publications': page('Finance publications', []),
+     'https://dspace.stateuni.ac.in/handle/123/456': page('Reports archive', []),
+   };
+   const visited: string[] = [];
+   const hunter = new FakeHunter();
+   const state = fresh('report 2018');
+   const html = async (url: string) => ({url, status: 200, contentType: 'text/html', length: null, head: Buffer.from('<!doctype html>')});
+   await runHunt(await database(), config, state, true, {hunter, judge, review, peek: async url => url.includes('scribd') ? html(url) : pdf(url),
+     sites: async () => [site('https://spb.state.gov.in/', 'Planning Board')],
+     pages: {check: async url => { visited.push(url); return pages[url] ?? page('Empty', []); }}});
+   assert.ok(visited.includes('https://finance.state.gov.in/publications'), 'same organisation');
+   assert.ok(visited.includes('https://dspace.stateuni.ac.in/handle/123/456'), 'a repository');
+   assert.ok(!visited.includes('https://othersite.example/archive'), 'another organisation is not followed');
+   assert.ok(hunter.asked.flat().every(l => !l.url.includes('malware')), 'unsafe links are never offered to Jev');
+   const scribd = state.docs.find(d => d.url.includes('scribd'));
+   assert.deepEqual([scribd?.doc_type, scribd?.viewer, scribd?.preview], ['viewer', 'Scribd', null]);
+ } finally { setBlocklist([]); }
+});

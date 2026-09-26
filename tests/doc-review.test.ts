@@ -99,18 +99,36 @@ test('review without a judge keeps the verified order and says so', async () => 
  } finally { await db.close(); }
 });
 
-test('more than 20 documents: the screener picks which ones are judged; the rest follow unjudged', async () => {
+test('long lists: the screener orders them, the first 20 are read, up to 60 are judged and the rest are not shown', async () => {
  const db = await database();
  try {
-   const docs: VerifiedDoc[] = Array.from({length: 24}, (_, i) => ({...doc(`https://a.example/${i}.pdf`, `Doc ${i}`), check: 'checked' as const, bytes: null}));
-   const screener = {screen: async () => ({screened: 24, promising: new Set(['https://a.example/22.pdf', 'https://a.example/23.pdf'])})};
+   const docs: VerifiedDoc[] = Array.from({length: 64}, (_, i) => ({...doc(`https://a.example/${i}.pdf`, `Doc ${i}`), check: 'checked' as const, bytes: null}));
+   const screener = {screen: async () => ({screened: 64, promising: new Set(['https://a.example/62.pdf', 'https://a.example/63.pdf'])})};
    const judge = new FakeJudge(Object.fromEntries(docs.map(d => [d.title, 8])));
-   const out = await reviewDocuments(db, testConfig, 'docs', docs, {judge, screener, pages: {check: async () => { throw new Error('offline'); }}});
+   const read: string[] = [];
+   const out = await reviewDocuments(db, testConfig, 'docs', docs, {judge, screener, pages: {check: async url => { read.push(url); throw new Error('offline'); }}});
    const judged = judge.calls[0].candidates.map(c => c.title);
-   assert.equal(judged.length, 20);
-   assert.ok(judged.includes('Doc 22') && judged.includes('Doc 23'), 'promising documents are judged even from the end of the list');
-   assert.equal(out.results.length, 24);
-   assert.deepEqual(out.results.slice(20).map(r => r.judgement), [undefined, undefined, undefined, undefined]);
+   assert.equal(judged.length, 60);
+   assert.ok(judged.includes('Doc 62') && judged.includes('Doc 63'), 'promising documents are judged even from the end of the list');
+   assert.equal(read.length, 20, 'only the first 20 are read');
+   assert.ok(read.includes('https://a.example/62.pdf'), "the screener's picks are read first");
+   assert.equal(out.results.length, 60);
+   assert.ok(out.results.every(r => r.judgement), 'nothing unjudged is shown');
+   assert.equal(out.removed, 4);
+   assert.match(out.providers.at(-1)!.message, /4 more were not reviewed/);
+ } finally { await db.close(); }
+});
+
+test('text that takes too long is not waited for: the document is judged on its title', async () => {
+ const db = await database();
+ try {
+   const docs: VerifiedDoc[] = [{...doc('https://slow.example/a.pdf', 'Slow'), check: 'checked', bytes: 10}];
+   const judge = new FakeJudge({Slow: 7});
+   const started = Date.now();
+   await reviewDocuments(db, testConfig, 'q', docs, {judge, screener: undefined, textBudgetMs: 50,
+     pages: {check: () => new Promise(resolve => setTimeout(() => resolve({status: 'checked' as const, title: 'late', description: null, text: 'late', libraries: [], badges: []}), 1000))}});
+   assert.ok(Date.now() - started < 800);
+   assert.equal(judge.calls[0].candidates[0].page, undefined);
  } finally { await db.close(); }
 });
 

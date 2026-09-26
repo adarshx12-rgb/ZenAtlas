@@ -466,7 +466,7 @@ function webItem(item){
  const row=node('article',undefined,'web-item');row.dataset.id=item.id;
  const head=node('div',undefined,'web-item-source');
  const source=link(url.href,item.source_name);source.className='web-item-host';head.append(source);
- if(item.doc_type)head.append(node('span',DOC_LABELS[item.doc_type]??item.doc_type.toUpperCase(),'badge'));
+ if(item.doc_type)head.append(node('span',item.doc_type==='viewer'?item.viewer??'Document viewer':DOC_LABELS[item.doc_type]??item.doc_type.toUpperCase(),'badge'));
  if(item.access)head.append(node('span',item.access,'badge'));
  if(item.check==='blocked'){const b=node('span','Unverified','badge');b.title='This site refused an automated check, so the file could not be confirmed.';head.append(b);}
  if(item.published)head.append(node('span',new Date(item.published).toLocaleDateString(),'meta'));

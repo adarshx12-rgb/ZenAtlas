@@ -44,6 +44,12 @@ export const configSchema = z.object({
   DOC_HUNT_SITES: number(6, 0, 12), DOC_HUNT_VISITS: number(14, 1, 40), DOC_HUNT_ROUNDS: number(3, 1, 5),
   DOC_HUNT_TIMEOUT_MS: number(20000, 5000, 60000), DOC_HUNT_MAX_DOCS: number(8, 1, 20),
   JEV_DOC_HUNT_DAILY_BUDGET: number(400, 0, 100000),
+  // Free-document sources searched directly by the Docs tab (src/doc-sources.ts); calls per day across all of them.
+  DOC_SOURCES_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
+  DOC_SOURCES_DAILY_BUDGET: number(1500, 0, 100000), SEMANTIC_SCHOLAR_API_KEY: optional,
+  // Public malware and phishing host lists the Docs tab checks every link against (src/safety.ts), refreshed daily.
+  DOC_BLOCKLISTS: z.string().default('https://urlhaus.abuse.ch/downloads/hostfile/,https://raw.githubusercontent.com/openphish/public_feed/refs/heads/main/feed.txt')
+    .refine(v => v.split(',').map(s => s.trim()).filter(Boolean).every(s => /^https:\/\/\S+$/.test(s)), 'Use comma-separated https URLs'),
   JEV_EXPLORATION_DAILY_BUDGET: number(200, 0, 100000),
   JEV_EXPLORATION_CONFIDENCE: z.coerce.number().min(0).max(1).default(0.65),
   // Shared requirements contract, evidence inspection and gap-directed exploration. false reproduces the previous

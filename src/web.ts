@@ -11,6 +11,9 @@ import { accessKind, accessLabel } from './access.js';
 import { previewToken } from './doc-preview.js';
 import { verifyDocuments, type VerifiedDoc } from './doc-review.js';
 import { startHunt } from './doc-hunt.js';
+import { findDocuments, type SourceFindings } from './doc-sources.js';
+import { viewerOf } from './doc-viewers.js';
+import { refreshBlocklists, unsafeLink } from './safety.js';
 import type { PeekResponse } from './http.js';
 
 // Web and document search are discovery-only, like image search: results come straight from the engines and never
@@ -44,6 +47,8 @@ export interface WebResult {
  preview: string | null;
  // Documents only: 'checked' when the file was confirmed to be a document, 'blocked' when its site refused the check.
  check?: 'checked' | 'blocked';
+ // doc_type 'viewer': the site that shows the document in its own reader (Scribd, SlideShare, Google Docs...).
+ viewer?: string;
 }
 // hunt: a token for /api/docs/hunt, which reports documents found inside websites and the review of every document.
 export interface WebSearchResponse { query: string; results: WebResult[]; providers: ProviderStatus[]; next_cursor: string | null; hunt?: string | null }
@@ -79,7 +84,8 @@ const isoDate = (value: unknown) => { const d = typeof value === 'string' ? new 
 type Row = {url: string; title: unknown; snippet: unknown; published: unknown; engine: string};
 type Deps = {transport: typeof fetchJSON; budget: (db: DB, key: string, limit: number) => Promise<boolean>;
  peek?: (url: string, options: {timeoutMs: number}) => Promise<PeekResponse>;
- hunt?: (query: string, docs: VerifiedDoc[], explore: boolean) => string};
+ hunt?: (query: string, docs: VerifiedDoc[], explore: boolean, sites: WebResult[]) => string;
+ sources?: (db: DB, config: Config, query: string) => Promise<SourceFindings>};
 
 export async function searchWeb(db: DB, config: Config, input: WebSearchInput,
  deps: Deps = {transport: fetchJSON, budget: takeBudget}): Promise<WebSearchResponse> {
@@ -90,7 +96,10 @@ export async function searchWeb(db: DB, config: Config, input: WebSearchInput,
  const providers: ProviderStatus[] = [];
  const results: WebResult[] = [];
  const seen = new Set<string>();
- let more = false;
+ let more = false, unsafe = 0;
+ // Documents are also looked for directly in free-document sources, alongside the engines (first page only).
+ const sourcesTask = docs && input.page === 1 ? (deps.sources ?? findDocuments)(db, config, input.q).catch((): SourceFindings => ({docs: [], sites: [], providers: []})) : null;
+ if (docs) void refreshBlocklists(config).catch(() => {});
 
  const keep = (rows: Row[]) => {
    for (const row of rows) {
@@ -99,14 +108,18 @@ export async function searchWeb(db: DB, config: Config, input: WebSearchInput,
      if (url.length > 2048 || seen.has(url)) continue;
      const kind = accessKind(url);
      if (kind === 'unauthorized') continue;
-     const type = documentType(url);
-     if (docs && (!type || !wanted.includes(type))) continue;
+     // Documents: a file of a wanted type, or a viewer page of one (Scribd, SlideShare...); never a malware, phishing or
+     // explicit link.
+     const viewer = docs && !documentType(url) ? viewerOf(url) : null;
+     const type = documentType(url) ?? (viewer ? 'viewer' : null);
+     if (docs && (!type || (viewer ? input.doc_type !== 'any' && viewer.group !== input.doc_type : !wanted.includes(type)))) continue;
+     if (docs && unsafeLink(url, typeof row.title === 'string' ? row.title : '')) { unsafe++; continue; }
      seen.add(url);
      const host = new URL(url).hostname.replace(/^www\./, '');
      results.push({id: createHash('sha1').update(url).digest('hex'), url, source_name: host,
        title: plain(row.title, 300) ?? host, snippet: plain(row.snippet, 600), published: isoDate(row.published),
-       doc_type: type, access: accessLabel(kind), engine: row.engine,
-       preview: type && type !== 'epub' && (type === 'pdf' || config.DOC_PREVIEW_CONVERTER) ? previewToken(config.SESSION_SECRET, url) : null});
+       doc_type: type, access: accessLabel(kind), engine: row.engine, ...(viewer ? {viewer: viewer.name} : {}),
+       preview: type && type !== 'epub' && type !== 'viewer' && (type === 'pdf' || config.DOC_PREVIEW_CONVERTER) ? previewToken(config.SESSION_SECRET, url) : null});
    }
  };
 
@@ -115,7 +128,7 @@ export async function searchWeb(db: DB, config: Config, input: WebSearchInput,
      providers.push({provider: 'brave', status: 'budget_exhausted', message: 'The daily Brave budget has been reached.'});
    } else try {
      const url = new URL('https://api.search.brave.com/res/v1/web/search');
-     url.search = new URLSearchParams({q: query, count: '20', offset: String(input.page - 1), safesearch: 'moderate',
+     url.search = new URLSearchParams({q: query, count: '20', offset: String(input.page - 1), safesearch: docs ? 'strict' : 'moderate',
        text_decorations: 'false', ...(input.language ? {search_lang: input.language.split('-')[0]} : {})}).toString();
      const data = z.object({web: z.object({results: z.array(z.unknown()).max(100)}).optional(),
        query: z.object({more_results_available: z.boolean().optional()}).optional()})
@@ -138,7 +151,7 @@ export async function searchWeb(db: DB, config: Config, input: WebSearchInput,
      providers.push({provider: 'searxng', status: 'budget_exhausted', message: 'The daily discovery budget has been reached.'});
    } else try {
      const url = new URL('/search', config.SEARXNG_BASE_URL);
-     url.search = new URLSearchParams({q: query, format: 'json', pageno: String(input.page), safesearch: '1', engines: engines.join(','),
+     url.search = new URLSearchParams({q: query, format: 'json', pageno: String(input.page), safesearch: docs ? '2' : '1', engines: engines.join(','),
        timeout_limit: String(Math.max(1, config.PROVIDER_TIMEOUT_MS / 1000 - 2)), ...(input.language ? {language: input.language} : {})}).toString();
      const data = z.object({results: z.array(z.unknown()).max(1000), unresponsive_engines: z.array(z.unknown()).optional()})
        .parse(await deps.transport(url.href, {trustedOrigin: url.origin, token: config.SEARXNG_TOKEN, timeoutMs: config.PROVIDER_TIMEOUT_MS, redirects: 0}));
@@ -159,6 +172,16 @@ export async function searchWeb(db: DB, config: Config, input: WebSearchInput,
  if (!providers.length) providers.push({provider: 'web', status: 'disabled', message: 'Web search is not configured on this instance.'});
  const next_cursor = more && input.page < 10 ? String(input.page + 1) : null;
  if (!docs) return {query: input.q, results, providers, next_cursor};
+ const found = await sourcesTask;
+ if (found) {
+   const before = results.length;
+   keep(found.docs);
+   const answered = found.providers.filter(p => p.status === 'ok').length;
+   if (found.providers.length) providers.push({provider: 'doc_sources', status: answered ? 'ok' : 'unavailable', message: answered
+     ? `${results.length - before} documents and ${found.sites.length} places to look came from ${answered} free-document sources.`
+     : 'Free-document sources did not answer; web search results only.'});
+ }
+ if (unsafe) providers.push({provider: 'safety', status: 'ok', message: `${unsafe} unsafe links (malware, phishing or explicit) were left out.`});
  const verified = await verifyDocuments(results, config, deps.peek);
  const {spam, dead, not_document} = verified.removed, removed = spam + dead + not_document;
  if (results.length) providers.push({provider: 'document_check', status: 'ok', message: removed
@@ -166,7 +189,10 @@ export async function searchWeb(db: DB, config: Config, input: WebSearchInput,
    : 'Every document link was checked.'});
  // The first page also explores the websites the search found, even when it found no document files itself.
  const explore = input.page === 1 && config.DOC_HUNT_ENABLED;
+ const sites = (found?.sites ?? []).flatMap(r => { try { const url = publicURL(r.url).href;
+   return unsafeLink(url) || accessKind(url) === 'unauthorized' ? [] : [{id: url, url, title: plain(r.title, 300) ?? url, source_name: new URL(url).hostname,
+     snippet: plain(r.snippet, 600), published: isoDate(r.published), doc_type: null, access: null, engine: r.engine, preview: null}]; } catch { return []; } });
  const hunt = verified.results.length || explore
-   ? (deps.hunt ?? ((q, found, e) => startHunt(db, config, q, found, e)))(input.q, verified.results, explore) : null;
+   ? (deps.hunt ?? ((q, list, e, s) => startHunt(db, config, q, list, e, {}, s)))(input.q, verified.results, explore, sites) : null;
  return {query: input.q, results: verified.results.map(({bytes: _bytes, ...d}) => d), providers, next_cursor, hunt};
 }
