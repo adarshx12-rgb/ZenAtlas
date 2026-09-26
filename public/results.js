@@ -270,6 +270,8 @@ function applyParamsFromURL(){for(const [key,value] of new URLSearchParams(windo
 // ---- images ---------------------------------------------------------------------------------
 // Videos run the full evidence pipeline; web, images and docs are discovery-only lists from their own endpoints.
 const tabOf=search=>{const tab=new URLSearchParams(search).get('tab');return tab in TABS?tab:'videos';};
+// The tab the URL names, or null when none was chosen for this query yet (a new search, or an older link).
+const chosenTab=search=>{const tab=new URLSearchParams(search).get('tab');return tab in TABS?tab:null;};
 const labelOf=field=>form.elements.namedItem(field)?.closest('label');
 
 // Keeps the tab links pointing at the current query, so they stay shareable and middle-clickable
@@ -279,7 +281,7 @@ function syncTabs(tab){
  base.delete('tab');
  base.delete('doc_type');
  for(const [name,anchor] of Object.entries(TABS)){
-  const query=new URLSearchParams(base);if(name!=='videos')query.set('tab',name);
+  const query=new URLSearchParams(base);query.set('tab',name);
   if(name==='docs'&&form.elements.namedItem('doc_type').value)query.set('doc_type',form.elements.namedItem('doc_type').value);
   anchor.href=`/results.html?${query}`;anchor.classList.toggle('tab--active',tab===name);
   if(tab===name)anchor.setAttribute('aria-current','page');else anchor.removeAttribute('aria-current');
@@ -591,23 +593,66 @@ async function runWebSearch(kind){
 }
 function runTab(tab){if(tab==='images')void runImageSearch();else if(tab==='web'||tab==='docs')void runWebSearch(tab);else void search();}
 
+// ---- mode routing ---------------------------------------------------------------------------
+// A new search opens on the tab its query suits (/api/mode: format words, then Jev, then a small model; videos when
+// unsure). A tab the user clicks is always kept. The chosen tab goes into the URL, so links and Back keep it.
+const modeNote=document.querySelector('#mode-note');
+const MODE_LABELS={videos:'videos',web:'web results',images:'images',docs:'documents'};
+let routeSeq=0;
+async function routeQuery(q){
+ const seq=++routeSeq;
+ status.textContent='Choosing where to search…';
+ let decision={mode:'videos',source:'default'};
+ try{const d=await api(`/api/mode?q=${encodeURIComponent(q)}`);if(d&&d.mode in TABS)decision=d;}catch{}
+ return seq===routeSeq?decision:null;
+}
+function showModeNote(decision){
+ modeNote.replaceChildren();modeNote.hidden=decision.source==='default';
+ if(modeNote.hidden)return;
+ modeNote.append(`Showing ${MODE_LABELS[decision.mode]} for this query · Search `);
+ Object.keys(TABS).filter(t=>t!==decision.mode).forEach((t,i,all)=>{
+  const a=node('a',t==='web'?'the web':t,'mode-switch');a.href=TABS[t].href;
+  a.addEventListener('click',event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||event.button!==0)return;event.preventDefault();TABS[t].click();});
+  modeNote.append(a);if(i<all.length-1)modeNote.append(' · ');
+ });
+ modeNote.append(' instead');
+}
+// Routes a query without a chosen tab, then records the tab in the URL (replace: Back skips the undecided address).
+async function routeAndRun(push){
+ const q=form.elements.namedItem('q').value;
+ const decision=await routeQuery(q);
+ if(!decision)return;
+ const query=new URLSearchParams([...new FormData(form)].filter(([,v])=>v!==''));
+ query.set('tab',decision.mode);if(decision.mode!=='docs')query.delete('doc_type');
+ window.history[push?'pushState':'replaceState'](null,'',`/results.html?${query}`);
+ syncTabs(decision.mode);showModeNote(decision);
+ runTab(decision.mode);
+}
+
 function runFromURL(){
  applyParamsFromURL();
+ routeSeq++;lastQuery=form.elements.namedItem('q').value||null;
+ if(lastQuery&&!chosenTab(window.location.search)){void routeAndRun(false);return;}
+ // A tab named in the URL (clicked, or kept from an earlier routing) is the user's view: no routing note.
+ modeNote.hidden=true;
  const tab=tabOf(window.location.search);
  syncTabs(tab);
  if(!form.elements.namedItem('q').value){status.textContent={videos:'Enter a query to search the catalogue.',web:'Enter a query to search the web.',
   images:'Enter a query to search for images.',docs:'Enter a query to search for documents.'}[tab];return;}
  runTab(tab);
 }
+// A new query is routed to the tab it suits, whichever tab is open. Changing only the document type on the Docs tab
+// re-runs that tab.
+let lastQuery=null;
 form.addEventListener('submit',event=>{event.preventDefault();
- const tab=tabOf(window.location.search);
+ const q=form.elements.namedItem('q').value,tab=chosenTab(window.location.search);
+ if(q&&(q!==lastQuery||!tab)){lastQuery=q;modeNote.hidden=true;void routeAndRun(true);return;}
  const query=new URLSearchParams([...new FormData(form)].filter(([,v])=>v!==''));
- // A search typed while another tab is open stays on that tab.
- if(tab!=='videos')query.set('tab',tab);
+ query.set('tab',tab??'videos');
  if(tab!=='docs')query.delete('doc_type');
  window.history.pushState(null,'',`/results.html?${query}`);
- syncTabs(tab);
- runTab(tab);
+ syncTabs(tab??'videos');
+ runTab(tab??'videos');
 });
 retry.addEventListener('click',()=>runTab(tabOf(window.location.search)));
 // Changing the document type re-runs the document search straight away.

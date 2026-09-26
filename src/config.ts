@@ -71,6 +71,13 @@ export const configSchema = z.object({
   WEB_REVIEW_READ_MS: number(15000, 2000, 30000),
   WEB_JEV_ACCURACY_MIN: z.coerce.number().min(0).max(1).default(0.3),
   WEB_JEV_SETTLE: z.enum(['true', 'false']).default('false').transform(v => v === 'true'),
+  // Mode routing (src/mode-router.ts): format words, then Jev at MODE_JEV_CONFIDENCE, then MODE_ROUTER_MODEL pick the tab a
+  // new search opens on, within MODE_ROUTER_TIMEOUT_MS; otherwise videos.
+  MODE_ROUTER_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
+  MODE_JEV_CONFIDENCE: z.coerce.number().min(0).max(1).default(0.7),
+  MODE_ROUTER_MODEL: z.string().regex(/^[\w.\/:-]{0,100}$/).default('google/gemini-3.5-flash-lite'),
+  MODE_ROUTER_TIMEOUT_MS: number(3000, 200, 10000),
+  MODE_ROUTER_DAILY_BUDGET: number(2000, 0, 100000),
   SPECIALIST_SEARCHES: number(3, 0, 6),
   ARCHIVE_DISCOVERY: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
   ARCHIVE_COLLECTIONS: z.string().default('prelinger,ephemera').refine(v =>

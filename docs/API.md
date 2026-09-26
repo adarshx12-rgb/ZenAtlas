@@ -97,6 +97,14 @@ The IDs above are placeholders. Feedback requires a result in the caller's activ
 
 `kind` defaults to `vote`, which needs `useful`; `reason` (`off_topic`, `low_quality`, `wrong_format`, `duplicate`) only goes with `useful:false`. A vote or open replaces the previous one for that result. `missing` takes a 3–500 character `note` and no `url`. The URL must be a result of that search (otherwise 403); another session's search is 404. Unlike `/api/feedback`, any result can be rated, retained or not; a vote on a retained record also updates the personal `feedback` row.
 
+## GET /api/mode
+
+`q` (2–400 characters). Returns the tab a new search should open on: `{mode: 'videos'|'web'|'images'|'docs', source:
+'rules'|'jev'|'model'|'default', confidence}`. Format words in the query decide first; otherwise Jev decides when at least
+`MODE_JEV_CONFIDENCE` sure, then `MODE_ROUTER_MODEL`; anything failing or slower than `MODE_ROUTER_TIMEOUT_MS` gives
+`videos` with source `default`. Decisions are cached per query for an hour. The results page calls it for every new query
+and for links without `tab`; a tab the user clicks is never re-routed.
+
 ## GET /api/web
 
 Web and document search (discovery only; results never enter the catalogue).

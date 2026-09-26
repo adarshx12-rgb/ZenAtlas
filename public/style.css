@@ -249,6 +249,8 @@ main.bleed{max-width:none;margin:0 0 96px;padding:0}
 /* ---- results --------------------------------------------------------------- */
 .results-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;border-top:1px solid var(--rule);padding-top:12px}
 h2{font-family:var(--font-display);font-size:26px;font-weight:400;letter-spacing:.01em;margin:0}
+#mode-note{margin:6px 0 12px;font-size:13px;color:var(--ink-2)}
+#mode-note a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
 #status{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
 #results{display:grid;gap:14px}
 .card{padding:22px 24px;background:var(--paper);border:1px solid var(--rule-soft);border-radius:var(--r-lg)}
