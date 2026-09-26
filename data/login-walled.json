@@ -1,0 +1,8 @@
+{
+ "_comment": "Hosts whose content usually sits behind a login wall. Results from them open in the login-free preview (src/walled.ts). Subdomains match too.",
+ "hosts": {
+  "x.com": "X", "twitter.com": "X", "reddit.com": "Reddit", "quora.com": "Quora", "instagram.com": "Instagram",
+  "facebook.com": "Facebook", "linkedin.com": "LinkedIn", "medium.com": "Medium", "threads.net": "Threads", "threads.com": "Threads",
+  "pinterest.com": "Pinterest", "tiktok.com": "TikTok", "glassdoor.com": "Glassdoor", "discord.com": "Discord"
+ }
+}

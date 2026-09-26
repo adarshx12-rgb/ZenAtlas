@@ -71,6 +71,11 @@ export const configSchema = z.object({
   WEB_REVIEW_READ_MS: number(15000, 2000, 30000),
   WEB_JEV_ACCURACY_MIN: z.coerce.number().min(0).max(1).default(0.3),
   WEB_JEV_SETTLE: z.enum(['true', 'false']).default('false').transform(v => v === 'true'),
+  // Login-free preview (src/walled.ts): previews of results from login-walled sites, from official endpoints only. Reddit
+  // post text and comments need a Reddit app (client credentials); without it Reddit previews show the title only.
+  WALLED_PREVIEW_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
+  WALLED_PREVIEW_DAILY_BUDGET: number(3000, 0, 100000),
+  REDDIT_CLIENT_ID: optional, REDDIT_CLIENT_SECRET: optional,
   // Mode routing (src/mode-router.ts): format words, then Jev at MODE_JEV_CONFIDENCE, then MODE_ROUTER_MODEL pick the tab a
   // new search opens on, within MODE_ROUTER_TIMEOUT_MS; otherwise videos.
   MODE_ROUTER_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),

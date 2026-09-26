@@ -49,7 +49,8 @@ async function request(input: string, options: Options, defaultTypes: string[]):
        if (!addresses.length || (!trusted && addresses.some(a => !isPublicIP(a.address)))) throw new UpstreamError('unsafe_destination');
        if (Date.now() - started >= deadline) throw new UpstreamError('timeout');
        const chosen = addresses[0];
-       const body = options.body === undefined ? undefined : JSON.stringify(options.body);
+       // A string body is sent as-is (a form body); anything else as JSON.
+       const body = options.body === undefined ? undefined : typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
        req = (url.protocol === 'https:' ? https : http).request(url, {
          method: options.method ?? 'GET', agent: false,
          lookup: ((_h: unknown, opts: any, cb: any) => opts.all ? cb(null, [chosen]) : cb(null, chosen.address, chosen.family)) as any,
