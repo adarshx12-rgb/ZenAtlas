@@ -11,7 +11,9 @@ import { OpenAICompatibleClient } from './openai-compatible.js';
 
 export interface CouncilSeats { checker?: Judge; chair?: Judge }
 export interface CouncilRecord { scorer: number; checker?: number; chair?: number; disputed: boolean }
-export interface CouncilOptions { top: number; disagreement?: number; log?: (line: Record<string, unknown>) => void }
+// chairTop: only disputes among this many of the highest-scored candidates go to the Chair; the rest keep the mean of the
+// two scores (video searches, where long comment threads make the judges disagree often and the Chair took 64-90 s).
+export interface CouncilOptions { top: number; disagreement?: number; chairTop?: number; log?: (line: Record<string, unknown>) => void }
 // Small batches in parallel: measured on 2026-09-26, the Checker answers 5 candidates in about 16 s but timed out on 15
 // in one call, and the Chair (which reasons first) timed out on 6-10 disputes at once.
 const CHECK_BATCH = 5, CHAIR_BATCH = 3;
@@ -80,6 +82,11 @@ export async function councilReview(query: string, candidates: JudgeCandidate[],
      records.set(c.key, {scorer: a.relevance, checker: b.relevance, disputed: false});
      verdicts.set(c.key, {...a, relevance: Math.floor((a.relevance + b.relevance) / 2)});
    }
+ }
+ // Disputes are in score order; those past chairTop are settled by the mean of the two scores.
+ for (const c of disputes.splice(options.chairTop ?? disputes.length)) {
+   const a = scored.get(c.key)!, b = second.get(c.key)!;
+   verdicts.set(c.key, {...a, relevance: Math.floor((a.relevance + b.relevance) / 2)});
  }
  let chaired = 0, chairModel: string|null = null;
  const chairStarted = Date.now();

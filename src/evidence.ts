@@ -159,6 +159,10 @@ export interface Decision {
 
 // One candidate against every hard per-result requirement. Inspected evidence beats a model's prediction on the
 // same requirement; a grounded judge quote counts where nothing was inspected; provisional findings count for nothing.
+// "Not X", "no talking", "exclude background music": metadata can rarely prove an absence, so an exclusion the evidence
+// neither confirms nor contradicts is waived (named in the notes) instead of making every candidate unverified. A
+// contradicted exclusion still removes the candidate.
+const EXCLUSION = /^\s*(?:not|no|never|without|exclud\w*|avoid\w*)\b/i;
 export function decide(contract: RequirementsContract, findings: Finding[], judged: RequirementCheck[] = []): Decision {
  const states: RequirementState[] = [], notes: string[] = [];
  for (const r of hardEach(contract)) {
@@ -180,6 +184,7 @@ export function decide(contract: RequirementsContract, findings: Finding[], judg
      notes.push(`Full work available (${full.excerpt ?? 'legitimate source'}); not as ${(r.formats ?? []).map(f => f.toUpperCase()).join(' or ')}.`);
    }
  }
+ for (const s of states) if (s.status === 'unknown' && EXCLUSION.test(s.text)) { s.status = 'waived'; notes.push(`Could not check: ${s.text}.`); }
  const contradicted = states.filter(s => s.status === 'contradicted').map(s => s.id);
  const unconfirmed = states.filter(s => s.status === 'unknown').map(s => s.id);
  return {status: contradicted.length ? 'excluded' : unconfirmed.length ? 'uncertain' : 'verified', requirements: states, contradicted, unconfirmed, notes};

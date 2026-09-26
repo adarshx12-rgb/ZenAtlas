@@ -325,7 +325,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
    const council = 'council' in deps ? deps.council : makeCouncil(db, config);
    if (council && byKey.size) {
      const reviewed = await councilReview(query, candidates, byKey, judgeContext, screenshots, council,
-       {top: config.COUNCIL_CHECK_TOP, disagreement: config.COUNCIL_DISAGREEMENT});
+       {top: config.COUNCIL_CHECK_TOP, disagreement: config.COUNCIL_VIDEO_DISAGREEMENT, chairTop: config.COUNCIL_VIDEO_CHAIR_TOP});
      for (const [key, v] of reviewed.verdicts) byKey.set(key, v);
      providers.push(...reviewed.providers);
    }

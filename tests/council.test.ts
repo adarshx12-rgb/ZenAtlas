@@ -124,3 +124,16 @@ test('the checker and the chair judge in small parallel batches, so one long cal
  const partial=await councilReview('q',candidates,scorer,undefined,undefined,{checker:oneFails},{top:12,...quiet});
  assert.equal(partial.records.size,7,'a failed batch only leaves its own candidates with one opinion');
 });
+
+test('video searches send only disputes among the top candidates to the chair; the rest keep the mean of the two scores',async()=>{
+ const keys=['a','b','c','d'];
+ const scorer=new Map([['a',v('a',9)],['b',v('b',8)],['c',v('c',7)],['d',v('d',6)]]);
+ const chairSaw:string[]=[];
+ const chair:Judge={async judge(_q,cs){chairSaw.push(...cs.map(c=>c.key));return {model:'chair',verdicts:new Map(cs.map(c=>[c.key,v(c.key,5)]))};}};
+ const out=await councilReview('q',keys.map(cand),scorer,undefined,undefined,{checker:seat({a:6,b:5,c:4,d:3}),chair},{top:15,disagreement:3,chairTop:2,...quiet});
+ assert.deepEqual(chairSaw.sort(),['a','b'],'only the two highest disputes');
+ assert.equal(out.verdicts.get('c')!.relevance,5,'c: disputed below the chair cut, floor((7+4)/2)');
+ assert.equal(out.verdicts.get('d')!.relevance,4);
+ const gap=await councilReview('q',['a'].map(cand),new Map([['a',v('a',9)]]),undefined,undefined,{checker:seat({a:7}),chair},{top:15,disagreement:3,...quiet});
+ assert.equal(gap.verdicts.get('a')!.relevance,8,'a 2-point gap is not a dispute at threshold 3');
+});

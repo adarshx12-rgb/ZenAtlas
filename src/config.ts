@@ -86,6 +86,8 @@ export const configSchema = z.object({
   COUNCIL_CHECKER_TIMEOUT_MS: number(35000, 5000, 120000), COUNCIL_CHAIR_TIMEOUT_MS: number(45000, 5000, 120000),
   COUNCIL_CHAIR_MODELS: z.string().regex(/^[\w.,\/:\s-]*$/).default('anthropic/claude-sonnet-5,google/gemini-3.1-pro-preview'),
   COUNCIL_CHECK_TOP: number(15, 5, 30), COUNCIL_DISAGREEMENT: number(2, 1, 5),
+  // Video searches: a wider gap before a dispute, and the Chair only for disputes among the top candidates.
+  COUNCIL_VIDEO_DISAGREEMENT: number(3, 1, 5), COUNCIL_VIDEO_CHAIR_TOP: number(5, 1, 30),
   COUNCIL_CHECKER_DAILY_BUDGET: number(1500, 0, 100000), COUNCIL_CHAIR_DAILY_BUDGET: number(400, 0, 100000),
   // Mode routing (src/mode-router.ts): format words, then Jev at MODE_JEV_CONFIDENCE, then MODE_ROUTER_MODEL pick the tab a
   // new search opens on, within MODE_ROUTER_TIMEOUT_MS; otherwise videos.
