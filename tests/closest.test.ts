@@ -67,3 +67,20 @@ test('closest suggestions are bounded and cannot include unchecked or explicitly
   assert.deepEqual(failed.results,[]);assert.deepEqual(failed.closest,[]);
  } finally {await db.close();}
 });
+
+test('when no candidate video has been watched, the search says what stays unverified instead of implying a miss',async()=>{
+ const db=await database();
+ try {
+  const item=await fixture(db,'Seatpost removal with heat');
+  const judge:Judge={async judge(_q,items){return {model:'fixture',verdicts:new Map(items.map(c=>[c.key,
+   {key:c.key,relevance:5,reason:'Uncertain: the removal is not confirmed',momentKeys:[]}]))};}};
+  const out=await applySignals(db,testConfig,'seatpost heat removal',[item],{judge});
+  assert.deepEqual(out.results,[]);assert.equal(out.closest.length,1);
+  const note=out.providers.find(p=>p.provider==='video_inspection');
+  assert.equal(note?.status,'ok','information, not a failed service: the search itself is complete');
+  assert.match(note!.message,/not been watched|unverified/i);
+  const verified=await applySignals(db,testConfig,'seatpost heat removal',[item],{judge:{async judge(_q,items){return {model:'fixture',
+   verdicts:new Map(items.map(c=>[c.key,{key:c.key,relevance:9,reason:'Clear',momentKeys:[]}]))};}}});
+  assert.equal(verified.providers.some(p=>p.provider==='video_inspection'),false,'a verified match needs no warning');
+ } finally {await db.close();}
+});

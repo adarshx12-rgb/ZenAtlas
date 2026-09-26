@@ -173,7 +173,8 @@ async function loadClosest(){
  try{
   const data=await api(`/api/search/${encodeURIComponent(request.id)}/closest`,{signal:closestAbort.signal});
   if(!valid())return;
-  closestLoaded=data.status!=='pending';closestStatus.textContent=data.message;
+  closestLoaded=data.status!=='pending';
+  closestStatus.textContent=autoClosest===request.id&&data.status==='ready'&&data.results.length?UNVERIFIED_INTRO:data.message;
   if(data.status==='pending')closestTimer=setTimeout(()=>void loadClosest(),1500);
   // Separate cards prevent an optional result from moving into the main results during polling.
   closestBox.replaceChildren(...data.results.flatMap(item=>{try{return [card(item)];}catch{return [];}}));
@@ -215,7 +216,7 @@ function render(data){
  searchId=data.search_id;catalogueTotal=data.catalogue_total;
  catalogueBox.replaceChildren();showFound(data.ranked??[...data.results.filter(r=>r.origin==='catalogue'),...data.discovered]);
  notices.replaceChildren(...(data.interpretation?[interpretation(data.interpretation)]:[]),
-  ...data.providers.filter(p=>p.status!=='ok'||p.provider==='relevance_filter'||p.message.includes('did not')).map(p=>node('p',p.message,'notice')));
+  ...data.providers.filter(p=>p.status!=='ok'||p.provider==='relevance_filter'||p.provider==='video_inspection'||p.message.includes('did not')).map(p=>node('p',p.message,'notice')));
  const busy=data.status==='discovering',partial=data.status==='partial',deepDone=data.depth==='deep';
  cancel.hidden=!busy;
  missing.hidden=busy;if(missing.dataset.search!==data.search_id){missing.dataset.search=data.search_id;missingStatus.textContent='';}
@@ -227,8 +228,15 @@ function render(data){
  status.textContent=busy?`${label} so far. ${progressText(data)}`
   :count?`${label} · ${deepDone?(partial?'Deep dive finished; some services were unavailable':'Deep dive complete'):partial?'Some search services are unavailable':'Search complete'}`
   :partial?'No catalogue matches. Discovery is unavailable or incomplete.':'No matching results. Try another query or broader filters.';
+ // A finished discovery with nothing verified opens the unverified candidates instead of an empty page (once per search,
+ // so choosing "Matches" again is respected).
+ if(!busy&&!count&&data.discovery_job_id&&data.status!=='cancelled'&&matchView==='matches'&&autoClosest!==data.search_id){
+  autoClosest=data.search_id;matchView='closest';
+ }
  showMatchView();if(matchView==='closest'&&closestRetry.hidden)void loadClosest();
 }
+let autoClosest=null;
+const UNVERIFIED_INTRO='No result could be verified. These candidates may match: each shows which requirements are confirmed (✓) and which are still unverified (?).';
 async function poll(token,deadline,misses=0){if(!controller.current(token.generation))return;
  if(Date.now()>deadline){cancel.hidden=true;retry.hidden=false;const count=shownCount();
   status.textContent=`${count} ${count===1?'result':'results'} so far. External sources are taking longer than expected; retry to check again.`;return;}
@@ -525,6 +533,12 @@ function renderSites(sites){
   row.append(host,node('span',s.title,'hunt-site-title'),node('span',s.verdict==='access'&&s.note?s.note:VERDICTS[s.verdict]??s.verdict,'hunt-site-verdict'));
   return row;})]:[]));
 }
+// A reviewed result whose page or file could not be opened is a lead: matched on its title and snippet only.
+function markLead(row,item){
+ if(!item?.lead||row.querySelector('.badge-lead'))return;
+ const b=node('span','Lead · not opened','badge badge-lead');b.title='ZenAtlas could not open this page or file, so it was matched on its title and description only.';
+ row.querySelector('.web-item-source')?.append(b);
+}
 // Removes the rows of one result page that a review rejected and orders the kept ones in place, as the review ranked them.
 function reorderPage(page,items){
  const now=new Map([...webList.querySelectorAll(`.web-item[data-page="${page}"]`)].map(r=>[r.dataset.id,r])),kept=items.map(d=>now.get(d.id)).filter(Boolean);
@@ -548,7 +562,7 @@ async function followReview(token,page,review){
   if(walledOpen&&!walledOpen.row.isConnected)closeWalled();
   for(const row of reorderPage(page,snap.results)){
    row.querySelector('.why')?.remove();
-   const r=byId.get(row.dataset.id);
+   const r=byId.get(row.dataset.id);markLead(row,r);
    if(r?.judgement)row.querySelector('h3').after(node('p',`Why this matches (${r.judgement.relevance}/10): ${r.judgement.reason}`,'why'));
   }
   for(const p of snap.providers)if(p.status!=='ok')notices.append(node('p',p.message,'notice'));
@@ -574,6 +588,7 @@ async function followHunt(token,page,hunt){
   if(fresh.length){if(last)last.after(...fresh);else webList.append(...fresh);}
   if(snap.status==='complete'){
    reorderPage(page,snap.documents);
+   for(const d of snap.documents)markLead(webList.querySelector(`.web-item[data-id="${CSS.escape(d.id)}"]`)??document.createElement('div'),d);
    for(const p of snap.providers)if(p.status!=='ok')notices.append(node('p',p.message,'notice'));
    const count=webList.children.length,inside=snap.documents.filter(d=>d.found_via?.length).length;
    status.textContent=count?`${count} ${count===1?'document':'documents'}${inside?` · ${inside} found inside websites`:''}${snap.removed?` · ${snap.removed} removed as not matching`:''}`

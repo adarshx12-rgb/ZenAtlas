@@ -24,10 +24,11 @@ export async function retainedEvidence(db:DB,ids:string[],query:string) {
 
 // Register only the canonical YouTube timeline, or reuse an explicitly registered local media version.
 // Fresh analyses run in the Python worker; completed evidence participates in subsequent final reviews.
-export async function queueSceneShortlist(db:DB,config:Config,results:Result[],query:string) {
+// minRelevance: 6 for shown results; 3 for closest candidates when nothing could be verified without watching.
+export async function queueSceneShortlist(db:DB,config:Config,results:Result[],query:string,minRelevance=6) {
  if(!config.SCENE_AUTO_QUEUE || !config.GEMINI_API_KEY) return 0;
  let queued=0;
- for(const result of results.filter(r=>(r.judgement?.relevance??0)>=6).slice(0,config.SCENE_SHORTLIST)) {
+ for(const result of results.filter(r=>(r.judgement?.relevance??0)>=minRelevance).slice(0,config.SCENE_SHORTLIST)) {
    await db.transaction(async tx=>{
      const row=(await tx.query(`SELECT c.*,s.policy FROM content c JOIN sources s ON s.id=c.source_id
        WHERE c.id=$1 AND s.status='active' AND s.health_status<>'down' AND c.expires_at>now()

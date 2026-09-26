@@ -390,8 +390,14 @@ export async function applySignals(db: DB, config: Config, query: string, result
    }));
  const shown = new Set(ranked.map(r => r.id));
  for (const id of previews.keys()) if (!shown.has(id)) previews.delete(id);
- const queued=await queueSceneShortlist(db,config,ranked,query).catch(()=>0);
- if(queued) providers.push({provider:'scene_analysis',status:'partial',message:`${queued} videos queued for scene analysis; these pending analyses are not evidence in this ranking.`});
+ // With nothing verified, the closest candidates are the videos worth watching: they are queued for inspection too, so a
+ // later search can confirm or reject what only watching can settle (actions, their order, sound).
+ const queued=await queueSceneShortlist(db,config,ranked.length?ranked:closest,query,ranked.length?6:3).catch(()=>0);
+ const unwatched=!ranked.length && closest.some(r=>r.duration!==null) && !closest.some(r=>(r.evidence_coverage?.analysed_scenes??0)>0);
+ if(unwatched) providers.push({provider:'video_inspection',status:'ok',message:queued
+   ? `No candidate video has been watched yet, so what happens in them (actions, their order, sound) is unverified. ${queued} were queued for inspection; search again in a few minutes to check them.`
+   : 'No candidate video has been watched, and video inspection is not available for them right now, so what happens in them (actions, their order, sound) is unverified.'});
+ else if(queued) providers.push({provider:'scene_analysis',status:'partial',message:`${queued} videos queued for scene analysis; these pending analyses are not evidence in this ranking.`});
  const captioned=await queueCaptions(db,config,ranked).catch(()=>0);
  if(captioned) providers.push({provider:'youtube_captions',status:'partial',message:`${captioned} videos queued for caption fetching; their transcripts help later searches, not this one.`});
  // Every candidate's verdict, rejected ones included, for the search's learning trace.
