@@ -20,6 +20,25 @@ Heartbeat = Callable[[], None]
 Transcriber = Callable[[Path, Heartbeat], list[tuple[float, float, str]]]
 
 
+HANDOFF_CODES = frozenset({"provider_unavailable", "provider_rate_limited", "provider_timeout", "provider_unreachable"})
+
+
+def candidate_models(primary: str, settings: Settings, media_kind: str) -> list[str]:
+    """The job's model, then the configured fallbacks; OpenRouter ones only with its key and only for YouTube URLs."""
+    usable = [m for m in settings.gemini_fallback_models
+              if "/" not in m or (settings.openrouter_api_key and media_kind == "youtube")]
+    return list(dict.fromkeys([primary, *usable]))
+
+
+def resolution_for(model: str) -> str:
+    # OpenRouter cannot set Gemini's media resolution, so its analyses use the provider default.
+    return "default" if "/" in model else MEDIA_RESOLUTION
+
+
+def analysis_version_for(model: str, subtitles: str) -> str:
+    return f"{PIPELINE_VERSION}:{model}:fps{FRAME_SAMPLING_FPS:g}:{resolution_for(model)}:{subtitles}"
+
+
 class SceneModel(Protocol):
     def analyse(self, request: AnalysisRequest, heartbeat: Heartbeat) -> str: ...
 
@@ -118,22 +137,33 @@ class ScenePipeline:
         heartbeat()
 
         plan = self._subtitle_plan(context, local)
-        analysis_version = f"{PIPELINE_VERSION}:{model}:fps{FRAME_SAMPLING_FPS:g}:{MEDIA_RESOLUTION}:{plan.identity}"
-        cached = store.cached_analysis(self.conn, version_id, analysis_version)
-        if cached:
-            store.cached(self.conn, job, version_id, cached)
-            return Outcome("cached", analysis_id=cached)
+        models = candidate_models(model, self.settings, context.media_kind)
+        # An analysis by any model in the chain is reused: the stored record names the model that produced it.
+        for candidate in models:
+            cached = store.cached_analysis(self.conn, version_id, analysis_version_for(candidate, plan.identity))
+            if cached:
+                store.cached(self.conn, job, version_id, cached)
+                return Outcome("cached", analysis_id=cached)
         cues = self._transcribe(context, local, heartbeat) if plan.source == "faster_whisper" and not plan.cues else plan.cues
 
-        if not store.take_budget(self.conn, "scene_analysis_requests", self.settings.daily_request_budget):
-            store.defer_for_budget(self.conn, job, version_id)
-            return Outcome("deferred", "budget_exhausted")
-        text = self.model.analyse(AnalysisRequest(
-            model=model, media_kind=context.media_kind,
-            youtube_url=context.media_reference if context.media_kind == "youtube" else None,
-            local_path=local.path if local else None, mime_type=local.mime_type if local else None,
-            media_duration=context.duration, cues=cues,
-            focus_query=job.get("payload", {}).get("query", "") if isinstance(job.get("payload", {}).get("query", ""), str) else ""), heartbeat)
+        focus = job.get("payload", {}).get("query", "")
+        # An overloaded, rate-limited or unreachable model hands the job to the next one; any other failure ends the chain.
+        for index, candidate in enumerate(models):
+            if not store.take_budget(self.conn, "scene_analysis_requests", self.settings.daily_request_budget):
+                store.defer_for_budget(self.conn, job, version_id)
+                return Outcome("deferred", "budget_exhausted")
+            try:
+                text = self.model.analyse(AnalysisRequest(
+                    model=candidate, media_kind=context.media_kind,
+                    youtube_url=context.media_reference if context.media_kind == "youtube" else None,
+                    local_path=local.path if local else None, mime_type=local.mime_type if local else None,
+                    media_duration=context.duration, cues=cues, focus_query=focus if isinstance(focus, str) else ""), heartbeat)
+                model = candidate
+                break
+            except TransientAnalysisError as error:
+                if error.code not in HANDOFF_CODES or index == len(models) - 1:
+                    raise
+        analysis_version = analysis_version_for(model, plan.identity)
         validated = validate_scenes(text, media_duration=context.duration, timeline_offset=context.timeline_offset,
                                     content_duration=context.content_duration, cues=cues)
         analysis_id = store.store_analysis(self.conn, job, context, store.AnalysisRecord(
@@ -141,7 +171,7 @@ class ScenePipeline:
             subtitle_sha256=cues_sha256(cues) if cues else None,
             dialogue_source=plan.source if plan.source in DIALOGUE_SOURCES else None,
             inspected_ranges=inspected_ranges(context), frame_sampling_fps=FRAME_SAMPLING_FPS,
-            media_resolution=MEDIA_RESOLUTION, validated=validated,
+            media_resolution=resolution_for(model), validated=validated,
             retained_cues=tuple(cues) if plan.source in ("sidecar_file", "faster_whisper") else ()))
         return Outcome("complete", analysis_id=analysis_id, scenes=len(validated.scenes))
 

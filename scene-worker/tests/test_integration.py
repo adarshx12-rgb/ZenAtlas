@@ -304,3 +304,26 @@ def test_media_without_an_audio_track_never_uses_speech_to_text(database, tmp_pa
     assert run_job(settings_for(database, tmp_path), FakeModel(scenes_reply()), transcriber=unexpected).status == "complete"
     assert rows(database["owner"], "SELECT subtitle_source,accepted_scenes FROM scene_analyses WHERE media_version_id=%s", (version["id"],)) == [
         {"subtitle_source": "none", "accepted_scenes": 0}]
+
+
+def test_an_overloaded_model_falls_back_to_the_next_and_records_the_model_that_answered(database, tmp_path, monkeypatch, capsys):
+    from zenatlas_scenes.gemini import TransientAnalysisError
+    owner = database["owner"]
+    content_id = make_content(owner)
+    make_video(tmp_path / "busy.mp4", seconds=6)
+    version = cli(monkeypatch, capsys, database, tmp_path, "register", content_id, "--version-key", "busy-v1", "--file", "busy.mp4",
+                  "--offset", "0", "--offset-basis", "TEST FIXTURE: identical export of the canonical clip")
+    cli(monkeypatch, capsys, database, tmp_path, "enqueue", version["id"], "--model", MODEL)
+    settings = settings_for(database, tmp_path, GEMINI_FALLBACK_MODELS="gemini-3.5-flash")
+    model = FakeModel(TransientAnalysisError("provider_unavailable"),
+                      scenes_reply({"start": "00:00", "end": "00:04", "description": "A mechanic heats the frame."}))
+    outcome = run_job(settings, model)
+    assert (outcome.status, outcome.code) == ("complete", None)
+    assert [r.model for r in model.requests] == [MODEL, "gemini-3.5-flash"]
+    assert rows(owner, "SELECT model FROM scene_analyses WHERE media_version_id=%s", (version["id"],)) == [{"model": "gemini-3.5-flash"}]
+    assert run_job_if_due(settings) is None, "the job is done: no retry is scheduled"
+
+
+def run_job_if_due(settings):
+    with store.connect(settings.database_url) as conn:
+        return store.claim(conn, settings.lease_seconds)

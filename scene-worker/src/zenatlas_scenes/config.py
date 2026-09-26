@@ -7,6 +7,8 @@ from pathlib import Path
 
 DEFAULT_MODEL = "gemini-3.8-flash"
 MODEL_PATTERN = re.compile(r"[a-z0-9][a-z0-9.\-]{1,79}")
+FALLBACK_PATTERN = re.compile(r"(?:google/)?gemini-[a-z0-9.\-]{1,72}")
+DEFAULT_FALLBACKS = "google/gemini-3.8-flash,google/gemini-3.5-flash,gemini-3.5-flash"
 WHISPER_NAME_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._/\-]{0,99}")
 
 
@@ -66,6 +68,12 @@ class Settings:
     whisper_model: str
     whisper_device: str
     whisper_compute_type: str
+    # Tried in order when the job's model is overloaded, rate-limited or unreachable. "google/..." names go through
+    # OpenRouter (separate capacity from the direct key; YouTube URLs only), plain names use GEMINI_API_KEY. Only Gemini
+    # models watch video, so only they are accepted.
+    gemini_fallback_models: tuple[str, ...] = ()
+    openrouter_api_key: str = ""
+    openrouter_base_url: str = "https://openrouter.ai/api/v1"
 
     @classmethod
     def from_env(cls, env: Mapping[str, str]) -> Settings:
@@ -87,6 +95,10 @@ class Settings:
         compute_type = env.get("WHISPER_COMPUTE_TYPE", "").strip() or "int8"
         if not WHISPER_NAME_PATTERN.fullmatch(whisper_model) or not WHISPER_NAME_PATTERN.fullmatch(compute_type):
             raise ConfigError("WHISPER_MODEL and WHISPER_COMPUTE_TYPE must be simple names")
+        raw = env.get("GEMINI_FALLBACK_MODELS")
+        fallbacks = tuple(m.strip() for m in (DEFAULT_FALLBACKS if raw is None else raw).split(",") if m.strip())
+        if not all(FALLBACK_PATTERN.fullmatch(m) for m in fallbacks):
+            raise ConfigError("GEMINI_FALLBACK_MODELS must list Gemini models, such as google/gemini-3.5-flash (through OpenRouter) or gemini-3.5-flash")
         device = env.get("WHISPER_DEVICE", "").strip() or "cpu"
         if device not in ("cpu", "cuda", "auto"):
             raise ConfigError("WHISPER_DEVICE must be cpu, cuda or auto")
@@ -105,6 +117,9 @@ class Settings:
             whisper_model=whisper_model,
             whisper_device=device,
             whisper_compute_type=compute_type,
+            gemini_fallback_models=fallbacks,
+            openrouter_api_key=env.get("OPENROUTER_API_KEY", "").strip(),
+            openrouter_base_url=(env.get("OPENROUTER_BASE_URL", "").strip() or "https://openrouter.ai/api/v1").rstrip("/"),
         )
 
     def require_gemini(self) -> None:

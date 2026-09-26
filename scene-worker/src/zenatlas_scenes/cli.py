@@ -145,11 +145,17 @@ def work(args: argparse.Namespace, settings: Settings) -> int:
     settings.require_gemini()
     from .gemini import GeminiSceneModel
 
-    model = GeminiSceneModel.from_api_key(settings.gemini_api_key, settings.gemini_timeout_seconds)
+    from .openrouter import OpenRouterSceneModel, RoutedSceneModel
+
+    # Fallback models named "google/..." go through OpenRouter when this instance has an OpenRouter key.
+    openrouter = OpenRouterSceneModel(settings.openrouter_api_key, settings.openrouter_base_url, settings.gemini_timeout_seconds,
+                                      site_url=os.environ.get("OPENROUTER_SITE_URL", ""), site_name=os.environ.get("OPENROUTER_SITE_NAME", ""))         if settings.openrouter_api_key else None
+    model = RoutedSceneModel(GeminiSceneModel.from_api_key(settings.gemini_api_key, settings.gemini_timeout_seconds), openrouter)
     stopping = threading.Event()
     for name in ("SIGINT", "SIGTERM"):
         signal.signal(getattr(signal, name), lambda *_: stopping.set())
-    log("scene_worker_started", default_model=settings.gemini_model)
+    log("scene_worker_started", default_model=settings.gemini_model,
+        fallback_models=[m for m in settings.gemini_fallback_models if "/" not in m or openrouter is not None])
     while not stopping.is_set():
         try:
             with store.connect(settings.database_url) as conn:
