@@ -91,9 +91,6 @@ export async function captionJob(db: DB, config: Config, job: any, fetch: Captio
  const id = youtubeId(row.canonical_url);
  if (!id) return {status: 'not_youtube'};
  if ((await db.query('SELECT 1 FROM transcript_segments WHERE content_id=$1 LIMIT 1', [row.id])).rows.length) return {status: 'already_transcribed'};
- if (!await takeBudget(db, 'youtube_caption_fetches', CAPTION_FETCHES_PER_MINUTE, 'minute')) {
-   await requeue(db, job, new Date(Date.now() + 60_000), 'rate_limited'); return null;
- }
  const settle = async (fetched: Exclude<CaptionAnswer, {status: 'error'}>, via: CaptionVia): Promise<CaptionOutcome> => {
    if (fetched.status === 'none') return {status: 'no_captions', reason: fetched.reason, via};
    // Captions may run a moment past the duration YouTube reports; the stored timeline never exceeds it.
@@ -109,7 +106,9 @@ export async function captionJob(db: DB, config: Config, job: any, fetch: Captio
 
  // Supadata first (it fetches from its own servers, so YouTube's blocks on this address do not matter), within its daily
  // budget. Anything but captions or a definite "none" falls back to asking YouTube directly.
- if (config.SUPADATA_API_KEY && !await pausedUntil(db, 'supadata') && await takeBudget(db, 'supadata_requests', config.SUPADATA_DAILY_BUDGET)) {
+ // Supadata has its own per-minute limit: YouTube's (below) protects this address, which Supadata does not use.
+ if (config.SUPADATA_API_KEY && !await pausedUntil(db, 'supadata') && await takeBudget(db, 'supadata_fetches', config.SUPADATA_PER_MINUTE, 'minute')
+   && await takeBudget(db, 'supadata_requests', config.SUPADATA_DAILY_BUDGET)) {
    const relayed = await fetch(id, row.language, 'supadata');
    if (relayed.status !== 'error') return settle(relayed, 'supadata');
    if (SUPADATA_STOPS.has(relayed.code)) {
@@ -118,6 +117,9 @@ export async function captionJob(db: DB, config: Config, job: any, fetch: Captio
    }
  }
  if (!await pausedUntil(db, 'youtube_captions')) {
+   if (!await takeBudget(db, 'youtube_caption_fetches', CAPTION_FETCHES_PER_MINUTE, 'minute')) {
+     await requeue(db, job, new Date(Date.now() + 60_000), 'rate_limited'); return null;
+   }
    const direct = await fetch(id, row.language, 'youtube');
    if (direct.status !== 'error') {
      await db.query(`DELETE FROM lane_pauses WHERE lane='youtube_captions'`);

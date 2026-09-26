@@ -137,7 +137,7 @@ export const configSchema = z.object({
   // Python with the scene-worker "captions" extra; empty uses PAGE_TEXT_PYTHON.
   CAPTIONS_PYTHON: optional, YOUTUBE_CAPTIONS_PROXY: optional,
   // Used only while YouTube blocks direct caption requests; one credit per video. The free plan has 100 credits a month.
-  SUPADATA_API_KEY: optional, SUPADATA_DAILY_BUDGET: number(3, 0, 10000),
+  SUPADATA_API_KEY: optional, SUPADATA_DAILY_BUDGET: number(3, 0, 10000), SUPADATA_PER_MINUTE: number(30, 1, 600),
   OFFICIAL_YOUTUBE_CHANNELS: optional,
   REDDIT_SIGNALS: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
   // No key needed: a public AniList lookup gives the planner and judge an anime's official titles, synonyms and

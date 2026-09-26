@@ -156,3 +156,24 @@ test('a helper failure is retried like any other job, and ineligible sources are
    assert.equal((await job(db, video.id)).result.status, 'not_permitted');
  } finally { await db.close(); }
 });
+
+test("YouTube's per-minute cap does not slow Supadata, which fetches from its own servers within its own limit", async () => {
+ const db = await database();
+ try {
+   const ids = ['aaaaaaaaaa1', 'aaaaaaaaaa2', 'aaaaaaaaaa3', 'aaaaaaaaaa4', 'aaaaaaaaaa5', 'aaaaaaaaaa6', 'aaaaaaaaaa7', 'aaaaaaaaaa8'];
+   const videos = []; for (const id of ids) videos.push(await youtube(db, id));
+   await queueCaptions(db, {...config, YOUTUBE_CAPTIONS_SHORTLIST: 10}, videos);
+   const {fetch, relayed, asked} = fetcher({}, Object.fromEntries(ids.map(id => [id, ok('youtube_unknown', `captions ${id}`)])));
+   while (await workOnce(db, {...config, SUPADATA_API_KEY: 'key', SUPADATA_DAILY_BUDGET: 50}, undefined, undefined, undefined, fetch));
+   assert.equal(relayed.length, 8, 'all eight in the same minute');
+   assert.equal(asked.length, 0);
+   const limited = {...config, SUPADATA_API_KEY: 'key', SUPADATA_DAILY_BUDGET: 50, SUPADATA_PER_MINUTE: 3};
+   const more = []; for (const id of ['bbbbbbbbbb1', 'bbbbbbbbbb2', 'bbbbbbbbbb3', 'bbbbbbbbbb4']) more.push(await youtube(db, id));
+   await queueCaptions(db, {...config, YOUTUBE_CAPTIONS_SHORTLIST: 10}, more);
+   await db.query(`DELETE FROM budgets WHERE bucket='supadata_fetches'`); // a new minute
+   const second = fetcher({}, {});
+   while (await workOnce(db, limited, undefined, undefined, undefined, second.fetch));
+   assert.equal(second.relayed.length, 3, 'Supadata has its own per-minute limit');
+   assert.equal(second.asked.length, 1, 'over it, YouTube is asked directly');
+ } finally { await db.close(); }
+});
