@@ -35,7 +35,7 @@ and says for each website it looked at whether that document is there. It runs i
    `DOC_HUNT_TIMEOUT_MS`. Candidate documents are confirmed by their signature, and each keeps the pages that led to it
    (*Found via*).
 3. **Review.** The search's own documents are reviewed while Jev explores; documents found inside websites are reviewed
-   after. Up to 60 documents are judged (more are not shown); the text of the first 20 is read within 15 seconds: PDFs up
+   after. Up to 60 documents are judged (more are not shown); the text of the first 20 is read within 30 seconds (PDFs two at a time, so the first-ranked finish first): PDFs up
    to `PDF_MAX_BYTES`, viewer pages, and office files through the preview converter (`DOC_PREVIEW_CONVERTER`). The rest are
    judged on their title and snippet. Third-party copies count like any other, unless clearly a full commercial book.
    The Jev pre-judge (rejections on, for documents only) and the LLM judge remove documents at relevance 4 or below, or

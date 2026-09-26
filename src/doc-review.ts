@@ -74,7 +74,9 @@ export type ReviewedDoc = VerifiedDoc & {judgement?: {relevance: number; reason:
 // Up to REVIEW_POOL documents are judged; beyond that they are not shown, since nothing vouches for them. The text of the
 // first TEXT_POOL is read (within TEXT_BUDGET_MS); the others are judged on their title and snippet. With more than
 // TEXT_POOL documents the Jev screener decides the order, so its promising picks are read first.
-export const REVIEW_POOL = 60, TEXT_POOL = 20, TEXT_BUDGET_MS = 15000;
+// 30 s: the review runs in the background after the results are shown, and a 12 MB report measured 9.5 s while other
+// documents loaded, so 15 s left the most important file unread on slower runs.
+export const REVIEW_POOL = 60, TEXT_POOL = 20, TEXT_BUDGET_MS = 30000;
 // office: reads an office document's text; absent when no converter or text helper is configured.
 type ReviewDeps = {judge?: Judge; pages?: PageCheck; screener?: Screener; office?: (url: string) => Promise<PageEvidence|null>; textBudgetMs?: number};
 const OFFICE = new Set(['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'odt', 'odp', 'ods', 'rtf', 'key']);
@@ -103,13 +105,14 @@ export async function reviewDocuments(db: DB, config: Config, query: string, doc
  // Both run together within TEXT_BUDGET_MS; a document not read by then is judged on its title and snippet.
  const read = async (reading: VerifiedDoc[]) => {
    const text = new Map<string, PageEvidence>();
+   const readPage = async (d: VerifiedDoc) => { const page = await pages.check(d.url).catch(() => null); if (page?.status === 'checked') text.set(d.url, page); };
    const office = reading.filter(d => d.check === 'checked' && OFFICE.has(d.doc_type ?? '')).slice(0, OFFICE_READS);
    const readOffice = office.length ? ('office' in deps ? deps.office : officeReader(db, config)) : undefined;
    const reads = Promise.all([
-     mapLimit(reading.filter(d => d.check === 'checked' && (d.doc_type === 'viewer' || d.doc_type === 'pdf' && (d.bytes === null || d.bytes <= config.PDF_MAX_BYTES))), 6, async d => {
-       const page = await pages.check(d.url).catch(() => null);
-       if (page?.status === 'checked') text.set(d.url, page);
-     }),
+     // Reading is limited by bandwidth: PDFs download two at a time, so the first-ranked (often the largest, such as a
+     // 12 MB report) finish within the budget instead of all arriving late together. Viewer pages load alongside.
+     mapLimit(reading.filter(d => d.check === 'checked' && d.doc_type === 'pdf' && (d.bytes === null || d.bytes <= config.PDF_MAX_BYTES)), 2, readPage),
+     mapLimit(reading.filter(d => d.check === 'checked' && d.doc_type === 'viewer'), 4, readPage),
      readOffice ? mapLimit(office, 1, async d => { const page = await readOffice(d.url).catch(() => null); if (page) text.set(d.url, page); }) : null,
    ]);
    let timer: NodeJS.Timeout|undefined;

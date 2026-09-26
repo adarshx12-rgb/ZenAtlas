@@ -148,3 +148,24 @@ test('Word, slides and spreadsheets are read through the converter, one at a tim
    assert.equal(judge.calls[0].candidates.find(c => c.title === 'Minutes')?.page?.text, 'Board minutes for March 2018');
  } finally { await db.close(); }
 });
+
+test('PDFs download two at a time so the first-ranked finish first; viewer pages load alongside them', async () => {
+ const db = await database();
+ try {
+   const docs: VerifiedDoc[] = [
+     ...Array.from({length: 5}, (_, i) => ({...doc(`https://a.example/${i}.pdf`, `Doc ${i}`), check: 'checked' as const, bytes: 1000})),
+     ...Array.from({length: 3}, (_, i) => ({...doc(`https://www.scribd.com/document/${i}/x`, `View ${i}`, {doc_type: 'viewer'}), check: 'checked' as const, bytes: null})),
+   ];
+   let pdfs = 0, maxPdfs = 0, viewersDuringPdfs = 0;
+   const pages = {check: async (url: string) => {
+     const pdf = url.endsWith('.pdf');
+     if (pdf) { pdfs++; maxPdfs = Math.max(maxPdfs, pdfs); } else if (pdfs) viewersDuringPdfs++;
+     await new Promise(r => setTimeout(r, 20));
+     if (pdf) pdfs--;
+     return {status: 'checked' as const, title: 'T', description: null, text: 'Body', libraries: [], badges: []};
+   }};
+   await reviewDocuments(db, testConfig, 'q', docs, {judge: new FakeJudge({}), pages, screener: undefined});
+   assert.equal(maxPdfs, 2);
+   assert.ok(viewersDuringPdfs > 0, 'viewer pages do not wait for the PDFs');
+ } finally { await db.close(); }
+});
