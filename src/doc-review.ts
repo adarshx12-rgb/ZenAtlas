@@ -1,15 +1,15 @@
 import type { DB } from './db.js';
 import type { Config } from './config.js';
-import { contentInput, type ProviderStatus } from './types.js';
+import type { ProviderStatus } from './types.js';
 import { peekDocument, UpstreamError, type PeekResponse } from './http.js';
 import { PageChecker, pageTools, type PageCheck, type PageEvidence } from './pages.js';
 import { DocumentPreviews, previewToken } from './doc-preview.js';
-import { makeJudge, type Judge, type JudgeCandidate, type Verdict } from './judge.js';
+import { makeJudge, type Judge } from './judge.js';
 import { makeJevJudge } from './jev-judge.js';
-import { makeScreener, screeningOrder, type Screener } from './screener.js';
-import { accessKind } from './access.js';
+import { makeScreener, type Screener } from './screener.js';
 import type { WebResult } from './web.js';
 import { viewerOf } from './doc-viewers.js';
+import { reviewResults } from './review.js';
 
 // Checking documents for the Docs tab. Verification (inside the search request) removes spam links, dead links and pages
 // posing as documents, reading only the first 4 KB of each file. Review (during the document hunt, src/doc-hunt.ts)
@@ -75,9 +75,6 @@ export type ReviewedDoc = VerifiedDoc & {judgement?: {relevance: number; reason:
 // first TEXT_POOL is read (within TEXT_BUDGET_MS); the others are judged on their title and snippet. With more than
 // TEXT_POOL documents the Jev screener decides the order, so its promising picks are read first.
 export const REVIEW_POOL = 60, TEXT_POOL = 20, TEXT_BUDGET_MS = 15000;
-// Documents at or below this relevance are removed (4 is "only tangential"). Unlike video results, a plausible 5 stays:
-// short document queries are often ambiguous, and an unconfirmed detail is not a miss.
-const TANGENTIAL = 4;
 // office: reads an office document's text; absent when no converter or text helper is configured.
 type ReviewDeps = {judge?: Judge; pages?: PageCheck; screener?: Screener; office?: (url: string) => Promise<PageEvidence|null>; textBudgetMs?: number};
 const OFFICE = new Set(['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'odt', 'odp', 'ods', 'rtf', 'key']);
@@ -100,61 +97,34 @@ export async function reviewDocuments(db: DB, config: Config, query: string, doc
    if (docs.length) providers.push({provider: 'judge', status: 'disabled', message: 'Documents were checked to exist but not for relevance.'});
    return {results: docs as ReviewedDoc[], removed: 0, providers};
  }
- let pool = docs;
- const screener = 'screener' in deps ? deps.screener : makeScreener(db, config);
- if (screener && docs.length > TEXT_POOL) {
-   try {
-     const leads = docs.map((d, i) => ({item: contentInput.parse({url: d.url, title: d.title, description: d.snippet, published_at: d.published}),
-       provider: d.engine, position: i, doc: d}));
-     pool = screeningOrder(leads, (await screener.screen(query, leads)).promising).map(l => l.doc);
-   } catch { providers.push({provider: 'jev_screener', status: 'unavailable', message: 'Documents were reviewed in search order.'}); }
- }
- const judged = pool.slice(0, REVIEW_POOL), unreviewed = pool.length - judged.length, reading = judged.slice(0, TEXT_POOL);
-
+ const pages = deps.pages ?? new PageChecker(config);
  // Text of real PDFs small enough to read and of viewer pages (the reader's text, title and description); Word, slides
  // and spreadsheets through the preview converter, one at a time since LibreOffice is heavy, at most OFFICE_READS.
  // Both run together within TEXT_BUDGET_MS; a document not read by then is judged on its title and snippet.
- const pages = deps.pages ?? new PageChecker(config);
- const text = new Map<string, PageEvidence>();
- const office = reading.filter(d => d.check === 'checked' && OFFICE.has(d.doc_type ?? '')).slice(0, OFFICE_READS);
- const read = office.length ? ('office' in deps ? deps.office : officeReader(db, config)) : undefined;
- const reads = Promise.all([
-   mapLimit(reading.filter(d => d.check === 'checked' && (d.doc_type === 'viewer' || d.doc_type === 'pdf' && (d.bytes === null || d.bytes <= config.PDF_MAX_BYTES))), 6, async d => {
-     const page = await pages.check(d.url).catch(() => null);
-     if (page?.status === 'checked') text.set(d.url, page);
-   }),
-   read ? mapLimit(office, 1, async d => { const page = await read(d.url).catch(() => null); if (page) text.set(d.url, page); }) : null,
- ]);
- let timer: NodeJS.Timeout|undefined;
- await Promise.race([reads, new Promise(resolve => { timer = setTimeout(resolve, deps.textBudgetMs ?? TEXT_BUDGET_MS); })]);
- clearTimeout(timer);
- const inspected = new Map(text);
- const keys = new Map(judged.map((d, i) => [`d${i + 1}`, d]));
- const candidates: JudgeCandidate[] = [...keys].map(([key, d]) => {
-   const page = inspected.get(d.url);
-   return {key, kind: 'website', site: d.source_name, url: d.url, title: d.title, channel: null, official: false, duration: null, live: null,
-     description: d.snippet, comments: [], moments: [], discussions: [], description_source: 'search',
-     inspected: {format: d.doc_type, published: page?.meta?.published ?? d.published?.slice(0, 10) ?? null, publisher: null, access: accessKind(d.url)},
-     ...(page ? {page: {status: page.status, title: page.title, description: page.description, text: page.text, libraries: []}} : {})};
- });
- const context = {kind: 'websites' as const, criteria: ['A document file that is itself what the request asks for',
-   'When the request is ambiguous (a name and a year can mean a book, an issue or a newspaper), a document that genuinely fits any reasonable reading matches; a different edition or year does not',
-   'A copy shared by a third party (Scribd, SlideShare, Academia.edu, a course or personal site) counts like any other; only an upload that is clearly a complete copy of a commercially published book does not'],
-   requirements: [{id: 'R1', text: `The document itself is what the request asks for: "${query.slice(0, 150)}" (its subject, edition, year and language as stated)`,
-     evidence: 'The document text or title shows its subject, edition or year.'}]};
- let verdicts: Map<string, Verdict>;
- try { verdicts = (await judge.judge(query, candidates, context)).verdicts; }
- catch {
-   providers.push({provider: 'judge', status: 'unavailable', message: 'Relevance checking is unavailable right now; documents are shown in search order.'});
-   return {results: docs as ReviewedDoc[], removed: 0, providers};
- }
- const scored = [...keys].map(([key, d], i) => ({d, i, v: verdicts.get(key)}));
- const kept = scored.filter(s => s.v && s.v.relevance > TANGENTIAL && !s.v.intentChecks?.some(c => c.status === 'mismatch'))
-   .sort((a, b) => b.v!.relevance - a.v!.relevance || a.i - b.i);
- const removed = judged.length - kept.length;
- providers.push({provider: 'judge', status: 'ok', message: `${judged.length} documents were checked for relevance; ${removed} did not match`
-   + `${unreviewed ? `; ${unreviewed} more were not reviewed and are not shown` : ''}.`});
- return {results: kept.map(s => ({...s.d, judgement: {relevance: s.v!.relevance, reason: s.v!.reason}})) as ReviewedDoc[], removed: removed + unreviewed, providers};
+ const read = async (reading: VerifiedDoc[]) => {
+   const text = new Map<string, PageEvidence>();
+   const office = reading.filter(d => d.check === 'checked' && OFFICE.has(d.doc_type ?? '')).slice(0, OFFICE_READS);
+   const readOffice = office.length ? ('office' in deps ? deps.office : officeReader(db, config)) : undefined;
+   const reads = Promise.all([
+     mapLimit(reading.filter(d => d.check === 'checked' && (d.doc_type === 'viewer' || d.doc_type === 'pdf' && (d.bytes === null || d.bytes <= config.PDF_MAX_BYTES))), 6, async d => {
+       const page = await pages.check(d.url).catch(() => null);
+       if (page?.status === 'checked') text.set(d.url, page);
+     }),
+     readOffice ? mapLimit(office, 1, async d => { const page = await readOffice(d.url).catch(() => null); if (page) text.set(d.url, page); }) : null,
+   ]);
+   let timer: NodeJS.Timeout|undefined;
+   await Promise.race([reads, new Promise(resolve => { timer = setTimeout(resolve, deps.textBudgetMs ?? TEXT_BUDGET_MS); })]);
+   clearTimeout(timer);
+   return new Map(text);
+ };
+ const out = await reviewResults(query, docs, {noun: 'documents', textPool: TEXT_POOL, reviewPool: REVIEW_POOL, read, judge, keepUnjudged: false,
+   screener: 'screener' in deps ? deps.screener : makeScreener(db, config),
+   criteria: ['A document file that is itself what the request asks for',
+     'When the request is ambiguous (a name and a year can mean a book, an issue or a newspaper), a document that genuinely fits any reasonable reading matches; a different edition or year does not',
+     'A copy shared by a third party (Scribd, SlideShare, Academia.edu, a course or personal site) counts like any other; only an upload that is clearly a complete copy of a commercially published book does not'],
+   requirement: {text: `The document itself is what the request asks for: "${query.slice(0, 150)}" (its subject, edition, year and language as stated)`,
+     evidence: 'The document text or title shows its subject, edition or year.'}});
+ return {results: out.results as ReviewedDoc[], removed: out.removed, providers: out.providers};
 }
 
 async function mapLimit<T>(items: T[], limit: number, fn: (item: T) => Promise<void>) {

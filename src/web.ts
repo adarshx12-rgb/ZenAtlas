@@ -49,6 +49,8 @@ export interface WebResult {
  check?: 'checked' | 'blocked';
  // doc_type 'viewer': the site that shows the document in its own reader (Scribd, SlideShare, Google Docs...).
  viewer?: string;
+ // Set by a relevance review (the Docs hunt, the Web review).
+ judgement?: {relevance: number; reason: string};
 }
 // hunt: a token for /api/docs/hunt, which reports documents found inside websites and the review of every document.
 export interface WebSearchResponse { query: string; results: WebResult[]; providers: ProviderStatus[]; next_cursor: string | null; hunt?: string | null }
