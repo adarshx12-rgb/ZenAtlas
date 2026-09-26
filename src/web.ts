@@ -55,6 +55,8 @@ export interface WebResult {
  judgement?: {relevance: number; reason: string};
  // A login-walled site's result: opens in the login-free preview (/api/walled with this token).
  walled?: {site: string; host: string; token: string};
+ // Set by a review when the page or file itself could not be read: judged on its title and snippet only.
+ lead?: true;
 }
 // hunt: a token for /api/docs/hunt, which reports documents found inside websites and the review of every document.
 // review (web only): a token for /api/web/review, which removes pages that do not match and ranks the rest.

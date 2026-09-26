@@ -378,6 +378,7 @@ code,.mono{font-size:11px}
 .missing{display:grid;gap:8px;margin:28px 0 12px}
 .missing label{font-size:13px;color:var(--ink-2,inherit)}
 /* Login-free preview: a window attached to its result, the row and window sharing one surface. */
+.web-item .badge.badge-lead{border-style:dashed;color:var(--ink-2)}
 .web-item .badge.badge-preview{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .web-item.walled-open{background:var(--wash);border-color:var(--rule-soft);box-shadow:none;transform:none}
 .walled-pop{position:absolute;z-index:40;box-sizing:border-box;background:var(--wash);border:1px solid var(--rule-soft);border-radius:var(--r-lg);

@@ -37,7 +37,11 @@ def pdf_facts(data: bytes) -> dict | None:
 
     reader = PdfReader(io.BytesIO(data))
     info = reader.metadata
-    created = getattr(info, "creation_date", None) if info else None
+    # Metadata is often malformed in scanned documents ("D:00000101000000Z"); a bad date must not hide the text.
+    try:
+        created = getattr(info, "creation_date", None) if info else None
+    except ValueError:
+        created = None
     text = " ".join(" ".join((page.extract_text() or "").split()) for page in reader.pages[:PDF_PAGES_READ])
     return {"pages": len(reader.pages), "title": (info.title if info else None) or None,
             "author": (info.author if info else None) or None,

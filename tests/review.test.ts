@@ -46,3 +46,9 @@ test('the screener orders the list only when it is longer than the text pool',as
  await reviewResults('q',[item(1),item(2)],plan(judgeOf({}),{screener,textPool:2}));
  assert.deepEqual(screened,[3]);
 });
+
+test('an item whose text could not be read is marked as a lead, whatever its score',async()=>{
+ const read=async(xs:Reviewable[])=>new Map(xs.filter(x=>x.title==='Page 1').map(x=>[x.url,{status:'checked' as const,title:'T',description:null,text:'Body',libraries:[],badges:[]}]));
+ const out=await reviewResults('q',[item(1),item(2)],plan(judgeOf({'Page 1':8,'Page 2':7}),{read}));
+ assert.deepEqual(out.results.map(r=>[r.title,r.lead??false]),[['Page 1',false],['Page 2',true]]);
+});

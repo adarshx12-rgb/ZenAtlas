@@ -257,7 +257,7 @@ async function review(db: DB, config: Config, state: HuntState, docs: HuntDoc[],
  const kept = new Map(out.results.map(r => [r.url, r]));
  for (const d of docs) {
    const k = kept.get(d.url);
-   if (k) Object.assign(d, {state: 'kept', judgement: k.judgement});
+   if (k) Object.assign(d, {state: 'kept', judgement: k.judgement, ...(k.lead ? {lead: true} : {})});
    else d.state = 'removed';
  }
  return {checked: docs.length, removed: docs.length - out.results.length, providers: out.providers};

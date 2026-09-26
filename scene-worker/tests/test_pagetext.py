@@ -68,3 +68,17 @@ def test_pdf_requests_answer_page_count_metadata_and_first_page_text():
     assert first == {"id": 7, "pdf": {"pages": 1, "title": "The Art of Seduction - Summary", "author": "StoryShots",
                                       "created": "2024-08-02", "text": "Book summary and key takeaways"}}
     assert second == {"id": 8, "pdf": None}
+
+
+def test_a_malformed_creation_date_does_not_discard_the_document():
+    # Seen on NASA's scanned Apollo 11 Mission Report: "D:00000101000000Z" made pypdf raise and hid the whole text.
+    import io
+    from pypdf import PdfWriter
+    from zenatlas_scenes.pagetext import pdf_facts
+    writer = PdfWriter()
+    writer.add_blank_page(width=200, height=200)
+    writer.add_metadata({"/Title": "Apollo 11 Mission Report", "/CreationDate": "D:00000101000000Z"})
+    buffer = io.BytesIO()
+    writer.write(buffer)
+    facts = pdf_facts(buffer.getvalue())
+    assert facts is not None and facts["pages"] == 1 and facts["title"] == "Apollo 11 Mission Report" and facts["created"] is None

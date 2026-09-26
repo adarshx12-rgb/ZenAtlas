@@ -14,7 +14,8 @@ export type Judgement = {relevance: number; reason: string};
 export interface ReviewPlan<T extends Reviewable> { noun: string; criteria: string[]; requirement: {text: string; evidence: string};
  textPool: number; reviewPool: number; read: (items: T[]) => Promise<Map<string, PageEvidence>>; judge: Judge; screener?: Screener; keepUnjudged: boolean }
 // trace: per judged item, the judge's relevance and Jev's record, for metrics.
-export interface ReviewOutcome<T> { results: (T & {judgement?: Judgement})[]; removed: number; providers: ProviderStatus[];
+// lead: the item's own text could not be read, so it was judged on its title and snippet only: a lead, not a verified match.
+export interface ReviewOutcome<T> { results: (T & {judgement?: Judgement; lead?: true})[]; removed: number; providers: ProviderStatus[];
  trace: {url: string; relevance: number|null; jev?: unknown}[] }
 // 4 is "only tangential"; a plausible 5 stays: short queries are often ambiguous and an unconfirmed detail is not a miss.
 const TANGENTIAL = 4;
@@ -55,7 +56,8 @@ export async function reviewResults<T extends Reviewable>(query: string, items: 
  providers.push({provider: 'judge', status: 'ok', message: `${judged.length} ${plan.noun} were checked for relevance; ${removed} did not match`
    + `${unreviewed ? `; ${unreviewed} more were not reviewed and are not shown` : ''}`
    + `${unjudged.length ? `; ${unjudged.length} could not be checked and are shown unranked` : ''}.`});
- return {results: [...kept.map(s => ({...s.d, judgement: {relevance: s.v!.relevance, reason: s.v!.reason}})), ...unjudged.map(s => s.d)],
+ const lead = (d: T) => inspected.has(d.url) ? {} : {lead: true as const};
+ return {results: [...kept.map(s => ({...s.d, judgement: {relevance: s.v!.relevance, reason: s.v!.reason}, ...lead(s.d)})), ...unjudged.map(s => ({...s.d, ...lead(s.d)}))],
    removed: removed + unreviewed, providers,
    trace: scored.map(s => ({url: s.d.url, relevance: s.v?.relevance ?? null, ...(s.jev ? {jev: s.jev} : {})}))};
 }
