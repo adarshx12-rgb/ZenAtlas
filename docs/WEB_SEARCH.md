@@ -38,18 +38,20 @@ page is reviewed on its own. Reviews run in the API process, at most four at onc
 
 ## Login-free preview
 
-Results from login-walled sites (`data/login-walled.json`: X, Reddit, Quora, Instagram, Facebook, LinkedIn, Medium,
+Results from login-walled sites (`data/login-walled.json`: X, Quora, Instagram, Facebook, LinkedIn, Medium,
 Threads, Pinterest, TikTok…) carry a **Preview** badge. Clicking the title opens a window attached to the result (beside
 it on wide screens, below it on phones) with the content the engine found, labelled *Login-free preview*, and a
 **Continue to {site}** button. Links in the window and the button go to the site itself, where its login rules apply.
 
 The site's login wall is never touched (`src/walled.ts`): X and Pinterest (and TikTok when it answers) give the content
-through their public oEmbed endpoints; Reddit through its official API with this instance's app keys
-(`REDDIT_CLIENT_ID`/`REDDIT_CLIENT_SECRET`), or only its title through oEmbed without them; every other site shows its
+through their public oEmbed endpoints; every other site shows its
 page text when robots.txt allows reading it and it is more than a login prompt, else the search snippet. The preview is
 rendered as plain text by our page; the site's HTML and scripts never run. Previews load ahead on hover or focus, on
 touch, and for the first three walled results in view (not on Data Saver or 2G/3G); ↓/↑ or a swipe move to the next
 walled result, Esc, × or a swipe down close it.
+
+Reddit is not on the list: its posts open without signing in. `src/walled.ts` can still preview Reddit (post text and
+top comments through the official API with `REDDIT_CLIENT_ID`/`REDDIT_CLIENT_SECRET`) if it is added back.
 
 ## Should Jev decide confident matches alone?
 

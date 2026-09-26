@@ -13,7 +13,7 @@ const TWEET={url:'https://x.com/Interior/status/507185938620219395',author_name:
 test('login-walled hosts are recognised, with subdomains; others are not',()=>{
  assert.deepEqual(walledSite('https://x.com/a/status/1'),{host:'x.com',site:'X'});
  assert.deepEqual(walledSite('https://mobile.twitter.com/a/status/1'),{host:'mobile.twitter.com',site:'X'});
- assert.deepEqual(walledSite('https://www.reddit.com/r/movies/comments/abc/x/'),{host:'reddit.com',site:'Reddit'});
+ assert.equal(walledSite('https://www.reddit.com/r/movies/comments/abc/x/'),null,'Reddit posts open without signing in');
  assert.deepEqual(walledSite('https://www.quora.com/What-is-x'),{host:'quora.com',site:'Quora'});
  assert.equal(walledSite('https://example.org/x.com'),null);
  assert.equal(walledSite('https://notreddit.com/r/x'),null);
