@@ -60,8 +60,10 @@ Provider messages take a noun (`documents` / `pages`) so both tabs read naturall
 The web review is a sequence of tests; a page must pass each to reach the next:
 
 1. **Read.** `PageChecker.check` on every discovered result (a page of results holds ~20, at most ~40), in screener
-   order, 6 at a time, within `WEB_REVIEW_READ_MS` (default 15 s). A page that fails to load (dead, error) is removed; a
-   page not read in time goes to step 3 on its title and snippet, since Jev has no content to analyse.
+   order, 6 at a time, within `WEB_REVIEW_READ_MS` (default 15 s), without opening a browser (`renders: 0`). A page that
+   cannot be read (failed load, bot block, robots.txt, or too slow) goes to step 3 on its title and snippet, since Jev has
+   no content to analyse. It is not removed: `PageChecker` reports bot blocks and dead links alike as `unavailable`, and
+   many good sites block automated reads.
 2. **Jev analyses the page** (`JevJudge` in *gate* mode, below). From the page's own text it answers:
    - *Satisfies the query?* — the existing relevance score and the R1 requirement check, quoting a snippet.
    - *Accurate information?* — a new `noul` question: "The page gives specific, credible, internally consistent
@@ -82,6 +84,13 @@ The web review is a sequence of tests; a page must pass each to reach the next:
 defaults (`settle: true, accuracy: false`), so their behaviour does not change. Web uses `settle: false, accuracy: true,
 reject: true`: a confident match is forwarded instead of settled, and the accuracy question is asked in the same Jev call
 (no extra call or budget). The `JevRecord` gains `accuracy?: number` so the learning loop can later tune the threshold.
+
+**Shadow settling.** In gate mode, a page Jev *would* have settled (the existing confident, fully backed rule) is
+recorded as outcome `would_settle` and still forwarded. Measured on 2026-09-26, video traces show Jev settling only 2 of
+100 candidates, so settling saves little; the shadow record lets us measure how often the LLM judge agrees before turning
+it on. The review logs one line per completed web review (`jev_would_settle`, `jev_rejected`, `settle_agreement` = share
+of would-settle pages the LLM judge scored ≥ 7), and `WEB_JEV_SETTLE` (default `false`) switches web to settle mode once
+the agreement is high.
 
 - Every result on the page is judged, so `reviewPool` is the page size and nothing is hidden for being unreviewed.
 - Judge criteria:
@@ -115,7 +124,8 @@ reject: true`: a confident match is forwarded instead of settled, and the accura
 - Only the reviewed page's rows are touched, so rows loaded from later pages meanwhile are unaffected. A new search
   cancels polling through the existing `controller` generation check. Poll failure or expiry leaves the raw list and
   just clears "checking relevance…".
-- The reason line is rendered by `webItem` for web results only (`!item.doc_type`); Docs rendering is unchanged.
+- The reason line is inserted by `followReview` under the title of each kept row; Docs rendering is unchanged.
+- Pages the LLM judge could not score (a failed batch) stay after the ranked ones, without a reason.
 
 ### 5. Configuration
 
@@ -131,7 +141,7 @@ reject: true`: a confident match is forwarded instead of settled, and the accura
 | No judge configured / `WEB_REVIEW_ENABLED=false` | No `review` token; raw results as today |
 | Screener unavailable or out of budget | Search order used; provider note |
 | Page reads slow | Unread pages skip Jev and go to the LLM judge on title + snippet after `WEB_REVIEW_READ_MS` |
-| Page fails to load | Removed (counted as dead in the removed total) |
+| Page cannot be read | Judged by the LLM on title + snippet (not removed) |
 | Jev unavailable / out of budget | Every read page goes to the LLM judge, which still checks relevance and accuracy |
 | LLM judge unavailable | Jev's removals still apply; pages that passed Jev stay, in search order, without reasons; notice "Relevance checking is unavailable right now" |
 | Too many reviews running | Completes at once with raw results; notice |
