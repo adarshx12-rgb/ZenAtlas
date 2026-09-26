@@ -470,6 +470,7 @@ function webItem(item){
  const source=link(url.href,item.source_name);source.className='web-item-host';head.append(source);
  if(item.doc_type)head.append(node('span',item.doc_type==='viewer'?item.viewer??'Document viewer':DOC_LABELS[item.doc_type]??item.doc_type.toUpperCase(),'badge'));
  if(item.access)head.append(node('span',item.access,'badge'));
+ if(item.walled){const b=node('span','Preview','badge badge-preview');b.title=`${item.walled.host} asks visitors to sign in; ZenAtlas shows this result without it.`;head.append(b);}
  if(item.check==='blocked'){const b=node('span','Unverified','badge');b.title='This site refused an automated check, so the file could not be confirmed.';head.append(b);}
  if(item.published)head.append(node('span',new Date(item.published).toLocaleDateString(),'meta'));
  const title=node('h3'),heading=cleanTitle(item.title,url.hostname,item.source_name);
@@ -479,7 +480,9 @@ function webItem(item){
   const open=node('button',undefined,'web-item-open');open.type='button';open.append(...headingParts(heading,query));
   open.addEventListener('click',()=>void openPreview(item,row));
   title.append(open);
- }else{const a=link(url.href,'');a.append(...headingParts(heading,query));title.append(a);}
+ }else{const a=link(url.href,'');a.append(...headingParts(heading,query));title.append(a);
+  // A login-walled result opens in the login-free preview; a modified click still opens the site.
+  if(item.walled)walledRow(row,item,a);}
  if(heading!==item.title)title.title=item.title;
  row.append(head,title);
  // A document found inside a website shows the pages that led to it.
@@ -497,7 +500,7 @@ async function searchWebPage(token,kind,append){
  const docType=form.elements.namedItem('doc_type')?.value;if(kind==='docs'&&docType)query.set('doc_type',docType);
  const data=await api(`/api/web?${query}`,{signal:token.signal});
  if(!controller.current(token.generation))return;
- if(!append){webList.replaceChildren();closePreview();}
+ if(!append){closeWalled();webList.replaceChildren();closePreview();walledSeen=0;}
  const rows=data.results.map(webItem).filter(Boolean),page=webPage;
  for(const row of rows)row.dataset.page=String(page);
  webList.append(...rows);
@@ -542,6 +545,7 @@ async function followReview(token,page,review){
   if(!controller.current(token.generation))return;
   if(snap.status!=='complete')continue;
   const byId=new Map(snap.results.map(r=>[r.id,r]));
+  if(walledOpen&&!walledOpen.row.isConnected)closeWalled();
   for(const row of reorderPage(page,snap.results)){
    row.querySelector('.why')?.remove();
    const r=byId.get(row.dataset.id);
@@ -550,6 +554,7 @@ async function followReview(token,page,review){
   for(const p of snap.providers)if(p.status!=='ok')notices.append(node('p',p.message,'notice'));
   const count=webList.children.length;
   status.textContent=count?`${count} ${count===1?'result':'results'}${snap.removed?` · ${snap.removed} removed as not matching`:''}`:'No page matched the request. Try another query.';
+  placeWalled();
   return;
  }
  settle();
@@ -592,6 +597,123 @@ async function runWebSearch(kind){
  catch(error){if(controller.current(token.generation)){status.textContent=error.message;retry.hidden=false;}}
 }
 function runTab(tab){if(tab==='images')void runImageSearch();else if(tab==='web'||tab==='docs')void runWebSearch(tab);else void search();}
+
+// ---- login-free preview ---------------------------------------------------------------------
+// Results from login-walled sites (X, Reddit, Quora…) open in a window attached to the result, showing the content the
+// engine found (/api/walled, official sources only). Links in it and "Continue to site" go to the site itself, whose
+// login rules apply. Desktop: beside the result, notch pointing at it; narrow screens: below it. Previews load ahead on
+// hover or focus, on touch, and for the first few walled results in view unless the connection is slow or saving data.
+const walledCache=new Map();let walledOpen=null,walledSeen=0;
+const slowLink=()=>{const c=navigator.connection;return !!c&&(c.saveData||/(^|-)(2g|3g)$/.test(c.effectiveType??''));};
+function loadWalled(item){
+ if(!walledCache.has(item.id))walledCache.set(item.id,api(`/api/walled?${new URLSearchParams({url:item.url,t:item.walled.token})}`).catch(()=>null));
+ return walledCache.get(item.id);
+}
+const walledView=new IntersectionObserver(entries=>{for(const e of entries){
+ if(!e.isIntersecting)continue;walledView.unobserve(e.target);
+ if(walledSeen<3&&!slowLink()){walledSeen++;void loadWalled(e.target.walledItem);}
+}});
+function walledRow(row,item,titleLink){
+ row.walledItem=item;row.classList.add('walled');
+ const ahead=()=>void loadWalled(item);
+ row.addEventListener('pointerenter',event=>{if(event.pointerType==='mouse')ahead();});
+ row.addEventListener('focusin',ahead);
+ row.addEventListener('touchstart',ahead,{passive:true});
+ walledView.observe(row);
+ titleLink.addEventListener('click',event=>{
+  if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||event.button!==0)return;
+  event.preventDefault();
+  if(walledOpen?.row===row)closeWalled();else void openWalled(row);
+ });
+}
+const walledRows=()=>[...webList.querySelectorAll('.web-item.walled')];
+function closeWalled(restoreFocus){
+ if(!walledOpen)return;
+ const {row,pop,watch}=walledOpen;walledOpen=null;
+ watch.disconnect();pop.remove();row.classList.remove('walled-open');
+ if(restoreFocus)row.querySelector('h3 a')?.focus();
+}
+// Beside the row when there is room (at least 340px), otherwise below it; kept inside the window, notch on the row.
+function placeWalled(){
+ if(!walledOpen)return;
+ const {row,pop}=walledOpen,rect=row.getBoundingClientRect(),room=window.innerWidth-rect.right-40;
+ if(room<340){
+  if(pop.previousElementSibling!==row)row.after(pop);
+  pop.classList.add('inline');pop.style.cssText='';return;
+ }
+ if(pop.parentElement!==document.body)document.body.append(pop);
+ pop.classList.remove('inline');
+ const width=Math.min(580,room),height=Math.min(pop.firstChild.scrollHeight+2,window.innerHeight-24);
+ let top=rect.top;
+ if(top+height>window.innerHeight-12)top=window.innerHeight-12-height;
+ top=Math.max(12,top);
+ const notch=Math.min(Math.max(rect.top-top+Math.min(28,rect.height/2),18),height-18);
+ pop.style.cssText=`left:${rect.right+18+window.scrollX}px;top:${top+window.scrollY}px;width:${width}px;--max:${window.innerHeight-24}px;--notch:${notch}px`;
+}
+const lockLine=(notice,text)=>notice.replaceChildren(node('span','🔓 ','walled-lock'),node('strong','Login-free preview'),text);
+async function openWalled(row){
+ closeWalled();
+ const item=row.walledItem,host=item.walled.host;
+ const pop=node('div',undefined,'walled-pop');pop.setAttribute('role','dialog');pop.setAttribute('aria-label',`Login-free preview of ${item.title}`);pop.tabIndex=-1;
+ const close=node('button','×','walled-close');close.type='button';close.setAttribute('aria-label','Close preview');close.addEventListener('click',()=>closeWalled(true));
+ const notice=node('p',undefined,'walled-notice');
+ lockLine(notice,` · ${host} normally asks you to sign in to see this. ZenAtlas brought it here for you.`);
+ const body=node('div',undefined,'walled-body');body.append(node('p','Loading the preview…','walled-loading'));
+ const cont=link(item.url,`Continue to ${host} ↗`);cont.className='walled-continue';
+ const foot=node('footer',undefined,'walled-foot');foot.append(cont,node('small',`${host} may ask you to sign in.`));
+ // The notch sits on the outer box; the inner box scrolls, so it cannot clip the notch.
+ const inner=node('div',undefined,'walled-inner');inner.append(close,notice,body,foot);pop.append(inner);
+ row.classList.add('walled-open');
+ // Closes when its result scrolls out of view.
+ const watch=new IntersectionObserver(([e])=>{if(!e.isIntersecting&&walledOpen?.row===row)closeWalled();});
+ walledOpen={row,pop,watch};
+ placeWalled();watch.observe(row);pop.focus({preventScroll:true});
+ const preview=await loadWalled(item);
+ if(walledOpen?.pop!==pop)return;
+ if(!preview?.complete)lockLine(notice,` · ${host} requires sign-in to read this. Here's what ZenAtlas could show without it.`);
+ body.replaceChildren();
+ if(preview?.author||preview?.published){const m=node('p',undefined,'walled-meta');
+  if(preview.author&&preview.author_url&&safeURL(preview.author_url))m.append(link(preview.author_url,preview.author));
+  else if(preview.author)m.append(preview.author);
+  if(preview.published)m.append(`${preview.author?' · ':''}${preview.published}`);
+  body.append(m);}
+ body.append(node('h4',preview?.title??item.title));
+ const text=preview?.text??item.snippet;
+ if(text)for(const para of text.split(/\n{2,}/).slice(0,40))body.append(node('p',para));
+ else body.append(node('p','Nothing more could be read without signing in.','walled-empty'));
+ if(preview?.links?.length){const list=node('ul',undefined,'walled-links');
+  for(const l of preview.links.slice(0,8)){if(!safeURL(l.url))continue;const li=node('li');li.append(link(l.url,l.text));list.append(li);}
+  body.append(list);}
+ if(preview?.comments?.length){const c=node('div',undefined,'walled-comments');c.append(node('h5','Top comments'));
+  for(const x of preview.comments){const p=node('p');p.append(node('strong',`${x.author} `),x.text);c.append(p);}
+  body.append(c);}
+ placeWalled();
+}
+// Skimming: ↓/↑ move the preview to the next or previous walled result, Esc closes it; on touch, swipe left/right and
+// swipe down (or tap outside) do the same.
+function stepWalled(by){
+ if(!walledOpen)return;
+ const rows=walledRows(),next=rows[rows.indexOf(walledOpen.row)+by];
+ if(next){next.scrollIntoView({block:'nearest'});void openWalled(next);}
+}
+document.addEventListener('keydown',event=>{
+ if(!walledOpen||event.target.closest?.('input,select,textarea'))return;
+ if(event.key==='Escape'){event.preventDefault();closeWalled(true);}
+ else if(event.key==='ArrowDown'||event.key==='ArrowUp'){event.preventDefault();stepWalled(event.key==='ArrowDown'?1:-1);}
+});
+document.addEventListener('pointerdown',event=>{if(walledOpen&&!walledOpen.pop.contains(event.target)&&!walledOpen.row.contains(event.target))closeWalled();});
+let swipe=null;
+document.addEventListener('touchstart',event=>{if(walledOpen?.pop.contains(event.target))swipe={x:event.touches[0].clientX,y:event.touches[0].clientY,top:walledOpen.pop.firstChild.scrollTop};},{passive:true});
+document.addEventListener('touchend',event=>{
+ if(!swipe||!walledOpen)return;
+ const t=event.changedTouches[0],dx=t.clientX-swipe.x,dy=t.clientY-swipe.y,start=swipe;swipe=null;
+ if(Math.abs(dx)>60&&Math.abs(dy)<40)stepWalled(dx<0?1:-1);
+ else if(dy>80&&Math.abs(dx)<40&&start.top===0)closeWalled();
+},{passive:true});
+window.addEventListener('resize',()=>placeWalled());
+// Beside its row, the window follows the row as the page scrolls, staying inside the viewport.
+let walledFrame=0;
+window.addEventListener('scroll',()=>{if(walledOpen&&!walledFrame)walledFrame=requestAnimationFrame(()=>{walledFrame=0;placeWalled();});},{passive:true});
 
 // ---- mode routing ---------------------------------------------------------------------------
 // A new search opens on the tab its query suits (/api/mode: format words, then Jev, then a small model; videos when

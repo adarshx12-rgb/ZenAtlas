@@ -122,6 +122,14 @@ Response: `{query, results, providers, next_cursor, hunt?, review?}`. Each resul
 `hunt` (Docs) is polled at `GET /api/docs/hunt?token=`; see [DOCS_SEARCH.md](DOCS_SEARCH.md). `review` (Web) is polled at
 `GET /api/web/review`.
 
+## GET /api/walled
+
+`url` and `t` (the `walled.token` of a web result from a login-walled site). Returns `{url, host, site, complete, source:
+'oembed'|'api'|'page'|'snippet', title, author, author_url, published, text, links, comments}`. `complete` is true when an
+official source gave the content itself; `source: 'snippet'` means nothing more could be read and the page shows the
+search snippet. A token that does not match the URL returns 403 `invalid_token`: only results the engine returned can be
+previewed. See [WEB_SEARCH.md](WEB_SEARCH.md).
+
 ## GET /api/web/review
 
 `token` (UUID from `/api/web`). Returns `{status: 'running'|'complete', results, removed, providers}`. While running,
