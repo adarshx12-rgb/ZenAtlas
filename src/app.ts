@@ -17,6 +17,7 @@ import { dependencyReport } from './watchdog.js';
 import { imageSearchInput, searchImages } from './images.js';
 import { searchWeb, webSearchInput } from './web.js';
 import { huntSnapshot, huntState } from './doc-hunt.js';
+import { webReviewSnapshot, webReviewState } from './web-review.js';
 import { DocumentPreviews, PreviewError } from './doc-preview.js';
 import { auditReport } from './learning.js';
 
@@ -105,6 +106,12 @@ export async function createApp(db:DB,config:Config) {
  app.get('/api/images',async req=>searchImages(db,config,imageSearchInput.parse(req.query)));
  // Web pages and documents (PDF, Word, slides…) are discovery-only lists too.
  app.get('/api/web',async req=>searchWeb(db,config,webSearchInput.parse(req.query)));
+ // The Web tab's relevance review, polled while it runs; complete, it lists the pages kept, ranked, with their reasons.
+ app.get('/api/web/review',async req=>{
+   const state=webReviewState(z.object({token:z.string().uuid()}).strict().parse(req.query).token);
+   if(!state) throw new ApiError(404,'review_expired','This relevance check has expired; search again.');
+   return webReviewSnapshot(state);
+ });
  // The Docs tab's document hunt, polled while it runs: websites searched with their verdicts, documents found and reviewed.
  app.get('/api/docs/hunt',async req=>{
    const state=huntState(z.object({token:z.string().uuid()}).strict().parse(req.query).token);

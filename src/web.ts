@@ -14,6 +14,7 @@ import { startHunt } from './doc-hunt.js';
 import { findDocuments, type SourceFindings } from './doc-sources.js';
 import { viewerOf } from './doc-viewers.js';
 import { refreshBlocklists, unsafeLink } from './safety.js';
+import { startWebReview } from './web-review.js';
 import type { PeekResponse } from './http.js';
 
 // Web and document search are discovery-only, like image search: results come straight from the engines and never
@@ -53,7 +54,8 @@ export interface WebResult {
  judgement?: {relevance: number; reason: string};
 }
 // hunt: a token for /api/docs/hunt, which reports documents found inside websites and the review of every document.
-export interface WebSearchResponse { query: string; results: WebResult[]; providers: ProviderStatus[]; next_cursor: string | null; hunt?: string | null }
+// review (web only): a token for /api/web/review, which removes pages that do not match and ranks the rest.
+export interface WebSearchResponse { query: string; results: WebResult[]; providers: ProviderStatus[]; next_cursor: string | null; hunt?: string | null; review?: string }
 
 // The file type a URL serves, from its path alone: a query string such as ?file=x.pdf names a viewer page, not a document.
 export function documentType(url: string): string | null {
@@ -87,7 +89,9 @@ type Row = {url: string; title: unknown; snippet: unknown; published: unknown; e
 type Deps = {transport: typeof fetchJSON; budget: (db: DB, key: string, limit: number) => Promise<boolean>;
  peek?: (url: string, options: {timeoutMs: number}) => Promise<PeekResponse>;
  hunt?: (query: string, docs: VerifiedDoc[], explore: boolean, sites: WebResult[]) => string;
- sources?: (db: DB, config: Config, query: string) => Promise<SourceFindings>};
+ sources?: (db: DB, config: Config, query: string) => Promise<SourceFindings>;
+ // false: no relevance review (the Docs hunt's own web search).
+ review?: false | ((query: string, results: WebResult[]) => string | null)};
 
 export async function searchWeb(db: DB, config: Config, input: WebSearchInput,
  deps: Deps = {transport: fetchJSON, budget: takeBudget}): Promise<WebSearchResponse> {
@@ -173,7 +177,10 @@ export async function searchWeb(db: DB, config: Config, input: WebSearchInput,
 
  if (!providers.length) providers.push({provider: 'web', status: 'disabled', message: 'Web search is not configured on this instance.'});
  const next_cursor = more && input.page < 10 ? String(input.page + 1) : null;
- if (!docs) return {query: input.q, results, providers, next_cursor};
+ if (!docs) {
+   const review = deps.review === false ? null : (deps.review ?? ((q, list) => startWebReview(db, config, q, list)))(input.q, results);
+   return {query: input.q, results, providers, next_cursor, ...(review ? {review} : {})};
+ }
  const found = await sourcesTask;
  if (found) {
    const before = results.length;

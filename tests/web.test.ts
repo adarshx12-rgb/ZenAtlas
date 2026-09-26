@@ -101,3 +101,15 @@ test('document search removes spam, dead links and pages posing as files, and st
  assert.equal(web.hunt,undefined,'web results are not verified or hunted');
  assert.equal(hunts.length,2);
 });
+
+test('web results start a relevance review; document search and callers that opt out do not',async()=>{
+ const {deps:d}=deps({'api.search.brave.com':brave({url:'https://example.org/a'})});
+ const started:string[][]=[];
+ const review=(_q:string,list:{url:string}[])=>{started.push(list.map(r=>r.url));return 'review-token';};
+ const out=await searchWeb({} as any,config,webSearchInput.parse({q:'query'}),{...d,review});
+ assert.equal(out.review,'review-token');
+ assert.deepEqual(started,[['https://example.org/a']]);
+ assert.equal((await searchWeb({} as any,config,webSearchInput.parse({q:'query'}),{...d,review:false})).review,undefined);
+ assert.equal((await searchWeb({} as any,config,webSearchInput.parse({q:'query',kind:'docs'}),{...d,review})).review,undefined);
+ assert.equal(started.length,1);
+});

@@ -306,7 +306,8 @@ async function verdicts(db: DB, config: Config, state: HuntState, seedPages: Map
 
 // Websites for the request: an ordinary web search, whose top results are the places to look inside.
 export async function discoverSites(db: DB, config: Config, query: string): Promise<WebResult[]> {
- return (await searchWeb(db, config, webSearchInput.parse({q: query}))).results.filter(r => !documentType(r.url));
+ return (await searchWeb(db, config, webSearchInput.parse({q: query}), {transport: fetchJSON, budget: takeBudget, review: false}))
+   .results.filter(r => !documentType(r.url));
 }
 
 // What the page polls: the websites and their verdicts, and the documents still standing (kept first, by relevance).
