@@ -154,12 +154,8 @@ main.bleed{max-width:none;margin:0 0 96px;padding:0}
    (the link colour, cooler and smaller), the snippet in plain black. On hover a card lifts slightly and shows ↗. */
 .web-list{display:flex;flex-direction:column;gap:18px;max-width:760px;margin-top:6px}
 .web-list:empty{display:none}
-.web-item{position:relative;padding:22px 26px 24px;border:1px solid rgb(0 0 0 / .06);border-radius:var(--r-lg);background:rgb(0 0 0 / .012);
- transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
-.web-item:hover{border-color:rgb(0 0 0 / .1);box-shadow:0 14px 32px -18px rgb(0 0 0 / .22);transform:translateY(-1px)}
-.web-item h3{font-size:19px;line-height:1.5;margin:12px 0 10px;font-weight:600;letter-spacing:-.015em;padding-right:24px;
- transform-origin:left center;transition:transform .2s ease}
-/* The arrow belongs to the card, not the heading: the heading scales on hover and would carry it along. */
+.web-item{position:relative;padding:22px 26px 24px;border:1px solid rgb(0 0 0 / .06);border-radius:var(--r-lg);background:rgb(0 0 0 / .012)}
+.web-item h3{font-size:19px;line-height:1.5;margin:12px 0 10px;font-weight:600;letter-spacing:-.015em;padding-right:24px}
 .web-item::after{content:'↗';position:absolute;top:22px;right:24px;font-family:var(--font-mono);font-size:14px;color:var(--ink-3);
  opacity:0;transform:translate(-3px,3px);transition:opacity .2s ease,transform .2s ease;pointer-events:none}
 .web-item:hover::after{opacity:1;transform:none}
@@ -167,20 +163,19 @@ main.bleed{max-width:none;margin:0 0 96px;padding:0}
    keyword (pink) and its best-fitting sentence (marine) are stroked; the rest of the title stays plain. */
 .web-item h3 a{color:var(--ink);text-decoration:none;overflow-wrap:anywhere}
 .title-key,.title-lead,.web-item-host{color:var(--ink);text-decoration:none;overflow-wrap:anywhere;border-radius:.4em;
- background-repeat:no-repeat;background-size:100% 100%;box-decoration-break:clone;-webkit-box-decoration-break:clone;transition:filter .2s ease}
+ background-repeat:no-repeat;background-size:100% 100%;box-decoration-break:clone;-webkit-box-decoration-break:clone;
+ position:relative;top:0;transition:filter .2s ease,top .2s ease}
 .title-key{background-image:var(--marker-pink);padding:.1em .35em}
 .title-lead{background-image:var(--marker-marine);padding:.1em .3em}
 /* A heading's first stroke and the source stroke reach into the card margin, so their text lines up with the snippet. */
 .web-item h3 .title-key:first-child{margin-left:-.35em}
-.web-item-host{display:inline-block;background-image:var(--marker-blue);padding:.2em .45em;margin-left:-.45em;transform-origin:left center;
- transition:filter .2s ease,transform .2s ease}
-/* Hover (or keyboard focus) pops the heading or source out a little and deepens its strokes; no underline. */
-.web-item h3:has(:is(a,.web-item-open):is(:hover,:focus-visible)){transform:scale(1.02)}
-.web-item h3:has(:is(a,.web-item-open):is(:hover,:focus-visible)) :is(.title-key,.title-lead),
-.web-item-host:is(:hover,:focus-visible){filter:brightness(.8) saturate(1.45)}
-.web-item-host:is(:hover,:focus-visible){transform:scale(1.05)}
+.web-item-host{display:inline-block;background-image:var(--marker-blue);padding:.2em .45em;margin-left:-.45em}
+/* Hover (or keyboard focus) leaves the card still: only the highlighter strokes pop out, lifting slightly with a soft
+   shadow and a deeper colour. Hovering the result pops its heading strokes; hovering the source pops the source. */
+.web-item:is(:hover,:focus-within) h3 :is(.title-key,.title-lead),
+.web-item-host:is(:hover,:focus-visible){top:-2px;filter:brightness(.82) saturate(1.45) drop-shadow(0 3px 4px rgb(0 0 0 / .16))}
 @media (prefers-reduced-motion:reduce){
- .web-item,.web-item:hover,.web-item h3,.web-item-host{transition:none;transform:none!important}
+ .title-key,.title-lead,.web-item-host{transition:none;top:0!important}
 }
 .web-item p{margin:0;color:var(--ink);font-size:15px;line-height:1.7;overflow-wrap:anywhere}
 .web-item p.why{margin:4px 0 8px;background:var(--wash);border-radius:var(--r-md);padding:8px 12px;font-size:13px;line-height:1.5;color:var(--ink-2)}
