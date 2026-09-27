@@ -5,6 +5,7 @@ import { screeningOrder, type Screener } from './screener.js';
 import { accessKind } from './access.js';
 import { councilReview, type CouncilSeats } from './council.js';
 import { cascadeReview, type CascadeOptions } from './cascade.js';
+import { rankBoost, sourceKind } from './canonical.js';
 
 // The relevance review shared by the Docs and Web tabs: the screener orders long lists, the caller reads the text of the
 // first textPool items, then the judge (Jev in front of the LLM judge) scores up to reviewPool items. Items at relevance 4
@@ -38,6 +39,9 @@ export async function reviewResults<T extends Reviewable>(query: string, items: 
      pool = screeningOrder(leads, (await plan.screener.screen(query, leads)).promising).map(l => l.doc);
    } catch { providers.push({provider: 'jev_screener', status: 'unavailable', message: `${capital(plan.noun)} were reviewed in search order.`}); }
  }
+ // Canonical copies first, so the original is among the items read (and reviewed) rather than judged on its title.
+ const kindOf = new Map(pool.map(d => [d.url, sourceKind(d.url, query)]));
+ pool = [...pool.filter(d => kindOf.get(d.url) === 'canonical'), ...pool.filter(d => kindOf.get(d.url) !== 'canonical')];
  const judged = pool.slice(0, plan.reviewPool), unreviewed = pool.length - judged.length;
  const inspected = await plan.read(judged.slice(0, plan.textPool));
  const keys = new Map(judged.map((d, i) => [`d${i + 1}`, d]));
@@ -66,7 +70,7 @@ export async function reviewResults<T extends Reviewable>(query: string, items: 
  }
  const scored = [...keys].map(([key, d], i) => ({d, i, v: out.verdicts.get(key) as Verdict|undefined, jev: out.jev?.get(key)}));
  const kept = scored.filter(s => s.v && s.v.relevance > TANGENTIAL && !s.v.intentChecks?.some(c => c.status === 'mismatch'))
-   .sort((a, b) => b.v!.relevance - a.v!.relevance || a.i - b.i);
+   .sort((a, b) => b.v!.relevance + rankBoost(kindOf.get(b.d.url) ?? null) - a.v!.relevance - rankBoost(kindOf.get(a.d.url) ?? null) || a.i - b.i);
  const unjudged = plan.keepUnjudged ? scored.filter(s => !s.v) : [];
  const removed = judged.length - kept.length - unjudged.length;
  providers.push({provider: 'judge', status: 'ok', message: `${judged.length} ${plan.noun} were checked for relevance; ${removed} did not match`

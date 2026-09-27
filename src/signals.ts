@@ -9,6 +9,7 @@ import { YouTubeData, youtubeId, type VideoDetails, type ViewerComment, type You
 import { makeJudge, type Judge, type JudgeCandidate, type JudgeContext, type JudgeResult, type Verdict } from './judge.js';
 import { councilReview, makeCouncil, type CouncilSeats } from './council.js';
 import { cascadeOptions, cascadeReview, makeStrongJudge } from './cascade.js';
+import { rankBoost } from './canonical.js';
 import { PageChecker, type PageCheck, type PageEvidence } from './pages.js';
 import type { SearchTarget } from './planner.js';
 import {PublicVideoEvidence,selectComments,type VideoEvidenceAdapter,type VideoEvidence} from './video-evidence.js';
@@ -393,7 +394,9 @@ export async function applySignals(db: DB, config: Config, query: string, result
    // inspected evidence contradicts them.
    const dropped = decision ? (judge ? decision.status !== 'verified' || weak : decision.status === 'excluded') : !!judge && weak;
    const basis:'metadata'|'viewer_claims'|'direct_evidence'=evidenceData?.transcripts.length||evidenceData?.scenes.length||e?.page?.status==='checked'?'direct_evidence':e?.comments.length?'viewer_claims':'metadata';
-   return {score, evidence, base, dropped, decision, result: {...r,
+   // The official channel's upload ranks above re-uploads within about one relevance point (src/canonical.ts).
+   const rank = score + (score >= 0 && e?.badges.includes('Official channel') ? rankBoost('canonical') : 0);
+   return {score, rank, evidence, base, dropped, decision, result: {...r,
      evidence_coverage:{comments:e?.video?.commentStatus??(e?.comments.length?'available':'unavailable'),
        captions:e?.video?.captionStatus??(evidenceData?.transcripts.length?'available':'unavailable'),
        transcript_passages:evidenceData?.transcripts.length??0,analysed_scenes:evidenceData?.scenes.length??0,basis},
@@ -409,7 +412,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
      ...(decision ? {requirements: decision.requirements, uncertainties: [...decision.notes,
        ...decision.requirements.filter(q => q.status === 'unknown').map(q => `Not confirmed: ${q.text}`)]} : {})}};
  });
- const order = (a: typeof scored[number], b: typeof scored[number]) => b.score - a.score || (a.score >= 0 ? b.evidence - a.evidence : 0) || b.base - a.base;
+ const order = (a: typeof scored[number], b: typeof scored[number]) => b.rank - a.rank || (a.score >= 0 ? b.evidence - a.evidence : 0) || b.base - a.base;
  const kept = scored.filter(s => !s.dropped);
  const rejected=scored.length-kept.length;
  if(rejected) providers.push({provider:'relevance_filter',status:'ok',message:kept.length
