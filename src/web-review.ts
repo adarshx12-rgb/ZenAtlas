@@ -9,6 +9,7 @@ import { makeScreener, type Screener } from './screener.js';
 import { reviewResults, type ReviewOutcome } from './review.js';
 import { makeCouncil, type CouncilSeats } from './council.js';
 import { cascadeOptions, makeStrongJudge } from './cascade.js';
+import { makeRefillPlanner, mergeReviewed, type RefillPlanner } from './refill.js';
 import type { WebResult } from './web.js';
 
 // The Web tab's relevance review, run in the background after /api/web answers with the search results. Every page is
@@ -17,7 +18,11 @@ import type { WebResult } from './web.js';
 // /api/web/review with the token. Unreadable pages are judged on their title and snippet: many good sites block reads.
 
 export interface WebReviewState { status: 'running'|'complete'; results: WebResult[]; removed: number; providers: ProviderStatus[] }
-export type WebReviewDeps = {judge?: Judge; pages?: PageCheck; screener?: Screener; council?: CouncilSeats|null; strong?: Judge|null; log?: (line: Record<string, unknown>) => void};
+// refill: the planner's check of what was kept (null turns it off); fetch: runs its searches (web.ts passes the Brave search).
+export type WebReviewDeps = {judge?: Judge; pages?: PageCheck; screener?: Screener; council?: CouncilSeats|null; strong?: Judge|null;
+ refill?: RefillPlanner|null; fetch?: (searches: string[]) => Promise<WebResult[]>; log?: (line: Record<string, unknown>) => void};
+// New pages a refill may add to the review.
+const REFILL_POOL = 20;
 // A results page holds about 20 results, at most about 40: all are read and judged.
 const WEB_POOL = 40, READS = 6;
 const CRITERIA = ['A web page that itself answers, explains or provides what the request asks for',
@@ -48,15 +53,41 @@ export async function reviewWeb(db: DB, config: Config, query: string, results: 
    clearTimeout(timer);
    return new Map(text);
  };
- const out = await reviewResults(query, results, {noun: 'pages', criteria: CRITERIA, textPool: WEB_POOL, reviewPool: WEB_POOL, read, judge: deps.judge,
+ const plan = {noun: 'pages', criteria: CRITERIA, textPool: WEB_POOL, reviewPool: WEB_POOL, read, judge: deps.judge,
    // A council passed in (tests) keeps the council; otherwise JUDGE_ARCHITECTURE picks the second stage.
    council: 'council' in deps ? deps.council : config.JUDGE_ARCHITECTURE === 'council' ? makeCouncil(db, config) : null,
    strong: 'strong' in deps ? deps.strong : 'council' in deps ? null : makeStrongJudge(db, config), cascade: cascadeOptions(config), councilTop: config.COUNCIL_CHECK_TOP, councilGap: config.COUNCIL_DISAGREEMENT, councilSure: config.COUNCIL_SURE_SCORE,
    screener: 'screener' in deps ? deps.screener : makeScreener(db, config), keepUnjudged: true,
    requirement: {text: `The page itself is what the request asks for: "${query.slice(0, 150)}" (its subject and intent as stated)`,
-     evidence: 'The page text, title or snippet shows its subject.'}});
+     evidence: 'The page text, title or snippet shows its subject.'}};
+ const log = deps.log ?? (line => process.stdout.write(`${JSON.stringify(line)}\n`));
+ let out = await reviewResults(query, results, plan);
  // One line per review for tuning Jev (PM2 keeps it): counts only, never the query.
- (deps.log ?? (line => process.stdout.write(`${JSON.stringify(line)}\n`)))({event: 'web_review', tier: config.TIER, ...webReviewMetrics(out.trace)});
+ log({event: 'web_review', tier: config.TIER, ...webReviewMetrics(out.trace)});
+ // Refill: the planner checks what was kept against the request; its searches bring new pages, reviewed the same way.
+ const refill = 'refill' in deps ? deps.refill : makeRefillPlanner(db, config);
+ if (refill && deps.fetch) {
+   const started = Date.now();
+   const kept = out.results.filter(r => r.judgement).slice(0, 15)
+     .map(r => ({title: r.title, host: r.source_name, relevance: r.judgement!.relevance, reason: r.judgement!.reason}));
+   const decision = await refill(query, kept, [query]).catch(() => null);
+   let added = 0, fetched = 0;
+   if (decision?.searches.length) {
+     const seen = new Set(results.map(r => r.url));
+     const fresh = (await deps.fetch(decision.searches).catch(() => [] as WebResult[]))
+       .filter(r => !seen.has(r.url) && !!seen.add(r.url)).slice(0, REFILL_POOL);
+     fetched = fresh.length;
+     if (fresh.length) {
+       const more = await reviewResults(query, fresh, plan);
+       added = more.results.filter(r => r.judgement).length;
+       out = {...out, results: mergeReviewed(query, out.results, more.results), removed: out.removed + more.removed, trace: [...out.trace, ...more.trace]};
+     }
+     out.providers.push({provider: 'refill', status: 'ok', message: `Looked again for what was missing${decision.missing ? ` (${decision.missing})` : ''}: `
+       + `${decision.searches.length} ${decision.searches.length === 1 ? 'search' : 'searches'}, ${added} more ${added === 1 ? 'page' : 'pages'} kept.`});
+   }
+   log({event: 'refill', tier: config.TIER, tab: 'web', complete: decision?.complete ?? null, failed: !decision, searches: decision?.searches.length ?? 0,
+     fetched, added, ms: Date.now() - started});
+ }
  return out;
 }
 

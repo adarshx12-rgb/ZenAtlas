@@ -208,7 +208,11 @@ export async function searchWeb(db: DB, config: Config, input: WebSearchInput,
  const said = rewrite?.changed ? {rewrite: {corrected: rewrite.corrected}} : {};
  const next_cursor = more && input.page < 10 ? String(input.page + 1) : null;
  if (!docs) {
-   const review = deps.review === false ? null : (deps.review ?? ((q, list) => startWebReview(db, config, q, list)))(meant, results);
+   // A refill round's searches run through this same search, as typed (no rewrite) and without a review of their own.
+   const fetch = async (searches: string[]) => (await Promise.all(searches.map(q => searchWeb(db, config,
+     webSearchInput.parse({q, kind: 'web', page: '1', exact: '1', tier: config.TIER, ...(input.language ? {language: input.language} : {})}),
+     {...deps, review: false}).then(r => r.results, () => [] as WebResult[])))).flat();
+   const review = deps.review === false ? null : (deps.review ?? ((q, list) => startWebReview(db, config, q, list, {fetch})))(meant, results);
    return {query: input.q, results, providers, next_cursor, ...(review ? {review} : {}), ...said};
  }
  const found = await sourcesTask;

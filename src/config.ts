@@ -86,6 +86,10 @@ export const configSchema = z.object({
   // Which second stage re-checks the judge (docs/superpowers/specs/2026-09-27-judge-cascade-design.md): the cascade
   // (src/cascade.ts: one Strong judge on uncertain verdicts only) or the council below. council is kept as a way back.
   JUDGE_ARCHITECTURE: z.enum(['cascade', 'council']).default('cascade'),
+  // Refill round (src/refill.ts): after the Web review the planner models name what the kept results lack and write up
+  // to REFILL_MAX_SEARCHES targeted searches; the new pages are reviewed and merged. One round per search.
+  REFILL_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
+  REFILL_MAX_SEARCHES: number(2, 1, 3), REFILL_TIMEOUT_MS: number(8000, 1000, 30000), REFILL_DAILY_BUDGET: number(1000, 0, 100000),
   // Cascade: the Strong judge re-judges verdicts scored CASCADE_BORDER_LOW-HIGH, in conflict with Jev's quoted evidence,
   // or above the border without a grounded quote, plus JEV_SETTLED_AUDIT_RATE of Jev's settles. gpt-5.6-terra: 93-99% on
   // labelled cases (2026-09-26); with flash-lite scoring first it scored 100% labels at 60% of the council's cost.
