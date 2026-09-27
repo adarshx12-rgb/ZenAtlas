@@ -1,0 +1,48 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {transcriptChunks,musicOnly,chooseSceneWindow,covered} from '../src/scene-window.js';
+import {testConfig} from './helpers.js';
+
+const seg=(start:number,text:string)=>({start,end:start+8,text});
+const config={...testConfig,OPENROUTER_API_KEY:'k'};
+const db={async query(){return {rows:[{used:1}]};}} as any;
+const webcast=[seg(10,'welcome to the falcon heavy test flight'),...Array.from({length:120},(_,i)=>seg(60+i*15,`telemetry update ${i}`)),
+ seg(1740,'side boosters are coming in for landing'),seg(1760,'the falcons have landed')];
+
+test('transcripts are cut into about 40 chunks on the video timeline, text trimmed',()=>{
+ const chunks=transcriptChunks(webcast,2059);
+ assert.ok(chunks.length<=40&&chunks.length>20);
+ assert.equal(chunks[0]!.start,0);
+ assert.ok(chunks.every(c=>c.text.length<=400&&c.end>c.start));
+ assert.ok(chunks.some(c=>c.text.includes('falcons have landed')));
+});
+
+test('lyrics-free music and bracketed sound cues are not a transcript to steer by',()=>{
+ assert.ok(musicOnly([seg(0,'[Music]'),seg(10,'♪ ♪'),seg(20,'[Applause]')]));
+ assert.ok(!musicOnly(webcast));
+});
+
+test('Jev picks the chunk; a confident pick becomes a padded window on the video timeline',async()=>{
+ let body:any;
+ const transport=(async(_url:string,o:any)=>{body=o.body;const land=Object.entries(o.body.state.video.transcript).find(([,c]:any)=>c.text.includes('landed'))![0];
+  return {model:'jev',answers:{window:{type:'choice',choice:land,confidence:0.9}}};}) as any;
+ const w=await chooseSceneWindow(db,config,'both side boosters land at the same time',webcast,2059,transport);
+ assert.ok(w&&w.start<1740&&w.end>1768&&w.end<=2059&&w.end-w.start<400,JSON.stringify(w));
+ assert.ok('none' in body.questions.window.criteria,'Jev may say the transcript does not point to it');
+});
+
+test('no window for short videos, music, "none", low confidence or a failing call',async()=>{
+ const pick=(choice:string,confidence:number)=>(async()=>({model:'jev',answers:{window:{type:'choice',choice,confidence}}})) as any;
+ assert.equal(await chooseSceneWindow(db,config,'q',webcast.slice(0,20),300,pick('c1',0.9)),null,'short videos are analysed whole');
+ assert.equal(await chooseSceneWindow(db,config,'q',[seg(0,'[Music]'),seg(900,'♪')],2000,pick('c1',0.9)),null);
+ assert.equal(await chooseSceneWindow(db,config,'q',webcast,2059,pick('none',0.95)),null);
+ assert.equal(await chooseSceneWindow(db,config,'q',webcast,2059,pick('c30',0.4)),null);
+ assert.equal(await chooseSceneWindow(db,config,'q',webcast,2059,(async()=>{throw new Error('down');}) as any),null);
+ assert.equal(await chooseSceneWindow(db,config,'q',[],2059,pick('c1',0.9)),null);
+});
+
+test('a window is covered when an earlier analysis inspected all of it',()=>{
+ assert.ok(covered({start:100,end:200},[[[0,2059]]]));
+ assert.ok(!covered({start:100,end:200},[[[0,150]],[[180,300]]]));
+ assert.ok(!covered({start:100,end:200},[]));
+});

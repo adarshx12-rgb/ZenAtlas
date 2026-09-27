@@ -173,6 +173,10 @@ export const configSchema = z.object({
   VIDEO_EVIDENCE_CHECKS: number(12, 0, 40),
   SCENE_AUTO_QUEUE: z.enum(['true','false']).default('true').transform(v => v === 'true'),
   SCENE_SHORTLIST: number(3, 0, 10),
+  // Transcript-guided scene analysis (src/scene-window.ts): videos at least SCENE_WINDOW_MIN_SECONDS long whose transcript
+  // Jev ties to the moment (confidence >= SCENE_WINDOW_CONFIDENCE) are analysed around that chunk, +-SCENE_WINDOW_PAD_SECONDS.
+  SCENE_WINDOW_MIN_SECONDS: number(600, 60, 7200), SCENE_WINDOW_PAD_SECONDS: number(60, 0, 600),
+  SCENE_WINDOW_CONFIDENCE: z.coerce.number().min(0).max(1).default(0.6), SCENE_WINDOW_DAILY_BUDGET: number(300, 0, 10000),
   // Existing YouTube captions (creator-made first, else auto-generated), fetched in the background for top results
   // without a transcript. Only caption text is read, never media. See docs/YOUTUBE_CAPTIONS.md.
   YOUTUBE_CAPTIONS: z.enum(['true','false']).default('false').transform(v => v === 'true'),

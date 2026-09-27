@@ -5,6 +5,7 @@ import {activeScene,sceneSelect,sceneMoment} from './scenes.js';
 import {youtubeId} from './youtube.js';
 import {takeBudget} from './budgets.js';
 import {captionWeight} from './moments.js';
+import {chooseSceneWindow,covered,type SceneWindow} from './scene-window.js';
 
 export async function retainedEvidence(db:DB,ids:string[],query:string) {
  const rows=(await db.query(`SELECT c.id,x.* FROM content c JOIN sources s ON s.id=c.source_id
@@ -57,10 +58,16 @@ export async function quoteMoments(db: DB, quotes: Map<string, string[]>): Promi
 // Register only the canonical YouTube timeline, or reuse an explicitly registered local media version.
 // Fresh analyses run in the Python worker; completed evidence participates in subsequent final reviews.
 // minRelevance: 6 for shown results; 3 for closest candidates when nothing could be verified without watching.
-export async function queueSceneShortlist(db:DB,config:Config,results:Result[],query:string,minRelevance=6) {
+// window: picks the stretch of a long video its transcript ties to the query (src/scene-window.ts); null analyses it whole.
+export async function queueSceneShortlist(db:DB,config:Config,results:Result[],query:string,minRelevance=6,
+ window:(query:string,segments:{start:number;end:number;text:string}[],duration:number)=>Promise<SceneWindow|null>=(q,s,d)=>chooseSceneWindow(db,config,q,s,d)) {
  if(!config.SCENE_AUTO_QUEUE || !config.GEMINI_API_KEY) return 0;
  let queued=0;
  for(const result of results.filter(r=>(r.judgement?.relevance??0)>=minRelevance).slice(0,config.SCENE_SHORTLIST)) {
+   // Chosen before the transaction: Jev takes a few seconds, and nothing here needs the row locks.
+   const segments=(result.duration??0)>=config.SCENE_WINDOW_MIN_SECONDS?(await db.query(`SELECT start_seconds AS start,end_seconds AS "end",text
+     FROM transcript_segments WHERE content_id=$1 ORDER BY start_seconds LIMIT 3000`,[result.id])).rows:[];
+   const chosen=segments.length?await window(query,segments,result.duration!).catch(()=>null):null;
    await db.transaction(async tx=>{
      const row=(await tx.query(`SELECT c.*,s.policy FROM content c JOIN sources s ON s.id=c.source_id
        WHERE c.id=$1 AND s.status='active' AND s.health_status<>'down' AND c.expires_at>now()
@@ -75,12 +82,19 @@ export async function queueSceneShortlist(db:DB,config:Config,results:Result[],q
          VALUES($1,$2,'youtube',$3,$4,$5,'content_metadata',0,'Canonical YouTube timeline.',
          '{"method":"discovery_shortlist","duration":"youtube_metadata"}') RETURNING *`,[row.id,`youtube:${id}`,row.canonical_url,id,row.duration])).rows[0];
      }
-     if(!version || version.analysis_status!=='pending') return;
+     if(!version) return;
+     // An analysed video is queued again only for a window no earlier analysis inspected.
+     if(version.analysis_status!=='pending'){
+       if(!chosen) return;
+       const inspected=(await tx.query('SELECT inspected_ranges FROM scene_analyses WHERE media_version_id=$1',[version.id])).rows.map(r=>r.inspected_ranges);
+       if(covered(chosen,inspected)) return;
+     }
      if((await tx.query("SELECT 1 FROM jobs WHERE kind='scene_analysis' AND payload->>'media_version_id'=$1 AND status IN ('queued','running')",[version.id])).rows.length) return;
      if(!await takeBudget(tx,'scene_auto_jobs',20)) return;
+     const span=chosen?{window:{start:Math.round(chosen.start),end:Math.round(chosen.end)}}:{};
      const job=await tx.query(`INSERT INTO jobs(kind,dedupe_key,payload) VALUES('scene_analysis',$1,$2)
-       ON CONFLICT DO NOTHING RETURNING id`,[`scene:${version.id}:${config.GEMINI_MODEL}:gemini-scenes-v2`,
-       JSON.stringify({media_version_id:version.id,model:config.GEMINI_MODEL,query:query.slice(0,500)})]);
+       ON CONFLICT DO NOTHING RETURNING id`,[`scene:${version.id}:${config.GEMINI_MODEL}:gemini-scenes-v2${chosen?`:w${span.window!.start}-${span.window!.end}`:''}`,
+       JSON.stringify({media_version_id:version.id,model:config.GEMINI_MODEL,query:query.slice(0,500),...span})]);
      queued+=job.rows.length;
    });
  }

@@ -62,8 +62,20 @@ def resolution_for(model: str) -> str:
     return "default" if "/" in model else MEDIA_RESOLUTION
 
 
-def analysis_version_for(model: str, subtitles: str) -> str:
-    return f"{PIPELINE_VERSION}:{model}:fps{FRAME_SAMPLING_FPS:g}:{resolution_for(model)}:{subtitles}"
+def analysis_version_for(model: str, subtitles: str, window: tuple[float, float] | None = None) -> str:
+    span = f":w{window[0]:.0f}-{window[1]:.0f}" if window else ""
+    return f"{PIPELINE_VERSION}:{model}:fps{FRAME_SAMPLING_FPS:g}:{resolution_for(model)}:{subtitles}{span}"
+
+
+def job_window(job: dict[str, Any], duration: float) -> tuple[float, float] | None:
+    """The job's window in media seconds, clamped to the media; None (the whole video) when absent or unusable."""
+    raw = (job.get("payload") or {}).get("window")
+    if not isinstance(raw, dict):
+        return None
+    start, end = raw.get("start"), raw.get("end")
+    if not all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in (start, end)) or start < 0 or end <= start or start >= duration:
+        return None
+    return float(start), float(min(end, duration))
 
 
 class SceneModel(Protocol):
@@ -93,8 +105,10 @@ def verify_media(settings: Settings, context: store.JobContext, youtube_check: C
                         duration=context.duration, max_bytes=settings.max_upload_bytes)
 
 
-def inspected_ranges(context: store.JobContext) -> list[list[float]]:
-    """The whole media version is submitted; record that span on the content timeline."""
+def inspected_ranges(context: store.JobContext, window: tuple[float, float] | None = None) -> list[list[float]]:
+    """The span analysed, on the content timeline: the window when there is one, else the whole media version."""
+    if window:
+        return [[round(window[0] + context.timeline_offset, 3), round(window[1] + context.timeline_offset, 3)]]
     end = context.duration + context.timeline_offset
     if context.content_duration is not None:
         end = min(end, context.content_duration)
@@ -166,13 +180,16 @@ class ScenePipeline:
         heartbeat()
 
         plan = self._subtitle_plan(context, local)
+        window = job_window(job, context.duration)
         models = candidate_models(model, self.settings, context.media_kind)
-        # An analysis by any model in the chain is reused: the stored record names the model that produced it.
+        # An analysis by any model in the chain is reused: the stored record names the model that produced it. A whole-
+        # video analysis also serves any window.
         for candidate in models:
-            cached = store.cached_analysis(self.conn, version_id, analysis_version_for(candidate, plan.identity))
-            if cached:
-                store.cached(self.conn, job, version_id, cached)
-                return Outcome("cached", analysis_id=cached)
+            for version in dict.fromkeys([analysis_version_for(candidate, plan.identity), analysis_version_for(candidate, plan.identity, window)]):
+                cached = store.cached_analysis(self.conn, version_id, version)
+                if cached:
+                    store.cached(self.conn, job, version_id, cached)
+                    return Outcome("cached", analysis_id=cached)
         cues = self._transcribe(context, local, heartbeat) if plan.source == "faster_whisper" and not plan.cues else plan.cues
 
         focus = job.get("payload", {}).get("query", "")
@@ -188,21 +205,21 @@ class ScenePipeline:
                     model=candidate, media_kind=context.media_kind,
                     youtube_url=context.media_reference if context.media_kind == "youtube" else None,
                     local_path=local.path if local else None, mime_type=local.mime_type if local else None,
-                    media_duration=context.duration, cues=cues, focus_query=focus if isinstance(focus, str) else ""), heartbeat)
+                    media_duration=context.duration, cues=cues, focus_query=focus if isinstance(focus, str) else "", window=window), heartbeat)
                 model = candidate
                 break
             except TransientAnalysisError as error:
                 self.cooldowns.failed(candidate, error.code)
                 if error.code not in HANDOFF_CODES or index == len(models) - 1:
                     raise
-        analysis_version = analysis_version_for(model, plan.identity)
+        analysis_version = analysis_version_for(model, plan.identity, window)
         validated = validate_scenes(text, media_duration=context.duration, timeline_offset=context.timeline_offset,
                                     content_duration=context.content_duration, cues=cues)
         analysis_id = store.store_analysis(self.conn, job, context, store.AnalysisRecord(
             analysis_version=analysis_version, model=model, subtitle_source=plan.source,
             subtitle_sha256=cues_sha256(cues) if cues else None,
             dialogue_source=plan.source if plan.source in DIALOGUE_SOURCES else None,
-            inspected_ranges=inspected_ranges(context), frame_sampling_fps=FRAME_SAMPLING_FPS,
+            inspected_ranges=inspected_ranges(context, window), frame_sampling_fps=FRAME_SAMPLING_FPS,
             media_resolution=resolution_for(model), validated=validated,
             retained_cues=tuple(cues) if plan.source in ("sidecar_file", "faster_whisper") else ()))
         return Outcome("complete", analysis_id=analysis_id, scenes=len(validated.scenes))

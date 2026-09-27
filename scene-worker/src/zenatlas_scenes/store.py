@@ -251,7 +251,11 @@ def store_analysis(conn: psycopg.Connection[Row], job: Row, context: JobContext,
                     group.append({"id": row["id"], "start": start, "end": end, "text": body})
                 save_window()
         conn.execute("DELETE FROM scene_analyses WHERE media_version_id=%s AND analysis_version=%s", (context.version_id, record.analysis_version))
-        conn.execute("UPDATE video_scenes SET status='stale' WHERE media_version_id=%s AND status='active'", (context.version_id,))
+        # A new analysis replaces the scenes it re-inspected: all of them for a whole video, only those inside a window.
+        for start, end in record.inspected_ranges:
+            conn.execute("""UPDATE video_scenes SET status='stale' WHERE media_version_id=%s AND status='active'
+                AND media_start_seconds < %s AND media_end_seconds > %s""",
+                         (context.version_id, end - context.timeline_offset, start - context.timeline_offset))
         analysis_id = conn.execute("""INSERT INTO scene_analyses(media_version_id,content_id,analysis_version,model,subtitle_source,
             subtitle_sha256,inspected_ranges,frame_sampling_fps,media_resolution,accepted_scenes,rejected_scenes,rejection_codes,job_id)
             VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id::text AS id""",

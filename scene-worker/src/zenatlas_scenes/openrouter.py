@@ -39,7 +39,7 @@ class OpenRouterSceneModel:
             "model": request.model, "max_tokens": MAX_OUTPUT_TOKENS,
             "messages": [{"role": "system", "content": SYSTEM_INSTRUCTION},
                          {"role": "user", "content": [{"type": "video_url", "video_url": {"url": request.youtube_url}},
-                                                      {"type": "text", "text": build_prompt(request.media_duration, request.cues, request.focus_query)}]}],
+                                                      {"type": "text", "text": build_prompt(request.media_duration, request.cues, request.focus_query, request.window)}]}],
             "response_format": {"type": "json_schema", "json_schema": {"name": "scenes", "strict": False, "schema": provider_schema(RESPONSE_JSON_SCHEMA)}},
         }
         heartbeat()

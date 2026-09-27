@@ -134,3 +134,30 @@ def test_provider_failures_are_classified_without_leaking_details(outcome, kind,
     with pytest.raises(kind) as raised:
         GeminiSceneModel(FakeClient(outcome)).analyse(youtube_request(), lambda: None)
     assert raised.value.code == code and "fixture" not in str(raised.value)
+
+
+def test_a_window_asks_for_scenes_in_that_stretch_only_on_the_whole_video_timeline():
+    from zenatlas_scenes.gemini import build_prompt
+    from zenatlas_scenes.subtitles import Cue
+    cues = [Cue("a", 10.0, 14.0, "welcome"), Cue("b", 1745.0, 1750.0, "the falcons have landed")]
+    text = build_prompt(2059.0, cues, "boosters land", window=(1680.0, 1800.0))
+    assert "Segment only the part from 28:00 to 30:00" in text
+    assert "whole video's timeline" in text
+    assert "falcons have landed" in text and "welcome" not in text, "only the window's cues are sent"
+    whole = build_prompt(2059.0, cues, "boosters land")
+    assert "Segment the whole video into scenes" in whole and "welcome" in whole
+
+
+def test_window_parsing_versions_and_inspected_ranges():
+    from zenatlas_scenes.pipeline import analysis_version_for, job_window, inspected_ranges
+    assert job_window({"payload": {"window": {"start": 1680, "end": 1800}}}, 2059.0) == (1680.0, 1800.0)
+    for bad in ({"start": 1800, "end": 1680}, {"start": -5, "end": 10}, {"start": "a", "end": 9}, None):
+        assert job_window({"payload": {"window": bad}}, 2059.0) is None
+    assert job_window({"payload": {"window": {"start": 1900, "end": 3000}}}, 2059.0) == (1900.0, 2059.0), "clamped to the media"
+    assert analysis_version_for("m", "none", (1680.0, 1800.0)).endswith(":w1680-1800")
+    assert ":w" not in analysis_version_for("m", "none")
+
+    class Ctx:
+        duration, timeline_offset, content_duration = 2059.0, 0.0, None
+    assert inspected_ranges(Ctx(), (1680.0, 1800.0)) == [[1680.0, 1800.0]]
+    assert inspected_ranges(Ctx()) == [[0.0, 2059.0]]
