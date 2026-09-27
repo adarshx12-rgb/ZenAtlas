@@ -10,7 +10,9 @@ import { engineStatus } from './providers.js';
 import { accessKind, accessLabel } from './access.js';
 import { previewToken } from './doc-preview.js';
 import { verifyDocuments, type VerifiedDoc } from './doc-review.js';
-import { startHunt } from './doc-hunt.js';
+import { discoverSites, startHunt } from './doc-hunt.js';
+import { rewriteQuery, type QueryRewrite } from './query-rewrite.js';
+import { tierSchema } from './tiers.js';
 import { findDocuments, type SourceFindings } from './doc-sources.js';
 import { viewerOf } from './doc-viewers.js';
 import { refreshBlocklists, unsafeLink } from './safety.js';
@@ -39,6 +41,9 @@ export const webSearchInput = z.object({
  doc_type: z.enum(['any', ...Object.keys(DOCUMENT_TYPES) as [DocumentGroup, ...DocumentGroup[]]]).default('any'),
  language: z.string().regex(/^[a-z]{2,3}(-[A-Za-z]{2,4})?$/).optional(),
  page: z.coerce.number().int().min(1).max(10).default(1),
+ // "Search instead for" the query as typed: no rewriting.
+ exact: z.literal('1').optional(),
+ tier: tierSchema,
 }).strict();
 export type WebSearchInput = z.infer<typeof webSearchInput>;
 
@@ -60,7 +65,9 @@ export interface WebResult {
 }
 // hunt: a token for /api/docs/hunt, which reports documents found inside websites and the review of every document.
 // review (web only): a token for /api/web/review, which removes pages that do not match and ranks the rest.
-export interface WebSearchResponse { query: string; results: WebResult[]; providers: ProviderStatus[]; next_cursor: string | null; hunt?: string | null; review?: string }
+// rewrite: present when the query searched was a corrected spelling of the one typed ("Showing results for …").
+export interface WebSearchResponse { query: string; results: WebResult[]; providers: ProviderStatus[]; next_cursor: string | null; hunt?: string | null; review?: string;
+ rewrite?: {corrected: string} }
 
 // The file type a URL serves, from its path alone: a query string such as ?file=x.pdf names a viewer page, not a document.
 export function documentType(url: string): string | null {
@@ -96,20 +103,28 @@ type Deps = {transport: typeof fetchJSON; budget: (db: DB, key: string, limit: n
  hunt?: (query: string, docs: VerifiedDoc[], explore: boolean, sites: WebResult[]) => string;
  sources?: (db: DB, config: Config, query: string) => Promise<SourceFindings>;
  // false: no relevance review (the Docs hunt's own web search).
- review?: false | ((query: string, results: WebResult[]) => string | null)};
+ review?: false | ((query: string, results: WebResult[]) => string | null);
+ rewrite?: (query: string, tab: 'web'|'docs') => Promise<QueryRewrite>};
 
 export async function searchWeb(db: DB, config: Config, input: WebSearchInput,
  deps: Deps = {transport: fetchJSON, budget: takeBudget}): Promise<WebSearchResponse> {
  const docs = input.kind === 'docs';
  const wanted: readonly string[] = docs ? (input.doc_type === 'any' ? ALL_EXTENSIONS : DOCUMENT_TYPES[input.doc_type]) : [];
+ // What was meant rather than what was typed (src/query-rewrite.ts); "exact" searches the query as typed.
+ const rewrite = input.exact ? null : await (deps.rewrite ?? ((q, tab) => rewriteQuery(db, config, q, tab)))(input.q, docs ? 'docs' : 'web');
+ const meant = rewrite?.corrected ?? input.q;
  // Engines honour filetype: but an OR'd list drifts towards PDF, so the type filter narrows the query too.
- const query = docs ? `${input.q} (${wanted.filter(e => e !== 'csv').map(e => `filetype:${e}`).join(' OR ')})` : input.q;
+ const typed = (q: string) => docs ? `${q} (${wanted.filter(e => e !== 'csv').map(e => `filetype:${e}`).join(' OR ')})` : q;
+ const query = typed(meant);
+ // The first page also searches Brave with the rewrite's first extra search (the topic in quotes); later pages page
+ // through the main query only.
+ const braveQueries = [query, ...(input.page === 1 && rewrite?.searches.length ? [typed(rewrite.searches[0])] : [])];
  const providers: ProviderStatus[] = [];
  const results: WebResult[] = [];
  const seen = new Set<string>();
  let more = false, unsafe = 0;
  // Documents are also looked for directly in free-document sources, alongside the engines (first page only).
- const sourcesTask = docs && input.page === 1 ? (deps.sources ?? findDocuments)(db, config, input.q).catch((): SourceFindings => ({docs: [], sites: [], providers: []})) : null;
+ const sourcesTask = docs && input.page === 1 ? (deps.sources ?? findDocuments)(db, config, meant).catch((): SourceFindings => ({docs: [], sites: [], providers: []})) : null;
  if (docs) void refreshBlocklists(config).catch(() => {});
 
  const keep = (rows: Row[]) => {
@@ -139,22 +154,29 @@ export async function searchWeb(db: DB, config: Config, input: WebSearchInput,
  if (config.BRAVE_SEARCH_API_KEY) {
    if (!await deps.budget(db, 'discovery:brave', config.BRAVE_DAILY_BUDGET)) {
      providers.push({provider: 'brave', status: 'budget_exhausted', message: 'The daily Brave budget has been reached.'});
-   } else try {
-     const url = new URL('https://api.search.brave.com/res/v1/web/search');
-     url.search = new URLSearchParams({q: query, count: '20', offset: String(input.page - 1), safesearch: docs ? 'strict' : 'moderate',
-       text_decorations: 'false', ...(input.language ? {search_lang: input.language.split('-')[0]} : {})}).toString();
-     const data = z.object({web: z.object({results: z.array(z.unknown()).max(100)}).optional(),
-       query: z.object({more_results_available: z.boolean().optional()}).optional()})
-       .parse(await deps.transport(url.href, {trustedOrigin: url.origin, headers: {'X-Subscription-Token': config.BRAVE_SEARCH_API_KEY},
-         timeoutMs: config.PROVIDER_TIMEOUT_MS, redirects: 0}));
-     keep((data.web?.results ?? []).flatMap(raw => {
+   } else {
+     const ask = async (q: string, first: boolean) => {
+       // The extra search spends its own unit of the Brave budget; without one, only the main query runs.
+       if (!first && !await deps.budget(db, 'discovery:brave', config.BRAVE_DAILY_BUDGET)) return null;
+       const url = new URL('https://api.search.brave.com/res/v1/web/search');
+       url.search = new URLSearchParams({q, count: '20', offset: String(input.page - 1), safesearch: docs ? 'strict' : 'moderate',
+         text_decorations: 'false', ...(input.language ? {search_lang: input.language.split('-')[0]} : {})}).toString();
+       return z.object({web: z.object({results: z.array(z.unknown()).max(100)}).optional(),
+         query: z.object({more_results_available: z.boolean().optional()}).optional()})
+         .parse(await deps.transport(url.href, {trustedOrigin: url.origin, headers: {'X-Subscription-Token': config.BRAVE_SEARCH_API_KEY},
+           timeoutMs: config.PROVIDER_TIMEOUT_MS, redirects: 0}));
+     };
+     const answers = await Promise.allSettled(braveQueries.map((q, i) => ask(q, i === 0)));
+     const lists = answers.map(a => a.status === 'fulfilled' && a.value ? (a.value.web?.results ?? []).flatMap(raw => {
        const r = z.looseObject({url: z.string()}).safeParse(raw);
        return r.success ? [{url: r.data.url, title: r.data.title, snippet: r.data.description, published: r.data.page_age, engine: 'brave'}] : [];
-     }));
-     more = data.query?.more_results_available === true;
-     providers.push({provider: 'brave', status: 'ok', message: 'Brave search completed.'});
-   } catch {
-     providers.push({provider: 'brave', status: 'unavailable', message: 'Brave did not answer; other engines were asked.'});
+     }) : []);
+     // Taken in turn, so the extra search's best results sit beside the main query's instead of below all of them.
+     keep(Array.from({length: Math.max(0, ...lists.map(l => l.length))}, (_, i) => lists.flatMap(l => l[i] ? [l[i]] : [])).flat());
+     const main = answers[0];
+     if (main.status === 'fulfilled' && main.value) more = main.value.query?.more_results_available === true;
+     if (answers.some(a => a.status === 'fulfilled' && a.value)) providers.push({provider: 'brave', status: 'ok', message: 'Brave search completed.'});
+     else providers.push({provider: 'brave', status: 'unavailable', message: 'Brave did not answer; other engines were asked.'});
    }
  }
 
@@ -183,10 +205,11 @@ export async function searchWeb(db: DB, config: Config, input: WebSearchInput,
  }
 
  if (!providers.length) providers.push({provider: 'web', status: 'disabled', message: 'Web search is not configured on this instance.'});
+ const said = rewrite?.changed ? {rewrite: {corrected: rewrite.corrected}} : {};
  const next_cursor = more && input.page < 10 ? String(input.page + 1) : null;
  if (!docs) {
-   const review = deps.review === false ? null : (deps.review ?? ((q, list) => startWebReview(db, config, q, list)))(input.q, results);
-   return {query: input.q, results, providers, next_cursor, ...(review ? {review} : {})};
+   const review = deps.review === false ? null : (deps.review ?? ((q, list) => startWebReview(db, config, q, list)))(meant, results);
+   return {query: input.q, results, providers, next_cursor, ...(review ? {review} : {}), ...said};
  }
  const found = await sourcesTask;
  if (found) {
@@ -209,6 +232,6 @@ export async function searchWeb(db: DB, config: Config, input: WebSearchInput,
    return unsafeLink(url) || accessKind(url) === 'unauthorized' ? [] : [{id: url, url, title: plain(r.title, 300) ?? url, source_name: new URL(url).hostname,
      snippet: plain(r.snippet, 600), published: isoDate(r.published), doc_type: null, access: null, engine: r.engine, preview: null}]; } catch { return []; } });
  const hunt = verified.results.length || explore
-   ? (deps.hunt ?? ((q, list, e, s) => startHunt(db, config, q, list, e, {}, s)))(input.q, verified.results, explore, sites) : null;
- return {query: input.q, results: verified.results.map(({bytes: _bytes, ...d}) => d), providers, next_cursor, hunt};
+   ? (deps.hunt ?? ((q, list, e, s) => startHunt(db, config, q, list, e, {sites: q => discoverSites(db, config, q, rewrite)}, s)))(meant, verified.results, explore, sites) : null;
+ return {query: input.q, results: verified.results.map(({bytes: _bytes, ...d}) => d), providers, next_cursor, hunt, ...said};
 }

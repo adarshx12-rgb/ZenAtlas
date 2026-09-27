@@ -19,7 +19,9 @@ export interface PageEvidence {
 // published_text: the visible date the publication date was read from, when the page declares none in its metadata.
 export interface PageMeta { og_type?: string; schema_types?: string[]; published?: string; published_text?: string; site_name?: string; publisher?: string; content_type?: string }
 export interface PdfEvidence { pages: number|null; title: string|null; author: string|null; created: string|null; text: string|null }
-export interface PageCheck { check(url: string): Promise<PageEvidence> }
+// onStep hears each step as it starts: reading the site's rules (robots.txt), then fetching the page if they allow it.
+export type PageStep = 'rules'|'page';
+export interface PageCheck { check(url: string, onStep?: (step: PageStep) => void): Promise<PageEvidence> }
 // renders: at most this many pages per checker are opened in the browser (default PAGE_RENDERS).
 // links: at most this many outbound links are kept per page (default 8; document hunting reads more).
 export interface PageTools { renderer?: Renderer; extractor?: TextExtractor; renders?: number; links?: number }
@@ -232,12 +234,14 @@ export class PageChecker implements PageCheck {
    }
    return pending;
  }
- async check(url: string): Promise<PageEvidence> {
+ async check(url: string, onStep?: (step: PageStep) => void): Promise<PageEvidence> {
    const empty = {title: null, description: null, text: null, libraries: [], badges: []};
    const target = new URL(url);
+   onStep?.('rules');
    const robots = await this.rules(target.origin);
    if (robots === false) return {status: 'unavailable', ...empty};
    if (robots !== null && !robotsAllows(robots, target.pathname + target.search)) return {status: 'robots_disallowed', ...empty};
+   onStep?.('page');
    if (/\.pdf$/i.test(target.pathname)) return this.document(url);
    try {
      const page = await this.transport(url, {maxBytes: 1536*1024, timeoutMs: this.config.PAGE_TIMEOUT_MS, redirects: 3}).catch(error => {

@@ -18,7 +18,9 @@ const CHECKING_WINDOW_MS = 180000;
 export class ApiError extends Error { constructor(public statusCode:number, public code:string, message:string) { super(message); } }
 export function queryKey(input: SearchInput) {
  const key = [RANKING_VERSION,input.q,input.language,input.source,input.after,input.evidence];
- return createHash('sha256').update(JSON.stringify(input.depth==='deep' ? [...key,'deep'] : key)).digest('hex');
+ const deep = input.depth==='deep' ? [...key,'deep'] : key;
+ // SSJ1 searches never share a discovery job with SSJ3 ones; SSJ3 keeps the key its stored jobs already use.
+ return createHash('sha256').update(JSON.stringify(input.tier==='ssj1' ? [...deep,'ssj1'] : deep)).digest('hex');
 }
 function encodeCursor(config: Config, id: string, offset: number) {
  const body = `${id}.${offset}`;

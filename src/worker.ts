@@ -11,6 +11,7 @@ import { ingest } from './catalogue.js';
 import { contentHash, enrichEmbedding } from './embeddings.js';
 import { canonicalize } from './urls.js';
 import { runDiscovery, type DiscoveryDeps } from './discovery.js';
+import { tierConfig } from './tiers.js';
 import { providerHealth } from './health.js';
 import { saveTrace } from './learning.js';
 import { captionCommand, captionJob, pythonCaptions, type CaptionFetcher } from './captions.js';
@@ -32,11 +33,13 @@ export async function workOnce(db:DB,config:Config,adapters?:SourceAdapter[],pro
    } else if(job.kind==='source_discovery') {
      await complete(db,job,await discoverAlternatives(db,config,job,adapters));
    } else if(job.kind==='discovery') {
-     const outcome=await runDiscovery(db,config,searchInput.parse(job.payload),adapters,deps??{},(name,ok,code)=>providerHealth(db,name,ok,code),
+     // The search's own model tier; stored, shared work (enrichment) keeps the base settings.
+     const input=searchInput.parse(job.payload),tiered=tierConfig(config,input.tier);
+     const outcome=await runDiscovery(db,tiered,input,adapters,deps??{},(name,ok,code)=>providerHealth(db,name,ok,code),
        update=>progress(db,job,update));
      for(const result of outcome.ingested) await enqueueEnrichment(db,config,result);
      await storePreviews(db,job,outcome.previews);
-     await learnFrom(db,config,job,outcome.trace);
+     await learnFrom(db,config,job,{...outcome.trace,tier:input.tier});
      await complete(db,job,{results:outcome.results,closest:outcome.closest,providers:outcome.providers,dropped:outcome.dropped,searches:outcome.searches,
        ...(outcome.contract?{contract:outcome.contract,unmet:outcome.unmet??[]}:{})});
    } else if(job.kind==='youtube_captions') {

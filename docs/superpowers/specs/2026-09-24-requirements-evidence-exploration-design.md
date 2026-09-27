@@ -15,6 +15,9 @@ documentation: `docs/DISCOVERY_QUALITY.md` → "Shared requirements and evidence
 - **Official status.** A page that declares the organisation as its own publisher (`og:site_name` or JSON-LD
   publisher, exact name match) counts even without a hypothesised domain. When a request lists several publishers,
   any of them counts.
+- **Owning companies.** A brand's owner publishes for it officially (Meta's design blog announced WhatsApp's 2024
+  redesign). `data/owning-companies.json` adds the owner's name and domains to an official requirement. The list is
+  curated rather than model-drafted: a wrong owner would make an unrelated company's pages "official".
 - **Admission uses the same `decide()` rule** as the final decision, so a legitimate store page is not dropped for
   being "not a PDF".
 - **Judge-less deployments** keep listing unverified results with their uncertainties (only contradictions

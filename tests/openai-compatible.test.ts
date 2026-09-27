@@ -77,3 +77,16 @@ test('a rate-limited model is set aside and the next one is tried first afterwar
    assert.deepEqual([second.model,tried],['vendor/spare:free',['vendor/spare:free']],'the cooling model is not tried again while it is set aside');
  }finally{await db.close();}
 });
+
+test('each answer logs what it cost and on which tier, from the usage OpenRouter reports',async()=>{
+ const db=await database();
+ try{
+   let sent:any;
+   const transport=async(_u:string,options:any)=>{sent=options;return {...answer({ok:true,items:[]}),usage:{prompt_tokens:120,completion_tokens:30,cost:0.00042}};};
+   const client=new OpenAICompatibleClient(db,{...config,TIER:'ssj1'},['vendor/model-cost'],transport as any);
+   const lines:any[]=[];client.log=l=>lines.push(l);
+   await client.json('judge_calls','system','text',SCHEMA);
+   assert.deepEqual(sent.body.usage,{include:true},'OpenRouter is asked to report the cost');
+   assert.deepEqual(lines,[{event:'model_cost',tier:'ssj1',bucket:'judge_calls',model:'vendor/model-cost',input_tokens:120,output_tokens:30,cost:0.00042}]);
+ }finally{await db.close();}
+});

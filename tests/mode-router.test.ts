@@ -67,7 +67,7 @@ test('one log line per decision: which step decided, never the query',async()=>{
  clearModeCache();
  const lines:any[]=[];
  await chooseMode(db,config,'secret words',{log:l=>lines.push(l),jev:async()=>({choice:'images',confidence:0.8})});
- assert.deepEqual(lines,[{event:'mode_route',mode:'images',source:'jev',confidence:0.8}]);
+ assert.deepEqual(lines,[{event:'mode_route',tier:'ssj3',mode:'images',source:'jev',confidence:0.8}]);
 });
 
 test('the Jev request carries the query as state and the four modes; Jev gets half the time limit',async()=>{
@@ -82,4 +82,15 @@ test('the Jev request carries the query as state and the four modes; Jev gets ha
  assert.equal(sent[0].options.body.state.request,'annual report 2018');
  assert.equal(sent[0].options.timeoutMs,1500);
  assert.ok(deps.model,'the fallback model is configured by default');
+});
+
+import {tierConfig} from '../src/tiers.js';
+test('each tier keeps its own routing decisions, and the log names the tier',async()=>{
+ clearModeCache();
+ let calls=0;const lines:any[]=[];
+ const deps:ModeDeps={jev:async()=>{calls++;return {choice:'web',confidence:0.95};},log:(l:any)=>lines.push(l)};
+ await chooseMode(db,config,'how do solar panels work',deps);
+ await chooseMode(db,tierConfig(config,'ssj1'),'how do solar panels work',deps);
+ assert.equal(calls,2);
+ assert.deepEqual(lines.map(l=>l.tier),['ssj3','ssj1']);
 });

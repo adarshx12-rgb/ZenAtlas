@@ -1,0 +1,10 @@
+{
+  "about": "Products and brands whose owning company also publishes for them officially. When a request asks for an 'official' source from a listed brand, pages from the owner (declared as publisher, or on the owner's domains) count as official too. Read by src/requirements.ts. Only add ownership that is public record; a wrong entry makes a company's pages 'official' for a brand it does not own.",
+  "owners": [
+    {"brands": ["WhatsApp", "Instagram", "Facebook", "Messenger", "Threads", "Oculus", "Quest"], "owner": "Meta", "domains": ["meta.com", "about.fb.com", "about.meta.com", "design.facebook.com"]},
+    {"brands": ["YouTube", "Android", "Gmail", "Chrome", "Pixel", "Fitbit", "Nest", "Waze", "DeepMind"], "owner": "Google", "domains": ["blog.google", "google.com", "googleblog.com"]},
+    {"brands": ["GitHub", "LinkedIn", "Xbox", "Skype", "Bing", "Minecraft"], "owner": "Microsoft", "domains": ["microsoft.com", "news.microsoft.com", "blogs.microsoft.com"]},
+    {"brands": ["Twitch", "Audible", "Ring", "Kindle", "Alexa", "IMDb"], "owner": "Amazon", "domains": ["aboutamazon.com", "amazon.com"]},
+    {"brands": ["Pixar", "Marvel", "Lucasfilm", "Hulu", "ESPN"], "owner": "Disney", "domains": ["thewaltdisneycompany.com", "disney.com"]}
+  ]
+}

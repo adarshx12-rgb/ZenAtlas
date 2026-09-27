@@ -64,6 +64,9 @@ test('PostgreSQL catalogue/API, ownership, filters, evidence and stable paginati
    assert.equal((await app.inject('/api/thumbnail')).statusCode,400,'url is required');
    assert.equal((await app.inject('/api/walled?url=https%3A%2F%2Fx.com%2Fa%2Fstatus%2F1&t=forged')).statusCode,403,'only engine results can be previewed');
    assert.equal((await app.inject('/api/walled?url=https%3A%2F%2Fx.com%2Fa%2Fstatus%2F1')).statusCode,400,'the token is required');
+   assert.equal((await app.inject('/api/walled?url=https%3A%2F%2Fx.com%2Fa%2Fstatus%2F1&t=forged&progress=1')).statusCode,403,'the streamed preview checks the token first');
+   assert.equal((await app.inject('/api/mode?q=cat%20videos&tier=ssj9')).statusCode,200,'an unknown tier searches on SSJ3');
+   assert.equal((await app.inject('/api/web?q=a&tier=ssj1')).statusCode,400,'input rules still apply with a tier');
    const badThumb=await app.inject('/api/thumbnail?url=http://127.0.0.1/x.jpg');
    assert.equal(badThumb.statusCode,400);assert.equal(badThumb.json().error.code,'unsafe_url');
    const feedback={method:'POST' as const,url:'/api/feedback',headers:{cookie,'x-requested-with':'CreatorSearch'},payload:{search_id:data.search_id,content_id:first.id,useful:true}};

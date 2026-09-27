@@ -75,7 +75,8 @@ export function clearModeCache() { cache.clear(); }
 const isMode = (value: unknown): value is Mode => MODES.includes(value as Mode);
 
 export async function chooseMode(db: DB, config: Config, query: string, deps: ModeDeps = modeDeps(db, config)): Promise<ModeDecision> {
- const key = query.normalize('NFC').toLowerCase().replace(/\s+/g, ' ').trim();
+ // Keyed by tier too: each tier's router decides for itself.
+ const key = `${config.TIER}:${query.normalize('NFC').toLowerCase().replace(/\s+/g, ' ').trim()}`;
  const hit = cache.get(key);
  if (hit && hit.expires > Date.now()) return hit.decision;
  const decision = await decide(config, query, deps);
@@ -84,7 +85,7 @@ export async function chooseMode(db: DB, config: Config, query: string, deps: Mo
    cache.set(key, {decision, expires: Date.now() + CACHE_MS});
  }
  // One line per decision for tuning MODE_JEV_CONFIDENCE (PM2 keeps it): never the query.
- (deps.log ?? (line => process.stdout.write(`${JSON.stringify(line)}\n`)))({event: 'mode_route', ...decision});
+ (deps.log ?? (line => process.stdout.write(`${JSON.stringify(line)}\n`)))({event: 'mode_route', tier: config.TIER, ...decision});
  return decision;
 }
 

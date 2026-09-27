@@ -11,6 +11,8 @@ export const searchInput = z.object({
  // Both depths plan with AI, check pages, comments and Reddit, and rank with AI. deep additionally searches niche
  // engines, later result pages and leads from its first finds, for sources ordinary searches miss. Deep only runs when asked for.
  depth: z.enum(['quick','deep']).default('quick'),
+ // The model tier (src/tiers.ts): which models run this search. Stored with the search, so paging and deep dives keep it.
+ tier: z.enum(['ssj3','ssj1']).catch('ssj3'),
  cursor: z.string().max(512).optional(),
 }).strict();
 export type SearchInput = z.infer<typeof searchInput>;

@@ -169,3 +169,24 @@ test('searchers can rate any result, say why, and report what was missing; admin
    assert.deepEqual(report.audits,[]);
  }finally{await app.close();await db.close();}
 });
+
+test('an SSJ1 search is audited and reviewed by the SSJ1 critic models; SSJ3 ones by SSJ3\'s',async()=>{
+ const db=await database();
+ try{
+   const ssj1=await saveTrace(db,null,{...trace([entry('A ghost story')]),tier:'ssj1'});
+   const ssj3=await saveTrace(db,null,trace([entry('Another ghost story')]));
+   const asked:string[]=[];
+   const config={...testConfig,OPENROUTER_API_KEY:'k',CRITIC_ENABLED:true,CRITIC_DAILY_BUDGET:10};
+   const clientFor=(model:string)=>({models:[model],json:async()=>{asked.push(model);throw new Error('stop after choosing the model');}});
+   await auditTrace(db,config,ssj1,{clientFor}).catch(()=>{});
+   await auditTrace(db,config,ssj3,{clientFor}).catch(()=>{});
+   assert.deepEqual(asked,['anthropic/claude-haiku-4.5','anthropic/claude-sonnet-5']);
+   asked.length=0;
+   const audit={topic:'t',best_results:{score:0.5,confidence:0.5,summary:'s',misranked:[]},missing_sources:{confidence:0.5,sources:[]},
+     search_depth:{verdict:'enough',confidence:0.5,why:'w'},quality:{score:0.5,confidence:0.5,issues:[]},lessons:[]};
+   for(const id of [ssj1,ssj3])await db.query(`INSERT INTO search_audits(trace_id,status,model,audit) VALUES($1,'complete','m',$2) ON CONFLICT(trace_id) DO UPDATE SET status='complete',audit=excluded.audit`,[id,JSON.stringify(audit)]);
+   const reviewer=(model:string)=>({models:[model],json:async()=>{asked.push(model);return {model,value:{findings:[]}};}});
+   await reviewAudits(db,config,{clientFor:reviewer});
+   assert.deepEqual(asked.sort(),['anthropic/claude-haiku-4.5','anthropic/claude-sonnet-5']);
+ }finally{await db.close();}
+});

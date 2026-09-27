@@ -390,3 +390,19 @@ test('a one-off probe stores nothing, and the report is for administrators and f
    assert.deepEqual((await app.inject({url:'/api/admin/health',headers})).json().dependencies,{ok:1,failing:1});
  }finally{await app.close();await db.close();}
 });
+
+test('tier models: a model OpenRouter no longer offers is named, with the tier and setting',async()=>{
+ const check=CHECKS.find(c=>c.name==='tier_models')!;
+ assert.ok(check,'the tier_models check exists');
+ const offered=['google/gemini-2.5-flash-lite','openai/gpt-5.6-luna','anthropic/claude-haiku-4.5','openai/gpt-4.1-nano',
+   'google/gemini-3.5-flash-lite','openai/gpt-5.6-terra','anthropic/claude-sonnet-5'];
+ const config={...testConfig,OPENROUTER_API_KEY:'k',JUDGE_MODELS:'google/gemini-3.5-flash-lite',COUNCIL_CHECKER_MODELS:'openai/gpt-5.6-terra',
+   COUNCIL_CHAIR_MODELS:'anthropic/claude-sonnet-5',MODE_ROUTER_MODEL:'google/gemini-3.5-flash-lite',QUERY_REWRITE_MODEL:'google/gemini-3.5-flash-lite'};
+ const env=(ids:string[]):CheckEnv=>({db:{} as any,config,root:'.',launchBrowser:async()=>'',extractor:()=>({}) as any,
+   transport:(async()=>({data:ids.map(id=>({id}))})) as any});
+ assert.equal((await check.run(env(offered))).status,'ok');
+ const gone=await check.run(env(offered.filter(m=>m!=='openai/gpt-5.6-luna')));
+ assert.equal(gone.status,'warning');
+ assert.match(gone.summary,/SSJ1.*openai\/gpt-5\.6-luna.*SSJ1_COUNCIL_CHECKER_MODELS/);
+ assert.equal((await check.run({...env(offered),config:{...config,OPENROUTER_API_KEY:''}})).status,'disabled');
+});

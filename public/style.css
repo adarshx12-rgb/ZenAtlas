@@ -212,7 +212,8 @@ main.bleed{max-width:none;margin:0 0 96px;padding:0}
 /* PDF.js needs an absolutely positioned scroll container. */
 .doc-pages{position:relative;height:78vh;background:#525659}
 .doc-scroll{position:absolute;inset:0;overflow:auto}
-.web-item-open{all:unset;cursor:pointer}
+/* The doc heading is a button (it opens the preview) but hovers like a web heading: no button fill, only the strokes pop. */
+.web-item-open,.web-item-open:hover{all:unset;cursor:pointer}
 .web-item-open:focus-visible,.web-item-host:focus-visible,.web-item h3 a:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .web-item.selected{border-color:var(--pink);background:rgb(255 105 180 / .04);box-shadow:inset 3px 0 0 var(--pink)}
 .web-item-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
@@ -244,8 +245,9 @@ main.bleed{max-width:none;margin:0 0 96px;padding:0}
 /* ---- results --------------------------------------------------------------- */
 .results-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;border-top:1px solid var(--rule);padding-top:12px}
 h2{font-family:var(--font-display);font-size:26px;font-weight:400;letter-spacing:.01em;margin:0}
-#mode-note{margin:6px 0 12px;font-size:13px;color:var(--ink-2)}
-#mode-note a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+#mode-note,#rewrite-note{margin:6px 0 12px;font-size:13px;color:var(--ink-2)}
+#mode-note a,#rewrite-note a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+#rewrite-note strong{color:var(--ink);font-weight:600}
 #status{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
 #results{display:grid;gap:14px}
 .card{padding:22px 24px;background:var(--paper);border:1px solid var(--rule-soft);border-radius:var(--r-lg)}
@@ -398,7 +400,19 @@ code,.mono{font-size:11px}
 .walled-body p{margin:0 0 12px;overflow-wrap:anywhere;white-space:pre-line}
 .walled-meta{font-family:var(--font-mono);font-size:11px;letter-spacing:.04em;color:var(--ink-2)}
 .walled-meta a{color:var(--ink)}
-.walled-loading,.walled-empty{color:var(--ink-2)}
+.walled-empty{color:var(--ink-2)}
+/* Loading: one bar segment per real step — done ones filled, the running one shimmering, the rest empty. */
+.walled-progress{padding:6px 0 14px}
+.walled-steps{display:flex;gap:6px;margin:0 0 14px;padding:0;list-style:none}
+.walled-steps li{flex:1;height:4px;border-radius:999px;background:var(--rule-soft);overflow:hidden}
+.walled-steps li.done{background:var(--ink)}
+.walled-steps li.active{background:linear-gradient(90deg,var(--rule-soft) 0%,var(--pink) 50%,var(--rule-soft) 100%);background-size:200% 100%;animation:walled-shimmer 1.4s linear infinite}
+@keyframes walled-shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
+.walled-body .walled-step{margin:0 0 4px;font-weight:600;font-size:15px}
+.walled-body .walled-why{margin:0;font-size:13px;line-height:1.5;color:var(--ink-2)}
+.walled-body .walled-wait{margin:10px 0 0;font-size:13px;line-height:1.5;color:var(--ink-2)}
+.walled-body .walled-wait:empty{display:none}
+@media (prefers-reduced-motion:reduce){.walled-steps li.active{animation:none;background:var(--pink)}}
 .walled-links{margin:0 0 12px;padding-left:18px;font-size:13px}
 .walled-links a,.walled-comments a{color:var(--ink);overflow-wrap:anywhere}
 .walled-comments{border-top:1px solid var(--rule-soft);padding-top:10px;margin-bottom:8px}
@@ -410,3 +424,15 @@ code,.mono{font-size:11px}
  font-size:10px;letter-spacing:.14em;text-transform:uppercase}
 .walled-continue:hover{opacity:.88}
 .walled-foot small{font-size:12px;color:var(--ink-2)}
+/* LVL: the model level, beside Search. A small dropdown of SSJ3 and SSJ1, each with one line on what it means. */
+.level{position:relative;display:flex}
+.searchbar .level-button{background:transparent;color:var(--ink);border:1px solid var(--rule);margin:0 6px 0 0;padding:0 14px;white-space:nowrap;border-radius:var(--r-md)}
+.searchbar .level-button:hover{background:var(--wash)}
+.level-menu{position:absolute;right:6px;top:calc(100% + 8px);z-index:30;min-width:260px;margin:0;padding:6px;list-style:none;
+ background:var(--paper);border:1px solid var(--rule);border-radius:var(--r-md);box-shadow:0 8px 24px rgb(0 0 0 / .12)}
+.level-menu li{display:grid;gap:2px;padding:10px 12px;border-radius:var(--r-md);cursor:pointer;outline-offset:-2px;color:var(--ink)}
+.level-menu li:hover,.level-menu li:focus{background:var(--wash)}
+.level-menu li[aria-selected="true"] strong::after{content:' ✓'}
+.level-menu strong{font-size:13px;letter-spacing:.08em}
+.level-menu span{font-size:12px;color:var(--ink-2)}
+@media (max-width:560px){.searchbar .level-button{padding:0 10px;font-size:9px}.level-menu{min-width:220px;right:0}}

@@ -47,6 +47,8 @@ export const configSchema = z.object({
   // Free-document sources searched directly by the Docs tab (src/doc-sources.ts); calls per day across all of them.
   DOC_SOURCES_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
   DOC_SOURCES_DAILY_BUDGET: number(1500, 0, 100000), SEMANTIC_SCHOLAR_API_KEY: optional,
+  // Each source's time limit: they normally answer within 1.5 s, and one stalling (Zenodo, 12 s) held up the whole Docs tab.
+  DOC_SOURCES_TIMEOUT_MS: number(5000, 500, 15000),
   // Public malware and phishing host lists the Docs tab checks every link against (src/safety.ts), refreshed daily.
   DOC_BLOCKLISTS: z.string().default('https://urlhaus.abuse.ch/downloads/hostfile/,https://raw.githubusercontent.com/openphish/public_feed/refs/heads/main/feed.txt')
     .refine(v => v.split(',').map(s => s.trim()).filter(Boolean).every(s => /^https:\/\/\S+$/.test(s)), 'Use comma-separated https URLs'),
@@ -96,6 +98,22 @@ export const configSchema = z.object({
   MODE_ROUTER_MODEL: z.string().regex(/^[\w.\/:-]{0,100}$/).default('google/gemini-3.5-flash-lite'),
   MODE_ROUTER_TIMEOUT_MS: number(3000, 200, 10000),
   MODE_ROUTER_DAILY_BUDGET: number(2000, 0, 100000),
+  // Query rewriting for the Web and Docs tabs (src/query-rewrite.ts): spelling fixed, topic named, two extra searches.
+  // gemini-3.5-flash-lite passed 12/12 on 2026-09-27 at ~1.2 s; cheaper models missed niche aesthetics or were too slow.
+  QUERY_REWRITE_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
+  QUERY_REWRITE_MODEL: z.string().regex(/^[\w.\/:-]{0,100}$/).default('google/gemini-3.5-flash-lite'),
+  QUERY_REWRITE_TIMEOUT_MS: number(2500, 200, 10000),
+  QUERY_REWRITE_DAILY_BUDGET: number(3000, 0, 100000),
+  // Model tiers (src/tiers.ts). TIER is set per search by tierConfig, never in .env. SSJ1_* are the lower-cost models
+  // SSJ1 puts first; SSJ3's own models follow them as backups (chosen 2026-09-27, see docs/superpowers/specs).
+  TIER: z.enum(['ssj3', 'ssj1']).default('ssj3'),
+  SSJ1_JUDGE_MODELS: z.string().regex(/^[\w.,\/:\s-]*$/).default('google/gemini-2.5-flash-lite'),
+  SSJ1_COUNCIL_CHECKER_MODELS: z.string().regex(/^[\w.,\/:\s-]*$/).default('openai/gpt-5.6-luna'),
+  SSJ1_COUNCIL_CHAIR_MODELS: z.string().regex(/^[\w.,\/:\s-]*$/).default('anthropic/claude-haiku-4.5'),
+  SSJ1_CRITIC_MODEL: z.string().regex(/^[\w.\/:-]{1,100}$/).default('anthropic/claude-haiku-4.5'),
+  SSJ1_CRITIC_REVIEW_MODEL: z.string().regex(/^[\w.\/:-]{1,100}$/).default('anthropic/claude-haiku-4.5'),
+  SSJ1_MODE_ROUTER_MODEL: z.string().regex(/^[\w.\/:-]{0,100}$/).default('openai/gpt-4.1-nano'),
+  SSJ1_QUERY_REWRITE_MODEL: z.string().regex(/^[\w.\/:-]{0,100}$/).default('openai/gpt-4.1-nano'),
   SPECIALIST_SEARCHES: number(3, 0, 6),
   ARCHIVE_DISCOVERY: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
   ARCHIVE_COLLECTIONS: z.string().default('prelinger,ephemera').refine(v =>

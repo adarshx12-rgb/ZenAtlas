@@ -6,7 +6,7 @@
 <main class="wide">
  <form id="search-form">
   <label for="query">Describe what you’re looking for</label>
-  <div class="searchbar"><input id="query" name="q" type="search" minlength="2" maxlength="500" required placeholder="Try Big Buck Bunny, or a scene you have in mind…"><button type="submit">Search ↗</button></div>
+  <div class="searchbar"><input id="query" name="q" type="search" minlength="2" maxlength="500" required placeholder="Try Big Buck Bunny, or a scene you have in mind…"><input type="hidden" name="tier" value=""><button type="submit">Search ↗</button></div>
   <div class="filters">
    <label>Search mode<select name="mode"><option value="auto">Catalogue + discovery</option><option value="catalogue">Catalogue only</option><option value="refresh">Fresh discovery</option></select></label>
    <label>Evidence<select name="evidence"><option value="any">All evidence</option><option value="transcript_supported">Transcript supported</option><option value="video_analysed">Video analysed</option><option value="viewer_timestamp">Viewer timestamps</option></select></label>
@@ -23,6 +23,7 @@
  <div class="results-heading"><h2 id="results-heading">Search results</h2><button id="cancel" class="secondary" hidden>Stop discovery updates</button></div>
  <p id="status" role="status" aria-live="polite">Enter a query to search the catalogue.</p>
  <p id="mode-note" class="mode-note" hidden></p>
+ <p id="rewrite-note" class="mode-note" hidden></p>
  <div id="deep-row" class="deep-row" hidden><button id="deep" type="button">Dig deeper ↓</button><span class="hint">Search specialist sites, archive catalogues and references. When sources finish, all finds are checked and ranked together by relevance.</span></div>
  <div id="notices"></div>
  <div id="match-tabs" class="tabs match-tabs" role="tablist" aria-label="Match quality">

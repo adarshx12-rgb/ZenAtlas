@@ -123,3 +123,52 @@ test('results from login-walled sites carry a signed preview token; other result
  const off=await searchWeb({} as any,{...config,WALLED_PREVIEW_ENABLED:false},webSearchInput.parse({q:'doomsday leaks'}),{...d,review:false});
  assert.equal(off.results[0].walled,undefined);
 });
+
+test('a rewritten query: Brave searches the corrected text and one extra search on the first page, results interleaved',async()=>{
+ const asked:string[]=[];const sourced:string[]=[];const reviewed:string[]=[];
+ const d={budget:async()=>true,sources:async(_db:unknown,_c:unknown,q:string)=>{sourced.push(q);return {docs:[],sites:[],providers:[]};},
+   review:(q:string)=>{reviewed.push(q);return 'review-token';},
+   rewrite:async(q:string)=>({query:q,corrected:'Gen X Soft Club design style catalogue',changed:true,topic:'Gen X Soft Club',topic_kind:'internet aesthetic',
+     searches:['"Gen X Soft Club" aesthetic examples','Gen X Soft Club aesthetic archive']}),
+   transport:async(url:string)=>{asked.push(new URL(url).searchParams.get('q')!);
+     return new URL(url).searchParams.get('q')!.startsWith('"')?brave({url:'https://cari.institute/aesthetics/gen-x-soft-club'},{url:'https://www.are.na/cari/gen-x'})
+       :brave({url:'https://aesthetics.fandom.com/wiki/Gen_X_Soft_Club'},{url:'https://example.org/generations'});}};
+ const out=await searchWeb({} as any,config,webSearchInput.parse({q:'Gen X Soft Clubl design style catalouge'}),d as any);
+ assert.deepEqual(asked,['Gen X Soft Club design style catalogue','"Gen X Soft Club" aesthetic examples']);
+ assert.deepEqual(out.results.map(r=>r.source_name),['aesthetics.fandom.com','cari.institute','example.org','are.na']);
+ assert.deepEqual(out.rewrite,{corrected:'Gen X Soft Club design style catalogue'});
+ assert.deepEqual(reviewed,['Gen X Soft Club design style catalogue'],'the review judges what was meant');
+ asked.length=0;
+ const second=await searchWeb({} as any,config,webSearchInput.parse({q:'Gen X Soft Clubl design style catalouge',page:2}),d as any);
+ assert.deepEqual(asked,['Gen X Soft Club design style catalogue'],'later pages: the corrected query only');
+ assert.equal(second.results.length,2);
+ asked.length=0;
+ const exact=await searchWeb({} as any,config,webSearchInput.parse({q:'Gen X Soft Clubl design style catalouge',exact:'1'}),d as any);
+ assert.deepEqual(asked,['Gen X Soft Clubl design style catalouge'],'exact: the query as typed, not rewritten');
+ assert.equal(exact.rewrite,undefined);
+});
+
+test('documents: both searches carry the file-type filter; the sources and the hunt get the corrected query and the rewrite',async()=>{
+ const {asked,hunts,deps:base}=deps({'api.search.brave.com':brave({url:'https://example.org/a.pdf'},{url:'https://example.org/b.pdf'})});
+ const sourced:string[]=[];
+ const rewrite={query:'pyhton asyncio tutorial',corrected:'python asyncio tutorial',changed:true,topic:'asyncio',topic_kind:'Python library',
+   searches:['"asyncio" python tutorial','python asyncio guide']};
+ const out=await searchWeb({} as any,config,webSearchInput.parse({q:'pyhton asyncio tutorial',kind:'docs'}),{...base,rewrite:async()=>rewrite,
+   sources:async(_db:unknown,_c:unknown,q:string)=>{sourced.push(q);return {docs:[],sites:[],providers:[]};}} as any);
+ const queries=asked.map(u=>new URL(u).searchParams.get('q')!);
+ assert.equal(queries.length,2);
+ assert.ok(queries[0].startsWith('python asyncio tutorial (filetype:pdf'));
+ assert.ok(queries[1].startsWith('"asyncio" python tutorial (filetype:pdf'));
+ assert.deepEqual(sourced,['python asyncio tutorial']);
+ assert.equal(hunts[0].query,'python asyncio tutorial');
+ assert.deepEqual(out.rewrite,{corrected:'python asyncio tutorial'});
+});
+
+test('an unchanged query with extra searches still searches both, and says nothing about a correction',async()=>{
+ const asked:string[]=[];
+ const out=await searchWeb({} as any,config,webSearchInput.parse({q:'rtx 5090 teardown'}),{budget:async()=>true,review:false,
+   rewrite:async(q:string)=>({query:q,corrected:q,changed:false,topic:'RTX 5090',topic_kind:'graphics card',searches:['"RTX 5090" teardown','RTX 5090 disassembly']}),
+   transport:async(url:string)=>{asked.push(new URL(url).searchParams.get('q')!);return brave({url:`https://example.org/${asked.length}`},{url:`https://example.org/x${asked.length}`});}} as any);
+ assert.deepEqual(asked,['rtx 5090 teardown','"RTX 5090" teardown']);
+ assert.equal(out.rewrite,undefined);
+});

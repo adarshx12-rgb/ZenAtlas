@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {testConfig} from './helpers.js';
-import {walledSite, walledToken, validWalledToken, walledPreview, clearWalledCache, loginPrompt} from '../src/walled.js';
+import {walledSite, walledToken, validWalledToken, walledPreview, walledPlan, clearWalledCache, loginPrompt} from '../src/walled.js';
 import {UpstreamError} from '../src/http.js';
 
 const db={async query(){return {rows:[{used:1}]};}} as any;
@@ -87,4 +87,32 @@ test('previews are cached; an exhausted budget returns the snippet fallback with
  clearWalledCache();
  const failing=await walledPreview(db,config,'https://x.com/Interior/status/1',{transport:(async()=>{throw new UpstreamError('upstream_failure',404);}) as any,pages:noPages});
  assert.equal(failing.source,'snippet','a deleted tweet falls back to the snippet');
+});
+
+test('Pinterest: a pin address with a title slug is asked of oEmbed by its bare pin id, which is all oEmbed accepts',async()=>{
+ clearWalledCache();
+ const asked:string[]=[];
+ const out=await walledPreview(db,config,'https://www.pinterest.com/pin/living-room-decor--720153796684601290/',{pages:noPages,
+   transport:(async(url:string)=>{asked.push(url);return {title:'Living room decor',author_name:'Vilma'};}) as any});
+ assert.equal(new URL(asked[0]).searchParams.get('url'),'https://www.pinterest.com/pin/720153796684601290/');
+ assert.deepEqual([out.complete,out.title,out.author],[true,'Living room decor','Vilma']);
+});
+
+test('a preview reports each real step as it starts, with how long that step may take',async()=>{
+ clearWalledCache();
+ const seen:unknown[]=[];
+ await walledPreview(db,config,'https://x.com/Interior/status/507185938620219395',{transport:(async()=>TWEET) as any,pages:noPages,onStage:s=>seen.push(s)});
+ assert.deepEqual(seen,[{stage:'official',limit_ms:config.PAGE_TIMEOUT_MS}],'a tweet is complete from oEmbed, so the page is never read');
+ clearWalledCache();seen.length=0;
+ const pages={check:async(_url:string,onStep?:(s:'rules'|'page')=>void)=>{onStep?.('rules');onStep?.('page');
+   return {status:'checked' as const,title:'Q',description:null,text:'x'.repeat(100),libraries:[],badges:[]};}};
+ await walledPreview(db,config,'https://www.quora.com/What-is-x',{pages,onStage:s=>seen.push(s)});
+ assert.deepEqual(seen.map((s:any)=>s.stage),['rules','page'],'Quora has no official source, so only the page steps run');
+ clearWalledCache();seen.length=0;
+ await walledPreview(db,config,'https://www.quora.com/What-is-y',{pages,onStage:s=>seen.push(s)});
+ await walledPreview(db,config,'https://www.quora.com/What-is-y',{pages,onStage:s=>seen.push(s)});
+ assert.equal(seen.length,2,'a cached preview has no steps to report');
+ assert.deepEqual(walledPlan('https://x.com/a/status/1'),['official','rules','page']);
+ assert.deepEqual(walledPlan('https://x.com/elonmusk'),['rules','page'],'an X profile has no official source');
+ assert.deepEqual(walledPlan('https://www.quora.com/What-is-x'),['rules','page']);
 });

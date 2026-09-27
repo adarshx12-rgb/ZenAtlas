@@ -1,4 +1,6 @@
+import {mountLevel} from './level.js';
 const form=document.querySelector('#search-form'),status=document.querySelector('#status');
+mountLevel(form);
 fetch('/api/session',{credentials:'same-origin'}).then(r=>{if(!r.ok)throw Error();}).catch(()=>{status.textContent='The search service is unavailable. Please try again later.';status.hidden=false;});
 form.addEventListener('submit',event=>{
  event.preventDefault();

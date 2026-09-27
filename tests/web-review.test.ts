@@ -24,7 +24,7 @@ test('every page is read and judged with the web criteria; the metrics line carr
  assert.equal(calls[0].candidates[0].page.text,'Full page text');
  assert.ok(calls[0].context.criteria.some((c:string)=>/accurate/.test(c)));
  assert.match(calls[0].context.requirements[0].text,/secret query/);
- assert.deepEqual(lines,[{event:'web_review',judged:3,jev_rejected:0,jev_would_settle:1,settle_agreement:1}]);
+ assert.deepEqual(lines,[{event:'web_review',tier:'ssj3',judged:3,jev_rejected:0,jev_would_settle:1,settle_agreement:1}]);
 });
 
 test('a page that cannot be read in time is judged on its title and snippet',async()=>{

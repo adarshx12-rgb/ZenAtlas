@@ -53,7 +53,7 @@ export async function reviewWeb(db: DB, config: Config, query: string, results: 
    requirement: {text: `The page itself is what the request asks for: "${query.slice(0, 150)}" (its subject and intent as stated)`,
      evidence: 'The page text, title or snippet shows its subject.'}});
  // One line per review for tuning Jev (PM2 keeps it): counts only, never the query.
- (deps.log ?? (line => process.stdout.write(`${JSON.stringify(line)}\n`)))({event: 'web_review', ...webReviewMetrics(out.trace)});
+ (deps.log ?? (line => process.stdout.write(`${JSON.stringify(line)}\n`)))({event: 'web_review', tier: config.TIER, ...webReviewMetrics(out.trace)});
  return out;
 }
 

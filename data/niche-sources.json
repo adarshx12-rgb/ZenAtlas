@@ -1,0 +1,818 @@
+{
+  "version": 1,
+  "status": "draft",
+  "created": "2026-09-22",
+  "purpose": "Niche-first search. When a query matches a niche, search these sites first (site: through the configured search providers) and fall back to the regular planned search only when they return nothing or too few good results.",
+  "criteria": "Ranked on: the size and depth of the site's existing catalogue for the niche; accuracy (editorial review, primary or official source, citations); reliability (long-lived, stable, well maintained); relevance to the niche's typical queries.",
+  "evidence": "Initial ranks are a judgement from each site's known standing, not measurements. Every site and channel was checked to be live on the created date. Re-rank from the engine's own per-site relevance data once niche-first search runs.",
+  "format": "Order within each list is the rank. An entry is either a site (a domain, optionally with a path) or a youtube channel handle. An empty list means general search serves that tab better than any niche-specific source. 'covers' describes the niche for matching queries to it; 'parent' marks a sub-niche; 'region' marks a source specific to one country.",
+  "niches": [
+    {
+      "id": "reference", "name": "General reference",
+      "covers": "encyclopedic facts about things, people, places, organisations and events",
+      "web": [
+        {"site": "wikipedia.org", "why": "Largest general encyclopedia, cited and constantly updated"},
+        {"site": "britannica.com", "why": "Expert-written, fact-checked encyclopedia"}
+      ],
+      "videos": [],
+      "images": [
+        {"site": "commons.wikimedia.org", "why": "Very large media archive covering almost every notable subject"}
+      ]
+    },
+    {
+      "id": "medicine", "name": "Medicine and health",
+      "covers": "diseases, symptoms, conditions, medical tests, treatments, anatomy, first aid",
+      "web": [
+        {"site": "mayoclinic.org", "why": "Physician-reviewed pages on thousands of conditions, tests and treatments"},
+        {"site": "medlineplus.gov", "why": "US National Library of Medicine; plain-language, ad-free, sourced"},
+        {"site": "nhs.uk", "why": "NHS health A-Z, clinically reviewed and regularly updated"}
+      ],
+      "videos": [
+        {"youtube": "@osmosis", "why": "Large clinician-reviewed library of medical explainers"},
+        {"youtube": "@NinjaNerdOfficial", "why": "Long, detailed lectures on physiology, pathology and pharmacology"},
+        {"youtube": "@mayoclinic", "why": "The hospital's own channel: procedures, conditions, expert interviews"}
+      ],
+      "images": [
+        {"site": "radiopaedia.org", "why": "Peer-reviewed library of tens of thousands of radiology cases"},
+        {"site": "openi.nlm.nih.gov", "why": "National Library of Medicine search over figures from biomedical papers"}
+      ]
+    },
+    {
+      "id": "medications", "name": "Medications", "parent": "medicine",
+      "covers": "drugs, dosages, side effects, drug interactions, prescriptions",
+      "web": [
+        {"site": "drugs.com", "why": "Monographs for tens of thousands of drugs, interaction checker, pill identifier"},
+        {"site": "dailymed.nlm.nih.gov", "why": "Official FDA drug labels, the primary source"},
+        {"site": "medlineplus.gov/druginfo", "why": "Plain-language drug pages from the National Library of Medicine"}
+      ],
+      "videos": [],
+      "images": []
+    },
+    {
+      "id": "mental-health", "name": "Mental health and psychology",
+      "covers": "psychology, mental health conditions, therapy, anxiety, depression, behaviour",
+      "web": [
+        {"site": "nimh.nih.gov", "why": "US research institute; evidence-based pages on conditions and treatments"},
+        {"site": "apa.org", "why": "American Psychological Association topics, research and guidelines"},
+        {"site": "verywellmind.com", "why": "Large catalogue of clinically reviewed explainers"}
+      ],
+      "videos": [
+        {"youtube": "@KatiMorton", "why": "Licensed therapist; long-running channel covering most mental health topics"}
+      ],
+      "images": []
+    },
+    {
+      "id": "fitness", "name": "Fitness and exercise",
+      "covers": "exercise, workouts, strength training, bodybuilding, running, mobility",
+      "web": [
+        {"site": "exrx.net", "why": "Long-standing exercise library mapped to muscles, with technique notes"},
+        {"site": "strongerbyscience.com", "why": "Research-reviewed training articles with citations"},
+        {"site": "acefitness.org", "why": "Certification body's exercise library and articles"}
+      ],
+      "videos": [
+        {"youtube": "@JeffNippard", "why": "Science-based training videos that cite the studies"},
+        {"youtube": "@RenaissancePeriodization", "why": "Exercise-science PhDs; large technique library"},
+        {"youtube": "@athleanx", "why": "Very large library of exercise technique videos"}
+      ],
+      "images": []
+    },
+    {
+      "id": "nutrition", "name": "Nutrition and diet",
+      "covers": "diet, nutrients, calories, supplements, vitamins, food composition",
+      "web": [
+        {"site": "examine.com", "why": "Independent, citation-heavy evidence database on supplements and nutrients"},
+        {"site": "fdc.nal.usda.gov", "why": "USDA FoodData Central: nutrient data for hundreds of thousands of foods"},
+        {"site": "nutritionsource.hsph.harvard.edu", "why": "Harvard School of Public Health nutrition guidance"}
+      ],
+      "videos": [],
+      "images": []
+    },
+    {
+      "id": "science", "name": "Science",
+      "covers": "physics, chemistry, biology, general science explanations and research news",
+      "web": [
+        {"site": "nature.com", "why": "Peer-reviewed journals plus science news; primary research"},
+        {"site": "quantamagazine.org", "why": "In-depth, carefully reported explanations of current research"},
+        {"site": "sciencedaily.com", "why": "Large archive of research news from universities and institutes"}
+      ],
+      "videos": [
+        {"youtube": "@veritasium", "why": "Well-researched science explainers and experiments"},
+        {"youtube": "@kurzgesagt", "why": "Heavily sourced animated explainers, sources published per video"},
+        {"youtube": "@smartereveryday", "why": "Experiment-driven explainers, often with the researchers themselves"}
+      ],
+      "images": [
+        {"site": "sciencephoto.com", "why": "Science Photo Library: large specialist archive of science imagery"},
+        {"site": "commons.wikimedia.org", "why": "Broad coverage of diagrams, specimens and apparatus"}
+      ]
+    },
+    {
+      "id": "space", "name": "Space and astronomy",
+      "covers": "astronomy, planets, stars, galaxies, telescopes, spaceflight, rockets, missions",
+      "web": [
+        {"site": "nasa.gov", "why": "Primary source for NASA missions, science and data"},
+        {"site": "esa.int", "why": "Primary source for European Space Agency missions"},
+        {"site": "space.com", "why": "Large archive of spaceflight and astronomy news and explainers"}
+      ],
+      "videos": [
+        {"site": "images.nasa.gov", "why": "NASA's own searchable library of mission video"},
+        {"youtube": "@NASA", "why": "Official launches, briefings and mission footage"},
+        {"youtube": "@EuropeanSpaceAgency", "why": "Official European Space Agency footage and explainers"}
+      ],
+      "images": [
+        {"site": "images.nasa.gov", "why": "NASA's own searchable archive of mission and science imagery"},
+        {"site": "webbtelescope.org", "why": "Official James Webb Space Telescope image releases"},
+        {"site": "apod.nasa.gov", "why": "Decades of daily curated astronomy images with expert captions"}
+      ]
+    },
+    {
+      "id": "mathematics", "name": "Mathematics",
+      "covers": "maths concepts, proofs, formulas, algebra, calculus, statistics theory, problem solving",
+      "web": [
+        {"site": "math.stackexchange.com", "why": "Huge archive of answered maths questions at every level"},
+        {"site": "mathworld.wolfram.com", "why": "Long-standing, reliable encyclopedia of mathematical definitions"},
+        {"site": "khanacademy.org", "why": "Structured lessons and exercises from arithmetic to calculus"}
+      ],
+      "videos": [
+        {"youtube": "@3blue1brown", "why": "Definitive visual explanations of core mathematical ideas"},
+        {"youtube": "@numberphile", "why": "Large library of topics explained by working mathematicians"},
+        {"youtube": "@khanacademy", "why": "Complete step-by-step lesson coverage"}
+      ],
+      "images": []
+    },
+    {
+      "id": "research-papers", "name": "Academic research",
+      "covers": "scientific papers, studies, journals, preprints, citations, literature reviews",
+      "web": [
+        {"site": "pubmed.ncbi.nlm.nih.gov", "why": "NLM index of biomedical literature, tens of millions of citations"},
+        {"site": "arxiv.org", "why": "Primary preprint server for physics, maths, computer science and more"},
+        {"site": "semanticscholar.org", "why": "Cross-discipline paper index with citation graph and summaries"}
+      ],
+      "videos": [],
+      "images": []
+    },
+    {
+      "id": "climate-environment", "name": "Climate and environment",
+      "covers": "climate change, emissions, energy transition, pollution, conservation",
+      "web": [
+        {"site": "ipcc.ch", "why": "UN climate assessment reports, the scientific consensus source"},
+        {"site": "carbonbrief.org", "why": "Fact-checked climate journalism, explainers and data analysis"},
+        {"site": "ourworldindata.org", "why": "Sourced, downloadable datasets on emissions, energy and environment"}
+      ],
+      "videos": [],
+      "images": []
+    },
+    {
+      "id": "wildlife-nature", "name": "Wildlife and nature",
+      "covers": "animals, birds, insects, plants, species identification, ecology, habitats",
+      "web": [
+        {"site": "inaturalist.org", "why": "Huge verified-observation database covering most known species"},
+        {"site": "animaldiversity.org", "why": "University of Michigan species accounts, referenced"},
+        {"site": "allaboutbirds.org", "why": "Cornell Lab of Ornithology bird guide, the reference for birds"}
+      ],
+      "videos": [
+        {"youtube": "@bbcearth", "why": "Natural-history footage from BBC productions"},
+        {"youtube": "@NatGeo", "why": "Large library of wildlife and nature documentaries and clips"},
+        {"site": "macaulaylibrary.org", "why": "Cornell's scientific archive of wildlife video, identified by species"}
+      ],
+      "images": [
+        {"site": "macaulaylibrary.org", "why": "Cornell's archive of tens of millions of identified wildlife photos"},
+        {"site": "inaturalist.org", "why": "Community photos with verified species identifications"},
+        {"site": "commons.wikimedia.org", "why": "Broad species coverage, well categorised"}
+      ]
+    },
+    {
+      "id": "gardening", "name": "Gardening and plants",
+      "covers": "gardening, growing plants, houseplants, vegetables, pests, pruning, soil",
+      "web": [
+        {"site": "rhs.org.uk", "why": "Royal Horticultural Society plant database and advice"},
+        {"site": "missouribotanicalgarden.org", "why": "Plant Finder database covering thousands of plants"},
+        {"site": "extension.umn.edu", "why": "University extension service; research-based growing advice"}
+      ],
+      "videos": [
+        {"youtube": "@epicgardening", "why": "Very large practical gardening library"}
+      ],
+      "images": []
+    },
+    {
+      "id": "programming", "name": "Programming and software development",
+      "covers": "coding, programming languages, frameworks, APIs, debugging, web development",
+      "web": [
+        {"site": "stackoverflow.com", "why": "Tens of millions of answered programming questions"},
+        {"site": "developer.mozilla.org", "why": "Authoritative documentation for the web platform"},
+        {"site": "github.com", "why": "Source code, issues, READMEs and documentation for most projects"}
+      ],
+      "videos": [
+        {"youtube": "@freecodecamp", "why": "Full-length free courses across most languages and stacks"},
+        {"youtube": "@Fireship", "why": "Fast, accurate overviews of tools and technologies"}
+      ],
+      "images": []
+    },
+    {
+      "id": "cybersecurity", "name": "Cybersecurity",
+      "covers": "security, vulnerabilities, CVEs, malware, hacking techniques, privacy, pentesting",
+      "web": [
+        {"site": "nvd.nist.gov", "why": "Official US database of every published CVE"},
+        {"site": "owasp.org", "why": "Standard references for web application security"},
+        {"site": "bleepingcomputer.com", "why": "Long-running security news and malware removal guides"}
+      ],
+      "videos": [
+        {"site": "media.ccc.de", "why": "Chaos Computer Club talk archive, high technical quality"},
+        {"youtube": "@DEFCONConference", "why": "Official DEF CON talk recordings"},
+        {"youtube": "@BlackHatOfficialYT", "why": "Official Black Hat briefings recordings"}
+      ],
+      "images": []
+    },
+    {
+      "id": "osint", "name": "OSINT and investigations", "parent": "cybersecurity",
+      "covers": "open-source intelligence, OSINT tools, online investigations, geolocation, verification",
+      "web": [
+        {"site": "osintframework.com", "why": "Categorised directory of free OSINT tools"},
+        {"site": "bellingcat.com", "why": "Leading investigative outlet; publishes methods and an open toolkit"},
+        {"site": "github.com", "why": "Where most OSINT tools and curated tool lists are published"}
+      ],
+      "videos": [],
+      "images": []
+    },
+    {
+      "id": "ai-ml", "name": "AI and machine learning",
+      "covers": "artificial intelligence, machine learning, deep learning, LLMs, models, datasets",
+      "web": [
+        {"site": "huggingface.co", "why": "Largest hub of open models, datasets and papers"},
+        {"site": "arxiv.org", "why": "Where most machine learning research appears first"},
+        {"site": "github.com", "why": "Code and documentation for most ML projects"}
+      ],
+      "videos": [
+        {"youtube": "@AndrejKarpathy", "why": "In-depth, from-scratch explanations by a leading practitioner"},
+        {"youtube": "@TwoMinutePapers", "why": "Accessible summaries of new research papers"}
+      ],
+      "images": []
+    },
+    {
+      "id": "software-tools", "name": "Software tools and apps",
+      "covers": "finding apps, websites, online tools, free software, alternatives to a product",
+      "web": [
+        {"site": "alternativeto.net", "why": "Large crowd-ranked catalogue of apps and their alternatives"},
+        {"site": "producthunt.com", "why": "Where new tools launch, with community discussion"},
+        {"site": "github.com", "why": "Open-source tools and curated 'awesome' lists"}
+      ],
+      "videos": [],
+      "images": []
+    },
+    {
+      "id": "consumer-tech", "name": "Consumer tech and gadgets",
+      "covers": "phones, laptops, TVs, headphones, cameras, gadgets, specs, tech reviews",
+      "web": [
+        {"site": "rtings.com", "why": "Lab-measured reviews with comparable test results"},
+        {"site": "gsmarena.com", "why": "Specification database for almost every phone ever released"},
+        {"site": "notebookcheck.net", "why": "Deeply tested laptop and phone reviews"}
+      ],
+      "videos": [
+        {"youtube": "@mkbhd", "why": "High-quality, widely trusted tech reviews"},
+        {"youtube": "@LinusTechTips", "why": "Very large library of reviews, builds and explainers"},
+        {"youtube": "@Mrwhosetheboss", "why": "Broad phone and gadget coverage and comparisons"}
+      ],
+      "images": []
+    },
+    {
+      "id": "electronics-diy", "name": "Electronics and maker projects",
+      "covers": "Arduino, Raspberry Pi, circuits, soldering, 3D printing, maker projects",
+      "web": [
+        {"site": "instructables.com", "why": "Very large library of step-by-step project guides"},
+        {"site": "learn.adafruit.com", "why": "Well-maintained tutorials tied to real hardware"},
+        {"site": "electronics.stackexchange.com", "why": "Expert answers to electronics questions"}
+      ],
+      "videos": [
+        {"youtube": "@GreatScottLab", "why": "Clear electronics projects and explanations"},
+        {"youtube": "@EEVblog", "why": "Engineer-led teardowns and electronics fundamentals"}
+      ],
+      "images": []
+    },
+    {
+      "id": "design-inspiration", "name": "Web and graphic design",
+      "covers": "website design, UI and UX, portfolios, landing pages, WebGL sites, graphic design, branding",
+      "web": [
+        {"site": "awwwards.com", "why": "Juried, scored showcase of standout websites"},
+        {"site": "behance.net", "why": "Largest professional portfolio network"},
+        {"site": "dribbble.com", "why": "Large showcase of UI and visual design work"}
+      ],
+      "videos": [],
+      "images": [
+        {"site": "behance.net", "why": "Full project case studies from professional designers"},
+        {"site": "dribbble.com", "why": "Large catalogue of UI, icon and branding shots"},
+        {"site": "pinterest.com", "why": "Huge visual index, strong for inspiration boards"}
+      ]
+    },
+    {
+      "id": "3d-animation", "name": "3D, animation and VFX",
+      "covers": "Blender, 3D modelling, rendering, animation, VFX, game art, concept art",
+      "web": [
+        {"site": "docs.blender.org", "why": "Official Blender manual"},
+        {"site": "blenderartists.org", "why": "Largest Blender community forum"},
+        {"site": "polycount.com", "why": "Game-art community with deep technical threads"}
+      ],
+      "videos": [
+        {"youtube": "@blenderguru", "why": "Widely used Blender tutorials"},
+        {"site": "studio.blender.org", "why": "Blender Studio: official open films and training"}
+      ],
+      "images": [
+        {"site": "artstation.com", "why": "Largest portfolio site for concept, 3D and game art"},
+        {"site": "sketchfab.com", "why": "Large library of viewable 3D models"}
+      ]
+    },
+    {
+      "id": "stock-media", "name": "Stock footage and photos",
+      "covers": "stock footage, b-roll, stock photos, editorial photos, clips for video editing",
+      "web": [],
+      "videos": [
+        {"site": "shutterstock.com", "why": "One of the largest licensed stock footage libraries"},
+        {"site": "pond5.com", "why": "Very large footage marketplace, strong archival collections"},
+        {"site": "pexels.com", "why": "Large free-to-use footage library"}
+      ],
+      "images": [
+        {"site": "shutterstock.com", "why": "One of the largest stock photo libraries"},
+        {"site": "gettyimages.com", "why": "Largest editorial archive: news, events, people"},
+        {"site": "unsplash.com", "why": "High-quality free-to-use photography"}
+      ]
+    },
+    {
+      "id": "stock-music", "name": "Music for video", "parent": "stock-media",
+      "covers": "background music, music for videos, sound effects, licensed tracks for creators",
+      "web": [
+        {"site": "epidemicsound.com", "why": "Large creator-licensed music and sound effects library"},
+        {"site": "artlist.io", "why": "Curated creator-licensed music and SFX"},
+        {"site": "pixabay.com/music", "why": "Free music library for video"}
+      ],
+      "videos": [],
+      "images": []
+    },
+    {
+      "id": "filmmaking", "name": "Filmmaking and video editing",
+      "covers": "cinematography, camera techniques, video editing, colour grading, lighting, screenwriting",
+      "web": [
+        {"site": "nofilmschool.com", "why": "Large archive of practical filmmaking articles and interviews"},
+        {"site": "studiobinder.com", "why": "Detailed guides on shots, techniques and production"},
+        {"site": "premiumbeat.com", "why": "Long-running editing and post-production tutorials"}
+      ],
+      "videos": [
+        {"youtube": "@StudioBinder", "why": "Film-technique breakdowns using real scenes"},
+        {"youtube": "@JustinOdisho", "why": "Leading DaVinci Resolve editing and grading tutorials"}
+      ],
+      "images": [
+        {"site": "shotdeck.com", "why": "Searchable library of high-quality film stills for reference"},
+        {"site": "film-grab.com", "why": "Large free archive of film stills"}
+      ]
+    },
+    {
+      "id": "movies-tv", "name": "Movies and TV",
+      "covers": "films, TV series, actors, directors, cast, reviews, trailers, where to watch",
+      "web": [
+        {"site": "imdb.com", "why": "Largest film and TV database: cast, crew, episodes"},
+        {"site": "themoviedb.org", "why": "Large community film and TV database with clean metadata"},
+        {"site": "rottentomatoes.com", "why": "Aggregated critic and audience reviews"},
+        {"site": "justwatch.com", "why": "Legal streaming availability by country"}
+      ],
+      "videos": [
+        {"youtube": "@Movieclips", "why": "Licensed scene clips from a very large film catalogue"},
+        {"youtube": "@RottenTomatoesTRAILERS", "why": "Official trailers across studios"}
+      ],
+      "images": [
+        {"site": "themoviedb.org", "why": "Posters and stills organised per title"},
+        {"site": "imdb.com", "why": "Official stills and event photos per title and person"}
+      ]
+    },
+    {
+      "id": "anime-manga", "name": "Anime and manga",
+      "covers": "anime series, manga, characters, episodes, scenes, studios, voice actors",
+      "web": [
+        {"site": "anilist.co", "why": "Accurate anime and manga database, already used by the engine"},
+        {"site": "myanimelist.net", "why": "Largest anime and manga database and community"},
+        {"site": "animenewsnetwork.com", "why": "Industry news plus a detailed staff and cast encyclopedia"}
+      ],
+      "videos": [
+        {"youtube": "@Crunchyroll", "why": "Official clips, trailers and episodes from the largest legal service"},
+        {"youtube": "@MuseAsia", "why": "Official free full episodes, licensed for Asia"},
+        {"youtube": "@AniOneAsia", "why": "Official free full episodes, licensed for Asia"}
+      ],
+      "images": []
+    },
+    {
+      "id": "books", "name": "Books and literature",
+      "covers": "books, authors, novels, book recommendations, reviews, classic literature",
+      "web": [
+        {"site": "goodreads.com", "why": "Largest reader-review catalogue of books"},
+        {"site": "openlibrary.org", "why": "Open catalogue with a page for millions of books"},
+        {"site": "gutenberg.org", "why": "Full texts of public-domain classics"}
+      ],
+      "videos": [],
+      "images": []
+    },
+    {
+      "id": "gaming", "name": "Video games",
+      "covers": "video games, walkthroughs, guides, game reviews, trailers, PC game fixes",
+      "web": [
+        {"site": "ign.com", "why": "Very large archive of game news, reviews and wikis"},
+        {"site": "gamefaqs.gamespot.com", "why": "Decades of walkthroughs and guides"},
+        {"site": "pcgamingwiki.com", "why": "Accurate technical fixes and settings for PC games"}
+      ],
+      "videos": [
+        {"youtube": "@IGN", "why": "Trailers, gameplay and reviews for nearly every release"},
+        {"youtube": "@gamespot", "why": "Trailers, reviews and gameplay coverage"}
+      ],
+      "images": []
+    },
+    {
+      "id": "art", "name": "Art and art history",
+      "covers": "paintings, artists, art movements, sculpture, museums, art history",
+      "web": [
+        {"site": "smarthistory.org", "why": "Scholar-written art history covering thousands of works"},
+        {"site": "metmuseum.org", "why": "Met collection pages and scholarly essays"},
+        {"site": "wikiart.org", "why": "Large catalogue of artworks by artist and movement"}
+      ],
+      "videos": [
+        {"youtube": "@smarthistory-art-history", "why": "Art historians discussing specific works"},
+        {"youtube": "@GreatArtExplained", "why": "Well-researched deep dives on famous works"}
+      ],
+      "images": [
+        {"site": "metmuseum.org", "why": "Hundreds of thousands of high-resolution collection images"},
+        {"site": "artic.edu", "why": "Art Institute of Chicago's large collection images"},
+        {"site": "wikiart.org", "why": "Broad coverage of artworks across movements"}
+      ]
+    },
+    {
+      "id": "photography", "name": "Photography",
+      "covers": "cameras, lenses, photography techniques, editing photos, photographers",
+      "web": [
+        {"site": "dpreview.com", "why": "Deep camera and lens reviews with a long archive"},
+        {"site": "petapixel.com", "why": "Large archive of photography news and techniques"},
+        {"site": "photographylife.com", "why": "Large library of lens reviews and technique articles"}
+      ],
+      "videos": [
+        {"youtube": "@PeterMcKinnon", "why": "Widely followed photography and camera technique videos"}
+      ],
+      "images": [
+        {"site": "flickr.com", "why": "Billions of photos, searchable by camera and technique"},
+        {"site": "500px.com", "why": "Curated high-quality photography"},
+        {"site": "unsplash.com", "why": "High-quality contributed photography"}
+      ]
+    },
+    {
+      "id": "history", "name": "History",
+      "covers": "historical events, eras, wars, empires, historical figures, archival footage",
+      "web": [
+        {"site": "worldhistory.org", "why": "Peer-reviewed history encyclopedia"},
+        {"site": "britannica.com", "why": "Expert-written historical entries"},
+        {"site": "loc.gov", "why": "Library of Congress primary sources"}
+      ],
+      "videos": [
+        {"site": "britishpathe.com", "why": "Tens of thousands of historic newsreels"},
+        {"site": "archive.org", "why": "Large archive of historic film, already used by the engine"},
+        {"site": "europeana.eu", "why": "Archival film from European institutions"}
+      ],
+      "images": [
+        {"site": "loc.gov", "why": "Library of Congress prints and photographs"},
+        {"site": "europeana.eu", "why": "Millions of images from European archives and museums"},
+        {"site": "commons.wikimedia.org", "why": "Broad historical image coverage"}
+      ]
+    },
+    {
+      "id": "travel", "name": "Travel",
+      "covers": "destinations, itineraries, places to visit, hotels, attractions, travel tips",
+      "web": [
+        {"site": "wikivoyage.org", "why": "Large community travel guide, no paid placement"},
+        {"site": "lonelyplanet.com", "why": "Long-established editorial destination guides"},
+        {"site": "tripadvisor.com", "why": "Largest catalogue of attraction, hotel and restaurant reviews"}
+      ],
+      "videos": [
+        {"youtube": "@RickStevesEuropeOfficial", "why": "Official Rick Steves' Europe channel: large library of destination guides"}
+      ],
+      "images": []
+    },
+    {
+      "id": "food-cooking", "name": "Food and cooking",
+      "covers": "recipes, cooking techniques, baking, cuisines, kitchen equipment",
+      "web": [
+        {"site": "seriouseats.com", "why": "Tested recipes with explained technique"},
+        {"site": "bbcgoodfood.com", "why": "Very large catalogue of tested recipes"},
+        {"site": "allrecipes.com", "why": "Largest community recipe catalogue with ratings"}
+      ],
+      "videos": [
+        {"youtube": "@americastestkitchen", "why": "Rigorously tested recipes and equipment reviews"},
+        {"youtube": "@foodwishes", "why": "Very large recipe video library"},
+        {"youtube": "@JoshuaWeissman", "why": "Popular, detailed technique-led recipes"}
+      ],
+      "images": []
+    },
+    {
+      "id": "finance", "name": "Personal finance and investing",
+      "covers": "investing, stocks, mutual funds, personal finance, taxes, economics, company filings",
+      "web": [
+        {"site": "investopedia.com", "why": "Largest reviewed catalogue of finance definitions and guides"},
+        {"site": "finance.yahoo.com", "why": "Broad market data and company information"},
+        {"site": "sec.gov", "why": "Official US company filings (EDGAR), the primary source"},
+        {"site": "moneycontrol.com", "region": "IN", "why": "Leading Indian markets and company data site"}
+      ],
+      "videos": [
+        {"youtube": "@BenFelixCSI", "why": "Evidence-based investing explanations"},
+        {"youtube": "@markets", "why": "Bloomberg's market news and interviews"}
+      ],
+      "images": []
+    },
+    {
+      "id": "crypto", "name": "Cryptocurrency",
+      "covers": "cryptocurrency, bitcoin, ethereum, tokens, blockchain, crypto prices",
+      "web": [
+        {"site": "coingecko.com", "why": "Independent tracker of prices and data for many thousands of tokens"},
+        {"site": "coinmarketcap.com", "why": "Largest crypto price and market data site"},
+        {"site": "ethereum.org", "why": "Official Ethereum documentation and explainers"}
+      ],
+      "videos": [],
+      "images": []
+    },
+    {
+      "id": "business", "name": "Business and startups",
+      "covers": "starting a business, startups, management, marketing, strategy, entrepreneurship",
+      "web": [
+        {"site": "hbr.org", "why": "Harvard Business Review; research-backed management writing"},
+        {"site": "ycombinator.com", "why": "Y Combinator's startup library and advice"},
+        {"site": "sba.gov", "why": "Official US small business guidance"}
+      ],
+      "videos": [
+        {"youtube": "@ycombinator", "why": "Startup school lectures and founder talks"},
+        {"youtube": "@ecorner", "why": "Stanford entrepreneurship talks archive"}
+      ],
+      "images": []
+    },
+    {
+      "id": "law", "name": "Law",
+      "covers": "laws, legal rights, statutes, court cases, legal definitions, contracts",
+      "web": [
+        {"site": "law.cornell.edu", "why": "Legal Information Institute: statutes, regulations, legal encyclopedia"},
+        {"site": "justia.com", "why": "Large free case-law and legal-guide catalogue"},
+        {"site": "indiankanoon.org", "region": "IN", "why": "Largest free search of Indian case law and statutes"}
+      ],
+      "videos": [],
+      "images": []
+    },
+    {
+      "id": "statistics-data", "name": "Statistics and data",
+      "covers": "statistics, datasets, population, economy figures, country comparisons, charts",
+      "web": [
+        {"site": "ourworldindata.org", "why": "Sourced, well-documented datasets and charts on major topics"},
+        {"site": "data.worldbank.org", "why": "Official development indicators for every country"},
+        {"site": "statista.com", "why": "Very large catalogue of statistics, partly paywalled"}
+      ],
+      "videos": [],
+      "images": []
+    },
+    {
+      "id": "news", "name": "News and current events",
+      "covers": "breaking news, current events, world news, politics, recent developments",
+      "web": [
+        {"site": "reuters.com", "why": "Wire service, strict accuracy standards, global coverage"},
+        {"site": "apnews.com", "why": "Wire service, strict accuracy standards"},
+        {"site": "bbc.com/news", "why": "Broad international coverage and explainers"}
+      ],
+      "videos": [
+        {"youtube": "@Reuters", "why": "Wire-service news footage"},
+        {"youtube": "@AssociatedPress", "why": "Wire-service news footage"},
+        {"youtube": "@BBCNews", "why": "International news reports and explainers"}
+      ],
+      "images": [
+        {"site": "gettyimages.com", "why": "Largest editorial news photo archive"}
+      ]
+    },
+    {
+      "id": "sports", "name": "Sports",
+      "covers": "sports news, scores, results, players, teams, sports statistics, highlights",
+      "web": [
+        {"site": "espn.com", "why": "Broad coverage of scores, news and analysis"},
+        {"site": "bbc.com/sport", "why": "Broad international sports coverage"},
+        {"site": "sports-reference.com", "why": "Deep historical statistics across major sports"}
+      ],
+      "videos": [
+        {"youtube": "@espn", "why": "Highlights and analysis across sports"}
+      ],
+      "images": []
+    },
+    {
+      "id": "cricket", "name": "Cricket", "parent": "sports",
+      "covers": "cricket matches, scores, players, IPL, test cricket, T20, ODI",
+      "web": [
+        {"site": "espncricinfo.com", "why": "Deepest cricket statistics database, live scores and reporting"},
+        {"site": "cricbuzz.com", "why": "Fast live scores and news"},
+        {"site": "icc-cricket.com", "why": "Official ICC rankings, tournaments and rules"}
+      ],
+      "videos": [
+        {"youtube": "@ICC", "why": "Official international highlights"},
+        {"youtube": "@IPL", "why": "Official IPL highlights"}
+      ],
+      "images": []
+    },
+    {
+      "id": "football", "name": "Football (soccer)", "parent": "sports",
+      "covers": "football, soccer, Premier League, Champions League, transfers, players, clubs",
+      "web": [
+        {"site": "transfermarkt.com", "why": "Largest player, transfer and market-value database"},
+        {"site": "fbref.com", "why": "Detailed match and player statistics"},
+        {"site": "bbc.com/sport/football", "why": "Broad reporting and live coverage"}
+      ],
+      "videos": [
+        {"youtube": "@premierleague", "why": "Official Premier League highlights"},
+        {"youtube": "@FIFA", "why": "Official World Cup and international footage"},
+        {"youtube": "@UEFA", "why": "Official UEFA channel: Champions League and European football"}
+      ],
+      "images": []
+    },
+    {
+      "id": "formula1", "name": "Formula 1 and motorsport", "parent": "sports",
+      "covers": "Formula 1, F1 races, drivers, teams, motorsport, qualifying, standings",
+      "web": [
+        {"site": "formula1.com", "why": "Official results, standings and news"},
+        {"site": "the-race.com", "why": "Specialist analysis by experienced motorsport journalists"},
+        {"site": "autosport.com", "why": "Long-running motorsport reporting and archive"}
+      ],
+      "videos": [
+        {"youtube": "@Formula1", "why": "Official race highlights and onboard footage"}
+      ],
+      "images": []
+    },
+    {
+      "id": "basketball", "name": "Basketball", "parent": "sports",
+      "covers": "basketball, NBA, players, teams, games, stats",
+      "web": [
+        {"site": "nba.com", "why": "Official NBA stats, schedules and news"},
+        {"site": "basketball-reference.com", "why": "Deepest basketball statistics database"}
+      ],
+      "videos": [
+        {"youtube": "@NBA", "why": "Official highlights"}
+      ],
+      "images": []
+    },
+    {
+      "id": "automotive", "name": "Cars and automotive",
+      "covers": "cars, car reviews, car buying, specs, car maintenance and repair",
+      "web": [
+        {"site": "edmunds.com", "why": "Large reviews, pricing and specifications catalogue"},
+        {"site": "caranddriver.com", "why": "Instrumented road tests and reviews"},
+        {"site": "motortrend.com", "why": "Long-running reviews and testing"}
+      ],
+      "videos": [
+        {"youtube": "@DougDeMuro", "why": "Detailed reviews of a very wide range of cars"},
+        {"youtube": "@ChrisFix", "why": "Clear, thorough DIY car repair"}
+      ],
+      "images": []
+    },
+    {
+      "id": "home-repair", "name": "Home repair and DIY",
+      "covers": "home repair, fixing devices, plumbing, electrical, renovation, tools",
+      "web": [
+        {"site": "ifixit.com", "why": "Very large library of step-by-step repair guides"},
+        {"site": "familyhandyman.com", "why": "Long-running, practical home repair guides"},
+        {"site": "thisoldhouse.com", "why": "Expert renovation and repair advice"}
+      ],
+      "videos": [
+        {"youtube": "@thisoldhouse", "why": "Professional tradespeople demonstrating repairs"},
+        {"youtube": "@iFixitYourself", "why": "Official iFixit repair videos"}
+      ],
+      "images": []
+    },
+    {
+      "id": "education", "name": "Courses and learning",
+      "covers": "online courses, lectures, learning a subject, study material, exam preparation",
+      "web": [
+        {"site": "khanacademy.org", "why": "Free structured courses across school and early university subjects"},
+        {"site": "ocw.mit.edu", "why": "Full MIT course materials"},
+        {"site": "coursera.org", "why": "Large catalogue of university and professional courses"},
+        {"site": "nptel.ac.in", "region": "IN", "why": "IIT and IISc course material"}
+      ],
+      "videos": [
+        {"youtube": "@khanacademy", "why": "Complete lesson coverage"},
+        {"youtube": "@mitocw", "why": "Full recorded MIT lectures"},
+        {"youtube": "@crashcourse", "why": "Accurate survey courses across many subjects"},
+        {"youtube": "@iit", "region": "IN", "why": "Recorded IIT and IISc lectures"}
+      ],
+      "images": []
+    },
+    {
+      "id": "language", "name": "Language and dictionaries",
+      "covers": "word meanings, definitions, pronunciation, grammar, synonyms, etymology",
+      "web": [
+        {"site": "merriam-webster.com", "why": "Authoritative dictionary with usage notes"},
+        {"site": "dictionary.cambridge.org", "why": "Authoritative dictionary strong for learners, many languages"},
+        {"site": "en.wiktionary.org", "why": "Very broad coverage, etymology and translations"}
+      ],
+      "videos": [],
+      "images": []
+    },
+    {
+      "id": "careers", "name": "Careers and jobs",
+      "covers": "jobs, careers, salaries, interviews, resumes, companies to work for",
+      "web": [
+        {"site": "indeed.com", "why": "Largest job listing aggregator"},
+        {"site": "glassdoor.com", "why": "Employee reviews, salaries and interview reports"},
+        {"site": "linkedin.com", "why": "Jobs, company pages and career profiles"}
+      ],
+      "videos": [],
+      "images": []
+    },
+    {
+      "id": "product-reviews", "name": "Product reviews and shopping",
+      "covers": "best products, buying guides, product comparisons, product reviews",
+      "web": [
+        {"site": "nytimes.com/wirecutter", "why": "Hands-on tested buying guides across categories"},
+        {"site": "consumerreports.org", "why": "Independent lab testing, partly paywalled"},
+        {"site": "rtings.com", "why": "Measured, comparable test results for electronics"}
+      ],
+      "videos": [],
+      "images": []
+    },
+    {
+      "id": "fashion-beauty", "name": "Fashion and beauty",
+      "covers": "fashion, outfits, clothing, runway, skincare, cosmetics, beauty ingredients",
+      "web": [
+        {"site": "vogue.com", "why": "Leading fashion coverage and runway archive"},
+        {"site": "incidecoder.com", "why": "Ingredient-level breakdown of cosmetic products"},
+        {"site": "gq.com", "why": "Established men's fashion coverage"}
+      ],
+      "videos": [],
+      "images": [
+        {"site": "vogue.com/fashion-shows", "why": "Complete runway show photography archive"},
+        {"site": "pinterest.com", "why": "Huge outfit and style inspiration index"}
+      ]
+    },
+    {
+      "id": "pets", "name": "Pets and animal care",
+      "covers": "pet care, dogs, cats, dog breeds, pet health, pet behaviour",
+      "web": [
+        {"site": "petmd.com", "why": "Veterinarian-reviewed pet health library"},
+        {"site": "vcahospitals.com", "why": "Veterinary hospital network's large client-education library"},
+        {"site": "akc.org", "why": "American Kennel Club: breed standards and dog care"}
+      ],
+      "videos": [],
+      "images": []
+    },
+    {
+      "id": "philosophy", "name": "Philosophy and religion",
+      "covers": "philosophy, philosophers, ethics, logic, religions, theology",
+      "web": [
+        {"site": "plato.stanford.edu", "why": "Stanford Encyclopedia of Philosophy, peer-reviewed by specialists"},
+        {"site": "iep.utm.edu", "why": "Internet Encyclopedia of Philosophy, peer-reviewed"},
+        {"site": "britannica.com", "why": "Expert-written entries on religions and thinkers"}
+      ],
+      "videos": [],
+      "images": []
+    },
+    {
+      "id": "architecture", "name": "Architecture and interiors",
+      "covers": "architecture, buildings, architects, interior design, house design",
+      "web": [
+        {"site": "archdaily.com", "why": "Largest architecture project database, with drawings"},
+        {"site": "dezeen.com", "why": "Leading architecture and design publication"},
+        {"site": "designboom.com", "why": "Long-running architecture and design coverage"}
+      ],
+      "videos": [],
+      "images": [
+        {"site": "archdaily.com", "why": "Professional project photography and plans"},
+        {"site": "dezeen.com", "why": "High-quality project photography"},
+        {"site": "pinterest.com", "why": "Huge interior inspiration index"}
+      ]
+    },
+    {
+      "id": "music", "name": "Music",
+      "covers": "artists, albums, songs, lyrics, discographies, music genres",
+      "web": [
+        {"site": "allmusic.com", "why": "Editorial reviews, biographies and discographies"},
+        {"site": "discogs.com", "why": "Largest catalogue of recordings and releases"},
+        {"site": "genius.com", "why": "Largest annotated lyrics catalogue"}
+      ],
+      "videos": [],
+      "images": []
+    },
+    {
+      "id": "music-production", "name": "Music production and theory", "parent": "music",
+      "covers": "music production, mixing, DAWs, synths, music theory, instruments",
+      "web": [
+        {"site": "soundonsound.com", "why": "Deep technical recording and production articles"},
+        {"site": "gearspace.com", "why": "Largest professional audio community"},
+        {"site": "musictheory.net", "why": "Clear, accurate interactive theory lessons"}
+      ],
+      "videos": [
+        {"youtube": "@AdamNeely", "why": "Rigorous music theory explanations"}
+      ],
+      "images": []
+    },
+    {
+      "id": "internet-culture", "name": "Memes and internet culture",
+      "covers": "memes, viral trends, internet slang, meme templates, online culture",
+      "web": [
+        {"site": "knowyourmeme.com", "why": "Documented history of memes and viral phenomena"},
+        {"site": "reddit.com", "why": "Where most trends start and are discussed"}
+      ],
+      "videos": [],
+      "images": [
+        {"site": "knowyourmeme.com", "why": "Original meme images with their history"},
+        {"site": "imgflip.com", "why": "Largest meme template library"}
+      ]
+    }
+  ]
+}

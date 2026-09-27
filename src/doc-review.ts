@@ -126,7 +126,10 @@ export async function reviewDocuments(db: DB, config: Config, query: string, doc
    screener: 'screener' in deps ? deps.screener : makeScreener(db, config),
    criteria: ['A document file that is itself what the request asks for',
      'When the request is ambiguous (a name and a year can mean a book, an issue or a newspaper), a document that genuinely fits any reasonable reading matches; a different edition or year does not',
-     'A copy shared by a third party (Scribd, SlideShare, Academia.edu, a course or personal site) counts like any other; only an upload that is clearly a complete copy of a commercially published book does not'],
+     'A copy shared by a third party (Scribd, SlideShare, Academia.edu, a course or personal site) counts like any other; only an upload that is clearly a complete copy of a commercially published book does not',
+     // Measured 2026-09-27: "y2k visual design style catalogue" kept 1 of 23 documents, rejecting a thesis on Y2K
+     // typography with examples as "not a dedicated catalogue"; the council disagreed on 12 of 15.
+     'A word for a general kind of document ("catalogue", "guide", "overview", "collection") says what the person wants to get from it, not a required genre: a document that substantially sets out the requested subject that way (a thesis or guide that walks through a style with its examples, for a style catalogue) matches; one on a different subject that only shares the word (a product or course catalogue) does not. A named work, edition or year is still exact'],
    requirement: {text: `The document itself is what the request asks for: "${query.slice(0, 150)}" (its subject, edition, year and language as stated)`,
      evidence: 'The document text or title shows its subject, edition or year.'}});
  return {results: out.results as ReviewedDoc[], removed: out.removed, providers: out.providers};

@@ -13,6 +13,7 @@ import { Trafilatura, type TextExtractor } from './extract.js';
 import { compareVersions, newer, parseVersion, satisfies } from './versions.js';
 import { plannerModels } from './planner.js';
 import { judgeModels } from './judge.js';
+import { TIERS } from './tiers.js';
 
 // Everything the search engine needs from outside its own code, each with a check the watchdog runs on a schedule.
 // A check reports what it observed and, when something is wrong, what it breaks and how to fix it.
@@ -419,6 +420,32 @@ const gemini: Check = {name: 'gemini', label: 'Gemini models', category: 'ai', e
      {primary, fallbacks, upgrades, models_offered: available.size, recent_failures: Object.fromEntries([...calls].map(([m, r]) => [m, r.failure_count]))}));
  }};
 
+// The OpenRouter model each tier puts first, per setting. A retired one still has backups in SSJ1, so this warns rather
+// than fails.
+const TIER_SETTINGS = [['JUDGE_MODELS', 'SSJ1_JUDGE_MODELS'], ['COUNCIL_CHECKER_MODELS', 'SSJ1_COUNCIL_CHECKER_MODELS'],
+ ['COUNCIL_CHAIR_MODELS', 'SSJ1_COUNCIL_CHAIR_MODELS'], ['CRITIC_MODEL', 'SSJ1_CRITIC_MODEL'], ['CRITIC_REVIEW_MODEL', 'SSJ1_CRITIC_REVIEW_MODEL'],
+ ['MODE_ROUTER_MODEL', 'SSJ1_MODE_ROUTER_MODEL'], ['QUERY_REWRITE_MODEL', 'SSJ1_QUERY_REWRITE_MODEL']] as const;
+const tierModels: Check = {name: 'tier_models', label: 'Model tiers (SSJ3 / SSJ1)', category: 'ai', every: () => 60, confirm: 1,
+ async run({config, transport}) {
+   if (!config.OPENROUTER_API_KEY) return disabled('OPENROUTER_API_KEY is empty; both tiers run without OpenRouter models.');
+   try {
+     const reply = z.object({data: z.array(z.object({id: z.string()}))}).parse(await transport('https://openrouter.ai/api/v1/models',
+       {trustedOrigin: 'https://openrouter.ai', timeoutMs: 15000, redirects: 0, maxBytes: 8 * 1024 * 1024}));
+     const offered = new Set(reply.data.map(m => m.id));
+     const missing = TIERS.flatMap(tier => TIER_SETTINGS.flatMap(([full, cheap]) => {
+       const setting = tier === 'ssj1' ? cheap : full;
+       const first = String(config[setting] ?? '').split(',').map(m => m.trim()).filter(Boolean)[0];
+       return first && !offered.has(first) ? [`${tier.toUpperCase()} ${first} (${setting})`] : [];
+     }));
+     return missing.length
+       ? warning('models_retired', `OpenRouter no longer offers ${missing.join('; ')}. Searches fall back to the next model; update the setting.`, {missing})
+       : ok('available', 'Every model both tiers put first is offered by OpenRouter.');
+   } catch (error) {
+     if (!(error instanceof UpstreamError) && !(error instanceof ZodError)) throw error;
+     return warning('unreachable', `OpenRouter's model list could not be read (${error instanceof UpstreamError ? reason(error) : 'unexpected reply'}); tier models were not checked.`);
+   }
+ }};
+
 const embeddings: Check = {name: 'embeddings', label: 'Embedding service', category: 'ai', every: () => 60,
  async run({db, config}) {
    if (!config.SEMANTIC_ENABLED) return disabled('SEMANTIC_ENABLED=false; search is lexical only.');
@@ -595,7 +622,7 @@ const vulnerabilities: Check = {name: 'vulnerabilities', label: 'Known vulnerabi
  }};
 
 export const CHECKS: Check[] = [api, worker, queue, database, budgets, runningCode, searchProviders, searxng, searxngEngines, searxngRelease,
- gemini, embeddings, youtube, anilist, browser, pageText, nodeRuntime, packages, vulnerabilities, packageUpdates];
+ gemini, tierModels, embeddings, youtube, anilist, browser, pageText, nodeRuntime, packages, vulnerabilities, packageUpdates];
 
 export function defaultEnv(db: DB, config: Config, root = process.cwd()): CheckEnv {
  return {db, config, root, transport: fetchJSON, launchBrowser: launchChromium, extractor: command => new Trafilatura(command)};

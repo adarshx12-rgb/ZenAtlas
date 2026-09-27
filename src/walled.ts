@@ -20,7 +20,11 @@ export interface WalledPreview {
  title: string|null; author: string|null; author_url: string|null; published: string|null; text: string|null;
  links: {url: string; text: string}[]; comments: {author: string; text: string}[];
 }
-export type WalledDeps = {transport?: typeof fetchJSON; pages?: PageCheck};
+// The steps a preview goes through, reported as each one starts so the window can say what is really happening:
+// asking the site's official source, reading the site's rules (robots.txt), reading the page. limit_ms: how long that
+// step may take before it is given up.
+export type WalledStage = 'official'|'rules'|'page';
+export type WalledDeps = {transport?: typeof fetchJSON; pages?: PageCheck; onStage?: (s: {stage: WalledStage; limit_ms: number}) => void};
 
 const HOSTS: Record<string, string> = JSON.parse(readFileSync(new URL('../data/login-walled.json', import.meta.url), 'utf8')).hosts;
 // The listed domain the URL's host belongs to (subdomains included), with its display name.
@@ -107,22 +111,33 @@ async function redditPost(url: string, config: Config, transport: typeof fetchJS
 
 // Pinterest pins and TikTok videos: their oEmbed gives the title (the pin's or video's caption) and its author.
 async function oembedTitle(endpoint: string, url: string, config: Config, transport: typeof fetchJSON): Promise<Partial<WalledPreview>|null> {
+ // Pinterest's oEmbed knows a pin only by its bare id: "/pin/living-room-decor--720153796684601290/" is not found.
+ const pin = /pinterest\.com$/.test(new URL(url).hostname) && /\/pin\/(?:[^/]*--)?(\d+)/.exec(new URL(url).pathname)?.[1];
+ if (pin) url = `https://www.pinterest.com/pin/${pin}/`;
  const reply = oembedReply.parse(await transport(`${endpoint}?${new URLSearchParams({url})}`, {timeoutMs: config.PAGE_TIMEOUT_MS, redirects: 1}));
  return reply.title?.trim() ? {complete: true, source: 'oembed', title: clip(plain(reply.title), 500), author: clip(reply.author_name, 200),
    author_url: reply.author_url ? webLink(reply.author_url) : null} : null;
 }
 
-async function official(url: string, host: string, config: Config, transport: typeof fetchJSON) {
- if (/(^|\.)(x|twitter)\.com$/.test(host)) return tweet(url, config, transport);
- if (/(^|\.)reddit\.com$/.test(host)) return redditPost(url, config, transport);
- if (/(^|\.)pinterest\.com$/.test(host) && /\/pin\//.test(url)) return oembedTitle('https://www.pinterest.com/oembed.json', url, config, transport);
- if (/(^|\.)tiktok\.com$/.test(host) && /\/video\//.test(url)) return oembedTitle('https://www.tiktok.com/oembed', url, config, transport);
+// The site's official source for this URL, if it has one.
+function officialSource(url: string, host: string): ((config: Config, transport: typeof fetchJSON) => Promise<Partial<WalledPreview>|null>)|null {
+ const path = new URL(url).pathname;
+ if (/(^|\.)(x|twitter)\.com$/.test(host) && /\/status(?:es)?\/\d+/.test(path)) return (c, t) => tweet(url, c, t);
+ if (/(^|\.)reddit\.com$/.test(host) && /\/comments\/[a-z0-9]{1,12}(?:\/|$)/i.test(path)) return (c, t) => redditPost(url, c, t);
+ if (/(^|\.)pinterest\.com$/.test(host) && /\/pin\//.test(path)) return (c, t) => oembedTitle('https://www.pinterest.com/oembed.json', url, c, t);
+ if (/(^|\.)tiktok\.com$/.test(host) && /\/video\//.test(path)) return (c, t) => oembedTitle('https://www.tiktok.com/oembed', url, c, t);
  return null;
+}
+// The steps a fresh preview of this URL may take. The page steps are skipped when the official source gives it all.
+export function walledPlan(url: string): WalledStage[] {
+ const site = walledSite(url) ?? {host: new URL(url).hostname};
+ return officialSource(url, site.host) ? ['official', 'rules', 'page'] : ['rules', 'page'];
 }
 
 const cache = new Map<string, {preview: WalledPreview; expires: number}>();
 const CACHE_MS = 30 * 60_000, CACHE_MAX = 500;
 export function clearWalledCache() { cache.clear(); redditToken = null; }
+export const walledCached = (url: string) => (cache.get(url)?.expires ?? 0) > Date.now();
 
 export async function walledPreview(db: DB, config: Config, url: string, deps: WalledDeps = {}): Promise<WalledPreview> {
  const site = walledSite(url) ?? {host: new URL(url).hostname, site: new URL(url).hostname};
@@ -132,13 +147,16 @@ export async function walledPreview(db: DB, config: Config, url: string, deps: W
  if (hit && hit.expires > Date.now()) return hit.preview;
  if (!await takeBudget(db, 'walled_preview', config.WALLED_PREVIEW_DAILY_BUDGET)) return base;
  let preview = base;
- const found = await official(url, site.host, config, deps.transport ?? fetchJSON).catch(() => null);
+ const stage = (s: WalledStage) => deps.onStage?.({stage: s, limit_ms: config.PAGE_TIMEOUT_MS});
+ const source = officialSource(url, site.host);
+ if (source) stage('official');
+ const found = source ? await source(config, deps.transport ?? fetchJSON).catch(() => null) : null;
  if (found) preview = {...base, ...found};
  // Everything else, and official sources that gave only a title: the page text, when the site lets it be read and it
  // is more than a login prompt.
  if (!preview.complete && !preview.text) {
    const pages = deps.pages ?? new PageChecker(config, undefined, {...pageTools(config), renders: 0});
-   const page = await pages.check(url).catch(() => null);
+   const page = await pages.check(url, stage).catch(() => null);
    if (page?.status === 'checked' && page.text && page.text.length >= 80 && !loginPrompt(page.text))
      preview = {...preview, source: preview.source === 'snippet' ? 'page' : preview.source, title: preview.title ?? clip(page.title, 300), text: clip(page.text, 2000)};
  }

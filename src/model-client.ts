@@ -35,7 +35,8 @@ export abstract class ModelClient {
  // Names this provider's health rows and cooldown keys, for example 'gemini'.
  protected abstract get provider(): string;
  abstract get models(): string[];
- protected abstract ask(model: string, system: string, text: string, schema: object, images: InlineImage[]): Promise<unknown>;
+ // bucket: the budget the call spends, which names the role asking (judge, council, critic…).
+ protected abstract ask(model: string, system: string, text: string, schema: object, images: InlineImage[], bucket: string): Promise<unknown>;
  private key(model: string) { return `${this.provider}:${model}`; }
  // Returns the parsed JSON reply and the model that produced it. Each attempt spends one unit of the named daily budget.
  // Each image follows the text, introduced by its label.
@@ -57,7 +58,7 @@ export abstract class ModelClient {
    for (const [i, model] of models.entries()) {
      if (!await takeBudget(this.db, bucket, this.config.JUDGE_DAILY_BUDGET)) throw new UpstreamError('budget_exhausted');
      try {
-       const value = await this.ask(model, system, text, schema, images);
+       const value = await this.ask(model, system, text, schema, images, bucket);
        coolingUntil.delete(this.key(model));
        await this.record(model, null);
        return {model, value};

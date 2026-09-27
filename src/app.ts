@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import cookie from '@fastify/cookie';
 import staticFiles from '@fastify/static';
 import { resolve } from 'node:path';
+import { PassThrough } from 'node:stream';
 import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
 import { z, ZodError } from 'zod';
 import type { DB } from './db.js';
@@ -18,8 +19,9 @@ import { imageSearchInput, searchImages } from './images.js';
 import { searchWeb, webSearchInput } from './web.js';
 import { huntSnapshot, huntState } from './doc-hunt.js';
 import { webReviewSnapshot, webReviewState } from './web-review.js';
-import { chooseMode } from './mode-router.js';
-import { validWalledToken, walledPreview } from './walled.js';
+import { chooseMode, modeDeps } from './mode-router.js';
+import { tierConfig, tierSchema } from './tiers.js';
+import { validWalledToken, walledCached, walledPlan, walledPreview } from './walled.js';
 import { DocumentPreviews, PreviewError } from './doc-preview.js';
 import { auditReport } from './learning.js';
 
@@ -107,15 +109,26 @@ export async function createApp(db:DB,config:Config) {
  // deep-dive machinery — one request in, one page of results out.
  app.get('/api/images',async req=>searchImages(db,config,imageSearchInput.parse(req.query)));
  // Web pages and documents (PDF, Word, slides…) are discovery-only lists too.
- app.get('/api/web',async req=>searchWeb(db,config,webSearchInput.parse(req.query)));
+ app.get('/api/web',async req=>{const input=webSearchInput.parse(req.query);return searchWeb(db,tierConfig(config,input.tier),input);});
  // The login-free preview of a login-walled result. Only URLs the engine returned carry a valid token.
- app.get('/api/walled',async req=>{
-   const {url,t}=z.object({url:z.string().url().max(2048),t:z.string().max(64)}).strict().parse(req.query);
+ // With progress=1 it streams one JSON line per real step as it starts ({plan} first, then {stage, limit_ms}), then
+ // {preview}, so the window can say what is happening while it loads. A cached preview comes back as {preview} alone.
+ app.get('/api/walled',async(req,reply)=>{
+   const {url,t,progress}=z.object({url:z.string().url().max(2048),t:z.string().max(64),progress:z.literal('1').optional()}).strict().parse(req.query);
    if(!config.WALLED_PREVIEW_ENABLED||!validWalledToken(config.SESSION_SECRET,url,t)) throw new ApiError(403,'invalid_token','This preview link is not valid; search again.');
-   return walledPreview(db,config,url);
+   if(!progress) return walledPreview(db,config,url);
+   const out=new PassThrough(),line=(value:unknown)=>{if(!out.writableEnded)out.write(`${JSON.stringify(value)}
+`);};
+   if(!walledCached(url)) line({plan:walledPlan(url)});
+   walledPreview(db,config,url,{onStage:line}).then(preview=>line({preview}),()=>line({error:'The preview could not be loaded.'})).finally(()=>out.end());
+   return reply.type('application/x-ndjson; charset=utf-8').header('cache-control','no-store').send(out);
  });
  // Which tab a new search opens on: format words, then Jev, then a small model; videos when unsure.
- app.get('/api/mode',async req=>chooseMode(db,config,z.object({q:z.string().trim().min(2).max(400)}).strict().parse(req.query).q));
+ app.get('/api/mode',async req=>{
+   const {q,tier}=z.object({q:z.string().trim().min(2).max(400),tier:tierSchema}).strict().parse(req.query);
+   const tiered=tierConfig(config,tier);
+   return chooseMode(db,tiered,q,modeDeps(db,tiered));
+ });
  // The Web tab's relevance review, polled while it runs; complete, it lists the pages kept, ranked, with their reasons.
  app.get('/api/web/review',async req=>{
    const state=webReviewState(z.object({token:z.string().uuid()}).strict().parse(req.query).token);

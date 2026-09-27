@@ -61,3 +61,16 @@ test('PDFs are fetched as documents and read by the text helper; without it they
  const unread=await blind.check('https://docs.example.org/other.pdf');
  assert.deepEqual([unread.status,unread.meta?.content_type,unread.pdf],['unavailable','application/pdf',undefined],'no helper: the PDF is known but not inspected');
 });
+
+test('a page check reports its steps as they start: the site rules, then the page itself unless the rules forbid it',async()=>{
+ const steps:string[]=[];
+ const open=async(url:string)=>{steps.push(`fetch ${new URL(url).pathname}`);
+   if(new URL(url).pathname==='/robots.txt')throw new UpstreamError('upstream_failure',404);
+   return {url,contentType:'text/html',text:ARTICLE_HTML};};
+ await new PageChecker(testConfig,open as any,{}).check('https://blog.example.org/post',step=>steps.push(step));
+ assert.deepEqual(steps,['rules','fetch /robots.txt','page','fetch /post']);
+ steps.length=0;
+ const closed=async(url:string)=>{steps.push(`fetch ${new URL(url).pathname}`);return {url,contentType:'text/plain',text:'User-agent: *\nDisallow: /'};};
+ await new PageChecker(testConfig,closed as any,{}).check('https://blog.example.org/post',step=>steps.push(step));
+ assert.deepEqual(steps,['rules','fetch /robots.txt']);
+});

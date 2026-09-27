@@ -99,3 +99,10 @@ test('document search: free sources, viewer pages and strict safe search join th
    assert.deepEqual(hunts, [['https://doi.org/10.1/x']], 'places to look go to the hunt, unsafe ones never');
  } finally { setBlocklist([]); }
 });
+
+test('free-document sources have their own short time limit, so one slow source does not hold up the Docs tab',async()=>{
+ const limits=new Set<number>();
+ const record=async(_url:string,o:{timeoutMs:number})=>{limits.add(o.timeoutMs);throw new Error('offline');};
+ await findDocuments({} as any,{...testConfig,PROVIDER_TIMEOUT_MS:12000},'gen x soft club',{json:record as any,text:record as any,budget:async()=>true});
+ assert.deepEqual([...limits],[5000],'measured 2026-09-27: Zenodo stalled 12 s on one query while it answers others in about a second');
+});

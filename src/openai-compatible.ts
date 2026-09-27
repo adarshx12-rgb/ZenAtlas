@@ -7,7 +7,7 @@ import { ModelClient, type InlineImage } from './model-client.js';
 const response = z.object({choices: z.array(z.object({
  finish_reason: z.string().nullish(),
  message: z.object({content: z.string().nullish()}),
-})).min(1)});
+})).min(1), usage: z.object({prompt_tokens: z.number().optional(), completion_tokens: z.number().optional(), cost: z.number().optional()}).nullish()});
 // Strict structured output rejects an object schema that does not forbid extra keys, at any depth. Only the planner's
 // schemas reach this client today (the judge's uses minimum/maximum, which strict mode has historically rejected), but
 // the requirement is added on the way out rather than in the caller so any future caller gets it for free.
@@ -23,7 +23,10 @@ export class OpenAICompatibleClient extends ModelClient {
  constructor(db: DB, config: Config, private modelList: string[], transport = fetchJSON, private maxTokens = 8192) { super(db, config, transport); }
  protected get provider() { return 'openrouter'; }
  get models() { return this.modelList; }
- protected async ask(model: string, system: string, text: string, schema: object, images: InlineImage[]) {
+ // One line per answered call (PM2 keeps it): model, tokens and cost, never the prompt.
+ log: (line: Record<string, unknown>) => void = line => process.stdout.write(`${JSON.stringify(line)}
+`);
+ protected async ask(model: string, system: string, text: string, schema: object, images: InlineImage[], bucket = '') {
    const url = new URL(`${this.config.OPENROUTER_BASE_URL.replace(/\/$/, '')}/chat/completions`);
    const parts = [{type: 'text', text}, ...images.flatMap(image => [{type: 'text', text: image.label},
      {type: 'image_url', image_url: {url: `data:${image.mimeType};base64,${image.data.toString('base64')}`}}])];
@@ -33,9 +36,12 @@ export class OpenAICompatibleClient extends ModelClient {
        ...(this.config.OPENROUTER_SITE_NAME ? {'X-Title': this.config.OPENROUTER_SITE_NAME} : {})},
      body: {model, messages: [{role: 'system', content: system}, {role: 'user', content: images.length ? parts : text}],
        response_format: {type: 'json_schema', json_schema: {name: 'reply', schema: strict(schema), strict: true}},
-       max_tokens: this.maxTokens}}));
+       max_tokens: this.maxTokens, usage: {include: true}}}));
    // A 200 carrying an error object, or anything else that is not a completion, is not an answer this app can use.
    if (!raw.success) throw new UpstreamError('malformed_response');
+   // What the call cost and on which tier (OpenRouter reports it when asked), for comparing SSJ1 with SSJ3.
+   const u = raw.data.usage;
+   if (u) this.log({event: 'model_cost', tier: this.config.TIER, bucket, model, input_tokens: u.prompt_tokens ?? null, output_tokens: u.completion_tokens ?? null, cost: u.cost ?? null});
    const first = raw.data.choices[0];
    // Reasoning models can spend the whole token cap before writing any answer; that is a truncated reply, not bad JSON.
    if (first.finish_reason && first.finish_reason !== 'stop') throw new UpstreamError('model_output_incomplete');

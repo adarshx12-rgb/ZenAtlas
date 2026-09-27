@@ -1,4 +1,8 @@
+import { readFileSync } from 'node:fs';
 import { z } from 'zod';
+
+const OWNERS: {brands: string[]; owner: string; domains: string[]}[] = JSON.parse(readFileSync(new URL('../data/owning-companies.json', import.meta.url), 'utf8'))
+ .owners.map((o: {brands: string[]; owner: string; domains: string[]}) => ({...o, brands: o.brands.map(b => b.toLowerCase())}));
 
 // The one interpretation of a request that every stage works from: planning, discovery, exploration, screening,
 // inspection, judging and presentation. The model drafts it; deterministic rules own dates, formats and syntax.
@@ -130,8 +134,12 @@ export function rulesContract(query: string, searchDate: string, draft: Contract
    const names = listed?.length ? listed.slice(0, 6)
      : [draft.entities?.find(e => e.kind === 'organisation' || e.kind === 'product')?.name ?? said ?? 'the named organisation'];
    const owner = names.length > 1 ? `${names.slice(0, -1).join(', ')} or ${names.at(-1)}` : names[0];
+   // A brand's owning company publishes for it officially too (Meta for WhatsApp): see data/owning-companies.json.
+   const owning = OWNERS.filter(o => names.some(n => o.brands.includes(n.toLowerCase())));
+   const domains = [...(draft.official_domains ?? []).map(d => d.toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '')).filter(Boolean),
+     ...owning.flatMap(o => o.domains)];
    out.push({text: `From an official ${owner} source`, kind: 'authority', hardness: 'hard', scope: 'each',
-     authority: {entity: owner, names, domains: (draft.official_domains ?? []).map(d => d.toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '')).filter(Boolean)},
+     authority: {entity: owner, names: [...names, ...owning.map(o => o.owner)].slice(0, 6), domains: [...new Set(domains)]},
      evidence: `Published on a domain the page itself identifies as ${owner}'s.`});
  }
  const completeness = draft.completeness === 'full' || FULL_WORK.test(q) ? 'full' : 'any';

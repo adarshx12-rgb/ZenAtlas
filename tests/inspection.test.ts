@@ -47,6 +47,23 @@ test('official status needs the domain and the page naming its owner; a domain a
  assert.deepEqual([status(channel,a)?.status,status(channel,a)?.method],['supported','video_api'],'an allow-listed official channel counts');
 });
 
+test('the owning company counts as official: Meta for WhatsApp, on its own domains or declared as publisher',()=>{
+ const a=req(whatsapp,'authority').id;
+ assert.ok(req(whatsapp,'authority').authority!.names!.includes('Meta'),'Meta is listed as an official publisher of WhatsApp');
+ const design=inspect(whatsapp,{url:'https://www.meta.com/design-at-meta/blog/whatsapp-user-interface-update/',title:'x',description:null,
+   page:page({title:'WhatsApp user interface update',meta:{site_name:'Meta'}})});
+ assert.deepEqual([status(design,a)?.status,status(design,a)?.provisional,status(design,a)?.excerpt],['supported',false,'Meta']);
+ const bare=inspect(whatsapp,{url:'https://about.fb.com/news/2024/05/whatsapp-new-look/',title:'x',description:null});
+ assert.deepEqual([status(bare,a)?.status,status(bare,a)?.provisional],['supported',true],'an owner domain alone stays provisional');
+ const ruled=rulesContract('official whatsapp chat ui',DAY),ra=ruled.requirements.find(r=>r.kind==='authority')!.id;
+ const onMeta=inspect(ruled,{url:'https://about.fb.com/news/x',title:'x',description:null,page:page({title:'x',meta:{publisher:'Meta'}})});
+ assert.deepEqual([status(onMeta,ra)?.status,status(onMeta,ra)?.provisional],['supported',false],'the rules-only contract knows the owner too');
+ const fan=inspect(whatsapp,{url:'https://metatips.example.org/whatsapp',title:'x',description:null,page:page({title:'WhatsApp tips',meta:{site_name:'Meta Tips'}})});
+ assert.equal(status(fan,a)?.status,'unknown','"Meta Tips" is not Meta');
+ const unrelated=rulesContract('official nasa jwst images',DAY).requirements.find(r=>r.kind==='authority')!;
+ assert.deepEqual(unrelated.authority!.names,['nasa'],'brands without a listed owner are unchanged');
+});
+
 test('dates need evidence: inside the window supports, outside contradicts, missing is unknown, snippets are provisional',()=>{
  const d=req(whatsapp,'date').id;
  const inside=inspect(whatsapp,{url:'https://blog.whatsapp.com/a',title:'a',description:null,page:page({meta:{published:'2024-05-09'}})});

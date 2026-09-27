@@ -12,6 +12,7 @@ import { claim, complete, fail, renewLease } from './queue.js';
 import type { ExplorationTrace } from './exploration.js';
 import type { RequirementsContract } from './requirements.js';
 import type { GapTrace } from './gaps.js';
+import { tierConfig, type Tier } from './tiers.js';
 
 // Learning loop, step 1. Every discovery search leaves a trace; a critic model audits it once results are shown,
 // testing any source it says was missed with a real search; once a week a reviewer re-checks a sample of audits.
@@ -35,10 +36,14 @@ export interface SearchTrace {
  searches: {query: string; target: string; round: number}[];
  rounds: number; providers: ProviderStatus[]; pool: TraceEntry[];
  contract?: RequirementsContract; unmet?: string[]; gaps?: GapTrace;
+ // The model tier the search ran on; absent on traces saved before tiers existed (SSJ3).
+ tier?: Tier;
 }
 // The critic's model client: anything answering the ModelClient json() call.
 export interface CriticClient { models: string[]; json(bucket: string, system: string, text: string, schema: object): Promise<{model: string; value: unknown}> }
-export interface CriticDeps { client?: CriticClient; probe?: (query: string) => Promise<{url: string; title: string; description?: string|null}[]> }
+// clientFor: builds the client for a model name (the tier decides the model); client overrides both.
+export interface CriticDeps { client?: CriticClient; clientFor?: (model: string) => CriticClient;
+ probe?: (query: string) => Promise<{url: string; title: string; description?: string|null}[]> }
 
 const BUCKET = 'critic_calls';
 const REVIEW_SAMPLE = 10;
@@ -205,7 +210,9 @@ export async function auditTrace(db: DB, config: Config, traceId: string, deps: 
  if (done) return {status: 'complete'};
  if (!await budgetLeft(db, config)) return storeAudit(db, traceId, {status: 'skipped', code: 'budget_exhausted'});
  const trace = row.trace as SearchTrace, metrics = row.metrics as TraceMetrics;
- const client = deps.client ?? criticClient(db, config, config.CRITIC_MODEL);
+ // The critic of the search's own tier: an SSJ1 search is audited by SSJ1's critic model.
+ const tiered = tierConfig(config, trace.tier ?? 'ssj3');
+ const client = deps.client ?? (deps.clientFor ?? (m => criticClient(db, tiered, m)))(tiered.CRITIC_MODEL);
  const shown = trace.pool.filter(p => p.shown).sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0));
  const rejected = trace.pool.filter(p => !p.shown).sort((a, b) => (b.relevance ?? -1) - (a.relevance ?? -1)).slice(0, 15);
  const brief = (p: TraceEntry) => ({url: p.url, title: p.title, site: p.site, round: p.round, relevance: p.relevance, basis: p.basis,
@@ -264,7 +271,13 @@ export async function auditTrace(db: DB, config: Config, traceId: string, deps: 
 export async function reviewAudits(db: DB, config: Config, deps: CriticDeps = {}): Promise<number> {
  const rows = (await db.query(`SELECT a.trace_id,a.audit,a.probes,t.trace,t.metrics FROM search_audits a JOIN search_traces t ON t.id=a.trace_id
    WHERE a.status='complete' AND a.reviewed_at IS NULL AND a.created_at>now()-interval '7 days' ORDER BY random() LIMIT $1`, [REVIEW_SAMPLE])).rows;
- const client = deps.client ?? criticClient(db, config, config.CRITIC_REVIEW_MODEL);
+ // Each audit is checked by the reviewer of its search's tier.
+ const clients = new Map<string, CriticClient>();
+ const reviewerFor = (tier: Tier) => {
+   const model = tierConfig(config, tier).CRITIC_REVIEW_MODEL;
+   if (!clients.has(model)) clients.set(model, deps.client ?? (deps.clientFor ?? (m => criticClient(db, config, m)))(model));
+   return clients.get(model)!;
+ };
  let reviewed = 0;
  for (const row of rows) {
    if (!await budgetLeft(db, config)) break;
@@ -278,7 +291,7 @@ export async function reviewAudits(db: DB, config: Config, deps: CriticDeps = {}
      `Test searches: ${line(row.probes ?? [])}`, `Searcher feedback: ${line(feedback)}`,
      '<findings>', ...Object.entries(findings).map(([key, value]) => line({key, finding: value})), '</findings>'].join('\n');
    let reply: {model: string; value: unknown};
-   try { reply = await client.json(BUCKET, REVIEW_SYSTEM, input, REVIEW_SCHEMA); } catch { break; }
+   try { reply = await reviewerFor(trace.tier ?? 'ssj3').json(BUCKET, REVIEW_SYSTEM, input, REVIEW_SCHEMA); } catch { break; }
    const parsed = reviewReply.safeParse(reply.value);
    if (!parsed.success) continue;
    const judged = parsed.data.findings.filter((f, i, all) => f.key in findings && all.findIndex(o => o.key === f.key) === i);

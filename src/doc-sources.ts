@@ -22,7 +22,7 @@ const words = (q: string) => q.toLowerCase().match(/[\p{L}\p{N}]{2,}/gu)?.slice(
 export async function findDocuments(db: DB, config: Config, query: string, deps: Deps = {json: fetchJSON, text: fetchText, budget: takeBudget}): Promise<SourceFindings> {
  const out: SourceFindings = {docs: [], sites: [], providers: []};
  if (!config.DOC_SOURCES_ENABLED) return out;
- const opts = (origin: string) => ({trustedOrigin: origin, timeoutMs: config.PROVIDER_TIMEOUT_MS, redirects: 0, maxBytes: 4 * 1024 * 1024});
+ const opts = (origin: string) => ({trustedOrigin: origin, timeoutMs: config.DOC_SOURCES_TIMEOUT_MS, redirects: 0, maxBytes: 4 * 1024 * 1024});
  const sources: [string, () => Promise<{docs?: SourceRow[]; sites?: SourceRow[]}>][] = [
    ['arxiv', async () => {
      const url = new URL('https://export.arxiv.org/api/query');
@@ -89,9 +89,9 @@ export async function findDocuments(db: DB, config: Config, query: string, deps:
    if (!await deps.budget(db, 'discovery:searxng', config.SEARXNG_DAILY_BUDGET)) throw new Error('budget_exhausted');
    const url = new URL('/search', config.SEARXNG_BASE_URL);
    url.search = new URLSearchParams({q, format: 'json', safesearch: '2', engines: config.SEARXNG_WEB_ENGINES,
-     timeout_limit: String(Math.max(1, config.PROVIDER_TIMEOUT_MS / 1000 - 2))}).toString();
+     timeout_limit: String(Math.max(1, config.DOC_SOURCES_TIMEOUT_MS / 1000 - 1))}).toString();
    const data = z.object({results: z.array(z.looseObject({url: z.string()})).max(1000)})
-     .parse(await deps.json(url.href, {trustedOrigin: url.origin, token: config.SEARXNG_TOKEN, timeoutMs: config.PROVIDER_TIMEOUT_MS, redirects: 0}));
+     .parse(await deps.json(url.href, {trustedOrigin: url.origin, token: config.SEARXNG_TOKEN, timeoutMs: config.DOC_SOURCES_TIMEOUT_MS, redirects: 0}));
    return data.results.slice(0, 20).map(r => ({url: r.url, title: r.title, snippet: r.content, published: r.publishedDate, engine: 'searxng'}));
  }
 

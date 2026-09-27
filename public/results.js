@@ -1,4 +1,5 @@
 import {SearchController} from './search-controller.js';
+import {mountLevel} from './level.js';
 const form=document.querySelector('#search-form'),status=document.querySelector('#status'),notices=document.querySelector('#notices');
 const catalogueBox=document.querySelector('#catalogue-results'),foundBox=document.querySelector('#found-results');
 const deepBox=document.querySelector('#deep-results'),deepHeading=document.querySelector('#deep-heading');
@@ -226,7 +227,7 @@ function render(data){
  const count=shownCount();
  const label=`${count} ${count===1?'result':'results'}`;
  status.textContent=busy?`${label} so far. ${progressText(data)}`
-  :count?`${label} · ${deepDone?(partial?'Deep dive finished; some services were unavailable':'Deep dive complete'):partial?'Some search services are unavailable':'Search complete'}`
+  :count?`${label}${levelTag()} · ${deepDone?(partial?'Deep dive finished; some services were unavailable':'Deep dive complete'):partial?'Some search services are unavailable':'Search complete'}`
   :partial?'No catalogue matches. Discovery is unavailable or incomplete.':'No matching results. Try another query or broader filters.';
  // A finished discovery with nothing verified opens the unverified candidates instead of an empty page (once per search,
  // so choosing "Matches" again is respected).
@@ -274,6 +275,10 @@ async function digDeeper(){if(!searchId)return;
  finally{deep.disabled=false;}
 }
 function applyParamsFromURL(){for(const [key,value] of new URLSearchParams(window.location.search)){const field=form.elements.namedItem(key);if(field)field.value=value;}}
+// LVL: the model tier. Changing it reruns the current search on the new models; the running one is discarded by the
+// search controller, so two tiers' results never mix.
+const level=mountLevel(form,{onChange:()=>{if(form.elements.namedItem('q').value)form.requestSubmit();}});
+const levelTag=()=>level.get()==='ssj1'?' · SSJ1':'';
 
 // ---- images ---------------------------------------------------------------------------------
 // Videos run the full evidence pipeline; web, images and docs are discovery-only lists from their own endpoints.
@@ -506,8 +511,11 @@ async function searchWebPage(token,kind,append){
  const query=new URLSearchParams({q:form.elements.namedItem('q').value,kind,page:String(webPage)});
  const language=form.elements.namedItem('language')?.value;if(language)query.set('language',language);
  const docType=form.elements.namedItem('doc_type')?.value;if(kind==='docs'&&docType)query.set('doc_type',docType);
+ if(new URLSearchParams(window.location.search).get('exact')==='1')query.set('exact','1');
+ if(level.get()==='ssj1')query.set('tier','ssj1');
  const data=await api(`/api/web?${query}`,{signal:token.signal});
  if(!controller.current(token.generation))return;
+ if(!append)showRewrite(data.rewrite,query.get('q'));
  if(!append){closeWalled();webList.replaceChildren();closePreview();walledSeen=0;}
  const rows=data.results.map(webItem).filter(Boolean),page=webPage;
  for(const row of rows)row.dataset.page=String(page);
@@ -518,7 +526,7 @@ async function searchWebPage(token,kind,append){
  notices.replaceChildren(...data.providers.filter(p=>p.status!=='ok').map(p=>node('p',p.message,'notice')));
  webMore.hidden=!data.next_cursor;
  const count=webList.children.length,noun=kind==='docs'?['document','documents']:['result','results'];
- status.textContent=count?`${count} ${noun[count===1?0:1]}${data.hunt?' · searching further…':''}${data.review?' · checking relevance…':''}`
+ status.textContent=count?`${count} ${noun[count===1?0:1]}${levelTag()}${data.hunt?' · searching further…':''}${data.review?' · checking relevance…':''}`
   :data.hunt?'Searching inside websites for documents…'
   :kind==='docs'?'No documents found. Try another query or document type.':'No results found. Try another query.';
  if(data.hunt)void followHunt(token,page,data.hunt);
@@ -567,7 +575,7 @@ async function followReview(token,page,review){
   }
   for(const p of snap.providers)if(p.status!=='ok')notices.append(node('p',p.message,'notice'));
   const count=webList.children.length;
-  status.textContent=count?`${count} ${count===1?'result':'results'}${snap.removed?` · ${snap.removed} removed as not matching`:''}`:'No page matched the request. Try another query.';
+  status.textContent=count?`${count} ${count===1?'result':'results'}${levelTag()}${snap.removed?` · ${snap.removed} removed as not matching`:''}`:'No page matched the request. Try another query.';
   placeWalled();
   return;
  }
@@ -591,7 +599,7 @@ async function followHunt(token,page,hunt){
    for(const d of snap.documents)markLead(webList.querySelector(`.web-item[data-id="${CSS.escape(d.id)}"]`)??document.createElement('div'),d);
    for(const p of snap.providers)if(p.status!=='ok')notices.append(node('p',p.message,'notice'));
    const count=webList.children.length,inside=snap.documents.filter(d=>d.found_via?.length).length;
-   status.textContent=count?`${count} ${count===1?'document':'documents'}${inside?` · ${inside} found inside websites`:''}${snap.removed?` · ${snap.removed} removed as not matching`:''}`
+   status.textContent=count?`${count} ${count===1?'document':'documents'}${levelTag()}${inside?` · ${inside} found inside websites`:''}${snap.removed?` · ${snap.removed} removed as not matching`:''}`
     :'No document matched the request. Try another query or document type.';
    // The first document opens beside the list if none is open (the review may have removed the one that was).
    const first=page===1&&!webList.querySelector('.web-item.selected')&&snap.documents.find(d=>d.preview);
@@ -599,7 +607,7 @@ async function followHunt(token,page,hunt){
    return;
   }
   const n=webList.children.length,sites=snap.sites.length;
-  status.textContent=`${n?`${n} ${n===1?'document':'documents'} · `:''}${sites?`searching inside ${sites} ${sites===1?'website':'websites'} · ${snap.checked_pages} pages checked`:'checking relevance'}…`;
+  status.textContent=`${n?`${n} ${n===1?'document':'documents'}${levelTag()} · `:''}${sites?`searching inside ${sites} ${sites===1?'website':'websites'} · ${snap.checked_pages} pages checked`:'checking relevance'}…`;
   await new Promise(resolve=>setTimeout(resolve,1200));
  }
 }
@@ -611,7 +619,19 @@ async function runWebSearch(kind){
  try{await session();await searchWebPage(token,kind,false);}
  catch(error){if(controller.current(token.generation)){status.textContent=error.message;retry.hidden=false;}}
 }
-function runTab(tab){if(tab==='images')void runImageSearch();else if(tab==='web'||tab==='docs')void runWebSearch(tab);else void search();}
+// The Web and Docs tabs search what was meant ("Showing results for …"); "Search instead for" reruns the query as typed
+// (exact=1 in the URL, dropped by the next new search or tab change).
+const rewriteNote=document.querySelector('#rewrite-note');
+function showRewrite(rewrite,typed){
+ rewriteNote.replaceChildren();rewriteNote.hidden=!rewrite;
+ if(!rewrite)return;
+ const exact=new URLSearchParams(window.location.search);exact.set('exact','1');
+ const a=node('a',typed);a.href=`/results.html?${exact}`;
+ a.addEventListener('click',event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||event.button!==0)return;
+  event.preventDefault();window.history.pushState(null,'',a.href);runTab(tabOf(window.location.search));});
+ rewriteNote.append('Showing results for ',node('strong',rewrite.corrected),' · Search instead for ',a);
+}
+function runTab(tab){rewriteNote.hidden=true;if(tab==='images')void runImageSearch();else if(tab==='web'||tab==='docs')void runWebSearch(tab);else void search();}
 
 // ---- login-free preview ---------------------------------------------------------------------
 // Results from login-walled sites (X, Reddit, Quora…) open in a window attached to the result, showing the content the
@@ -620,9 +640,57 @@ function runTab(tab){if(tab==='images')void runImageSearch();else if(tab==='web'
 // hover or focus, on touch, and for the first few walled results in view unless the connection is slow or saving data.
 const walledCache=new Map();let walledOpen=null,walledSeen=0;
 const slowLink=()=>{const c=navigator.connection;return !!c&&(c.saveData||/(^|-)(2g|3g)$/.test(c.effectiveType??''));};
+// One load per result, shared by loading ahead and the window: the server streams each real step as it starts ({plan},
+// then {stage, limit_ms}), then {preview}. Watchers hear every change, so a window opened mid-load shows where it is.
 function loadWalled(item){
- if(!walledCache.has(item.id))walledCache.set(item.id,api(`/api/walled?${new URLSearchParams({url:item.url,t:item.walled.token})}`).catch(()=>null));
- return walledCache.get(item.id);
+ let load=walledCache.get(item.id);if(load)return load;
+ load={plan:[],stage:null,limit:0,stageAt:performance.now(),done:false,watchers:new Set()};
+ const tell=()=>{for(const watch of load.watchers)watch(load);};
+ load.promise=(async()=>{
+  const response=await fetch(`/api/walled?${new URLSearchParams({url:item.url,t:item.walled.token,progress:'1'})}`,{credentials:'same-origin'});
+  if(!response.ok||!response.body)return null;
+  const reader=response.body.pipeThrough(new TextDecoderStream()).getReader();let buffer='',preview=null;
+  for(;;){
+   const {value,done}=await reader.read();if(done)break;buffer+=value;
+   for(let end;(end=buffer.indexOf('\n'))>=0;buffer=buffer.slice(end+1)){
+    const message=JSON.parse(buffer.slice(0,end));
+    if(message.plan)load.plan=message.plan;
+    else if(message.stage){load.stage=message.stage;load.limit=message.limit_ms;load.stageAt=performance.now();}
+    else if('preview' in message)preview=message.preview;
+    tell();
+   }
+  }
+  return preview;
+ })().catch(()=>null).finally(()=>{load.done=true;tell();});
+ walledCache.set(item.id,load);return load;
+}
+// What the window says while a preview loads: the step really running, in plain words, and why it is worth the wait.
+// Nothing here is timed for show; the words change only when the server starts its next step.
+const WALLED_STEPS={
+ official:site=>[`Asking ${site} for this post`,`Through ${site}'s own public feed, the one it offers for sharing posts.`],
+ rules:site=>[`Checking what ${site} lets us show`,`Every site sets public rules for what readers like ZenAtlas may read. We follow them.`],
+ page:()=>['Reading the page','Keeping the words that matter and leaving the clutter behind.']
+};
+function walledProgress(load,site){
+ const box=node('div',undefined,'walled-progress');box.setAttribute('role','status');
+ const steps=node('ol',undefined,'walled-steps'),title=node('p',undefined,'walled-step'),why=node('p',undefined,'walled-why'),wait=node('p',undefined,'walled-wait');
+ box.append(steps,title,why,wait);
+ let shown;
+ const draw=()=>{
+  const plan=load.plan.length?load.plan:[load.stage].filter(Boolean),at=plan.indexOf(load.stage);
+  steps.replaceChildren(...plan.map((_,i)=>node('li',undefined,i<at?'done':i===at?'active':'')));
+  steps.hidden=plan.length<2;
+  if(shown!==load.stage){shown=load.stage;
+   const [head,reason]=load.stage?WALLED_STEPS[load.stage](site):['Getting your preview ready','Only from sources anyone is allowed to read.'];
+   title.textContent=plan.length>1&&at>=0?`${head} · step ${at+1} of ${plan.length}`:head;why.textContent=reason;}
+  // Only a slow step earns a note, and its countdown is the real limit the server set for that step.
+  const spent=performance.now()-load.stageAt,left=Math.ceil((load.limit-spent)/1000);
+  wait.textContent=!load.stage||spent<2500?'':left>0?`${site} is slow to answer. We'll give it ${left} more second${left===1?'':'s'}, then show what the search already found.`:'Wrapping up with what we have.';
+ };
+ draw();
+ const timer=setInterval(()=>{if(!box.isConnected||load.done){clearInterval(timer);load.watchers.delete(draw);}else draw();},500);
+ load.watchers.add(draw);
+ return box;
 }
 const walledView=new IntersectionObserver(entries=>{for(const e of entries){
  if(!e.isIntersecting)continue;walledView.unobserve(e.target);
@@ -673,7 +741,7 @@ async function openWalled(row){
  const close=node('button','×','walled-close');close.type='button';close.setAttribute('aria-label','Close preview');close.addEventListener('click',()=>closeWalled(true));
  const notice=node('p',undefined,'walled-notice');
  lockLine(notice,` · ${host} normally asks you to sign in to see this. ZenAtlas brought it here for you.`);
- const body=node('div',undefined,'walled-body');body.append(node('p','Loading the preview…','walled-loading'));
+ const body=node('div',undefined,'walled-body');
  const cont=link(item.url,`Continue to ${host} ↗`);cont.className='walled-continue';
  const foot=node('footer',undefined,'walled-foot');foot.append(cont,node('small',`${host} may ask you to sign in.`));
  // The notch sits on the outer box; the inner box scrolls, so it cannot clip the notch.
@@ -682,8 +750,10 @@ async function openWalled(row){
  // Closes when its result scrolls out of view.
  const watch=new IntersectionObserver(([e])=>{if(!e.isIntersecting&&walledOpen?.row===row)closeWalled();});
  walledOpen={row,pop,watch};
+ const load=loadWalled(item);
+ if(!load.done)body.append(walledProgress(load,item.walled.site));
  placeWalled();watch.observe(row);pop.focus({preventScroll:true});
- const preview=await loadWalled(item);
+ const preview=await load.promise;
  if(walledOpen?.pop!==pop)return;
  if(!preview?.complete)lockLine(notice,` · ${host} requires sign-in to read this. Here's what ZenAtlas could show without it.`);
  body.replaceChildren();
@@ -740,7 +810,7 @@ async function routeQuery(q){
  const seq=++routeSeq;
  status.textContent='Choosing where to search…';
  let decision={mode:'videos',source:'default'};
- try{const d=await api(`/api/mode?q=${encodeURIComponent(q)}`);if(d&&d.mode in TABS)decision=d;}catch{}
+ try{const d=await api(`/api/mode?${new URLSearchParams({q,...(level.get()==='ssj1'?{tier:'ssj1'}:{})})}`);if(d&&d.mode in TABS)decision=d;}catch{}
  return seq===routeSeq?decision:null;
 }
 function showModeNote(decision){
@@ -766,8 +836,15 @@ async function routeAndRun(push){
  runTab(decision.mode);
 }
 
-function runFromURL(){
+function runFromURL(event){
  applyParamsFromURL();
+ // Back/Forward: the URL is the record of that search, so no tier in it means SSJ3. On first load the level
+ // remembered in this browser stands when the link names none.
+ if(event?.type==='popstate'&&!new URLSearchParams(window.location.search).get('tier'))form.elements.namedItem('tier').value='';
+ level.refresh();
+ // A remembered SSJ1 is written into the address, so Back/Forward and a shared link rerun on the level that ran.
+ const here=new URLSearchParams(window.location.search);
+ if(level.get()==='ssj1'&&here.get('tier')!=='ssj1'){here.set('tier','ssj1');window.history.replaceState(null,'',`/results.html?${here}`);}
  routeSeq++;lastQuery=form.elements.namedItem('q').value||null;
  if(lastQuery&&!chosenTab(window.location.search)){void routeAndRun(false);return;}
  // A tab named in the URL (clicked, or kept from an earlier routing) is the user's view: no routing note.

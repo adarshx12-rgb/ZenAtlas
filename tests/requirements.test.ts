@@ -29,7 +29,7 @@ test('the WhatsApp request needs official status and dates for each result, and 
  const kinds=hardEach(c).map(r=>r.kind);
  assert.deepEqual(kinds.sort(),['authority','date','subject']);
  const authority=c.requirements.find(r=>r.kind==='authority')!;
- assert.deepEqual(authority.authority,{entity:'WhatsApp',names:['WhatsApp'],domains:['blog.whatsapp.com','whatsapp.com']});
+ assert.deepEqual(authority.authority,{entity:'WhatsApp',names:['WhatsApp','Meta'],domains:['blog.whatsapp.com','whatsapp.com','meta.com','about.fb.com','about.meta.com','design.facebook.com']},'the owning company counts as official');
  const date=hardEach(c).find(r=>r.kind==='date')!;
  assert.deepEqual(date.date_range,{from:'2023-09-24',to:DAY},'the model\'s own date arithmetic is replaced');
  assert.ok(!c.requirements.some(r=>r.text==='Published in 2024'));
@@ -70,7 +70,7 @@ test('"websites" is a preference, not a hard format, so videos presenting sites 
 test('without a planner draft, the word after "official" names the owner',()=>{
  const c=rulesContract('official whatsapp chat ui interface from over past 3 years',DAY);
  const a=c.requirements.find(r=>r.kind==='authority')!;
- assert.deepEqual(a.authority?.names,['whatsapp']);
+ assert.deepEqual(a.authority?.names,['whatsapp','Meta']);
  assert.equal(a.text,'From an official whatsapp source');
 });
 

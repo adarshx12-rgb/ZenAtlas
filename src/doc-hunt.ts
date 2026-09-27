@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
+import type { QueryRewrite } from './query-rewrite.js';
 import type { DB } from './db.js';
 import type { Config } from './config.js';
 import type { ProviderStatus } from './types.js';
@@ -304,9 +305,11 @@ async function verdicts(db: DB, config: Config, state: HuntState, seedPages: Map
  } catch { for (const s of unsure) s.verdict = 'not_found'; }
 }
 
-// Websites for the request: an ordinary web search, whose top results are the places to look inside.
-export async function discoverSites(db: DB, config: Config, query: string): Promise<WebResult[]> {
- return (await searchWeb(db, config, webSearchInput.parse({q: query}), {transport: fetchJSON, budget: takeBudget, review: false}))
+// Websites for the request: an ordinary web search, whose top results are the places to look inside. rewrite: the Docs
+// search's own rewrite (its query is already corrected), reused so the model is not asked twice.
+export async function discoverSites(db: DB, config: Config, query: string, rewrite?: QueryRewrite|null): Promise<WebResult[]> {
+ return (await searchWeb(db, config, webSearchInput.parse({q: query}), {transport: fetchJSON, budget: takeBudget, review: false,
+   ...(rewrite ? {rewrite: async () => ({...rewrite, query, corrected: query, changed: false})} : {})}))
    .results.filter(r => !documentType(r.url));
 }
 
