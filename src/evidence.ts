@@ -16,6 +16,8 @@ export interface Finding {
 export interface InspectionInput {
  url: string; title: string; description: string|null; published_at?: string|null;
  page?: PageEvidence;
+ // Seconds, from the video platform or the result's metadata; null when unknown.
+ duration?: number|null;
  // From the video platform's API, not from the search result.
  video?: {publishedAt: string|null; official: boolean; channel?: string|null};
 }
@@ -26,6 +28,8 @@ const ARTICLE_TYPES = /^(?:Article|NewsArticle|BlogPosting|ReportageNewsArticle|
 // Wording that marks a derivative of a work rather than the work itself.
 const DERIVATIVE = /\b(?:summary|summaries|key takeaways|book review|study guide|sparknotes|cliffs ?notes|storyshots|blinkist|book notes|notes on|excerpt|sample chapter|free preview|chapter \d+ only|cheat ?sheet)\b/i;
 
+const clock = (s: number) => { const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), sec = String(Math.floor(s % 60)).padStart(2, '0');
+ return h ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${m}:${sec}`; };
 const host = (url: string) => { try { return new URL(url).hostname.toLowerCase().replace(/^www\./, ''); } catch { return ''; } };
 const hostPath = (url: string) => { try { const u = new URL(url); return `${u.hostname.replace(/^www\./, '')}${u.pathname}`; } catch { return ''; } };
 const words = (s: string): string[] => s.toLowerCase().normalize('NFKC').match(/[\p{L}\p{N}]+/gu) ?? [];
@@ -101,6 +105,11 @@ export function inspect(contract: RequirementsContract, input: InspectionInput):
      const inside = dated.day >= r.date_range.from && dated.day <= r.date_range.to;
      add(r, {status: inside ? 'supported' : 'contradicted', excerpt: dated.day, location: {field: dated.field}, method: dated.method,
        access: 'ok', provisional: dated.provisional});
+   } else if (r.kind === 'duration' && r.duration_range) {
+     if (input.duration == null) { unknown(r); continue; }
+     const {min, max} = r.duration_range, d = input.duration;
+     const inside = (min === undefined || d >= min) && (max === undefined || d <= max);
+     add(r, {status: inside ? 'supported' : 'contradicted', excerpt: clock(d), location: {field: 'metadata'}, method: 'video_api', access: 'ok', provisional: false});
    } else if (r.kind === 'authority' && r.scope === 'each') {
      const domains = r.authority?.domains ?? [], h = host(input.url);
      const onDomain = domains.some(d => h === d || h.endsWith(`.${d}`));
@@ -150,7 +159,7 @@ export function inspect(contract: RequirementsContract, input: InspectionInput):
 }
 
 export interface RequirementCheck { id: string; status: 'supported'|'unknown'|'mismatch'; field: string; quote: string }
-const INSPECTED_KINDS = new Set<Requirement['kind']>(['format', 'date', 'authority', 'completeness']);
+const INSPECTED_KINDS = new Set<Requirement['kind']>(['format', 'date', 'duration', 'authority', 'completeness']);
 export interface RequirementState { id: string; text: string; status: FindingStatus|'waived'; excerpt: string|null; method: Method|null }
 export interface Decision {
  status: 'verified'|'uncertain'|'excluded';
@@ -168,7 +177,7 @@ export function decide(contract: RequirementsContract, findings: Finding[], judg
  for (const r of hardEach(contract)) {
    const own = findings.filter(f => f.requirement_id === r.id && !f.provisional);
    const inspected = own.find(f => f.status === 'contradicted') ?? own.find(f => f.status === 'supported');
-   // Format, date, authority and completeness have inspectors; a model quoting a title cannot establish them.
+   // Format, date, duration, authority and completeness have inspectors; a model quoting a title cannot establish them.
    const model = INSPECTED_KINDS.has(r.kind) ? undefined : judged.find(c => c.id === r.id);
    if (inspected) states.push({id: r.id, text: r.text, status: inspected.status, excerpt: inspected.excerpt, method: inspected.method});
    else if (model?.status === 'mismatch') states.push({id: r.id, text: r.text, status: 'contradicted', excerpt: model.quote || null, method: 'judge'});

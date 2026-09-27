@@ -137,3 +137,17 @@ test('coverage separates per-result requirements from set requirements and names
  assert.ok(!cov.gaps.some(g=>g.requirement_id===date),'two supported results meet a target of two');
  assert.ok(cov.gaps.some(g=>g.requirement_id===req(whatsapp,'subject').id),'subject evidence comes only from the judge, so it is still a gap');
 });
+
+test('a known duration confirms or contradicts a duration limit; an unknown one stays unknown',()=>{
+ const c=rulesContract('hindi explainer on how UPI works, under 10 minutes',DAY);
+ const r=c.requirements.find(x=>x.kind==='duration')!;
+ const at=(duration:number|null)=>inspect(c,{url:'https://www.youtube.com/watch?v=a',title:'UPI',description:null,duration}).find(f=>f.requirement_id===r.id)!;
+ assert.equal(at(481).status,'supported');
+ assert.equal(at(481).excerpt,'8:01');
+ assert.equal(at(481).method,'video_api');
+ assert.equal(at(626).status,'contradicted');
+ assert.equal(at(null).status,'unknown');
+ const verified=decide(c,[at(481)],[]);
+ assert.ok(!verified.unconfirmed.includes(r.id));
+ assert.equal(decide(c,[at(626)],[{id:r.id,status:'supported',field:'title',quote:'short'}]).status,'excluded','a model quote cannot override the known duration');
+});

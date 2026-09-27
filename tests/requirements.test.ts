@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {DRAFT_REQUIRED,DRAFT_SCHEMA,explicitFormats,hardEach,normaliseContract,resolveDates,rulesContract,setRequirements} from '../src/requirements.js';
+import {DRAFT_REQUIRED,DRAFT_SCHEMA,explicitFormats,hardEach,normaliseContract,resolveDates,resolveDuration,rulesContract,setRequirements} from '../src/requirements.js';
 
 const DAY='2026-09-24';
 
@@ -91,4 +91,26 @@ test('model requirements that restate the date phrase or a set without items are
 test('authority requirements are never invented without the word official',()=>{
  const c=normaliseContract('whatsapp chat ui',DAY,{requirements:[{text:'From Meta',kind:'authority',hardness:'hard',scope:'each',evidence:''}],official_domains:['whatsapp.com']});
  assert.ok(!c.requirements.some(r=>r.kind==='authority'));
+});
+
+test('duration limits come from the words of the request, in seconds',()=>{
+ assert.deepEqual(resolveDuration('hindi explainer on how UPI works, under 10 minutes'),{text:'under 10 minutes',max:600});
+ assert.deepEqual(resolveDuration('lecture over an hour on transformers'),{text:'over an hour',min:3600});
+ assert.deepEqual(resolveDuration('talks between 5 and 15 minutes long'),{text:'between 5 and 15 minutes',min:300,max:900});
+ assert.deepEqual(resolveDuration('cat clip shorter than 90 seconds'),{text:'shorter than 90 seconds',max:90});
+ assert.deepEqual(resolveDuration('at least 2 hrs documentary'),{text:'at least 2 hrs',min:7200});
+ assert.equal(resolveDuration('10 minute abs workout'),null,'a bare length names the content, not a limit');
+ assert.equal(resolveDuration('top 10 moments of 2024'),null);
+});
+
+test('a duration limit is a rules requirement and replaces the planner duration requirement',()=>{
+ const c=rulesContract('hindi explainer on how UPI works, under 10 minutes','2026-09-27',{requirements:[
+  {text:'Video duration must be under 10 minutes',kind:'property',hardness:'hard',scope:'each',evidence:'metadata'},
+  {text:'Video must explain how UPI works in Hindi',kind:'subject',hardness:'hard',scope:'each',evidence:'title'}]},'model');
+ const d=c.requirements.filter(r=>r.kind==='duration');
+ assert.equal(d.length,1);
+ assert.deepEqual(d[0]!.duration_range,{max:600});
+ assert.equal(d[0]!.hardness,'hard');
+ assert.ok(!c.requirements.some(r=>r.kind==='property'&&/duration/i.test(r.text)),'the planner copy is dropped');
+ assert.ok(c.requirements.some(r=>r.kind==='subject'));
 });

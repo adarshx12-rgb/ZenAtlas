@@ -377,7 +377,7 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
        if (id && youtube) {
          const d = (await youtube.videos([id]).catch(() => new Map<string,VideoDetails>())).get(id);
          return {findings: inspect(contract, {url: c.url, title: c.title, description: c.description, published_at: c.published_at,
-           video: d ? {publishedAt: d.publishedAt, official: officialChannels.has(d.channelId), channel: d.channelTitle} : undefined}),
+           duration: d?.duration ?? null, video: d ? {publishedAt: d.publishedAt, official: officialChannels.has(d.channelId), channel: d.channelTitle} : undefined}),
            links: d ? descriptionLinks(d.description) : [], title: d?.title ?? c.title, description: d?.description ?? null};
        }
        const page = await checkPage(c.url);

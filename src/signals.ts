@@ -264,7 +264,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
    for (const r of results) {
      const e = extra.get(r.id), d = e?.details;
      const fresh = inspect(contract, {url: r.canonical_url, title: r.title, description: r.description, published_at: r.published_at,
-       page: e?.page, video: d ? {publishedAt: d.publishedAt, official: !!e?.badges.includes('Official channel'), channel: d.channelTitle} : undefined});
+       duration: d?.duration ?? r.duration, page: e?.page, video: d ? {publishedAt: d.publishedAt, official: !!e?.badges.includes('Official channel'), channel: d.channelTitle} : undefined});
      const prior = earlier.filter(f => f.url === r.canonical_url);
      // A fresh inspection supersedes an earlier provisional or unknown finding for the same requirement.
      findings.push(...fresh, ...prior.filter(p => !fresh.some(f => f.requirement_id === p.requirement_id && (f.location.key ?? '') === (p.location.key ?? '')

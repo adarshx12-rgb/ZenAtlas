@@ -11,9 +11,11 @@ export type Format = typeof FORMATS[number];
 const format = z.enum(FORMATS);
 const requirement = z.object({
  id: z.string().regex(/^R\d{1,2}$/), text: z.string().min(1).max(200),
- kind: z.enum(['subject', 'format', 'date', 'authority', 'completeness', 'property']),
+ kind: z.enum(['subject', 'format', 'date', 'duration', 'authority', 'completeness', 'property']),
  hardness: z.enum(['hard', 'preferred']), scope: z.enum(['each', 'set']), evidence: z.string().max(300),
  date_range: z.object({from: z.string(), to: z.string()}).optional(),
+ // Seconds; either bound may be absent ("under 10 minutes" has only max).
+ duration_range: z.object({min: z.number().optional(), max: z.number().optional()}).optional(),
  formats: z.array(format).optional(),
  authority: z.object({entity: z.string(), names: z.array(z.string()).max(6).optional(), domains: z.array(z.string())}).optional(),
  set_items: z.array(z.string().max(80)).max(12).optional(),
@@ -72,6 +74,23 @@ const years = (from: string, to: string) => {
  return out;
 };
 
+// Duration limits the request states in words, in seconds. A bare length ("10 minute abs workout") names the content
+// rather than a limit, so only a comparison word or a range makes one.
+const UNIT = String.raw`(seconds?|secs?|minutes?|mins?|hours?|hrs?)`, AMOUNT = String.raw`(\d+(?:\.\d+)?|an?|one)`;
+const SECONDS: [RegExp, number][] = [[/^s/, 1], [/^m/, 60], [/^h/, 3600]];
+const seconds = (amount: string, unit: string) => (/^\d/.test(amount) ? Number(amount) : 1) * SECONDS.find(([p]) => p.test(unit))![1];
+export function resolveDuration(query: string): {text: string; min?: number; max?: number}|null {
+ const q = query.toLowerCase();
+ const range = new RegExp(String.raw`\bbetween\s+${AMOUNT}\s+and\s+${AMOUNT}\s+${UNIT}\b`).exec(q);
+ if (range) return {text: range[0], min: seconds(range[1], range[3]), max: seconds(range[2], range[3])};
+ const under = new RegExp(String.raw`\b(?:under|less than|shorter than|below|at most|no more than|up to|max(?:imum)?(?: of)?)\s+${AMOUNT}\s+${UNIT}\b`).exec(q);
+ if (under) return {text: under[0], max: seconds(under[1], under[2])};
+ const over = new RegExp(String.raw`\b(?:over|more than|longer than|at least|above|min(?:imum)?(?: of)?)\s+${AMOUNT}\s+${UNIT}\b`).exec(q);
+ if (over) return {text: over[0], min: seconds(over[1], over[2])};
+ return null;
+}
+const DURATION_WORDS = /\b(?:duration|runtime|length|long|minutes?|mins?|seconds?|secs?|hours?|hrs?)\b/i;
+
 // Publication windows the request states in words, resolved against the search date. Bare years ("roswell 1947")
 // usually name the event rather than a publication window, so they are left to the model as subject matter.
 export function resolveDates(query: string, searchDate: string): {text: string; from: string; to: string}|null {
@@ -126,6 +145,10 @@ export function rulesContract(query: string, searchDate: string, draft: Contract
    if (items.length > 1) out.push({text: `Results together cover ${items[0]}–${items.at(-1)}`, kind: 'date', hardness: 'preferred', scope: 'set',
      date_range: {from: dates.from, to: dates.to}, set_items: items, evidence: 'At least one result dated in each year.'});
  }
+ const duration = resolveDuration(query);
+ if (duration) out.push({text: `Duration ${duration.text}`, kind: 'duration', hardness: 'hard', scope: 'each',
+   duration_range: {...(duration.min !== undefined ? {min: duration.min} : {}), ...(duration.max !== undefined ? {max: duration.max} : {})},
+   evidence: 'The duration from the video platform or the file.'});
  if (/\bofficial\b/.test(q)) {
    // When the request names several publishers ("official NASA, ESA and CSA sources"), any one of them is official.
    const listed = draft.requirements?.find(r => r.kind === 'authority' && r.scope === 'set' && r.set_items?.length)?.set_items;
@@ -155,6 +178,8 @@ export function rulesContract(query: string, searchDate: string, draft: Contract
    // A set with nothing to cover checks nothing; a requirement restating the date phrase duplicates the rules' own.
    if (r.scope === 'set' && !r.set_items?.length) continue;
    if (dates && (resolveDates(r.text, searchDate) || r.text.toLowerCase().includes(dates.text))) continue;
+   // The rules check a stated duration against the platform's figure; the model's restatement would need a quote.
+   if (duration && DURATION_WORDS.test(r.text)) continue;
    out.push({text: r.text, kind: r.kind, hardness: r.hardness, scope: r.scope, evidence: r.evidence || 'Stated in the inspected content.',
      ...(r.scope === 'set' && r.set_items?.length ? {set_items: r.set_items.slice(0, 12)} : {})});
  }
