@@ -19,6 +19,7 @@ import { imageSearchInput, searchImages } from './images.js';
 import { searchWeb, webSearchInput } from './web.js';
 import { huntSnapshot, huntState } from './doc-hunt.js';
 import { webReviewSnapshot, webReviewState } from './web-review.js';
+import { imageReviewState } from './image-review.js';
 import { chooseMode, modeDeps } from './mode-router.js';
 import { tierConfig, tierSchema } from './tiers.js';
 import { validWalledToken, walledCached, walledPlan, walledPreview } from './walled.js';
@@ -107,7 +108,12 @@ export async function createApp(db:DB,config:Config) {
  app.get('/api/search',async req=>service.start(req.query,owner(req)));
  // Images are discovery-only, so they need none of the search service's snapshot, polling or
  // deep-dive machinery — one request in, one page of results out.
- app.get('/api/images',async req=>searchImages(db,config,imageSearchInput.parse(req.query)));
+ app.get('/api/images',async req=>{const input=imageSearchInput.parse(req.query);return searchImages(db,tierConfig(config,input.tier),input);});
+ app.get('/api/images/review',async req=>{
+   const state=imageReviewState(z.object({token:z.string().uuid()}).strict().parse(req.query).token);
+   if(!state) throw new ApiError(404,'review_expired','This image check has expired; search again.');
+   return state;
+ });
  // Web pages and documents (PDF, Word, slides…) are discovery-only lists too.
  app.get('/api/web',async req=>{const input=webSearchInput.parse(req.query);return searchWeb(db,tierConfig(config,input.tier),input);});
  // The login-free preview of a login-walled result. Only URLs the engine returned carry a valid token.

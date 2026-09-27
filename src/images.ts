@@ -7,6 +7,10 @@ import { fetchJSON, UpstreamError } from './http.js';
 import { takeBudget } from './budgets.js';
 import { publicURL } from './urls.js';
 import { engineStatus } from './providers.js';
+import { tierSchema } from './tiers.js';
+import { rewriteQuery } from './query-rewrite.js';
+import { aiGenerated, excludesAI, openverseResults, wantsLicense, type ImageLicense } from './image-signals.js';
+import { startImageReview } from './image-review.js';
 
 // Image search is discovery-only: results are returned straight from the engines and never
 // enter the catalogue. The evidence pipeline — transcripts, moments, scene analysis — is
@@ -21,6 +25,7 @@ export const imageSearchInput = z.object({
  limit: z.coerce.number().int().min(1).max(100).default(48),
  language: z.string().regex(/^[a-z]{2,3}(-[A-Za-z]{2,4})?$/).optional(),
  page: z.coerce.number().int().min(1).max(10).default(1),
+ tier: tierSchema,
 }).strict();
 export type ImageSearchInput = z.infer<typeof imageSearchInput>;
 
@@ -28,9 +33,30 @@ export interface ImageResult {
  id: string; title: string; image_url: string; thumbnail: string;
  page_url: string; source_name: string;
  width: number | null; height: number | null; engine: string;
+ // From Openverse, which indexes openly licensed images; absent means the licence is unknown.
+ license?: ImageLicense;
+ // The source marks it AI-generated (an ai-image URL, a "Generative AI" label).
+ ai_generated?: true;
 }
 export interface ImageSearchResponse {
  query: string; results: ImageResult[]; providers: ProviderStatus[]; next_cursor: string | null;
+ // The background review's token (src/image-review.ts), polled at /api/images/review.
+ review?: string; rewrite?: {corrected: string};
+}
+export interface ImageSearchDeps { rewrite?: typeof rewriteQuery; review?: false | ((query: string, images: ImageResult[]) => string | null) }
+
+// Openverse (openly licensed images with their licence), asked beside the engines when enabled and within budget.
+async function openverse(db: DB, config: Config, q: string, page: number): Promise<{results: ImageResult[]; status: ProviderStatus|null}> {
+ if (!config.OPENVERSE_ENABLED) return {results: [], status: null};
+ if (!await takeBudget(db, 'discovery:openverse', config.OPENVERSE_DAILY_BUDGET)) return {results: [], status: null};
+ const url = new URL('https://api.openverse.org/v1/images/');
+ url.search = new URLSearchParams({q, page: String(page), page_size: '20', mature: 'false'}).toString();
+ try {
+   return {results: openverseResults(await fetchJSON(url.href, {trustedOrigin: url.origin, timeoutMs: config.PROVIDER_TIMEOUT_MS, redirects: 0})),
+     status: {provider: 'openverse', status: 'ok', message: 'Openly licensed images came from Openverse.'}};
+ } catch {
+   return {results: [], status: {provider: 'openverse', status: 'unavailable', message: 'Openverse (licensed images) did not answer.'}};
+ }
 }
 
 const engineList = (engines: string) => [...new Set(engines.split(',').map(e => e.trim()).filter(Boolean))];
@@ -60,7 +86,31 @@ function displayTitle(title: unknown, host: string) {
  return looksLikeFile ? host : text.slice(0, 300);
 }
 
-export async function searchImages(db: DB, config: Config, input: ImageSearchInput): Promise<ImageSearchResponse> {
+export async function searchImages(db: DB, config: Config, input: ImageSearchInput, deps: ImageSearchDeps = {}): Promise<ImageSearchResponse> {
+ // What was meant rather than what was typed, as on the Web tab (the planner step for images).
+ const rewrite = await (deps.rewrite ?? rewriteQuery)(db, config, input.q, 'web').catch(() => null);
+ const q = rewrite?.corrected ?? input.q;
+ const licensed = openverse(db, config, q, input.page);
+ const found = await engineImages(db, config, {...input, q});
+ const extra = await licensed;
+ const seen = new Set(found.results.map(r => r.image_url));
+ const fresh = extra.results.filter(r => !seen.has(r.image_url));
+ // A request about licences puts licensed images first; otherwise they follow the engines' results.
+ let results = wantsLicense(input.q) ? [...fresh, ...found.results] : [...found.results, ...fresh];
+ results = results.map(r => aiGenerated(r.page_url, r.title) ? {...r, ai_generated: true as const} : r);
+ const providers = [...found.providers, ...(extra.status ? [extra.status] : [])];
+ if (excludesAI(input.q)) {
+   const before = results.length;
+   results = results.filter(r => !r.ai_generated);
+   if (before > results.length) providers.push({provider: 'ai_filter', status: 'ok', message: `${before - results.length} images their source marks as AI-generated were left out.`});
+ }
+ results = results.slice(0, input.limit);
+ const review = deps.review === false ? null : (deps.review ?? ((query, list) => startImageReview(db, config, query, list)))(q, results);
+ return {...found, results, providers, next_cursor: found.next_cursor ?? (results.length ? String(input.page + 1) : null),
+   ...(review ? {review} : {}), ...(rewrite?.changed ? {rewrite: {corrected: rewrite.corrected}} : {})};
+}
+
+async function engineImages(db: DB, config: Config, input: ImageSearchInput): Promise<ImageSearchResponse> {
  const engines = engineList(config.SEARXNG_IMAGE_ENGINES);
  if (!config.SEARXNG_BASE_URL || !engines.length) {
    return {query: input.q, results: [], next_cursor: null,

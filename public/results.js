@@ -330,8 +330,37 @@ function imageTile(item){
  // so skip the title line when it would just repeat the host below it.
  if(item.title&&item.title!==item.source_name)meta.append(node('span',item.title,'image-tile-title'));
  meta.append(node('span',item.source_name,'image-tile-host'));
+ // Licence from Openverse, with its attribution to copy; an AI-generated label only when the source says so.
+ if(item.license){const b=node('span',item.license.name,'image-tile-badge');b.title=item.license.attribution??`${item.license.name}${item.license.creator?` · ${item.license.creator}`:''}`;meta.append(b);}
+ if(item.ai_generated){const b=node('span','AI-generated (per source)','image-tile-badge image-tile-badge--ai');b.title='The page or its title marks this image as AI-generated.';meta.append(b);}
  tile.append(meta);
+ tile.dataset.id=item.id;
  return tile;
+}
+// The Images tab's review, polled until it completes: images the judge did not see matching the request are removed,
+// the rest ordered as it ranked them, each with its reason on hover. A failed or expired poll leaves the images as they are.
+async function followImageReview(token,page,review){
+ const settle=()=>{if(controller.current(token.generation))status.textContent=status.textContent.replace(' · checking images…','');};
+ for(let polls=0;polls<50;polls++){
+  await new Promise(resolve=>setTimeout(resolve,1500));
+  if(!controller.current(token.generation))return;
+  let snap;
+  try{snap=await api(`/api/images/review?token=${encodeURIComponent(review)}`,{signal:token.signal});}catch{settle();return;}
+  if(!controller.current(token.generation))return;
+  if(snap.status!=='complete')continue;
+  const tiles=new Map([...imageGrid.querySelectorAll(`.image-tile[data-page="${page}"]`)].map(t=>[t.dataset.id,t]));
+  const byId=new Map(snap.results.map(r=>[r.id,r]));
+  let before=[...tiles.values()][0]?.previousElementSibling??null;
+  for(const [id,tile] of tiles)if(!byId.has(id))tile.remove();
+  for(const r of snap.results){const tile=tiles.get(r.id);if(!tile)continue;
+   if(r.judgement)tile.title=`Why this matches (${r.judgement.relevance}/10): ${r.judgement.reason}`;
+   if(before)before.after(tile);else imageGrid.prepend(tile);before=tile;}
+  for(const p of snap.providers)if(p.status!=='ok')notices.append(node('p',p.message,'notice'));
+  const count=imageGrid.children.length;
+  status.textContent=count?`${count} ${count===1?'image':'images'}${levelTag()}${snap.removed?` · ${snap.removed} removed as not matching`:''}`:'No image matched the request. Try another query.';
+  return;
+ }
+ settle();
 }
 
 async function searchImagesPage(token,append){
@@ -340,15 +369,19 @@ async function searchImagesPage(token,append){
  query.set('limit',String(IMAGE_PAGE));query.set('page',String(imagePage));
  const language=form.elements.namedItem('language')?.value;
  if(language)query.set('language',language);
+ if(level.get()==='ssj1')query.set('tier','ssj1');
+ const page=imagePage;
  const data=await api(`/api/images?${query}`,{signal:token.signal});
  if(!controller.current(token.generation))return;
  if(!append)imageGrid.replaceChildren();
  const tiles=data.results.map(imageTile).filter(Boolean);
+ for(const t of tiles)t.dataset.page=String(page);
  imageGrid.append(...tiles);
  notices.replaceChildren(...data.providers.filter(p=>p.status!=='ok').map(p=>node('p',p.message,'notice')));
  imageMore.hidden=!data.next_cursor||!data.results.length;
  const count=imageGrid.children.length;
- status.textContent=count?`${count} ${count===1?'image':'images'}`:'No images found. Try another query.';
+ status.textContent=count?`${count} ${count===1?'image':'images'}${levelTag()}${data.review?' · checking images…':''}`:'No images found. Try another query.';
+ if(data.review)void followImageReview(token,page,data.review);
 }
 
 async function runImageSearch(){
