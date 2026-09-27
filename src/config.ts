@@ -83,6 +83,16 @@ export const configSchema = z.object({
   // skip the Checker for verdicts at COUNCIL_SURE_SCORE or above. The Checker stays gpt-5.6-terra: on labelled cases
   // (2026-09-26) it scored 93-99% against gpt-5.6-luna's 70-76%, and on 2026-09-27 luna's extra disputes cost more Chair
   // calls than its lower price saved. A gap of 2 sent about a third of checked pages to the Chair.
+  // Which second stage re-checks the judge (docs/superpowers/specs/2026-09-27-judge-cascade-design.md): the cascade
+  // (src/cascade.ts: one Strong judge on uncertain verdicts only) or the council below. council is kept as a way back.
+  JUDGE_ARCHITECTURE: z.enum(['cascade', 'council']).default('cascade'),
+  // Cascade: the Strong judge re-judges verdicts scored CASCADE_BORDER_LOW-HIGH, in conflict with Jev's quoted evidence,
+  // or above the border without a grounded quote, plus JEV_SETTLED_AUDIT_RATE of Jev's settles. gpt-5.6-terra: 93-99% on
+  // labelled cases (2026-09-26); with flash-lite scoring first it scored 100% labels at 60% of the council's cost.
+  CASCADE_STRONG_MODELS: z.string().regex(/^[\w.,\/:\s-]*$/).default('openai/gpt-5.6-terra,mistralai/mistral-medium-3.1,openai/gpt-5.4-mini'),
+  CASCADE_STRONG_TIMEOUT_MS: number(35000, 5000, 120000), CASCADE_STRONG_DAILY_BUDGET: number(1500, 0, 100000),
+  CASCADE_BORDER_LOW: number(4, 0, 10), CASCADE_BORDER_HIGH: number(7, 0, 10),
+  JEV_SETTLED_AUDIT_RATE: z.coerce.number().min(0).max(1).default(0.1),
   COUNCIL_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
   // Chosen by the 2026-09-26 seat benchmarks (scripts/council-bench.ts): gpt-5.6-terra was most accurate (99% labels, 94%
   // ordered pairs) and steady at ~7 s; mistral-medium-3.1 (another provider, cheapest of the accurate ones) and
@@ -111,6 +121,9 @@ export const configSchema = z.object({
   // SSJ1 puts first; SSJ3's own models follow them as backups (chosen 2026-09-27, see docs/superpowers/specs).
   TIER: z.enum(['ssj3', 'ssj1']).default('ssj3'),
   SSJ1_JUDGE_MODELS: z.string().regex(/^[\w.,\/:\s-]*$/).default('google/gemini-2.5-flash-lite'),
+  // SSJ1 Strong judge: gemini-3.5-flash-lite (97-98% labels, ~5 s, $0.005 a call on 2026-09-26), a step above SSJ1's
+  // gemini-2.5-flash-lite Scorer; claude-haiku-4.5 (98%) behind it, then SSJ3's list.
+  SSJ1_CASCADE_STRONG_MODELS: z.string().regex(/^[\w.,\/:\s-]*$/).default('google/gemini-3.5-flash-lite,anthropic/claude-haiku-4.5'),
   SSJ1_COUNCIL_CHECKER_MODELS: z.string().regex(/^[\w.,\/:\s-]*$/).default('openai/gpt-5.6-luna'),
   SSJ1_COUNCIL_CHAIR_MODELS: z.string().regex(/^[\w.,\/:\s-]*$/).default('anthropic/claude-haiku-4.5'),
   SSJ1_CRITIC_MODEL: z.string().regex(/^[\w.\/:-]{1,100}$/).default('anthropic/claude-haiku-4.5'),

@@ -8,6 +8,7 @@ import { makeJevJudge } from './jev-judge.js';
 import { makeScreener, type Screener } from './screener.js';
 import { reviewResults, type ReviewOutcome } from './review.js';
 import { makeCouncil, type CouncilSeats } from './council.js';
+import { cascadeOptions, makeStrongJudge } from './cascade.js';
 import type { WebResult } from './web.js';
 
 // The Web tab's relevance review, run in the background after /api/web answers with the search results. Every page is
@@ -16,7 +17,7 @@ import type { WebResult } from './web.js';
 // /api/web/review with the token. Unreadable pages are judged on their title and snippet: many good sites block reads.
 
 export interface WebReviewState { status: 'running'|'complete'; results: WebResult[]; removed: number; providers: ProviderStatus[] }
-export type WebReviewDeps = {judge?: Judge; pages?: PageCheck; screener?: Screener; council?: CouncilSeats|null; log?: (line: Record<string, unknown>) => void};
+export type WebReviewDeps = {judge?: Judge; pages?: PageCheck; screener?: Screener; council?: CouncilSeats|null; strong?: Judge|null; log?: (line: Record<string, unknown>) => void};
 // A results page holds about 20 results, at most about 40: all are read and judged.
 const WEB_POOL = 40, READS = 6;
 const CRITERIA = ['A web page that itself answers, explains or provides what the request asks for',
@@ -48,7 +49,9 @@ export async function reviewWeb(db: DB, config: Config, query: string, results: 
    return new Map(text);
  };
  const out = await reviewResults(query, results, {noun: 'pages', criteria: CRITERIA, textPool: WEB_POOL, reviewPool: WEB_POOL, read, judge: deps.judge,
-   council: 'council' in deps ? deps.council : makeCouncil(db, config), councilTop: config.COUNCIL_CHECK_TOP, councilGap: config.COUNCIL_DISAGREEMENT, councilSure: config.COUNCIL_SURE_SCORE,
+   // A council passed in (tests) keeps the council; otherwise JUDGE_ARCHITECTURE picks the second stage.
+   council: 'council' in deps ? deps.council : config.JUDGE_ARCHITECTURE === 'council' ? makeCouncil(db, config) : null,
+   strong: 'strong' in deps ? deps.strong : 'council' in deps ? null : makeStrongJudge(db, config), cascade: cascadeOptions(config), councilTop: config.COUNCIL_CHECK_TOP, councilGap: config.COUNCIL_DISAGREEMENT, councilSure: config.COUNCIL_SURE_SCORE,
    screener: 'screener' in deps ? deps.screener : makeScreener(db, config), keepUnjudged: true,
    requirement: {text: `The page itself is what the request asks for: "${query.slice(0, 150)}" (its subject and intent as stated)`,
      evidence: 'The page text, title or snippet shows its subject.'}});

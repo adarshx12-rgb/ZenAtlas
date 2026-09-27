@@ -2,7 +2,7 @@ import { z } from 'zod';
 import type { Config } from './config.js';
 
 // Model tiers. SSJ3 is the full model architecture; SSJ1 runs the same roles (planner, Jev, judge, council, critic,
-// router, query rewrite) on lower-cost models. A search carries its tier, and tierConfig gives it the settings to run
+// router, query rewrite, cascade) on lower-cost models. A search carries its tier, and tierConfig gives it the settings to run
 // with: every role builds its model client from the config it is handed, so no role knows about tiers. Work stored and
 // shared by every search (scene analysis, transcripts, embeddings) always uses the base settings.
 export const TIERS = ['ssj3', 'ssj1'] as const;
@@ -18,6 +18,7 @@ export function tierConfig(config: Config, tier: Tier): Config {
  if (tier === 'ssj3') return config;
  return {...config, TIER: 'ssj1',
    JUDGE_MODELS: first(config.SSJ1_JUDGE_MODELS, config.JUDGE_MODELS),
+   CASCADE_STRONG_MODELS: first(config.SSJ1_CASCADE_STRONG_MODELS, config.CASCADE_STRONG_MODELS),
    COUNCIL_CHECKER_MODELS: first(config.SSJ1_COUNCIL_CHECKER_MODELS, config.COUNCIL_CHECKER_MODELS),
    COUNCIL_CHAIR_MODELS: first(config.SSJ1_COUNCIL_CHAIR_MODELS, config.COUNCIL_CHAIR_MODELS),
    CRITIC_MODEL: config.SSJ1_CRITIC_MODEL, CRITIC_REVIEW_MODEL: config.SSJ1_CRITIC_REVIEW_MODEL,

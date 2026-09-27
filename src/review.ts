@@ -4,6 +4,7 @@ import type { Judge, JudgeCandidate, JudgeResult, Verdict } from './judge.js';
 import { screeningOrder, type Screener } from './screener.js';
 import { accessKind } from './access.js';
 import { councilReview, type CouncilSeats } from './council.js';
+import { cascadeReview, type CascadeOptions } from './cascade.js';
 
 // The relevance review shared by the Docs and Web tabs: the screener orders long lists, the caller reads the text of the
 // first textPool items, then the judge (Jev in front of the LLM judge) scores up to reviewPool items. Items at relevance 4
@@ -16,7 +17,9 @@ export interface ReviewPlan<T extends Reviewable> { noun: string; criteria: stri
  textPool: number; reviewPool: number; read: (items: T[]) => Promise<Map<string, PageEvidence>>; judge: Judge; screener?: Screener; keepUnjudged: boolean;
  // The judge council's Checker and Chair (src/council.ts), re-checking the top councilTop verdicts; absent or null: one judge.
  // councilGap: score gap that counts as a dispute; councilSure: scores that skip the Checker (src/council.ts).
- council?: CouncilSeats|null; councilTop?: number; councilGap?: number; councilSure?: number; log?: (line: Record<string, unknown>) => void }
+ council?: CouncilSeats|null; councilTop?: number; councilGap?: number; councilSure?: number;
+ // The judge cascade's Strong judge and settings (src/cascade.ts), used in place of the council when given.
+ strong?: Judge|null; cascade?: CascadeOptions; log?: (line: Record<string, unknown>) => void }
 // trace: per judged item, the judge's relevance and Jev's record, for metrics.
 // lead: the item's own text could not be read, so it was judged on its title and snippet only: a lead, not a verified match.
 export interface ReviewOutcome<T> { results: (T & {judgement?: Judgement; lead?: true})[]; removed: number; providers: ProviderStatus[];
@@ -52,7 +55,11 @@ export async function reviewResults<T extends Reviewable>(query: string, items: 
    providers.push({provider: 'judge', status: 'unavailable', message: `Relevance checking is unavailable right now; ${plan.noun} are shown in search order.`});
    return {results: items, removed: 0, providers, trace: []};
  }
- if (plan.council) {
+ if (plan.strong && plan.cascade) {
+   const reviewed = await cascadeReview(query, candidates, out.verdicts, out.jev, context, undefined, plan.strong, {...plan.cascade, log: plan.log ?? plan.cascade.log});
+   out = {...out, verdicts: reviewed.verdicts};
+   providers.push(...reviewed.providers);
+ } else if (plan.council) {
    const reviewed = await councilReview(query, candidates, out.verdicts, context, undefined, plan.council, {top: plan.councilTop ?? 15, disagreement: plan.councilGap, sureScore: plan.councilSure, log: plan.log});
    out = {...out, verdicts: reviewed.verdicts};
    providers.push(...reviewed.providers);

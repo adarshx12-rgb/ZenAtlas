@@ -8,6 +8,7 @@ import { takeBudget } from './budgets.js';
 import { YouTubeData, youtubeId, type VideoDetails, type ViewerComment, type YouTubeClient } from './youtube.js';
 import { makeJudge, type Judge, type JudgeCandidate, type JudgeContext, type JudgeResult, type Verdict } from './judge.js';
 import { councilReview, makeCouncil, type CouncilSeats } from './council.js';
+import { cascadeOptions, cascadeReview, makeStrongJudge } from './cascade.js';
 import { PageChecker, type PageCheck, type PageEvidence } from './pages.js';
 import type { SearchTarget } from './planner.js';
 import {PublicVideoEvidence,selectComments,type VideoEvidenceAdapter,type VideoEvidence} from './video-evidence.js';
@@ -27,9 +28,10 @@ const LEAD_IN_SECONDS = 5;
 export interface TimestampMention { commentId: string; seconds: number; excerpt: string; likes: number; weight: number }
 export interface MomentCluster { start: number; end: number; score: number; mentions: TimestampMention[] }
 export interface Discussion { title: string; url: string; snippet: string|null }
-// council: the judge council's Checker and Chair (src/council.ts); null turns it off, absent builds it from settings.
+// council: the judge council's Checker and Chair (src/council.ts); null turns it off, absent builds it from settings when
+// JUDGE_ARCHITECTURE is council. strong: the cascade's Strong judge (src/cascade.ts); absent builds it unless a council is given.
 // captions: fetches captions during a moment search (src/captions.ts); null turns it off, absent builds it from settings.
-export interface SignalDeps { youtube?: YouTubeClient; judge?: Judge; council?: CouncilSeats|null; captions?: CaptionFetcher|null; pages?: PageCheck; videoEvidence?:VideoEvidenceAdapter; discussions?: (query: string) => Promise<Discussion[]> }
+export interface SignalDeps { youtube?: YouTubeClient; judge?: Judge; council?: CouncilSeats|null; strong?: Judge|null; captions?: CaptionFetcher|null; pages?: PageCheck; videoEvidence?:VideoEvidenceAdapter; discussions?: (query: string) => Promise<Discussion[]> }
 // What the search plan wanted, and which kind of search found each result (by result id).
 // underrated is retained for callers; obscurity is a badge, never a ranking boost.
 // contract: the search's shared requirements; findings: evidence already gathered for these candidates (exploration).
@@ -332,9 +334,16 @@ export async function applySignals(db: DB, config: Config, query: string, result
    // Lighter fallback models often skip candidates in long batches; the skipped ones are asked once more in short batches.
    const skipped = settled.flatMap(s => s.status === 'fulfilled' ? s.value.batch.filter(c => !byKey.has(c.key)) : []);
    if (skipped.length) collect(await judgeAll(skipped, RETRY_BATCH));
-   // The council re-checks the top verdicts across all batches: a second opinion, and a Chair where the two disagree.
-   const council = 'council' in deps ? deps.council : makeCouncil(db, config);
-   if (council && byKey.size) {
+   // The second stage re-checks verdicts across all batches: the cascade sends only uncertain ones to one Strong judge;
+   // the council (JUDGE_ARCHITECTURE=council) re-checks the top ones, with a Chair where the two disagree.
+   const council = 'council' in deps ? deps.council : config.JUDGE_ARCHITECTURE === 'council' ? makeCouncil(db, config) : null;
+   const strong = 'strong' in deps ? deps.strong : 'council' in deps ? null : makeStrongJudge(db, config);
+   if (strong && byKey.size) {
+     const jevByKey = new Map([...keys].flatMap(([id, key]) => jevRecords.has(id) ? [[key, jevRecords.get(id)] as const] : []));
+     const reviewed = await cascadeReview(query, candidates, byKey, jevByKey, judgeContext, screenshots, strong, cascadeOptions(config));
+     for (const [key, v] of reviewed.verdicts) byKey.set(key, v);
+     providers.push(...reviewed.providers);
+   } else if (council && byKey.size) {
      const reviewed = await councilReview(query, candidates, byKey, judgeContext, screenshots, council,
        {top: config.COUNCIL_CHECK_TOP, disagreement: config.COUNCIL_VIDEO_DISAGREEMENT, chairTop: config.COUNCIL_VIDEO_CHAIR_TOP});
      for (const [key, v] of reviewed.verdicts) byKey.set(key, v);

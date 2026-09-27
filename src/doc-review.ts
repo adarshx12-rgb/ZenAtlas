@@ -11,6 +11,7 @@ import type { WebResult } from './web.js';
 import { viewerOf } from './doc-viewers.js';
 import { reviewResults } from './review.js';
 import { makeCouncil } from './council.js';
+import { cascadeOptions, makeStrongJudge } from './cascade.js';
 
 // Checking documents for the Docs tab. Verification (inside the search request) removes spam links, dead links and pages
 // posing as documents, reading only the first 4 KB of each file. Review (during the document hunt, src/doc-hunt.ts)
@@ -122,7 +123,8 @@ export async function reviewDocuments(db: DB, config: Config, query: string, doc
    return new Map(text);
  };
  const out = await reviewResults(query, docs, {noun: 'documents', textPool: TEXT_POOL, reviewPool: REVIEW_POOL, read, judge, keepUnjudged: false,
-   council: 'judge' in deps ? null : makeCouncil(db, config), councilTop: config.COUNCIL_CHECK_TOP, councilGap: config.COUNCIL_DISAGREEMENT, councilSure: config.COUNCIL_SURE_SCORE,
+   council: 'judge' in deps || config.JUDGE_ARCHITECTURE !== 'council' ? null : makeCouncil(db, config),
+   strong: 'judge' in deps ? null : makeStrongJudge(db, config), cascade: cascadeOptions(config), councilTop: config.COUNCIL_CHECK_TOP, councilGap: config.COUNCIL_DISAGREEMENT, councilSure: config.COUNCIL_SURE_SCORE,
    screener: 'screener' in deps ? deps.screener : makeScreener(db, config),
    criteria: ['A document file that is itself what the request asks for',
      'When the request is ambiguous (a name and a year can mean a book, an issue or a newspaper), a document that genuinely fits any reasonable reading matches; a different edition or year does not',
