@@ -79,7 +79,10 @@ export const configSchema = z.object({
   WALLED_PREVIEW_DAILY_BUDGET: number(3000, 0, 100000),
   REDDIT_CLIENT_ID: optional, REDDIT_CLIENT_SECRET: optional,
   // Judge council (src/council.ts): a Checker from another provider re-scores the top COUNCIL_CHECK_TOP; a Chair decides
-  // where the two disagree by COUNCIL_DISAGREEMENT or more. Each seat: main model first, then its fallbacks.
+  // where the two disagree by COUNCIL_DISAGREEMENT or more. Each seat: main model first, then its fallbacks. Web and Docs
+  // skip the Checker for verdicts at COUNCIL_SURE_SCORE or above. The Checker stays gpt-5.6-terra: on labelled cases
+  // (2026-09-26) it scored 93-99% against gpt-5.6-luna's 70-76%, and on 2026-09-27 luna's extra disputes cost more Chair
+  // calls than its lower price saved. A gap of 2 sent about a third of checked pages to the Chair.
   COUNCIL_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
   // Chosen by the 2026-09-26 seat benchmarks (scripts/council-bench.ts): gpt-5.6-terra was most accurate (99% labels, 94%
   // ordered pairs) and steady at ~7 s; mistral-medium-3.1 (another provider, cheapest of the accurate ones) and
@@ -87,7 +90,7 @@ export const configSchema = z.object({
   COUNCIL_CHECKER_MODELS: z.string().regex(/^[\w.,\/:\s-]*$/).default('openai/gpt-5.6-terra,mistralai/mistral-medium-3.1,openai/gpt-5.4-mini'),
   COUNCIL_CHECKER_TIMEOUT_MS: number(35000, 5000, 120000), COUNCIL_CHAIR_TIMEOUT_MS: number(45000, 5000, 120000),
   COUNCIL_CHAIR_MODELS: z.string().regex(/^[\w.,\/:\s-]*$/).default('anthropic/claude-sonnet-5,google/gemini-3.1-pro-preview'),
-  COUNCIL_CHECK_TOP: number(15, 5, 30), COUNCIL_DISAGREEMENT: number(2, 1, 5),
+  COUNCIL_CHECK_TOP: number(15, 5, 30), COUNCIL_DISAGREEMENT: number(3, 1, 5), COUNCIL_SURE_SCORE: number(8, 5, 11),
   // Video searches: a wider gap before a dispute, and the Chair only for disputes among the top candidates.
   COUNCIL_VIDEO_DISAGREEMENT: number(3, 1, 5), COUNCIL_VIDEO_CHAIR_TOP: number(5, 1, 30),
   COUNCIL_CHECKER_DAILY_BUDGET: number(1500, 0, 100000), COUNCIL_CHAIR_DAILY_BUDGET: number(400, 0, 100000),

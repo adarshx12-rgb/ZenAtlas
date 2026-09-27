@@ -13,7 +13,9 @@ export interface CouncilSeats { checker?: Judge; chair?: Judge }
 export interface CouncilRecord { scorer: number; checker?: number; chair?: number; disputed: boolean }
 // chairTop: only disputes among this many of the highest-scored candidates go to the Chair; the rest keep the mean of the
 // two scores (video searches, where long comment threads make the judges disagree often and the Chair took 64-90 s).
-export interface CouncilOptions { top: number; disagreement?: number; chairTop?: number; log?: (line: Record<string, unknown>) => void }
+// sureScore: verdicts scored this high or higher keep the Scorer's word unchecked (Web and Docs): measured on 2026-09-27,
+// the council's disputes rarely changed which pages were kept, and each check of a sure verdict still cost a Checker call.
+export interface CouncilOptions { top: number; disagreement?: number; chairTop?: number; sureScore?: number; log?: (line: Record<string, unknown>) => void }
 // Small batches in parallel: measured on 2026-09-26, the Checker answers 5 candidates in about 16 s but timed out on 15
 // in one call, and the Chair (which reasons first) timed out on 6-10 disputes at once.
 const CHECK_BATCH = 5, CHAIR_BATCH = 3;
@@ -60,7 +62,7 @@ export async function councilReview(query: string, candidates: JudgeCandidate[],
  const verdicts = new Map(scored), records = new Map<string, CouncilRecord>(), providers: ProviderStatus[] = [];
  const log = options.log ?? (line => process.stdout.write(`${JSON.stringify(line)}\n`));
  const byKey = new Map(candidates.map(c => [c.key, c]));
- const top = [...scored.values()].filter(v => v.relevance >= 3 && byKey.has(v.key))
+ const top = [...scored.values()].filter(v => v.relevance >= 3 && v.relevance < (options.sureScore ?? Infinity) && byKey.has(v.key))
    .sort((a, b) => b.relevance - a.relevance).slice(0, options.top).map(v => byKey.get(v.key)!);
  if (!seats.checker || !top.length) return {verdicts, records, providers};
  const started = Date.now();

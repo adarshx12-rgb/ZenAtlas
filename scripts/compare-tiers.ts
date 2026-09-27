@@ -6,6 +6,8 @@
 // model then scores every kept result 0-2, blind to the tier: both tiers' results for a query are pooled, shuffled
 // and graded together. Council lines from the PM2 logs give each tier's checker agreement.
 // Run: node --env-file-if-exists=.env --import tsx scripts/compare-tiers.ts   (nothing else should search meanwhile)
+// Narrower reruns: COMPARE_TIERS=ssj3 COMPARE_KINDS=web,docs COMPARE_LABEL=ssj3-lean COMPARE_WITH=output/<earlier>.json runs
+// only those, labels the new rows, and grades them in one blind pool with the earlier file's rows for the same queries.
 import { execSync } from 'node:child_process';
 import { readFileSync, statSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
@@ -71,16 +73,20 @@ const judgeUsed = Number(psql(`SELECT coalesce(max(used),0) FROM budgets WHERE b
 if (judgeUsed > Number(process.env.JUDGE_DAILY_BUDGET ?? 1000) - 300) throw new Error(`judge_calls budget nearly spent today (${judgeUsed} used)`);
 const logStart = LOGS.map(f => statSync(f).size);
 const rows: any[] = [];
-for (const {q, kind} of QUERIES) for (const tier of ['ssj3', 'ssj1']) {
+const TIERS_RUN = (process.env.COMPARE_TIERS ?? 'ssj3,ssj1').split(','), KINDS = (process.env.COMPARE_KINDS ?? 'web,docs,videos').split(',');
+const LABEL = process.env.COMPARE_LABEL, RUN = QUERIES.filter(x => KINDS.includes(x.kind));
+for (const {q, kind} of RUN) for (const tier of TIERS_RUN) {
  const start = offsets(), started = Date.now();
  const kept = kind === 'videos' ? await videos(q, tier) : await webOrDocs(q, kind, tier);
  const ms = Date.now() - started; await sleep(3000); const {cost, calls, byRole} = costSince(start, tier);
- rows.push({q, kind, tier, kept: kept.length, ms, cost_usd: Number(cost.toFixed(6)), calls, by_role: byRole, items: kept.slice(0, 15)});
+ rows.push({q, kind, tier: LABEL ?? tier, kept: kept.length, ms, cost_usd: Number(cost.toFixed(6)), calls, by_role: byRole, items: kept.slice(0, 15)});
  // Web and Docs reviews always call the judge; none logged means it fell back, so this row does not measure the tier.
  if (kind !== 'videos' && kept.length && !byRole.judge_calls) console.log(`  WARNING: no judge cost logged for this search (judge fallback?)`);
  console.log(`${tier} ${kind.padEnd(6)} "${q}": ${kept.length} kept, ${(ms / 1000).toFixed(1)} s, $${cost.toFixed(4)} (${calls} calls ${JSON.stringify(byRole)})`);
 }
-for (const {q} of QUERIES) {
+const earlier = process.env.COMPARE_WITH ? (JSON.parse(readFileSync(process.env.COMPARE_WITH, 'utf8')).rows as any[]).filter(r => RUN.some(x => x.q === r.q)) : [];
+rows.push(...earlier);
+for (const {q} of RUN) {
  const mine = rows.filter(r => r.q === q);
  const pool = [...new Map(mine.flatMap(r => r.items).map((x: Kept) => [x.url, x])).values()].sort(() => Math.random() - 0.5) as Kept[];
  const scores = await grade(q, pool), byUrl = new Map(pool.map((x, i) => [x.url, scores[i]]));

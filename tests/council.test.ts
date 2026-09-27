@@ -77,6 +77,7 @@ test('seats come from settings; the checker never reuses a scorer model',()=>{
  assert.equal((seats.chair as any).client.config.JUDGE_TIMEOUT_MS,config.COUNCIL_CHAIR_TIMEOUT_MS);
  assert.deepEqual([testConfig.COUNCIL_CHECKER_MODELS,testConfig.COUNCIL_CHECKER_TIMEOUT_MS,testConfig.COUNCIL_CHAIR_TIMEOUT_MS],
   ['openai/gpt-5.6-terra,mistralai/mistral-medium-3.1,openai/gpt-5.4-mini',35000,45000],'defaults chosen by the 2026-09-26 seat benchmarks');
+ assert.deepEqual([testConfig.COUNCIL_DISAGREEMENT,testConfig.COUNCIL_SURE_SCORE],[3,8]);
  assert.equal(makeCouncil({} as any,{...config,COUNCIL_ENABLED:false}),null);
  assert.equal(makeCouncil({} as any,{...config,OPENROUTER_API_KEY:''}),null);
 });
@@ -136,4 +137,26 @@ test('video searches send only disputes among the top candidates to the chair; t
  assert.equal(out.verdicts.get('d')!.relevance,4);
  const gap=await councilReview('q',['a'].map(cand),new Map([['a',v('a',9)]]),undefined,undefined,{checker:seat({a:7}),chair},{top:15,disagreement:3,...quiet});
  assert.equal(gap.verdicts.get('a')!.relevance,8,'a 2-point gap is not a dispute at threshold 3');
+});
+
+test('verdicts at or above the sure score skip the checker and keep the scorer verdict',async()=>{
+ const candidates=['a','b','c'].map(cand);
+ const scorer=new Map([['a',v('a',9)],['b',v('b',8)],['c',v('c',5)]]);
+ const seen:JudgeCandidate[][]=[];
+ const out=await councilReview('q',candidates,scorer,undefined,undefined,{checker:seat({a:2,b:2,c:5},seen)},{top:15,sureScore:8,...quiet});
+ assert.deepEqual(seen.flat().map(c=>c.key),['c'],'only the borderline verdict is checked');
+ assert.equal(out.verdicts.get('a')!.relevance,9);
+ assert.equal(out.verdicts.get('b')!.relevance,8);
+});
+
+test('Docs and Web reviews use the configured disagreement gap and sure score',async()=>{
+ const {reviewResults}=await import('../src/review.js');
+ const item=(n:number)=>({url:`https://s${n}.example/p`,title:`Page ${n}`,source_name:`s${n}.example`,snippet:null,published:null,engine:'brave',doc_type:null});
+ const judge:Judge={async judge(_q,cs){return {model:'scorer',verdicts:new Map(cs.map(c=>[c.key,v(c.key,c.title==='Page 1'?9:7)]))};}};
+ const seen:JudgeCandidate[][]=[], chairSaw:JudgeCandidate[][]=[];
+ await reviewResults('q',[item(1),item(2)],{noun:'pages',criteria:[],requirement:{text:'R',evidence:'E'},textPool:40,reviewPool:40,
+  read:async()=>new Map(),judge,keepUnjudged:true,council:{checker:seat({d1:9,d2:5},seen,'checker'),chair:seat({d2:6},chairSaw,'chair')},
+  councilTop:15,councilGap:3,councilSure:8,log:()=>{}} as any);
+ assert.deepEqual(seen.flat().map(c=>c.key),['d2'],'page 1 (9) is sure and skips the checker');
+ assert.equal(chairSaw.length,0,'7 vs 5 is within a gap of 3, so no chair');
 });

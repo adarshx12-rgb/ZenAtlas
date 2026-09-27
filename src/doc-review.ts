@@ -122,7 +122,7 @@ export async function reviewDocuments(db: DB, config: Config, query: string, doc
    return new Map(text);
  };
  const out = await reviewResults(query, docs, {noun: 'documents', textPool: TEXT_POOL, reviewPool: REVIEW_POOL, read, judge, keepUnjudged: false,
-   council: 'judge' in deps ? null : makeCouncil(db, config), councilTop: config.COUNCIL_CHECK_TOP,
+   council: 'judge' in deps ? null : makeCouncil(db, config), councilTop: config.COUNCIL_CHECK_TOP, councilGap: config.COUNCIL_DISAGREEMENT, councilSure: config.COUNCIL_SURE_SCORE,
    screener: 'screener' in deps ? deps.screener : makeScreener(db, config),
    criteria: ['A document file that is itself what the request asks for',
      'When the request is ambiguous (a name and a year can mean a book, an issue or a newspaper), a document that genuinely fits any reasonable reading matches; a different edition or year does not',

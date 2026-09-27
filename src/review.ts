@@ -15,7 +15,8 @@ export type Judgement = {relevance: number; reason: string};
 export interface ReviewPlan<T extends Reviewable> { noun: string; criteria: string[]; requirement: {text: string; evidence: string};
  textPool: number; reviewPool: number; read: (items: T[]) => Promise<Map<string, PageEvidence>>; judge: Judge; screener?: Screener; keepUnjudged: boolean;
  // The judge council's Checker and Chair (src/council.ts), re-checking the top councilTop verdicts; absent or null: one judge.
- council?: CouncilSeats|null; councilTop?: number; log?: (line: Record<string, unknown>) => void }
+ // councilGap: score gap that counts as a dispute; councilSure: scores that skip the Checker (src/council.ts).
+ council?: CouncilSeats|null; councilTop?: number; councilGap?: number; councilSure?: number; log?: (line: Record<string, unknown>) => void }
 // trace: per judged item, the judge's relevance and Jev's record, for metrics.
 // lead: the item's own text could not be read, so it was judged on its title and snippet only: a lead, not a verified match.
 export interface ReviewOutcome<T> { results: (T & {judgement?: Judgement; lead?: true})[]; removed: number; providers: ProviderStatus[];
@@ -52,7 +53,7 @@ export async function reviewResults<T extends Reviewable>(query: string, items: 
    return {results: items, removed: 0, providers, trace: []};
  }
  if (plan.council) {
-   const reviewed = await councilReview(query, candidates, out.verdicts, context, undefined, plan.council, {top: plan.councilTop ?? 15, log: plan.log});
+   const reviewed = await councilReview(query, candidates, out.verdicts, context, undefined, plan.council, {top: plan.councilTop ?? 15, disagreement: plan.councilGap, sureScore: plan.councilSure, log: plan.log});
    out = {...out, verdicts: reviewed.verdicts};
    providers.push(...reviewed.providers);
  }
