@@ -1,0 +1,3536 @@
+{
+ "started": "2026-09-26T13:03:07.281Z",
+ "routing": {
+  "the part in Steve Jobs' Stanford commencement speech where he talks about connecting the dots": {
+   "mode": "videos",
+   "source": "model",
+   "confidence": null
+  },
+  "moment in the Falcon Heavy test flight video when both side boosters land at the same time": {
+   "mode": "videos",
+   "source": "rules",
+   "confidence": null
+  },
+  "hindi explainer on how UPI works, under 10 minutes, not from big news channels": {
+   "mode": "web",
+   "source": "rules",
+   "confidence": null
+  },
+  "which article of the GDPR covers the right to be forgotten": {
+   "mode": "web",
+   "source": "rules",
+   "confidence": null
+  },
+  "the Google paper that introduced MapReduce": {
+   "mode": "docs",
+   "source": "jev",
+   "confidence": 0.95
+  },
+  "RTI Act 2005 full text in Hindi": {
+   "mode": "docs",
+   "source": "jev",
+   "confidence": 0.89
+  },
+  "current RBI repo rate": {
+   "mode": "web",
+   "source": "jev",
+   "confidence": 1
+  },
+  "how long can cooked rice be safely kept in the fridge": {
+   "mode": "web",
+   "source": "jev",
+   "confidence": 1
+  },
+  "postgres vs mysql for write-heavy workloads from engineers who ran both, not vendor blogs": {
+   "mode": "web",
+   "source": "rules",
+   "confidence": null
+  },
+  "red vintage bicycle leaning against a blue wall": {
+   "mode": "images",
+   "source": "jev",
+   "confidence": 1
+  },
+  "free to use photo of mount everest with license and attribution": {
+   "mode": "images",
+   "source": "rules",
+   "confidence": null
+  },
+  "infographic showing india's population by state, not AI-generated": {
+   "mode": "images",
+   "source": "jev",
+   "confidence": 0.96
+  }
+ },
+ "videos": [
+  {
+   "q": "the part in Steve Jobs' Stanford commencement speech where he talks about connecting the dots",
+   "status": "partial",
+   "first_ms": 21323,
+   "full_ms": 21357,
+   "providers": [
+    {
+     "status": "ok",
+     "message": "Brave discovery completed.",
+     "provider": "brave"
+    },
+    {
+     "status": "ok",
+     "message": "5 of 6 search engines answered; Google Videos (blocked by a CAPTCHA) did not. Filled in for 1 of 5 searches where Brave failed or found too little.",
+     "provider": "searxng"
+    },
+    {
+     "status": "ok",
+     "message": "AI planned 4 searches for videos.",
+     "provider": "planner"
+    },
+    {
+     "status": "ok",
+     "message": "Looked for evidence on 2 unmet requirements: 1 targeted searches, 1 pages or videos opened, 0 closed.",
+     "provider": "gap_exploration"
+    },
+    {
+     "status": "partial",
+     "message": "137 candidates found; up to 60 candidates were selected for checking after all sources answered.",
+     "provider": "candidate_pool"
+    },
+    {
+     "status": "ok",
+     "message": "Screened 120 of 137 leads to prioritize evidence checks; final relevance is checked separately.",
+     "provider": "jev_screener"
+    },
+    {
+     "status": "ok",
+     "message": "YouTube details and viewer comments checked.",
+     "provider": "youtube"
+    },
+    {
+     "status": "ok",
+     "message": "Reddit discussions checked.",
+     "provider": "reddit"
+    },
+    {
+     "status": "ok",
+     "message": "12 of 18 result pages were checked, 6 in a browser.",
+     "provider": "pages"
+    },
+    {
+     "status": "ok",
+     "message": "Results were checked for relevance by AI.",
+     "provider": "judge"
+    },
+    {
+     "status": "ok",
+     "message": "45 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+     "provider": "relevance_filter"
+    },
+    {
+     "status": "partial",
+     "message": "5 videos queued for caption fetching; their transcripts help later searches, not this one.",
+     "provider": "youtube_captions"
+    }
+   ],
+   "interpretation": {
+    "intent": "Find the specific segment of Steve Jobs' Stanford commencement speech regarding connecting the dots.",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "part in Steve Jobs' Stanford commencement speech",
+      "hardness": "hard",
+      "scope": "each"
+     },
+     {
+      "id": "R2",
+      "text": "talks about connecting the dots",
+      "hardness": "hard",
+      "scope": "each"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unmet": []
+   },
+   "top": [
+    {
+     "title": "Steve Jobs - Connecting The Dots - Motivational Video - YouTube",
+     "url": "https://www.youtube.com/watch?v=wz0j7z38LIg",
+     "creator": "Fearless Soul",
+     "duration": 390,
+     "language": "en",
+     "relevance": 8,
+     "reason": "The video features Steve Jobs' commencement speech at Stanford focusing on connecting the dots. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": "pending"
+    },
+    {
+     "title": "​​\"Trust that the dots will somehow connect,\" Steve Jobs, Stanford commencement address, 2005",
+     "url": "https://www.youtube.com/watch?v=bp4OzXLxEv4",
+     "creator": "Steve Jobs Archive",
+     "duration": 35,
+     "language": "en",
+     "relevance": 8,
+     "reason": "The video features Steve Jobs delivering the 2005 Stanford commencement address about trusting that dots connect. Supporting evidence only; exact match unverified.",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": "pending"
+    },
+    {
+     "title": "Steve Jobs Connect the Dots",
+     "url": "https://www.youtube.com/watch?v=5BSbOc5VYY8",
+     "creator": "Spark",
+     "duration": 319,
+     "language": "en",
+     "relevance": 8,
+     "reason": "The video specifically identifies itself as the 'Connecting the Dots' segment from Steve Jobs' 2005 Stanford commencement speech, and comments confirm the subject. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": "pending"
+    },
+    {
+     "title": "\"Stay Hungry Stay Foolish\" - Steve Jobs | Motivational Video | Stanford Commencement Speech - 2025",
+     "url": "https://www.youtube.com/watch?v=Zcwkp-SByFE",
+     "creator": "The Life Motivation",
+     "duration": 239,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Video specifically features Steve Jobs' Stanford commencement speech discussing connecting the dots. Supporting evidence only; exact match unverified.",
+     "badges": [
+      "Underrated find"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Stop Trying to Connect the Dots 🛑 (Steve Jobs)",
+     "url": "https://www.youtube.com/watch?v=kMHmkKbWrbM",
+     "creator": "Vantage Shorts",
+     "duration": 37,
+     "language": "en",
+     "relevance": 8,
+     "reason": "A short video highlighting the specific advice on 'connecting the dots' from the Stanford speech.",
+     "badges": [
+      "Underrated find"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Steve Jobs | Connecting The Dots Theory | Motivational Video - YouTube",
+     "url": "https://www.youtube.com/watch?v=b8yFfEXK4Tc",
+     "creator": "ElicCr",
+     "duration": 289,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Video specifically covers Steve Jobs' Stanford commencement address focusing on the connecting the dots theory. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Connecting the Dots... Steve Jobs' 2005 Stanford Commencement Address - YouTube",
+     "url": "https://www.youtube.com/watch?v=p7vklHhds1w",
+     "creator": "Detox Life",
+     "duration": 905,
+     "language": "en",
+     "relevance": 6,
+     "reason": "The video features Steve Jobs' 2005 Stanford Commencement Address with a focus on connecting the dots. Metadata only; contents unverified.",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Connecting the dots - Steve Jobs Stanford Commencement speech (English subtitles) [Motivator] - YouTube",
+     "url": "https://www.youtube.com/watch?v=vE87TeU3qxQ",
+     "creator": "Motivator",
+     "duration": 277,
+     "language": "en",
+     "relevance": 6,
+     "reason": "Video focuses on the connecting the dots segment from Steve Jobs' Stanford commencement speech. Metadata only; contents unverified.",
+     "badges": [],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Connecting the dots with English Subtitles | Steve Jobs' Speech at Stanford | (2005) - YouTube",
+     "url": "https://www.youtube.com/watch?v=yzPHFItCr6Q",
+     "creator": "taeyong park",
+     "duration": 327,
+     "language": "ko",
+     "relevance": 6,
+     "reason": "Video contains the connecting the dots excerpt from Steve Jobs' 2005 Stanford speech. Metadata only; contents unverified.",
+     "badges": [],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Connecting the Dots, Love and Loss, and Facing Death: Steve Jobs' Inspiring Commencement Speech. - YouTube",
+     "url": "https://www.youtube.com/watch?v=1y7M4eVe1ek",
+     "creator": "soul space",
+     "duration": 802,
+     "language": "en",
+     "relevance": 6,
+     "reason": "Video features Steve Jobs' commencement speech including the connecting the dots story, though full length. Metadata only; contents unverified.",
+     "badges": [],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    }
+   ],
+   "total": 15,
+   "closest": [
+    {
+     "title": "Stay Hungry, Stay Foolish - Steve Jobs 2005 Speech at Stanford",
+     "url": "https://www.youtube.com/watch?v=q6SG3Zg1Qb4",
+     "creator": "Goals&Growth",
+     "duration": 60,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Video clip features Steve Jobs' 2005 Stanford University speech discussing connecting the dots. Metadata only; contents unverified.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "unknown: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Steve Jobs - 2005 Stanford Commencement Speech",
+     "url": "https://podcasts.apple.com/us/podcast/steve-jobs-2005-stanford-commencement-speech/id1522163030?i=1000491212759",
+     "creator": null,
+     "duration": null,
+     "language": null,
+     "relevance": 5,
+     "reason": "Podcast episode discussing Steve Jobs' 2005 Stanford commencement speech and connecting the dots. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Steve Jobs Stanford Commencement Address (2005)",
+     "url": "https://fs.blog/steve-jobs-stanford-commencement/",
+     "creator": null,
+     "duration": null,
+     "language": null,
+     "relevance": 5,
+     "reason": "Article and video featuring Steve Jobs' 2005 Stanford commencement address discussing connecting the dots. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "unknown: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "ENGLISH SPEECH Steve Jobs Stanford Commencement Speech 2005 (subtitles Anglicus)（subtitles in latin）",
+     "url": "https://www.dailymotion.com/video/x96q63g",
+     "creator": null,
+     "duration": 868,
+     "language": null,
+     "relevance": 5,
+     "reason": "Dailymotion video presents Steve Jobs' Stanford Commencement Speech 2005. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "unknown: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Steve Jobs «Stay Hungry. Stay Foolish.» Motivational Speech At Stanford University",
+     "url": "https://www.dailymotion.com/video/x2kp0d2",
+     "creator": null,
+     "duration": 874,
+     "language": null,
+     "relevance": 5,
+     "reason": "This is the full commencement speech containing the required content, but it is not isolated as a specific clip. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "unknown: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Steve Jobs Commencement Address at Stanford University",
+     "url": "https://www.dailymotion.com/video/x8enseq",
+     "creator": null,
+     "duration": 852,
+     "language": null,
+     "relevance": 5,
+     "reason": "This is the full commencement address which contains the segment, though it is not a specific clip about the dots. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "unknown: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Stay hungry...Stay foolish. Amazing Steve Jobs Speech at Stanford with english subtitles",
+     "url": "https://www.dailymotion.com/video/x4cq3pp",
+     "creator": null,
+     "duration": 873,
+     "language": null,
+     "relevance": 5,
+     "reason": "This is the full commencement speech, which contains the requested segment, though it is not a clip isolated to just that part. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "unknown: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Connecting the Dots: Respect💯| Ft. Steve Jobs | Motivational Speech at #stanforduniversity #allen - YouTube",
+     "url": "https://www.youtube.com/watch?v=D2NB82EhOoY",
+     "creator": "ALLEN Overseas",
+     "duration": 59,
+     "language": "en",
+     "relevance": 5,
+     "reason": "This is a short motivational edit featuring the speech. It captures the requested content, though it is not the full raw segment. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    }
+   ],
+   "round": 1
+  },
+  {
+   "q": "the part in Steve Jobs' Stanford commencement speech where he talks about connecting the dots",
+   "status": "partial",
+   "first_ms": 1106,
+   "full_ms": 1127,
+   "providers": [
+    {
+     "status": "ok",
+     "message": "Brave discovery completed.",
+     "provider": "brave"
+    },
+    {
+     "status": "ok",
+     "message": "5 of 6 search engines answered; Google Videos (blocked by a CAPTCHA) did not. Filled in for 1 of 5 searches where Brave failed or found too little.",
+     "provider": "searxng"
+    },
+    {
+     "status": "ok",
+     "message": "AI planned 4 searches for videos.",
+     "provider": "planner"
+    },
+    {
+     "status": "ok",
+     "message": "Looked for evidence on 2 unmet requirements: 1 targeted searches, 1 pages or videos opened, 0 closed.",
+     "provider": "gap_exploration"
+    },
+    {
+     "status": "partial",
+     "message": "137 candidates found; up to 60 candidates were selected for checking after all sources answered.",
+     "provider": "candidate_pool"
+    },
+    {
+     "status": "ok",
+     "message": "Screened 120 of 137 leads to prioritize evidence checks; final relevance is checked separately.",
+     "provider": "jev_screener"
+    },
+    {
+     "status": "ok",
+     "message": "YouTube details and viewer comments checked.",
+     "provider": "youtube"
+    },
+    {
+     "status": "ok",
+     "message": "Reddit discussions checked.",
+     "provider": "reddit"
+    },
+    {
+     "status": "ok",
+     "message": "12 of 18 result pages were checked, 6 in a browser.",
+     "provider": "pages"
+    },
+    {
+     "status": "ok",
+     "message": "Results were checked for relevance by AI.",
+     "provider": "judge"
+    },
+    {
+     "status": "ok",
+     "message": "45 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+     "provider": "relevance_filter"
+    },
+    {
+     "status": "partial",
+     "message": "5 videos queued for caption fetching; their transcripts help later searches, not this one.",
+     "provider": "youtube_captions"
+    }
+   ],
+   "interpretation": {
+    "intent": "Find the specific segment of Steve Jobs' Stanford commencement speech regarding connecting the dots.",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "part in Steve Jobs' Stanford commencement speech",
+      "hardness": "hard",
+      "scope": "each"
+     },
+     {
+      "id": "R2",
+      "text": "talks about connecting the dots",
+      "hardness": "hard",
+      "scope": "each"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unmet": []
+   },
+   "top": [
+    {
+     "title": "Steve Jobs - Connecting The Dots - Motivational Video - YouTube",
+     "url": "https://www.youtube.com/watch?v=wz0j7z38LIg",
+     "creator": "Fearless Soul",
+     "duration": 390,
+     "language": "en",
+     "relevance": 8,
+     "reason": "The video features Steve Jobs' commencement speech at Stanford focusing on connecting the dots. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": "pending"
+    },
+    {
+     "title": "​​\"Trust that the dots will somehow connect,\" Steve Jobs, Stanford commencement address, 2005",
+     "url": "https://www.youtube.com/watch?v=bp4OzXLxEv4",
+     "creator": "Steve Jobs Archive",
+     "duration": 35,
+     "language": "en",
+     "relevance": 8,
+     "reason": "The video features Steve Jobs delivering the 2005 Stanford commencement address about trusting that dots connect. Supporting evidence only; exact match unverified.",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": "pending"
+    },
+    {
+     "title": "Steve Jobs Connect the Dots",
+     "url": "https://www.youtube.com/watch?v=5BSbOc5VYY8",
+     "creator": "Spark",
+     "duration": 319,
+     "language": "en",
+     "relevance": 8,
+     "reason": "The video specifically identifies itself as the 'Connecting the Dots' segment from Steve Jobs' 2005 Stanford commencement speech, and comments confirm the subject. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": "pending"
+    },
+    {
+     "title": "\"Stay Hungry Stay Foolish\" - Steve Jobs | Motivational Video | Stanford Commencement Speech - 2025",
+     "url": "https://www.youtube.com/watch?v=Zcwkp-SByFE",
+     "creator": "The Life Motivation",
+     "duration": 239,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Video specifically features Steve Jobs' Stanford commencement speech discussing connecting the dots. Supporting evidence only; exact match unverified.",
+     "badges": [
+      "Underrated find"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Stop Trying to Connect the Dots 🛑 (Steve Jobs)",
+     "url": "https://www.youtube.com/watch?v=kMHmkKbWrbM",
+     "creator": "Vantage Shorts",
+     "duration": 37,
+     "language": "en",
+     "relevance": 8,
+     "reason": "A short video highlighting the specific advice on 'connecting the dots' from the Stanford speech.",
+     "badges": [
+      "Underrated find"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Steve Jobs | Connecting The Dots Theory | Motivational Video - YouTube",
+     "url": "https://www.youtube.com/watch?v=b8yFfEXK4Tc",
+     "creator": "ElicCr",
+     "duration": 289,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Video specifically covers Steve Jobs' Stanford commencement address focusing on the connecting the dots theory. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Connecting the Dots... Steve Jobs' 2005 Stanford Commencement Address - YouTube",
+     "url": "https://www.youtube.com/watch?v=p7vklHhds1w",
+     "creator": "Detox Life",
+     "duration": 905,
+     "language": "en",
+     "relevance": 6,
+     "reason": "The video features Steve Jobs' 2005 Stanford Commencement Address with a focus on connecting the dots. Metadata only; contents unverified.",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Connecting the dots - Steve Jobs Stanford Commencement speech (English subtitles) [Motivator] - YouTube",
+     "url": "https://www.youtube.com/watch?v=vE87TeU3qxQ",
+     "creator": "Motivator",
+     "duration": 277,
+     "language": "en",
+     "relevance": 6,
+     "reason": "Video focuses on the connecting the dots segment from Steve Jobs' Stanford commencement speech. Metadata only; contents unverified.",
+     "badges": [],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Connecting the dots with English Subtitles | Steve Jobs' Speech at Stanford | (2005) - YouTube",
+     "url": "https://www.youtube.com/watch?v=yzPHFItCr6Q",
+     "creator": "taeyong park",
+     "duration": 327,
+     "language": "ko",
+     "relevance": 6,
+     "reason": "Video contains the connecting the dots excerpt from Steve Jobs' 2005 Stanford speech. Metadata only; contents unverified.",
+     "badges": [],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Connecting the Dots, Love and Loss, and Facing Death: Steve Jobs' Inspiring Commencement Speech. - YouTube",
+     "url": "https://www.youtube.com/watch?v=1y7M4eVe1ek",
+     "creator": "soul space",
+     "duration": 802,
+     "language": "en",
+     "relevance": 6,
+     "reason": "Video features Steve Jobs' commencement speech including the connecting the dots story, though full length. Metadata only; contents unverified.",
+     "badges": [],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    }
+   ],
+   "total": 15,
+   "closest": [
+    {
+     "title": "Stay Hungry, Stay Foolish - Steve Jobs 2005 Speech at Stanford",
+     "url": "https://www.youtube.com/watch?v=q6SG3Zg1Qb4",
+     "creator": "Goals&Growth",
+     "duration": 60,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Video clip features Steve Jobs' 2005 Stanford University speech discussing connecting the dots. Metadata only; contents unverified.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "unknown: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Steve Jobs - 2005 Stanford Commencement Speech",
+     "url": "https://podcasts.apple.com/us/podcast/steve-jobs-2005-stanford-commencement-speech/id1522163030?i=1000491212759",
+     "creator": null,
+     "duration": null,
+     "language": null,
+     "relevance": 5,
+     "reason": "Podcast episode discussing Steve Jobs' 2005 Stanford commencement speech and connecting the dots. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Steve Jobs Stanford Commencement Address (2005)",
+     "url": "https://fs.blog/steve-jobs-stanford-commencement/",
+     "creator": null,
+     "duration": null,
+     "language": null,
+     "relevance": 5,
+     "reason": "Article and video featuring Steve Jobs' 2005 Stanford commencement address discussing connecting the dots. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "unknown: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "ENGLISH SPEECH Steve Jobs Stanford Commencement Speech 2005 (subtitles Anglicus)（subtitles in latin）",
+     "url": "https://www.dailymotion.com/video/x96q63g",
+     "creator": null,
+     "duration": 868,
+     "language": null,
+     "relevance": 5,
+     "reason": "Dailymotion video presents Steve Jobs' Stanford Commencement Speech 2005. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "unknown: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Steve Jobs «Stay Hungry. Stay Foolish.» Motivational Speech At Stanford University",
+     "url": "https://www.dailymotion.com/video/x2kp0d2",
+     "creator": null,
+     "duration": 874,
+     "language": null,
+     "relevance": 5,
+     "reason": "This is the full commencement speech containing the required content, but it is not isolated as a specific clip. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "unknown: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Steve Jobs Commencement Address at Stanford University",
+     "url": "https://www.dailymotion.com/video/x8enseq",
+     "creator": null,
+     "duration": 852,
+     "language": null,
+     "relevance": 5,
+     "reason": "This is the full commencement address which contains the segment, though it is not a specific clip about the dots. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "unknown: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Stay hungry...Stay foolish. Amazing Steve Jobs Speech at Stanford with english subtitles",
+     "url": "https://www.dailymotion.com/video/x4cq3pp",
+     "creator": null,
+     "duration": 873,
+     "language": null,
+     "relevance": 5,
+     "reason": "This is the full commencement speech, which contains the requested segment, though it is not a clip isolated to just that part. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "unknown: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Connecting the Dots: Respect💯| Ft. Steve Jobs | Motivational Speech at #stanforduniversity #allen - YouTube",
+     "url": "https://www.youtube.com/watch?v=D2NB82EhOoY",
+     "creator": "ALLEN Overseas",
+     "duration": 59,
+     "language": "en",
+     "relevance": 5,
+     "reason": "This is a short motivational edit featuring the speech. It captures the requested content, though it is not the full raw segment. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    }
+   ],
+   "round": 2
+  },
+  {
+   "q": "the part in Steve Jobs' Stanford commencement speech where he talks about connecting the dots",
+   "status": "partial",
+   "first_ms": 565,
+   "full_ms": 608,
+   "providers": [
+    {
+     "status": "ok",
+     "message": "Brave discovery completed.",
+     "provider": "brave"
+    },
+    {
+     "status": "ok",
+     "message": "5 of 6 search engines answered; Google Videos (blocked by a CAPTCHA) did not. Filled in for 1 of 5 searches where Brave failed or found too little.",
+     "provider": "searxng"
+    },
+    {
+     "status": "ok",
+     "message": "AI planned 4 searches for videos.",
+     "provider": "planner"
+    },
+    {
+     "status": "ok",
+     "message": "Looked for evidence on 2 unmet requirements: 1 targeted searches, 1 pages or videos opened, 0 closed.",
+     "provider": "gap_exploration"
+    },
+    {
+     "status": "partial",
+     "message": "137 candidates found; up to 60 candidates were selected for checking after all sources answered.",
+     "provider": "candidate_pool"
+    },
+    {
+     "status": "ok",
+     "message": "Screened 120 of 137 leads to prioritize evidence checks; final relevance is checked separately.",
+     "provider": "jev_screener"
+    },
+    {
+     "status": "ok",
+     "message": "YouTube details and viewer comments checked.",
+     "provider": "youtube"
+    },
+    {
+     "status": "ok",
+     "message": "Reddit discussions checked.",
+     "provider": "reddit"
+    },
+    {
+     "status": "ok",
+     "message": "12 of 18 result pages were checked, 6 in a browser.",
+     "provider": "pages"
+    },
+    {
+     "status": "ok",
+     "message": "Results were checked for relevance by AI.",
+     "provider": "judge"
+    },
+    {
+     "status": "ok",
+     "message": "45 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+     "provider": "relevance_filter"
+    },
+    {
+     "status": "partial",
+     "message": "5 videos queued for caption fetching; their transcripts help later searches, not this one.",
+     "provider": "youtube_captions"
+    }
+   ],
+   "interpretation": {
+    "intent": "Find the specific segment of Steve Jobs' Stanford commencement speech regarding connecting the dots.",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "part in Steve Jobs' Stanford commencement speech",
+      "hardness": "hard",
+      "scope": "each"
+     },
+     {
+      "id": "R2",
+      "text": "talks about connecting the dots",
+      "hardness": "hard",
+      "scope": "each"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unmet": []
+   },
+   "top": [
+    {
+     "title": "Steve Jobs - Connecting The Dots - Motivational Video - YouTube",
+     "url": "https://www.youtube.com/watch?v=wz0j7z38LIg",
+     "creator": "Fearless Soul",
+     "duration": 390,
+     "language": "en",
+     "relevance": 8,
+     "reason": "The video features Steve Jobs' commencement speech at Stanford focusing on connecting the dots. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": "pending"
+    },
+    {
+     "title": "​​\"Trust that the dots will somehow connect,\" Steve Jobs, Stanford commencement address, 2005",
+     "url": "https://www.youtube.com/watch?v=bp4OzXLxEv4",
+     "creator": "Steve Jobs Archive",
+     "duration": 35,
+     "language": "en",
+     "relevance": 8,
+     "reason": "The video features Steve Jobs delivering the 2005 Stanford commencement address about trusting that dots connect. Supporting evidence only; exact match unverified.",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": "pending"
+    },
+    {
+     "title": "Steve Jobs Connect the Dots",
+     "url": "https://www.youtube.com/watch?v=5BSbOc5VYY8",
+     "creator": "Spark",
+     "duration": 319,
+     "language": "en",
+     "relevance": 8,
+     "reason": "The video specifically identifies itself as the 'Connecting the Dots' segment from Steve Jobs' 2005 Stanford commencement speech, and comments confirm the subject. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": "pending"
+    },
+    {
+     "title": "\"Stay Hungry Stay Foolish\" - Steve Jobs | Motivational Video | Stanford Commencement Speech - 2025",
+     "url": "https://www.youtube.com/watch?v=Zcwkp-SByFE",
+     "creator": "The Life Motivation",
+     "duration": 239,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Video specifically features Steve Jobs' Stanford commencement speech discussing connecting the dots. Supporting evidence only; exact match unverified.",
+     "badges": [
+      "Underrated find"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Stop Trying to Connect the Dots 🛑 (Steve Jobs)",
+     "url": "https://www.youtube.com/watch?v=kMHmkKbWrbM",
+     "creator": "Vantage Shorts",
+     "duration": 37,
+     "language": "en",
+     "relevance": 8,
+     "reason": "A short video highlighting the specific advice on 'connecting the dots' from the Stanford speech.",
+     "badges": [
+      "Underrated find"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Steve Jobs | Connecting The Dots Theory | Motivational Video - YouTube",
+     "url": "https://www.youtube.com/watch?v=b8yFfEXK4Tc",
+     "creator": "ElicCr",
+     "duration": 289,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Video specifically covers Steve Jobs' Stanford commencement address focusing on the connecting the dots theory. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Connecting the Dots... Steve Jobs' 2005 Stanford Commencement Address - YouTube",
+     "url": "https://www.youtube.com/watch?v=p7vklHhds1w",
+     "creator": "Detox Life",
+     "duration": 905,
+     "language": "en",
+     "relevance": 6,
+     "reason": "The video features Steve Jobs' 2005 Stanford Commencement Address with a focus on connecting the dots. Metadata only; contents unverified.",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Connecting the dots - Steve Jobs Stanford Commencement speech (English subtitles) [Motivator] - YouTube",
+     "url": "https://www.youtube.com/watch?v=vE87TeU3qxQ",
+     "creator": "Motivator",
+     "duration": 277,
+     "language": "en",
+     "relevance": 6,
+     "reason": "Video focuses on the connecting the dots segment from Steve Jobs' Stanford commencement speech. Metadata only; contents unverified.",
+     "badges": [],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Connecting the dots with English Subtitles | Steve Jobs' Speech at Stanford | (2005) - YouTube",
+     "url": "https://www.youtube.com/watch?v=yzPHFItCr6Q",
+     "creator": "taeyong park",
+     "duration": 327,
+     "language": "ko",
+     "relevance": 6,
+     "reason": "Video contains the connecting the dots excerpt from Steve Jobs' 2005 Stanford speech. Metadata only; contents unverified.",
+     "badges": [],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Connecting the Dots, Love and Loss, and Facing Death: Steve Jobs' Inspiring Commencement Speech. - YouTube",
+     "url": "https://www.youtube.com/watch?v=1y7M4eVe1ek",
+     "creator": "soul space",
+     "duration": 802,
+     "language": "en",
+     "relevance": 6,
+     "reason": "Video features Steve Jobs' commencement speech including the connecting the dots story, though full length. Metadata only; contents unverified.",
+     "badges": [],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    }
+   ],
+   "total": 15,
+   "closest": [
+    {
+     "title": "Stay Hungry, Stay Foolish - Steve Jobs 2005 Speech at Stanford",
+     "url": "https://www.youtube.com/watch?v=q6SG3Zg1Qb4",
+     "creator": "Goals&Growth",
+     "duration": 60,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Video clip features Steve Jobs' 2005 Stanford University speech discussing connecting the dots. Metadata only; contents unverified.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "unknown: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Steve Jobs - 2005 Stanford Commencement Speech",
+     "url": "https://podcasts.apple.com/us/podcast/steve-jobs-2005-stanford-commencement-speech/id1522163030?i=1000491212759",
+     "creator": null,
+     "duration": null,
+     "language": null,
+     "relevance": 5,
+     "reason": "Podcast episode discussing Steve Jobs' 2005 Stanford commencement speech and connecting the dots. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Steve Jobs Stanford Commencement Address (2005)",
+     "url": "https://fs.blog/steve-jobs-stanford-commencement/",
+     "creator": null,
+     "duration": null,
+     "language": null,
+     "relevance": 5,
+     "reason": "Article and video featuring Steve Jobs' 2005 Stanford commencement address discussing connecting the dots. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "unknown: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "ENGLISH SPEECH Steve Jobs Stanford Commencement Speech 2005 (subtitles Anglicus)（subtitles in latin）",
+     "url": "https://www.dailymotion.com/video/x96q63g",
+     "creator": null,
+     "duration": 868,
+     "language": null,
+     "relevance": 5,
+     "reason": "Dailymotion video presents Steve Jobs' Stanford Commencement Speech 2005. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "unknown: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Steve Jobs «Stay Hungry. Stay Foolish.» Motivational Speech At Stanford University",
+     "url": "https://www.dailymotion.com/video/x2kp0d2",
+     "creator": null,
+     "duration": 874,
+     "language": null,
+     "relevance": 5,
+     "reason": "This is the full commencement speech containing the required content, but it is not isolated as a specific clip. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "unknown: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Steve Jobs Commencement Address at Stanford University",
+     "url": "https://www.dailymotion.com/video/x8enseq",
+     "creator": null,
+     "duration": 852,
+     "language": null,
+     "relevance": 5,
+     "reason": "This is the full commencement address which contains the segment, though it is not a specific clip about the dots. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "unknown: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Stay hungry...Stay foolish. Amazing Steve Jobs Speech at Stanford with english subtitles",
+     "url": "https://www.dailymotion.com/video/x4cq3pp",
+     "creator": null,
+     "duration": 873,
+     "language": null,
+     "relevance": 5,
+     "reason": "This is the full commencement speech, which contains the requested segment, though it is not a clip isolated to just that part. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "unknown: talks about connecting the dots"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Connecting the Dots: Respect💯| Ft. Steve Jobs | Motivational Speech at #stanforduniversity #allen - YouTube",
+     "url": "https://www.youtube.com/watch?v=D2NB82EhOoY",
+     "creator": "ALLEN Overseas",
+     "duration": 59,
+     "language": "en",
+     "relevance": 5,
+     "reason": "This is a short motivational edit featuring the speech. It captures the requested content, though it is not the full raw segment. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: part in Steve Jobs' Stanford commencement speech",
+      "supported: talks about connecting the dots"
+     ],
+     "scene": null
+    }
+   ],
+   "round": 3
+  },
+  {
+   "q": "moment in the Falcon Heavy test flight video when both side boosters land at the same time",
+   "status": "partial",
+   "first_ms": 65855,
+   "full_ms": 65880,
+   "providers": [
+    {
+     "status": "ok",
+     "message": "Brave discovery completed.",
+     "provider": "brave"
+    },
+    {
+     "status": "ok",
+     "message": "5 of 6 search engines answered; Google Videos (blocked by a CAPTCHA) did not. Filled in for 1 of 4 searches where Brave failed or found too little.",
+     "provider": "searxng"
+    },
+    {
+     "status": "ok",
+     "message": "AI planned 4 searches for videos.",
+     "provider": "planner"
+    },
+    {
+     "status": "ok",
+     "message": "The first results already covered every requirement.",
+     "provider": "gap_exploration"
+    },
+    {
+     "status": "ok",
+     "message": "Screened 42 of 42 leads to prioritize evidence checks; final relevance is checked separately.",
+     "provider": "jev_screener"
+    },
+    {
+     "status": "ok",
+     "message": "YouTube details and viewer comments checked.",
+     "provider": "youtube"
+    },
+    {
+     "status": "ok",
+     "message": "Reddit discussions checked.",
+     "provider": "reddit"
+    },
+    {
+     "status": "ok",
+     "message": "10 of 11 result pages were checked, 6 in a browser.",
+     "provider": "pages"
+    },
+    {
+     "status": "ok",
+     "message": "Results were checked for relevance by AI.",
+     "provider": "judge"
+    },
+    {
+     "status": "ok",
+     "message": "33 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+     "provider": "relevance_filter"
+    },
+    {
+     "status": "partial",
+     "message": "5 videos queued for caption fetching; their transcripts help later searches, not this one.",
+     "provider": "youtube_captions"
+    }
+   ],
+   "interpretation": {
+    "intent": "Find the specific moment in the Falcon Heavy test flight video where both side boosters land simultaneously.",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "Is a video",
+      "hardness": "hard",
+      "scope": "each"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unmet": []
+   },
+   "top": [
+    {
+     "title": "Falcon Heavy Boosters Nail Dual Landing Back on Earth - YouTube",
+     "url": "https://www.youtube.com/watch?v=uPvXvkEQvnQ",
+     "creator": "New York Post",
+     "duration": 123,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Video shows Falcon Heavy side boosters landing back on Earth.",
+     "badges": [],
+     "moments": [
+      {
+       "start": 87,
+       "end": 122,
+       "type": "viewer_timestamp",
+       "summary": "1:32 - That last clip was the best of them -- never seen landing from that particular kind of camera angle before."
+      }
+     ],
+     "requirements": [
+      "supported: Is a video"
+     ],
+     "scene": "pending"
+    },
+    {
+     "title": "SpaceX Lands All 3 Falcon Heavy Boosters for the First Time - YouTube",
+     "url": "https://www.youtube.com/watch?v=sf4qRY3h_eo",
+     "creator": "Galaxy Central",
+     "duration": 882,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Viewers point to 7:35 as the moment the Falcon Heavy side boosters land side by side. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "moments": [
+      {
+       "start": 450,
+       "end": 497,
+       "type": "viewer_timestamp",
+       "summary": "7:35 i've seen this scene plenty of times, but every time i see the double landing by the falcon heavy's rockets, chills goes down through my spine. · 7:47 is where SpaceX established its fame. Well done Elon and your team. · @Mpren43 7:35 "
+      }
+     ],
+     "requirements": [
+      "supported: Is a video"
+     ],
+     "scene": "pending"
+    },
+    {
+     "title": "[4K] Watch Falcon Heavy Launch & Land From Just 4 Miles Away! - YouTube",
+     "url": "https://www.youtube.com/watch?v=zBjVDC8tMeo",
+     "creator": "Everyday Astronaut",
+     "duration": 6566,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Viewers note the twin booster landing at 1:16:36 in the livestream replay.",
+     "badges": [
+      "Livestream replay"
+     ],
+     "moments": [
+      {
+       "start": 4591,
+       "end": 4626,
+       "type": "viewer_timestamp",
+       "summary": "Twin booster landing at 1:16:36"
+      }
+     ],
+     "requirements": [
+      "supported: Is a video"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Simultaneous SpaceX Falcon Heavy Side Booster Landing @ KSC - YouTube",
+     "url": "https://www.youtube.com/watch?v=WLidfyD4eUM",
+     "creator": "ISSET Space & STEM",
+     "duration": 108,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Video title and description confirm simultaneous Falcon Heavy side booster landing. Supporting evidence only; exact match unverified.",
+     "badges": [
+      "Underrated find"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: Is a video"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Double #SpaceX #FalconHeavy Side Booster Landing at LZ-1 and LZ-2! 🚀 #space #nasa - YouTube",
+     "url": "https://www.youtube.com/watch?v=838WSxFxgPE",
+     "creator": "Overlook Horizon",
+     "duration": 31,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Shows double side booster landing at LZ-1 and LZ-2.",
+     "badges": [
+      "Underrated find"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: Is a video"
+     ],
+     "scene": null
+    },
+    {
+     "title": "SpaceX's Falcon Heavy Boosters Make Spectacular Landing",
+     "url": "https://www.dailymotion.com/video/x6eoc38",
+     "creator": null,
+     "duration": 59,
+     "language": null,
+     "relevance": 6,
+     "reason": "Captures the simultaneous landing of Falcon Heavy boosters from Cape Canaveral. Metadata only; contents unverified.",
+     "badges": [],
+     "moments": [],
+     "requirements": [
+      "supported: Is a video"
+     ],
+     "scene": null
+    },
+    {
+     "title": "👉 Falcon Heavy Dual Booster Landing – Perfect Synchronized Touchdown - YouTube",
+     "url": "https://www.youtube.com/watch?v=VNUbg8fep0g",
+     "creator": "Space Googlevesaire",
+     "duration": 156,
+     "language": "en",
+     "relevance": 6,
+     "reason": "Video captures Falcon Heavy Dual Booster Landing with synchronized touchdown. Metadata only; contents unverified.",
+     "badges": [],
+     "moments": [],
+     "requirements": [
+      "supported: Is a video"
+     ],
+     "scene": null
+    },
+    {
+     "title": "VIEW FROM SPACEX FALCON HEAVY: Side by Side Landing of Falcon Heavy Rockets - YouTube",
+     "url": "https://www.youtube.com/watch?v=z8fGzg_SxUc",
+     "creator": "Space Tech Lion",
+     "duration": 14,
+     "language": "en",
+     "relevance": 6,
+     "reason": "Video displays simultaneous landing of Falcon Heavy side boosters. Metadata only; contents unverified.",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: Is a video"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Psyche Mission: Booster Landing - YouTube",
+     "url": "https://www.youtube.com/watch?v=iN_asq0hkSY",
+     "creator": "NASA's Kennedy Space Center",
+     "duration": 45,
+     "language": "en",
+     "relevance": 6,
+     "reason": "NASA Kennedy Space Center clip showing Falcon Heavy boosters successfully landing after liftoff. Metadata only; contents unverified.",
+     "badges": [],
+     "moments": [],
+     "requirements": [
+      "supported: Is a video"
+     ],
+     "scene": null
+    }
+   ],
+   "total": 9,
+   "closest": [
+    {
+     "title": "SpaceX's Falcon Heavy Boosters Make Successful Landing",
+     "url": "https://www.dailymotion.com/video/x6eirkl",
+     "creator": null,
+     "duration": 61,
+     "language": null,
+     "relevance": 5,
+     "reason": "Video shows Falcon Heavy boosters landing successfully. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: Is a video"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Falcon Heavy Landing",
+     "url": "https://www.dailymotion.com/video/x6gc8oj",
+     "creator": null,
+     "duration": 6,
+     "language": null,
+     "relevance": 5,
+     "reason": "Metadata mentions Falcon Heavy landing but lacks specific test flight details. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: Is a video"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Falcon Heavy boosters nail dual landing back on earth",
+     "url": "https://www.dailymotion.com/video/xa7j3iy",
+     "creator": null,
+     "duration": 36,
+     "language": null,
+     "relevance": 5,
+     "reason": "Dailymotion video states Falcon Heavy boosters nail dual landing back on earth. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: Is a video"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Falcon Heavy boosters nail dual landing back on earth",
+     "url": "https://www.dailymotion.com/video/xa7j29e",
+     "creator": null,
+     "duration": 122,
+     "language": null,
+     "relevance": 5,
+     "reason": "Transcript shows landing burn at 0:36 and landing confirmation at 0:55 for the Falcon Heavy boosters. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: Is a video"
+     ],
+     "scene": null
+    },
+    {
+     "title": "SpaceX Falcon Landing",
+     "url": "https://www.dailymotion.com/video/x6eeexc",
+     "creator": null,
+     "duration": 56,
+     "language": null,
+     "relevance": 5,
+     "reason": "Description states it is Falcon Heavy outboard boosters landing but no timing or simultaneous confirmation in description or comments. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: Is a video"
+     ],
+     "scene": null
+    },
+    {
+     "title": "SpaceX's Falcon Heavy Landing",
+     "url": "https://www.dailymotion.com/video/x6ehm08",
+     "creator": null,
+     "duration": 151,
+     "language": null,
+     "relevance": 5,
+     "reason": "Video mentions landing of the SpaceX Falcon Heavy outboard boosters. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: Is a video"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Falcon Heavy boosters landing - YouTube",
+     "url": "https://www.youtube.com/watch?v=6YyV-otP3pI",
+     "creator": "SciNews",
+     "duration": 139,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Description says both boosters landed at LZ-1 and LZ-2, comments and moments mention near simultaneous landing at 0:55. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: Is a video"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Falcon Heavy Dual Booster Landing (12/28/2023) - YouTube",
+     "url": "https://www.youtube.com/watch?v=Msmz1UCTQ3k",
+     "creator": "Reds Rhetoric",
+     "duration": 43,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Short video showing booster landing from USSF-52 mission, but not the test flight. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: Is a video"
+     ],
+     "scene": null
+    }
+   ],
+   "round": 1
+  },
+  {
+   "q": "hindi explainer on how UPI works, under 10 minutes, not from big news channels",
+   "status": "partial",
+   "first_ms": 102109,
+   "full_ms": 102142,
+   "providers": [
+    {
+     "status": "ok",
+     "message": "Brave discovery completed.",
+     "provider": "brave"
+    },
+    {
+     "status": "ok",
+     "message": "Not needed: Brave answered every search.",
+     "provider": "searxng"
+    },
+    {
+     "status": "ok",
+     "message": "AI planned 4 searches for videos.",
+     "provider": "planner"
+    },
+    {
+     "status": "ok",
+     "message": "Looked for evidence on 1 unmet requirement: 1 targeted searches, 2 pages or videos opened, 0 closed.",
+     "provider": "gap_exploration"
+    },
+    {
+     "status": "partial",
+     "message": "80 candidates found; up to 60 candidates were selected for checking after all sources answered.",
+     "provider": "candidate_pool"
+    },
+    {
+     "status": "ok",
+     "message": "Screened 80 of 80 leads to prioritize evidence checks; final relevance is checked separately.",
+     "provider": "jev_screener"
+    },
+    {
+     "status": "ok",
+     "message": "YouTube details and viewer comments checked.",
+     "provider": "youtube"
+    },
+    {
+     "status": "ok",
+     "message": "Reddit discussions checked.",
+     "provider": "reddit"
+    },
+    {
+     "status": "ok",
+     "message": "13 of 20 result pages were checked, 6 in a browser.",
+     "provider": "pages"
+    },
+    {
+     "status": "ok",
+     "message": "Results were checked for relevance by AI.",
+     "provider": "judge"
+    },
+    {
+     "status": "ok",
+     "message": "55 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+     "provider": "relevance_filter"
+    },
+    {
+     "status": "partial",
+     "message": "5 videos queued for caption fetching; their transcripts help later searches, not this one.",
+     "provider": "youtube_captions"
+    }
+   ],
+   "interpretation": {
+    "intent": "Find a Hindi video explaining how UPI works under 10 minutes from non-news sources.",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "how UPI works",
+      "hardness": "hard",
+      "scope": "each"
+     }
+    ],
+    "assumptions": [
+     "user prefers YouTube or similar video platforms"
+    ],
+    "ambiguities": [
+     "definition of big news channels"
+    ],
+    "unmet": []
+   },
+   "top": [
+    {
+     "title": "UPI क्या है? | Unified Payments Interface पूरी जानकारी हिंदी में - YouTube",
+     "url": "https://www.youtube.com/watch?v=kSX7to1oJro",
+     "creator": "Infomax Computer Academy",
+     "duration": 315,
+     "language": "hi",
+     "relevance": 8,
+     "reason": "Video fully about UPI in Hindi, explains what it is and how it works, duration under 10 minutes, not from big news channel.",
+     "badges": [
+      "Underrated find"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: how UPI works"
+     ],
+     "scene": "pending"
+    },
+    {
+     "title": "UPI ID क्या है? | What is UPI ID In Hindi? | How to Check UPI ID? | UPI ID Explained in Hindi - YouTube",
+     "url": "https://www.youtube.com/watch?v=td8DEynyoK4",
+     "creator": "Humsafar Tech",
+     "duration": 348,
+     "language": "hi",
+     "relevance": 7,
+     "reason": "Video in Hindi explains UPI ID, creation, benefits, and money transfer mechanics, under 10 minutes; channel not a big news outlet.",
+     "badges": [],
+     "moments": [],
+     "requirements": [
+      "supported: how UPI works"
+     ],
+     "scene": "pending"
+    },
+    {
+     "title": "What is UPI? | Unified Payments Interface Explained | Full Guide - YouTube",
+     "url": "https://www.youtube.com/watch?v=Kow5dgx0hFQ",
+     "creator": "Infomax Computer Academy",
+     "duration": 345,
+     "language": "hi",
+     "relevance": 6,
+     "reason": "Video covers UPI workings in Hindi, duration 5:45, from an academy (not big news), explains UPI mechanics step by step. Metadata only; contents unverified.",
+     "badges": [],
+     "moments": [],
+     "requirements": [
+      "supported: how UPI works"
+     ],
+     "scene": "pending"
+    },
+    {
+     "title": "What is UPI? India’s instant payment scheme explained | 100 Seconds Series - YouTube",
+     "url": "https://www.youtube.com/watch?v=RJuTJ3pscCc",
+     "creator": "RedCompass Labs",
+     "duration": 186,
+     "language": "en",
+     "relevance": 6,
+     "reason": "Video explains UPI in 3:06 but no evidence the content is in Hindi or source is not a big news channel; channel is small but language unclear.",
+     "badges": [],
+     "moments": [],
+     "requirements": [
+      "supported: how UPI works"
+     ],
+     "scene": null
+    },
+    {
+     "title": "System Design of UPI Payments - YouTube",
+     "url": "https://www.youtube.com/watch?v=fqySz1Me2pI",
+     "creator": "Piyush Garg",
+     "duration": 1525,
+     "language": "hi",
+     "relevance": 6,
+     "reason": "Over 10 min but detailed system design talk in Hindi by small channel covers how UPI payments work but no transcript to verify exact details",
+     "badges": [],
+     "moments": [],
+     "requirements": [
+      "supported: how UPI works"
+     ],
+     "scene": null
+    }
+   ],
+   "total": 5,
+   "closest": [
+    {
+     "title": "How UPI Payment Works? | UPI Payment System Explained in Hindi #upipayments - YouTube",
+     "url": "https://www.youtube.com/watch?v=tWZLpz-Li_A",
+     "creator": "Kotak Neo",
+     "duration": 118,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Short Hindi video 1:58 explains UPI payment process and related steps; non-big channel Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "unknown: how UPI works"
+     ],
+     "scene": null
+    },
+    {
+     "title": "UPI क्या है? | UPI कैसे काम करता है? | What is UPI Payment System? | UPI Explained in Hindi - YouTube",
+     "url": "https://www.youtube.com/watch?v=oH6k4DET860",
+     "creator": "Deepak TechTimes",
+     "duration": 481,
+     "language": "hi",
+     "relevance": 5,
+     "reason": "8:01 Hindi video explaining what is UPI and how it works in good detail; non-big channel Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "unknown: how UPI works"
+     ],
+     "scene": null
+    },
+    {
+     "title": "Meaning of UPI ? || UPI कैसे काम करता है ? || All About UPI in Hindi - YouTube",
+     "url": "https://www.youtube.com/watch?v=CnH9_n5L4Nc",
+     "creator": "Computer Gyan",
+     "duration": 211,
+     "language": "hi",
+     "relevance": 5,
+     "reason": "3:31 Hindi video clearly explains UPI mechanics and usage; not from major news source Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "unknown: how UPI works"
+     ],
+     "scene": null
+    },
+    {
+     "title": "How UPI Payment Works | Benefits of UPI | Hindi - YouTube",
+     "url": "https://www.youtube.com/watch?v=EAux2r3AO3E",
+     "creator": "Basic Gyaan",
+     "duration": 352,
+     "language": "hi",
+     "relevance": 5,
+     "reason": "Explains UPI payment process in Hindi in under 10 minutes but viewer comments note shallow explanation and unclear on detailed mechanics; not from big news channel. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "unknown: how UPI works"
+     ],
+     "scene": null
+    },
+    {
+     "title": "What is UPI in Hindi? | UPI Payment कैसे काम करता है | UPI Payment, Safe, Fast & Secure | CTA - YouTube",
+     "url": "https://www.youtube.com/watch?v=FlFDutuIpAE",
+     "creator": "Computer Tech Academy",
+     "duration": 296,
+     "language": "hi",
+     "relevance": 5,
+     "reason": "4:56 Hindi video explains UPI mechanics clearly as per title/description, non-big channel Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: how UPI works"
+     ],
+     "scene": null
+    },
+    {
+     "title": "UPI के भारत में 10 साल पूरे | जानिए क्या है UPI? | What is UPI | Unified Payments Interface - YouTube",
+     "url": "https://www.youtube.com/watch?v=vEoIYqscpVs",
+     "creator": "IBC24",
+     "duration": 177,
+     "language": "hi",
+     "relevance": 5,
+     "reason": "Title in Hindi about UPI, short duration 2:57, explains UPI, not from big news channel (IBC24). Match not verified from the evidence.",
+     "badges": [
+      "Livestream replay",
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: how UPI works"
+     ],
+     "scene": null
+    },
+    {
+     "title": "How UPI Works: Real-Time Payments in India | Paypal | Zelle - YouTube",
+     "url": "https://www.youtube.com/watch?v=iI2NaN_QVTI",
+     "creator": "ByteMonk",
+     "duration": 578,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Explains how UPI works in detail but video is in English, not Hindi; channel is small; duration just under 10 minutes. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "unknown: how UPI works"
+     ],
+     "scene": null
+    },
+    {
+     "title": "UPI Turns 10: How India Built the World's Digital Payments Powerhouse | Vantage on Firstpost | 4K - YouTube",
+     "url": "https://www.youtube.com/watch?v=nJSsLWYp0wY",
+     "creator": "Firstpost",
+     "duration": 416,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Explains UPI and its impact in Hindi, under 10 minutes, but from Firstpost channel which is a large news outlet; partial relevance but source mismatch.",
+     "badges": [
+      "Livestream replay",
+      "Closest match"
+     ],
+     "moments": [],
+     "requirements": [
+      "supported: how UPI works"
+     ],
+     "scene": null
+    }
+   ],
+   "round": 1
+  }
+ ],
+ "docs": [
+  {
+   "q": "which article of the GDPR covers the right to be forgotten",
+   "kind": "docs",
+   "first_ms": 3834,
+   "full_ms": 46818,
+   "found": 27,
+   "providers": [
+    {
+     "provider": "brave",
+     "status": "ok",
+     "message": "Brave search completed."
+    },
+    {
+     "provider": "doc_sources",
+     "status": "ok",
+     "message": "15 documents and 20 places to look came from 5 free-document sources."
+    },
+    {
+     "provider": "document_check",
+     "status": "ok",
+     "message": "2 links were removed: 2 dead or unreachable, 0 not actually documents, 0 spam."
+    },
+    {
+     "provider": "doc_hunt",
+     "status": "ok",
+     "message": "6 websites searched, 6 pages checked, 1 documents found inside them."
+    },
+    {
+     "provider": "judge",
+     "status": "ok",
+     "message": "28 documents were checked for relevance; 10 did not match."
+    }
+   ],
+   "sites": [
+    {
+     "host": "gdpr-info.eu",
+     "url": "https://gdpr-info.eu/art-17-gdpr/",
+     "title": "Art. 17 GDPR – Right to erasure (‘right to be forgotten’) - General Data Protection Regulation (GDPR)",
+     "verdict": "web_only",
+     "pages": 1,
+     "note": null
+    },
+    {
+     "host": "aceenglishgrammar.com",
+     "url": "https://aceenglishgrammar.com/articles-in-english/",
+     "title": "Articles In English Grammar: A, An, The, And No Article",
+     "verdict": "not_found",
+     "pages": 1,
+     "note": null
+    },
+    {
+     "host": "gdpr.eu",
+     "url": "https://gdpr.eu/right-to-be-forgotten/",
+     "title": "Everything you need to know about the \"Right to be forgotten\" - GDPR.eu",
+     "verdict": "web_only",
+     "pages": 1,
+     "note": null
+    },
+    {
+     "host": "patnahighcourt.gov.in",
+     "url": "https://patnahighcourt.gov.in/ILR/viewpdf.aspx?T=ARTICLE&ID=Nw%3D%3D-HslR7sb%2Fngk%3D",
+     "title": "[PDF] The right to be forgotten Essentiality to the current legal ...",
+     "verdict": "not_found",
+     "pages": 1,
+     "note": null
+    },
+    {
+     "host": "dataprotection.ie",
+     "url": "https://www.dataprotection.ie/en/individuals/know-your-rights/right-erasure-articles-17-19-gdpr",
+     "title": "The right to erasure (Articles 17 & 19 of the GDPR) | Data Protection Commission",
+     "verdict": "web_only",
+     "pages": 1,
+     "note": null
+    },
+    {
+     "host": "jipel.law.nyu.edu",
+     "url": "https://jipel.law.nyu.edu/the-impact-of-the-gdpr/",
+     "title": "The Impact of the GDPR - NYU Journal of Intellectual Property ...",
+     "verdict": "not_found",
+     "pages": 1,
+     "note": null
+    }
+   ],
+   "removed": 10,
+   "top": [
+    {
+     "title": "PricewaterhouseCoopers Legal LLP Article 17 of the General Data Protection",
+     "url": "https://www.pwc.lu/en/general-data-protection/docs/pwc-gdpr-right-to-be-forgotten.pdf",
+     "source": "pwc.lu",
+     "doc_type": "pdf",
+     "check": "checked",
+     "lead": false,
+     "walled": null,
+     "relevance": 10,
+     "reason": "Document explicitly states Article 17 of the GDPR sets out the right to be forgotten.",
+     "snippet": "PricewaterhouseCoopers Legal LLP · Article 17 of the General Data Protection",
+     "published": null
+    },
+    {
+     "title": "THE RIGHT TO BE FORGOTTEN UNDER GDPR: LEGAL ...",
+     "url": "https://www.ijfmr.com/papers/2025/4/51772.pdf",
+     "source": "ijfmr.com",
+     "doc_type": "pdf",
+     "check": "checked",
+     "lead": false,
+     "walled": null,
+     "relevance": 9,
+     "reason": "Paper discusses the right to be forgotten under GDPR and explicitly names Article 17.",
+     "snippet": "The 'Right to Be Forgotten' – Worth Remembering?. Computer Law & Security Review, 28(2), 143–152. ... The General Data Protection Regulation (GDPR), which came into force on May 25, 2018, revolutionized the · data protec",
+     "published": null
+    },
+    {
+     "title": "Right to Erasure Under EU Law | PDF | Privacy - Scribd",
+     "url": "https://www.scribd.com/document/208068819/Right-to-Be-Forgotten",
+     "source": "scribd.com",
+     "doc_type": "viewer",
+     "check": "checked",
+     "lead": false,
+     "walled": null,
+     "relevance": 9,
+     "reason": "Document states Article 17 provides for the right to erasure, previously termed the right to be forgotten.",
+     "snippet": "Article 17 now specifically provides for the 'right to erasure', previously termed the 'right to be forgotten',",
+     "published": null
+    },
+    {
+     "title": "Guidelines 5/2019 on the criteria of the Right to be Forgotten ...",
+     "url": "https://www.edpb.europa.eu/sites/default/files/files/file1/edpb_guidelines_201905_rtbfsearchengines_afterpublicconsultation_en.pdf",
+     "source": "edpb.europa.eu",
+     "doc_type": "pdf",
+     "check": "checked",
+     "lead": false,
+     "walled": null,
+     "relevance": 8,
+     "reason": "Document discusses guidelines on the right to be forgotten under Article 17 GDPR.",
+     "snippet": "light of the provisions of Article 17 GDPR (the “Right to request delisting”). Indeed, the Right to be · Forgotten has been especially enacted under Article 17 GDPR to take into account the Right to request",
+     "published": null
+    },
+    {
+     "title": "TRINITY COLLEGE LAW REVIEW ONLINE THE RIGHT TO BE FORGOTTEN AND ITS POSSIBLE",
+     "url": "https://trinitycollegelawreview.org/wp-content/uploads/2016/04/The-Right-To-Be-Forgotten-.pdf",
+     "source": "trinitycollegelawreview.org",
+     "doc_type": "pdf",
+     "check": "checked",
+     "lead": false,
+     "walled": null,
+     "relevance": 8,
+     "reason": "Document discusses the right to be forgotten under Article 17 of the GDPR.",
+     "snippet": "Google Spain or the GDPR. This will depend on how the judgment is · interpreted and applied in subsequent cases. The statutory right to be · forgotten under Article 17 of the GDPR is to be welcomed as it will obviate",
+     "published": null
+    },
+    {
+     "title": "Right to be Forgotten in India | PDF | Privacy | Justice - Scribd",
+     "url": "https://www.scribd.com/document/838721231/ssrn-4850700",
+     "source": "scribd.com",
+     "doc_type": "viewer",
+     "check": "checked",
+     "lead": false,
+     "walled": null,
+     "relevance": 8,
+     "reason": "Document discusses the right to be forgotten under GDPR and notes it is defined under Article 17.",
+     "snippet": "The Right to be forgotten (RTBF) is a statutory right defined under Article 17 of GDPR. It means the data subject has the right to get his personal data erased",
+     "published": null
+    },
+    {
+     "title": "RIGHT TO BE FORGOTTEN",
+     "url": "https://www.ijmr.net.in/current/2025/Jun/EoGOHLPwabfQG5g.pdf",
+     "source": "ijmr.net.in",
+     "doc_type": "pdf",
+     "check": "blocked",
+     "lead": true,
+     "walled": null,
+     "relevance": 6,
+     "reason": "The description directly answers which article of the GDPR covers the right to be forgotten.",
+     "snippet": "The General Data Protection Regulation (GDPR) is the cornerstone of RTBF in the EU. Article 17 of GDPR · grants individuals the right to request the deletion of personal data when certain conditions are met.",
+     "published": null
+    },
+    {
+     "title": "(DOC) The Right to be Forgotten A 21st Century Re ...",
+     "url": "https://www.academia.edu/30411510/The_Right_to_be_Forgotten_A_21st_Century_Re_interpretation_of_the_right_to_privacy",
+     "source": "academia.edu",
+     "doc_type": "viewer",
+     "check": "blocked",
+     "lead": true,
+     "walled": null,
+     "relevance": 6,
+     "reason": "Description explicitly states that the GDPR's Article 17 codifies the right to erasure. Metadata only; contents unverified.",
+     "snippet": "The GDPR's Article 17 codifies the right to erasure, impacting data subjects' control over their information. Significant legal cases highlight the complexities of balancing privacy rights with freedom of expression. Cul",
+     "published": null
+    },
+    {
+     "title": "Individual rights | Right to erasure and right to restriction of processing",
+     "url": "https://www.twobirds.com/-/media/pdfs/gdpr-pdfs/34--guide-to-the-gdpr--right-to-erasure-and-right-to-restriction-of-processing.pdf?la=en",
+     "source": "twobirds.com",
+     "doc_type": "pdf",
+     "check": "checked",
+     "lead": false,
+     "walled": null,
+     "relevance": 5,
+     "reason": "Discusses individual rights and right to erasure under GDPR, but does not explicitly cite the article number in the snippet. Match not verified from the evidence.",
+     "snippet": "Individual rights | Right to erasure and right to restriction of processing · • More extensive, and unclear, rights are",
+     "published": null
+    },
+    {
+     "title": "Critical Views on the Right to be Forgotten after the Entry into ...",
+     "url": "https://reference-global.com/download/article/10.2478/iclr-2021-0015.pdf",
+     "source": "reference-global.com",
+     "doc_type": "pdf",
+     "check": "checked",
+     "lead": true,
+     "walled": null,
+     "relevance": 5,
+     "reason": "Mentions Article 17 of the GDPR in relation to the right to be forgotten.",
+     "snippet": "ing measures can positively affect the effectiveness of the right to be forgotten, such as 1) ensuring the data confidentiality by the CJEU and other participants of · the judicial process in the cases regarding the impl",
+     "published": null
+    }
+   ]
+  },
+  {
+   "q": "the Google paper that introduced MapReduce",
+   "kind": "docs",
+   "first_ms": 6054,
+   "full_ms": 48648,
+   "found": 29,
+   "providers": [
+    {
+     "provider": "brave",
+     "status": "ok",
+     "message": "Brave search completed."
+    },
+    {
+     "provider": "searxng",
+     "status": "ok",
+     "message": "3 of 4 search engines answered; Brave (did not answer) did not."
+    },
+    {
+     "provider": "doc_sources",
+     "status": "ok",
+     "message": "15 documents and 22 places to look came from 5 free-document sources."
+    },
+    {
+     "provider": "document_check",
+     "status": "ok",
+     "message": "3 links were removed: 2 dead or unreachable, 1 not actually documents, 0 spam."
+    },
+    {
+     "provider": "doc_hunt",
+     "status": "ok",
+     "message": "6 websites searched, 7 pages checked, 1 documents found inside them."
+    },
+    {
+     "provider": "judge",
+     "status": "ok",
+     "message": "30 documents were checked for relevance; 21 did not match."
+    }
+   ],
+   "sites": [
+    {
+     "host": "medium.com",
+     "url": "https://medium.com/@duhov/demystifying-distributed-systems-an-overview-of-googles-mapreduce-paper-00b664481fc3",
+     "title": "Demystifying Distributed Systems: An Overview of Google’s MapReduce Paper | by Ivan Duhov | Medium",
+     "verdict": "not_found",
+     "pages": 1,
+     "note": null
+    },
+    {
+     "host": "ieeexplore.ieee.org",
+     "url": "https://ieeexplore.ieee.org/document/8737669/",
+     "title": "Blending Big Data Analytics: Review on Challenges and a Recent Study",
+     "verdict": "not_found",
+     "pages": 1,
+     "note": null
+    },
+    {
+     "host": "en.wikipedia.org",
+     "url": "https://en.wikipedia.org/wiki/MapReduce",
+     "title": "MapReduce - Wikipedia",
+     "verdict": "not_found",
+     "pages": 1,
+     "note": null
+    },
+    {
+     "host": "sciencedirect.com",
+     "url": "http://www.sciencedirect.com/science/article/pii/S2667305324001340",
+     "title": "MapReduce teaching learning based optimization algorithm for solving CEC-2013 LSGO benchmark Testsuit",
+     "verdict": "not_found",
+     "pages": 1,
+     "note": null
+    },
+    {
+     "host": "research.google.com",
+     "url": "https://research.google.com/archive/mapreduce.html",
+     "title": "Google Research Publication: MapReduce",
+     "verdict": "document",
+     "pages": 2,
+     "note": null
+    },
+    {
+     "host": "google.co.in",
+     "url": "https://www.google.co.in/",
+     "title": "Google India",
+     "verdict": "not_found",
+     "pages": 1,
+     "note": null
+    }
+   ],
+   "removed": 21,
+   "top": [
+    {
+     "title": "MapReduce: simplified data processing on large clusters",
+     "url": "https://cse.buffalo.edu/~okennedy/courses/papers/mapreduce.pdf",
+     "source": "cse.buffalo.edu",
+     "doc_type": "pdf",
+     "check": "checked",
+     "lead": false,
+     "walled": null,
+     "relevance": 10,
+     "reason": "This PDF is the exact Google paper that introduced MapReduce, authored by Jeffrey Dean and Sanjay Ghemawat.",
+     "snippet": "1 Introduction Prior to our development of MapReduce, the authors and many others at Google implemented hundreds of special-purpose computations that process large amounts of raw data, such as crawled documents, Web requ",
+     "published": null
+    },
+    {
+     "title": "Simpliﬁed Data Processing on Large Cluste - Semantic Scholar",
+     "url": "https://pdfs.semanticscholar.org/840f/ffba1a678b650fca06712b731b84f24e52e1.pdf",
+     "source": "pdfs.semanticscholar.org",
+     "doc_type": "pdf",
+     "check": "checked",
+     "lead": false,
+     "walled": null,
+     "relevance": 10,
+     "reason": "This is the original 2004 Google paper by Jeffrey Dean and Sanjay Ghemawat introducing MapReduce.",
+     "snippet": "Many different implementations of the MapReduce interface are possible • The implementation targeted to the computing environment in wide use at Google: large clusters of commodity PCs connected together with switched Et",
+     "published": null
+    },
+    {
+     "title": "Mapreduce Google Paper | PDF - Scribd",
+     "url": "https://www.scribd.com/document/1058196137/Mapreduce-Google-Paper",
+     "source": "scribd.com",
+     "doc_type": "viewer",
+     "check": "checked",
+     "lead": false,
+     "walled": null,
+     "relevance": 10,
+     "reason": "Scribd host containing the complete text of the original Google paper introducing MapReduce.",
+     "snippet": "MapReduce: Simplified Data Processing on Large Clusters Jeffrey Dean and Sanjay Ghemawat jeff@ [Link], sanjay@ [Link] Google, Inc. Abstract given day, etc. Most such computations are conceptu- ally straightforward. Howev",
+     "published": null
+    },
+    {
+     "title": "Download",
+     "url": "https://storage.googleapis.com/gweb-research2023-media/pubtools/4449.pdf",
+     "source": "storage.googleapis.com",
+     "doc_type": "pdf",
+     "check": "checked",
+     "lead": false,
+     "walled": null,
+     "relevance": 10,
+     "reason": "PDF is the original Google paper MapReduce: Simplified Data Processing on Large Clusters by Jeffrey Dean and Sanjay Ghemawat.",
+     "snippet": "",
+     "published": null
+    },
+    {
+     "title": "MapReduce: Simpliﬁed Data Processing on Large Clusters",
+     "url": "https://pdos.csail.mit.edu/6.824/papers/mapreduce.pdf",
+     "source": "pdos.csail.mit.edu",
+     "doc_type": "pdf",
+     "check": "checked",
+     "lead": false,
+     "walled": null,
+     "relevance": 9,
+     "reason": "Jev: R1 — \"MapReduce: Simpliﬁed Data Processing on Large Clusters Jeffrey Dean and Sanjay Ghemawat je\"",
+     "snippet": "Abstract MapReduce is a programming model and an associated implementation for processing and generating large data sets. Users specify a map function that processes a key/value pair to generate a set of intermediate key",
+     "published": null
+    },
+    {
+     "title": "MapReduce: Simpliﬁed Data Processing on Large Clusters",
+     "url": "https://research.google.com/archive/mapreduce-osdi04.pdf",
+     "source": "research.google.com",
+     "doc_type": "pdf",
+     "check": "checked",
+     "lead": false,
+     "walled": null,
+     "relevance": 5,
+     "reason": "Direct PDF link to the original Google paper 'MapReduce: Simplified Data Processing on Large Clusters' by Jeffrey Dean and Sanjay Ghemawat. Match not verified from the evidence.",
+     "snippet": "MapReduce: Simpliﬁed Data Processing on Large Clusters ... Google, Inc.",
+     "published": null
+    },
+    {
+     "title": "MapReduce: Simpliﬁed Data Processing on Large Cluste",
+     "url": "https://www.plus.ac.at/wp-content/uploads/2021/02/MapReduce.pdf",
+     "source": "plus.ac.at",
+     "doc_type": "pdf",
+     "check": "checked",
+     "lead": false,
+     "walled": null,
+     "relevance": 5,
+     "reason": "This PDF provides the original Google paper introducing MapReduce by Jeffrey Dean and Sanjay Ghemawat. Match not verified from the evidence.",
+     "snippet": "Abstract MapReduce is a programming model and an associ-ated implementation for processing and generating large data sets. Users specify a map function that processes a key/value pair to generate a set of intermediate ke",
+     "published": null
+    },
+    {
+     "title": "MapReduce: Simplified Data Processing on Large Clusters",
+     "url": "https://www.researchgate.net/publication/220851866_MapReduce_Simplified_Data_Processing_on_Large_Clusters",
+     "source": "researchgate.net",
+     "doc_type": "viewer",
+     "check": "blocked",
+     "lead": true,
+     "walled": null,
+     "relevance": 5,
+     "reason": "ResearchGate page mentions the MapReduce paper, but it is a metadata page rather than the direct document. Match not verified from the evidence.",
+     "snippet": "Jan 1, 2004 · Download Citation | MapReduce: Simplified Data Processing on Large Clusters | MapReduce is a programming model and an associated implementation for processing and generating large datasets that is ...",
+     "published": null
+    },
+    {
+     "title": "(PDF) MapReduce - Academia.edu",
+     "url": "https://www.academia.edu/71800491/MapReduce",
+     "source": "academia.edu",
+     "doc_type": "viewer",
+     "check": "blocked",
+     "lead": true,
+     "walled": null,
+     "relevance": 5,
+     "reason": "Academia.edu page discusses the MapReduce abstract, but does not serve as the primary document file. Match not verified from the evidence.",
+     "snippet": "Abstract MapReduce is a programming model and an associated implementation for processing and generating large datasets that is amenable to a broad variety of real-world tasks. Users specify the computation in terms of a",
+     "published": null
+    }
+   ]
+  },
+  {
+   "q": "RTI Act 2005 full text in Hindi",
+   "kind": "docs",
+   "first_ms": 18058,
+   "full_ms": 101476,
+   "found": 25,
+   "providers": [
+    {
+     "provider": "brave",
+     "status": "ok",
+     "message": "Brave search completed."
+    },
+    {
+     "provider": "doc_sources",
+     "status": "ok",
+     "message": "13 documents and 20 places to look came from 4 free-document sources."
+    },
+    {
+     "provider": "document_check",
+     "status": "ok",
+     "message": "8 links were removed: 7 dead or unreachable, 1 not actually documents, 0 spam."
+    },
+    {
+     "provider": "doc_hunt",
+     "status": "ok",
+     "message": "6 websites searched, 10 pages checked, 0 documents found inside them."
+    },
+    {
+     "provider": "judge",
+     "status": "ok",
+     "message": "25 documents were checked for relevance; 6 did not match."
+    }
+   ],
+   "sites": [
+    {
+     "host": "nicf.gov.in",
+     "url": "https://nicf.gov.in/rti/rti-act-2005/",
+     "title": "RTI Act 2005 | Official Website of National Institute of Communication Finance, Department of Telecommunications, Ministry of Communications, Government of India",
+     "verdict": "not_found",
+     "pages": 4,
+     "note": null
+    },
+    {
+     "host": "support.google.com",
+     "url": "https://support.google.com/meet/?hl=en",
+     "title": "Google Meet Help",
+     "verdict": "not_found",
+     "pages": 1,
+     "note": null
+    },
+    {
+     "host": "iiim.res.in",
+     "url": "https://iiim.res.in/rti-act-2005-hindi-version/",
+     "title": "RTI Act 2005 (Hindi Version) – सीएसआईआर-भारतीय समवेत औषध संस्थान",
+     "verdict": "not_found",
+     "pages": 1,
+     "note": null
+    },
+    {
+     "host": "dopt.gov.in",
+     "url": "https://dopt.gov.in/acts/%E0%A4%B8%E0%A5%82%E0%A4%9A%E0%A4%A8%E0%A4%BE-%E0%A4%95%E0%A4%BE-%E0%A4%85%E0%A4%A7%E0%A4%BF%E0%A4%95%E0%A4%BE%E0%A4%B0-%E0%A4%85%E0%A4%A7%E0%A4%BF%E0%A4%A8%E0%A4%BF%E0%A4%AF%E0%A4%AE-2005-%E0%A4%A8%E0%A4%B5%E0%A5%80%E0%A4%A8%E0%A4%A4%E0%A4%AE-rti-act-2005-updated",
+     "title": "सूचना का अधिकार अधिनियम, 2005 (नवीनतम)/ RTI Act, 2005 (updated) | Department of Personnel & Training",
+     "verdict": "not_found",
+     "pages": 1,
+     "note": null
+    },
+    {
+     "host": "visionias.in",
+     "url": "https://visionias.in/current-affairs/hi/monthly-magazine/2024-11-30/polity-and-governance/sacana-ka-athhakara-rti-athhanayama-2005-right-to-information-rti-act-2005",
+     "title": "सूचना का अधिकार (RTI) अधिनियम, 2005 {Right to Information (RTI) Act, 2005} | Current Affairs | Vision IAS",
+     "verdict": "not_found",
+     "pages": 2,
+     "note": null
+    },
+    {
+     "host": "recindia.nic.in",
+     "url": "https://recindia.nic.in/handbook-under-rti-act-2005",
+     "title": "Handbook Under RTI Act 2005",
+     "verdict": "not_found",
+     "pages": 1,
+     "note": null
+    }
+   ],
+   "removed": 6,
+   "top": [
+    {
+     "title": "सूचना का अधिकार अधिनियम, 2005",
+     "url": "https://cic.gov.in/sites/default/files/rti-actinhindi.pdf",
+     "source": "cic.gov.in",
+     "doc_type": "pdf",
+     "check": "checked",
+     "lead": false,
+     "walled": null,
+     "relevance": 10,
+     "reason": "Official CIC PDF containing the complete text of the Right to Information Act, 2005 in Hindi.",
+     "snippet": "liriff *moil* · alk ITZT •ux 1°14 · GOVERNMENT OF INDIA · MINISTRY OF LAW AND JUSTICE · T1111 ThT 3TffiTh-TR\" aff, 2005 · (2005 5t aReizriT *is. 22) · [I Trot 2011 of 712TTftEPT19] · Right to Information Act, 2005 · (Act",
+     "published": null
+    },
+    {
+     "title": "बायत सयकाय विधध औय न् माम भ्रालारम GOVERNMENT OF INDIA",
+     "url": "https://homeguard.up.gov.in/Downloads/RTI_Act-2005.pdf",
+     "source": "homeguard.up.gov.in",
+     "doc_type": "pdf",
+     "check": "checked",
+     "lead": false,
+     "walled": null,
+     "relevance": 10,
+     "reason": "Government PDF providing the full text of the RTI Act 2005 in Hindi.",
+     "snippet": "सूचना का अधधकाय अधधधनमभ, 2005 का मह स्स् कयण ्विभबाी ूपऩ भ प्रकाधतत ्कमा जा",
+     "published": null
+    },
+    {
+     "title": "सूचना का अिधकार अिधिनयम, 2005",
+     "url": "https://rti.dopt.gov.in/Writereaddata/RTI%20Act%20Version%20Hindi.pdf",
+     "source": "rti.dopt.gov.in",
+     "doc_type": "pdf",
+     "check": "checked",
+     "lead": false,
+     "walled": null,
+     "relevance": 9,
+     "reason": "Jev: R1 — \"सूचना का अिधकार अिधिनयम, 2005 _________ धारा� का �म _________ ध◌ाराएं अ ध् य ाय 1 �ारिम् भ\"",
+     "snippet": "Lodge your RTI Request/ Appeal with Central Min./Dept. ... Right to Information Act 2005 mandates timely response to citizen requests for government information.",
+     "published": null
+    },
+    {
+     "title": "Rti Act 2005 Updated-Hindi | PDF - Scribd",
+     "url": "https://www.scribd.com/document/741943450/Rti-Act-2005-Updated-hindi",
+     "source": "scribd.com",
+     "doc_type": "viewer",
+     "check": "checked",
+     "lead": false,
+     "walled": null,
+     "relevance": 8,
+     "reason": "The document title and text are the updated RTI Act 2005 in Hindi.",
+     "snippet": "सूचना का अिधकार अिधिनयम, 2005 _________ धारा का म _________ ध ाराएं अध्याय 1 ारिम्भक 1. संिक्षप्त नाम, िवस्तार और ारं भ । 2. प रभाषाएं । अध्याय 2 सूचना का अिधकार और लोक ािधका ...",
+     "published": null
+    },
+    {
+     "title": "RTI Act Version Hindi - 250306 - 123725 | PDF - Scribd",
+     "url": "https://www.scribd.com/document/907484258/RTI-Act-Version-Hindi-250306-123725",
+     "source": "scribd.com",
+     "doc_type": "viewer",
+     "check": "checked",
+     "lead": false,
+     "walled": null,
+     "relevance": 8,
+     "reason": "Scribd document identified as RTI Act Hindi version, though the metadata is less descriptive than others.",
+     "snippet": "सूचना का अिधकार अिधिनयम, 2005 _________ धारा का म _________ ध ाराएं अध्याय 1 ारिम्भक 1. संिक्षप्त नाम, िवस्तार और ारं भ । 2. प रभाषाएं । अध्याय 2 सूचना का अिधकार और लोक ािधका ...",
+     "published": null
+    },
+    {
+     "title": "RTI-Act-hindi.pdf",
+     "url": "https://phedwater.rajasthan.gov.in/content/dam/doitassets/water/Ground%20Water/Pdf/RTI/RTI-Act-hindi.pdf",
+     "source": "phedwater.rajasthan.gov.in",
+     "doc_type": "pdf",
+     "check": "checked",
+     "lead": false,
+     "walled": null,
+     "relevance": 7,
+     "reason": "The document is a PDF containing the RTI Act in bilingual/Hindi format.",
+     "snippet": "The government of Rajasthan is committed to public welfare as well being of its public is the priority of the Government. Jankalyan portal (a Public Welfare Portal) fulfills this ideology of Hon’ble Chief Minister of Raj",
+     "published": null
+    },
+    {
+     "title": "Drishtiias",
+     "url": "https://www.drishtiias.com/hindi/pdf/1569588930.pdf",
+     "source": "drishtiias.com",
+     "doc_type": "pdf",
+     "check": "checked",
+     "lead": true,
+     "walled": null,
+     "relevance": 6,
+     "reason": "Provides a PDF document directly hosting the full Hindi text of the RTI Act 2005. Metadata only; contents unverified.",
+     "snippet": "online ias portal, ias coaching in hindi, ias exam portal, pcs study material, ias preparation, online ias preparation, upsc exam preparation, pcs exam preparation",
+     "published": null
+    },
+    {
+     "title": "RTI Act-2005 | PDF - Scribd",
+     "url": "https://www.scribd.com/document/1053480608/RTI-Act-2005",
+     "source": "scribd.com",
+     "doc_type": "viewer",
+     "check": "checked",
+     "lead": true,
+     "walled": null,
+     "relevance": 6,
+     "reason": "Scribd document provides the full RTI Act 2005 in Hindi. Metadata only; contents unverified.",
+     "snippet": "बायत सयकाय विधध औय न्माम भ्रालारम GOVERNMENT OF INDIA MINISTRY OF LAW AND JUSTICE सूचना का ...",
+     "published": null
+    },
+    {
+     "title": "cf) 79T TT 3#4TTT 2005 ansmi • • WO. cbir4q,,Mirf4MIziff MR NM fir wifft",
+     "url": "https://www.iitr.ac.in/rti/Downloads/RTI_GUIDELINES_Hindi.pdf",
+     "source": "iitr.ac.in",
+     "doc_type": "pdf",
+     "check": "checked",
+     "lead": false,
+     "walled": null,
+     "relevance": 5,
+     "reason": "The page is a guidelines document rather than the full text of the RTI Act 2005. Match not verified from the evidence.",
+     "snippet": "-4=rti 54) It7t-e · auft a1 T2Tmtafta. 1 · T · 1 41 · 1 · ET -dFf 3T T 31-M\"P111, 2005 · 13. 3-17aF 1 9T 1Iai1czlci: 6 l Fcr · rr&-r · 71A- itTrOta dildIc11 · tI a-zrftr, ItOisr · dii41 · TkvaTr 3m0- crftm-Turr · 41 · 3T",
+     "published": null
+    },
+    {
+     "title": "RTI-Act_English.pdf",
+     "url": "https://cic.gov.in/sites/default/files/RTI-Act_English.pdf",
+     "source": "cic.gov.in",
+     "doc_type": "pdf",
+     "check": "checked",
+     "lead": false,
+     "walled": null,
+     "relevance": 5,
+     "reason": "CIC PDF for the RTI Act 2005, but this specific file contains the English text version. Match not verified from the evidence.",
+     "snippet": "This edition of the Right to Information Act, 2005 is being published in diglot form. The English text and · the authoritative Hindi text of the Act have been modified up (lithe 1st day of February, 2011.",
+     "published": null
+    }
+   ]
+  }
+ ],
+ "web": [
+  {
+   "q": "current RBI repo rate",
+   "kind": "web",
+   "first_ms": 2800,
+   "full_ms": 17017,
+   "found": 20,
+   "providers": [
+    {
+     "provider": "brave",
+     "status": "ok",
+     "message": "Brave search completed."
+    },
+    {
+     "provider": "judge",
+     "status": "ok",
+     "message": "20 pages were checked for relevance; 6 did not match."
+    }
+   ],
+   "sites": [],
+   "removed": 6,
+   "top": [
+    {
+     "title": "DBIE",
+     "url": "https://data.rbi.org.in/",
+     "source": "data.rbi.org.in",
+     "doc_type": null,
+     "check": null,
+     "lead": false,
+     "walled": null,
+     "relevance": 10,
+     "reason": "Official RBI data portal listing the current policy repo rate directly.",
+     "snippet": "Policy Repo Rate : 5.25% | Reverse Repo Rate : 3.35% | Cash Reserve Ratio : 3.00% | Statutory Liquidity Ratio : 18.00% | Standing Deposit Facility (SDF) Rate : 5.00% | CPI Inflation : 4.82% (Aug-26) | WACR : 5.05% (Sep-2",
+     "published": null
+    },
+    {
+     "title": "What is Repo Rate? Meaning, Current Rates and Impact",
+     "url": "https://www.bajajhousingfinance.in/repo-rate",
+     "source": "bajajhousingfinance.in",
+     "doc_type": null,
+     "check": null,
+     "lead": false,
+     "walled": null,
+     "relevance": 9,
+     "reason": "Provides the current RBI repo rate clearly in the page text.",
+     "snippet": "What is Repo Rate? Meaning, Current Rates and Impact ... As per the announcement made by the Reserve Bank of India (RBI) on 05 August 2026, the current Repo Rate is 5.25%.",
+     "published": "2026-08-05T18:39:22.000Z"
+    },
+    {
+     "title": "India Interest Rate",
+     "url": "https://tradingeconomics.com/india/interest-rate",
+     "source": "tradingeconomics.com",
+     "doc_type": null,
+     "check": null,
+     "lead": false,
+     "walled": null,
+     "relevance": 9,
+     "reason": "The page states that the RBI kept its key repo rate unchanged at 5.25% in August.",
+     "snippet": "India Holds Rates, Revises Down FY26/27 GDP Forecasts · The Reserve Bank of India (RBI) kept its key repo rate unchanged at 5.25% for the third consecutive meeting in June and maintained a neutral stance amid a weakening",
+     "published": "2026-08-04T20:05:03.000Z"
+    },
+    {
+     "title": "Check the Current Repo Rate 2026",
+     "url": "https://www.bankbazaar.com/home-loan/repo-rate.html",
+     "source": "bankbazaar.com",
+     "doc_type": null,
+     "check": null,
+     "lead": false,
+     "walled": null,
+     "relevance": 9,
+     "reason": "The page explicitly provides the current RBI repo rate of 5.25% and details its recent changes.",
+     "snippet": "The Repo Rate is the interest rate at which the RBI lends money to commercial banks in exchange for securities to manage liquidity and control inflation. Currently at 5.25% (following a 25 basis points cut on 5 December ",
+     "published": "2026-08-06T23:25:05.000Z"
+    },
+    {
+     "title": "Repo Rate 2026: Current, Reverse, SDF, Meaning and Monetary Policy",
+     "url": "https://cleartax.in/s/repo-rate",
+     "source": "cleartax.in",
+     "doc_type": null,
+     "check": null,
+     "lead": false,
+     "walled": null,
+     "relevance": 9,
+     "reason": "The page provides the current repo rate of 5.25% following the June 2026 MPC meeting.",
+     "snippet": "In its latest Monetary Policy Committee (MPC) meeting held in June 2026, the RBI kept the repo rate unchanged at 5.25% and maintained a neutral policy stance while balancing inflation risks and growth concerns.",
+     "published": "2026-06-08T07:00:24.000Z"
+    },
+    {
+     "title": "Repo Rate Today: RBI Current Repo Rate 2026 | Bajaj Finance",
+     "url": "https://www.bajajfinserv.in/repo-rate",
+     "source": "bajajfinserv.in",
+     "doc_type": null,
+     "check": null,
+     "lead": false,
+     "walled": null,
+     "relevance": 9,
+     "reason": "Page states the current RBI repo rate explicitly.",
+     "snippet": "The current RBI repo rate in 2026 is 5.25%*, having been kept unchanged by the Monetary Policy Committee (MPC).",
+     "published": null
+    },
+    {
+     "title": "Check Information on Current RBI Bank Interest Rates 2026",
+     "url": "https://www.bankbazaar.com/finance-tools/emi-calculator/current-rbi-bank-interest-rates.html",
+     "source": "bankbazaar.com",
+     "doc_type": null,
+     "check": null,
+     "lead": false,
+     "walled": null,
+     "relevance": 9,
+     "reason": "Provides information on the current RBI repo rate.",
+     "snippet": "The rate of interest charged by RBI while they repurchase the securities is called Repo Rate. The current Repo Rate as fixed by the RBI is 5.25%. The latest revision in the rates was made to mitigate the economic risks k",
+     "published": null
+    },
+    {
+     "title": "RBI keeps repo rate unchanged at 5.25%, Reduces GDP growth projection to 6.6% | Akashvani News",
+     "url": "https://newsonair.gov.in/rbi-keeps-repo-rate-unchanged-at-5-25-retains-neutral-stance/",
+     "source": "newsonair.gov.in",
+     "doc_type": null,
+     "check": null,
+     "lead": false,
+     "walled": null,
+     "relevance": 9,
+     "reason": "The page directly provides the current RBI repo rate of 5.25% from the monetary policy announcement.",
+     "snippet": "Announcing the second bi-monthly monetary policy for the current fiscal, RBI Governor Sanjay Malhotra today said that the Monetary Policy Committee (MPC) has unanimously decided to retain the short-term lending rate or t",
+     "published": "2026-06-04T18:30:00.000Z"
+    },
+    {
+     "title": "RBI keeps repo rate unchanged; Projects India’s real GDP growth for current fiscal at 6.9% | Akashvani News",
+     "url": "https://newsonair.gov.in/rbi-to-announce-its-first-bi-monthly-monetary-policy-statement-for-financial-year-2026-27-today/",
+     "source": "newsonair.gov.in",
+     "doc_type": null,
+     "check": null,
+     "lead": false,
+     "walled": null,
+     "relevance": 9,
+     "reason": "The page reports the RBI keeping the repo rate unchanged at 5.25% in its monetary policy announcement.",
+     "snippet": "The Reserve Bank of India has kept interest rates unchanged at 5.25 percent. Announcing the first bi-monthly monetary policy for the current fiscal, RBI Governor Sanjay Malhotra today said that the Monetary Policy Commit",
+     "published": "2026-09-08T10:55:02.000Z"
+    },
+    {
+     "title": "RBI Issues June 2025 Monetary Policy Update",
+     "url": "https://www.pib.gov.in/PressNoteDetails.aspx?NoteId=154573&ModuleId=3&reg=48&lang=2",
+     "source": "pib.gov.in",
+     "doc_type": null,
+     "check": null,
+     "lead": false,
+     "walled": null,
+     "relevance": 8,
+     "reason": "The page provides an official RBI monetary policy update, though detailing a previous rate of 5.50% from June 2025.",
+     "snippet": "RBI has announced its latest Monetary ... decisions include: ... Policy repo rate is being reduced by 50 basis points (bps) to 5.50 per cent with immediate effect....",
+     "published": null
+    }
+   ]
+  },
+  {
+   "q": "how long can cooked rice be safely kept in the fridge",
+   "kind": "web",
+   "first_ms": 1382,
+   "full_ms": 16647,
+   "found": 20,
+   "providers": [
+    {
+     "provider": "brave",
+     "status": "ok",
+     "message": "Brave search completed."
+    },
+    {
+     "provider": "judge",
+     "status": "ok",
+     "message": "20 pages were checked for relevance; 2 did not match."
+    }
+   ],
+   "sites": [],
+   "removed": 2,
+   "top": [
+    {
+     "title": "How Long Does Cooked Rice Last in the Fridge? | Reencle",
+     "url": "https://reencle.co/blogs/news/how-long-does-cooked-rice-last",
+     "source": "reencle.co",
+     "doc_type": null,
+     "check": null,
+     "lead": false,
+     "walled": null,
+     "relevance": 10,
+     "reason": "The page directly answers how long cooked rice lasts in the fridge with clear USDA and FDA guidelines.",
+     "snippet": "Cooked rice lasts 3–4 days in the fridge — but improper storage makes it a foodborne illness risk",
+     "published": "2026-05-12T03:20:50.000Z"
+    },
+    {
+     "title": "How Long Is Rice Good for in the Fridge?",
+     "url": "https://reencle.co/blogs/news/how-long-is-rice-good-for-in-the-fridge",
+     "source": "reencle.co",
+     "doc_type": null,
+     "check": null,
+     "lead": false,
+     "walled": null,
+     "relevance": 10,
+     "reason": "The page gives a precise timeline based on USDA FoodKeeper guidelines stating cooked rice should be stored for 3 to 5 days.",
+     "snippet": "The full 5-day window applies to rice that was cooled promptly and stored in a properly cold refrigerator (at or below 40°F / 4°C) in an airtight container. Both cooked white rice and cooked brown rice follow the same 3-",
+     "published": "2026-03-18T21:05:02.000Z"
+    },
+    {
+     "title": "How Long Does Rice Last in the Fridge? - The New York Times",
+     "url": "https://www.nytimes.com/newsgraphics/card-story/food-rice-safety-how-long-fridge",
+     "source": "nytimes.com",
+     "doc_type": null,
+     "check": null,
+     "lead": false,
+     "walled": null,
+     "relevance": 9,
+     "reason": "The page details the storage time for cooked rice in the fridge according to the Department of Health and Human Services.",
+     "snippet": "The U.S. Department of Health and Human Services gives us four to six days to eat cooked rice (and up to four days for most other leftovers), so long as it’s been stored in a fridge that’s 40 degrees Fahrenheit or cooler",
+     "published": null
+    },
+    {
+     "title": "How Long Does Rice Last in the Fridge Before It Goes Bad?",
+     "url": "https://www.tasteofhome.com/article/how-long-does-rice-last/",
+     "source": "tasteofhome.com",
+     "doc_type": null,
+     "check": null,
+     "lead": false,
+     "walled": null,
+     "relevance": 9,
+     "reason": "The page details that prepared rice lasts four to six days in the fridge.",
+     "snippet": "Since you can’t see or smell B. cereus, assume that rice has gone bad if you haven’t refrigerated it within one to two hours of cooking or if it’s been in the fridge for more than four days.",
+     "published": "2025-07-11T04:12:53.000Z"
+    },
+    {
+     "title": "How Long Does Cooked Rice Last and How Long Can You Keep It?",
+     "url": "https://www.finedininglovers.com/explore/articles/how-long-does-cooked-rice-last-and-how-long-can-you-keep-it",
+     "source": "finedininglovers.com",
+     "doc_type": null,
+     "check": null,
+     "lead": false,
+     "walled": null,
+     "relevance": 9,
+     "reason": "The page directly answers how long cooked rice can be safely kept in the fridge, stating 3 to 5 days.",
+     "snippet": "Rice is best eaten as soon after ... rice leftovers for set periods: In the fridge, cooked rice leftovers may be stored for 3 to 5 days....",
+     "published": "2021-05-22T02:23:18.000Z"
+    },
+    {
+     "title": "How Long Does Cooked Rice Last in the Fridge?",
+     "url": "https://redbeansanderic.com/how-long-does-cooked-rice-last-in-the-fridge/",
+     "source": "redbeansanderic.com",
+     "doc_type": null,
+     "check": null,
+     "lead": false,
+     "walled": null,
+     "relevance": 8,
+     "reason": "The page explains how long cooked rice lasts in the fridge.",
+     "snippet": "At the 4-day mark, if it’s still in there, I toss it. However, according to FoodSafety.gov, leftover white or brown rice is safe to eat for up to four to six days after being cooked.",
+     "published": "2025-06-02T03:30:55.000Z"
+    },
+    {
+     "title": "How Long Can You Store Cooked Rice In The Fridge? - Tasting Table",
+     "url": "https://www.tastingtable.com/878539/how-long-can-you-store-cooked-rice-in-the-fridge/",
+     "source": "tastingtable.com",
+     "doc_type": null,
+     "check": null,
+     "lead": false,
+     "walled": null,
+     "relevance": 8,
+     "reason": "The page discusses the storage duration of cooked rice in the fridge.",
+     "snippet": "At first glance, it looks okay — but how long do you have before leftover rice becomes dangerous to eat? Per FoodSafety.gov, leftover rice can be stored in the refrigerator and safely eaten four to six days after being c",
+     "published": "2022-05-29T16:55:03.000Z"
+    },
+    {
+     "title": "How long does rice last in the fridge? How to reheat leftovers safely",
+     "url": "https://www.usatoday.com/story/life/health-wellness/2024/02/28/how-long-does-rice-last-in-the-fridge/72754864007/",
+     "source": "usatoday.com",
+     "doc_type": null,
+     "check": null,
+     "lead": false,
+     "walled": null,
+     "relevance": 7,
+     "reason": "The page discusses how long rice lasts in the fridge and safety guidelines.",
+     "snippet": "\"My rule or guideline is to cool leftover rice and get it into the fridge within an hour after preparing,\" Rael suggests. She adds that rice can technically safely last up to 2 hours, but shouldn't exceed that timeframe.",
+     "published": "2024-12-03T20:52:45.000Z"
+    },
+    {
+     "title": "How Long Does Rice Last in the Fridge? Tips for Leftover Rice",
+     "url": "https://www.rd.com/article/how-long-does-rice-last-in-the-fridge/",
+     "source": "rd.com",
+     "doc_type": null,
+     "check": null,
+     "lead": false,
+     "walled": null,
+     "relevance": 7,
+     "reason": "The page discusses how long cooked rice lasts in the fridge.",
+     "snippet": "While making sure to throw out leftover rice after six days, or a week max, is a smart way to stay safe, the bigger key to avoiding these issues is to make sure you are storing the rice properly.",
+     "published": "2025-07-30T08:06:56.000Z"
+    },
+    {
+     "title": "How Long Does Cooked Rice Last in the Fridge?",
+     "url": "https://www.foodandwine.com/how-long-does-rice-last-in-the-fridge-8637282",
+     "source": "foodandwine.com",
+     "doc_type": null,
+     "check": null,
+     "lead": true,
+     "walled": null,
+     "relevance": 6,
+     "reason": "Food and Wine article clearly answers how long cooked rice lasts in the fridge based on FoodSafety.gov. Metadata only; contents unverified.",
+     "snippet": "How long has it been in there, and is it still OK to eat? According to FoodSafety.gov, leftover white or brown rice is safe to eat for four to six days after being cooked and up to six months in the freezer.",
+     "published": "2026-07-26T16:25:17.000Z"
+    }
+   ]
+  },
+  {
+   "q": "postgres vs mysql for write-heavy workloads from engineers who ran both, not vendor blogs",
+   "kind": "web",
+   "first_ms": 2124,
+   "full_ms": 20446,
+   "found": 20,
+   "providers": [
+    {
+     "provider": "brave",
+     "status": "ok",
+     "message": "Brave search completed."
+    },
+    {
+     "provider": "judge",
+     "status": "ok",
+     "message": "20 pages were checked for relevance; 11 did not match."
+    }
+   ],
+   "sites": [],
+   "removed": 11,
+   "top": [
+    {
+     "title": "PostgreSQL vs MySQL: Choosing a Database for Your Stack | Markaicode",
+     "url": "https://markaicode.com/vs/postgresql-vs-mysql/",
+     "source": "markaicode.com",
+     "doc_type": null,
+     "check": null,
+     "lead": false,
+     "walled": null,
+     "relevance": 6,
+     "reason": "Provides a production-focused comparison of PostgreSQL and MySQL trade-offs.",
+     "snippet": "Your workload is dominated by simple, well-indexed CRUD queries where InnoDB's storage engine is a good match. You're on MySQL 8.0 today — the move to make is to 8.4 LTS or 9.7, not necessarily to PostgreSQL. Cost isn't ",
+     "published": "2026-05-20T18:30:00.000Z"
+    },
+    {
+     "title": "Postgres vs. MySQL: Engineering the Right Trade-off for Heavy Workloads | by Kumar Ramamurthy | Google Cloud - Community | Jun, 2026 | Medium",
+     "url": "https://medium.com/google-cloud/postgres-vs-mysql-engineering-the-right-trade-off-for-heavy-workloads-d1fde92e603d",
+     "source": "medium.com",
+     "doc_type": null,
+     "check": null,
+     "lead": true,
+     "walled": "Medium",
+     "relevance": 5,
+     "reason": "Medium article discusses PostgreSQL vs MySQL for workloads, but publisher is Google Cloud community (vendor adjacent). Match not verified from the evidence.",
+     "snippet": "PostgreSQL excels when your domain model calls for complex, heavily analytical expressions, execution parallelization, or rich data types (such as geographical GIS coordinates, multi-dimensional vectors, or flexible JSON",
+     "published": "2026-06-10T06:08:16.000Z"
+    },
+    {
+     "title": "PostgreSQL vs MySQL Architecture: Deep Engine & Workload Analysis - DEV Community",
+     "url": "https://dev.to/wantsvibes/postgresql-vs-mysql-architecture-deep-engine-workload-analysis-4j94",
+     "source": "dev.to",
+     "doc_type": null,
+     "check": null,
+     "lead": false,
+     "walled": null,
+     "relevance": 5,
+     "reason": "DEV Community post analyzing PostgreSQL and MySQL architectures under production workloads. Match not verified from the evidence.",
+     "snippet": "When evaluating database index overhead write amplification, cache pressure, and maintenance costs, engineers must recognize that write-heavy systems place severe demands on append-only logs and background maintenance ta",
+     "published": "2026-09-19T00:22:04.000Z"
+    },
+    {
+     "title": "PostgreSQL vs MySQL in 2026: Definitive Comparison | TECHSY",
+     "url": "https://techsy.io/en/blog/postgresql-vs-mysql",
+     "source": "techsy.io",
+     "doc_type": null,
+     "check": null,
+     "lead": false,
+     "walled": null,
+     "relevance": 5,
+     "reason": "Comparative guide with benchmarks and side-by-side examples from backend experience. Match not verified from the evidence.",
+     "snippet": "MySQL wins here, and it is not close for simple queries. Sysbench OLTP benchmarks show MySQL achieving approximately 21% higher peak transactions per second than PostgreSQL on simple read-heavy workloads (DoltHub, 2024).",
+     "published": "2026-02-10T18:30:00.000Z"
+    },
+    {
+     "title": "MySQL vs PostgreSQL in 2026: A Practical Decision Framework - Basevolt Blog",
+     "url": "https://basevolt.app/blog/mysql-vs-postgresql-2026",
+     "source": "basevolt.app",
+     "doc_type": null,
+     "check": null,
+     "lead": false,
+     "walled": null,
+     "relevance": 5,
+     "reason": "Practical decision framework comparing MySQL and PostgreSQL from personal engineering experience. Match not verified from the evidence.",
+     "snippet": "MySQL and PostgreSQL are both excellent, both mature, and both capable of running serious production systems in 2026. The differences that matter are narrower than the argument suggests, and the argument is usually drive",
+     "published": "2026-09-23T18:30:00.000Z"
+    },
+    {
+     "title": "r/programming on Reddit: MySQL vs PostgreSQL Performance: throughput & latency, reads & writes",
+     "url": "https://www.reddit.com/r/programming/comments/1q5fqbp/mysql_vs_postgresql_performance_throughput/",
+     "source": "reddit.com",
+     "doc_type": null,
+     "check": null,
+     "lead": true,
+     "walled": null,
+     "relevance": 5,
+     "reason": "Reddit discussion on MySQL vs PostgreSQL throughput and write workloads. Match not verified from the evidence.",
+     "snippet": "Empirically, MySQL benefits from having more connections, yielding better results; especially for write-heavy workloads. ... PostgreSQL 18 still assumes storage on HDD instead of SSD.",
+     "published": "2026-01-06T05:37:31.000Z"
+    },
+    {
+     "title": "PostgreSQL vs. MySQL: Choosing the Right Database for Your Project | DataCamp",
+     "url": "https://www.datacamp.com/blog/postgresql-vs-mysql",
+     "source": "datacamp.com",
+     "doc_type": null,
+     "check": null,
+     "lead": true,
+     "walled": null,
+     "relevance": 5,
+     "reason": "DataCamp blog post comparing PostgreSQL and MySQL performance. Match not verified from the evidence.",
+     "snippet": "Here, we’ll identify differences in both performance and scalability of Postgres and MySQL. For read-heavy workflows, MySQL provides substantial performance gains over Postgres. MySQL’s default engine (InnoDB) utilizes r",
+     "published": "2024-09-20T16:30:00.000Z"
+    },
+    {
+     "title": "MySQL vs PostgreSQL Performance: throughput & latency, reads & writes",
+     "url": "https://binaryigor.com/mysql-vs-postgresql-performance.html",
+     "source": "binaryigor.com",
+     "doc_type": null,
+     "check": null,
+     "lead": false,
+     "walled": null,
+     "relevance": 5,
+     "reason": "Empirical performance comparison measuring throughput and latency for reads and writes. Match not verified from the evidence.",
+     "snippet": "Since DBs have 8 CPUs available, connection pool sizes are: 8 * 16 = 128 for MySQL and 8 * 8 = 64 for Postgres. Empirically, MySQL benefits from having more connections, yielding better results; especially for write-heav",
+     "published": "2026-01-04T18:30:00.000Z"
+    },
+    {
+     "title": "PostgreSQL vs MySQL in 2026: Performance, Features and When to Use Each - DEV Community",
+     "url": "https://dev.to/philip_mcclarence_2ef9475/postgresql-vs-mysql-in-2026-performance-features-and-when-to-use-each-3g7e",
+     "source": "dev.to",
+     "doc_type": null,
+     "check": null,
+     "lead": false,
+     "walled": null,
+     "relevance": 5,
+     "reason": "Engineer shares personal migration experience comparing Postgres and MySQL performance. Match not verified from the evidence.",
+     "snippet": "PostgreSQL's model gives it simpler, faster reads at the cost of vacuum maintenance. MySQL's model avoids bloat at the cost of undo log traversal for certain workloads. Both databases use WAL (write-ahead logging) for du",
+     "published": "2026-03-01T17:27:13.000Z"
+    }
+   ]
+  }
+ ],
+ "images": [
+  {
+   "q": "red vintage bicycle leaning against a blue wall",
+   "full_ms": 1301,
+   "providers": [
+    {
+     "provider": "searxng",
+     "status": "ok",
+     "message": "3 of 4 search engines answered; Duckduckgo Images (did not answer) did not."
+    }
+   ],
+   "top": [
+    {
+     "title": "alamy.com",
+     "image": "https://c8.alamy.com/comp/2JHRT0K/a-rusty-red-bicycle-leaning-on-blue-weathered-building-wall-and-metal-gate-2JHRT0K.jpg",
+     "page": "https://www.alamy.com/a-rusty-red-bicycle-leaning-on-blue-weathered-building-wall-and-metal-gate-image475652819.html",
+     "source": "alamy.com",
+     "engine": "google images",
+     "size": [
+      1300,
+      1044
+     ]
+    },
+    {
+     "title": "unsplash.com",
+     "image": "https://images.unsplash.com/photo-1778800051130-a7466c7ae19a?fm=jpg&q=60&w=3000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+     "page": "https://unsplash.com/photos/red-vintage-bicycle-leaning-against-a-blue-wall-lQh76MKnY6g",
+     "source": "unsplash.com",
+     "engine": "google images",
+     "size": [
+      3000,
+      2400
+     ]
+    },
+    {
+     "title": "Free A classic red bicycle with a vintage feel, resting against an urban wall. Stock Photo",
+     "image": "https://images.pexels.com/photos/36483846/pexels-photo-36483846/free-photo-of-red-vintage-bicycle-leaning-against-wall.jpeg?cs=tinysrgb&dpr=1&w=500",
+     "page": "https://www.pexels.com/search/vintage%20bike/",
+     "source": "pexels.com",
+     "engine": "brave.images",
+     "size": [
+      null,
+      null
+     ]
+    },
+    {
+     "title": "Free AI Image Generator, No Signup or Watermar…",
+     "image": "https://fastimg.ai/_astro/text-to-image-red-bicycle-blue-wall.CVUZQAED_Z1zwVqM.webp",
+     "page": "https://fastimg.ai/ai-image-generator/",
+     "source": "fastimg.ai",
+     "engine": "bing images",
+     "size": [
+      720,
+      540
+     ]
+    },
+    {
+     "title": "vecteezy.com",
+     "image": "https://static.vecteezy.com/system/resources/previews/065/801/227/large_2x/red-vintage-bicycle-leaning-against-blue-wooden-wall-amidst-white-and-yellow-flowers-photo.jpg",
+     "page": "https://www.vecteezy.com/photo/65801227-red-vintage-bicycle-leaning-against-blue-wooden-wall-amidst-white-and-yellow-flowers",
+     "source": "vecteezy.com",
+     "engine": "google images",
+     "size": [
+      3497,
+      1960
+     ]
+    },
+    {
+     "title": "Detail of a red vintage bicycle leaning against a wall",
+     "image": "https://us.123rf.com/450wm/semolina/semolina1207/semolina120700032/14442496-detail-of-a-red-vintage-bicycle-leaning-against-a-wall.jpg?ver=6",
+     "page": "https://123rf.com/stock-photo/vintage_bike.html",
+     "source": "123rf.com",
+     "engine": "brave.images",
+     "size": [
+      null,
+      null
+     ]
+    },
+    {
+     "title": "dreamstime.com",
+     "image": "https://thumbs.dreamstime.com/b/old-red-rusty-bicycle-leaning-against-blue-doors-street-old-red-rusty-bicycle-leaning-against-blue-doors-street-268709584.jpg",
+     "page": "https://www.dreamstime.com/photos-images/old-bicycle-leaning-against-blue-door.html",
+     "source": "dreamstime.com",
+     "engine": "google images",
+     "size": [
+      800,
+      534
+     ]
+    },
+    {
+     "title": "Retro Vintage Red Bike Leaning Against Block Wall Black And White Photo b&w bicycle old fashioned cycle tricycle chain pedal transportation stone brick Cool Wall Art Print Poster 36x24",
+     "image": "https://m.media-amazon.com/images/I/51VYWAIzZgL.jpg",
+     "page": "https://www.amazon.com/Retro-Vintage-Leaning-Against-Poster/dp/B07JBBXTJ1",
+     "source": "amazon.com",
+     "engine": "brave.images",
+     "size": [
+      null,
+      null
+     ]
+    },
+    {
+     "title": "Red Vintage Bicycle Leaning on Blue Wall and Cherry Blossom Tree Stoc…",
+     "image": "https://thumbs.dreamstime.com/b/interior-design-red-vintage-bicycle-leaning-blue-wall-cherry-blossom-tree-minimal-style-interior-design-red-347932620.jpg",
+     "page": "https://www.dreamstime.com/interior-design-red-vintage-bicycle-leaning-blue-wall-cherry-blossom-tree-minimal-style-interior-design-red-image347932620",
+     "source": "dreamstime.com",
+     "engine": "bing images",
+     "size": [
+      800,
+      269
+     ]
+    },
+    {
+     "title": "This captivating stock photo showcases the vintage charm of an old red bicycle leaning against a wall in a typical street of Polignano a Mare, Italy. The image captures the essence of the vibrant and …",
+     "image": "https://thumbs.dreamstime.com/b/captivating-stock-photo-showcases-vintage-charm-old-red-bicycle-leaning-against-wall-typical-street-polignano-269977829.jpg",
+     "page": "https://dreamstime.com/photos-images/old-red-bicycle-leaning-against-wall.html",
+     "source": "dreamstime.com",
+     "engine": "brave.images",
+     "size": [
+      null,
+      null
+     ]
+    },
+    {
+     "title": "Old Red Bicycle Leaning Agains…",
+     "image": "https://images.fineartamerica.com/images-medium-large-5/old-red-bicycle-leaning-against-a-carl-larson-photography.jpg",
+     "page": "https://fineartamerica.com/featured/old-red-bicycle-leaning-against-a-carl-larson-photography.html",
+     "source": "fineartamerica.com",
+     "engine": "bing images",
+     "size": [
+      675,
+      900
+     ]
+    },
+    {
+     "title": "shutterstock.com",
+     "image": "https://www.shutterstock.com/image-photo/red-vintage-bicycle-hanging-on-260nw-2758082875.jpg",
+     "page": "https://www.shutterstock.com/search/bike-blue-wall",
+     "source": "shutterstock.com",
+     "engine": "google images",
+     "size": [
+      506,
+      280
+     ]
+    }
+   ]
+  },
+  {
+   "q": "free to use photo of mount everest with license and attribution",
+   "full_ms": 681,
+   "providers": [
+    {
+     "provider": "searxng",
+     "status": "ok",
+     "message": "3 of 4 search engines answered; Duckduckgo Images (did not answer) did not."
+    }
+   ],
+   "top": [
+    {
+     "title": "commons.wikimedia.org",
+     "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/36/Mount_Everest_as_seen_from_Drukair2.jpg/1280px-Mount_Everest_as_seen_from_Drukair2.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail",
+     "page": "https://commons.wikimedia.org/wiki/File:Mount_Everest_as_seen_from_Drukair2.jpg",
+     "source": "commons.wikimedia.org",
+     "engine": "google images",
+     "size": [
+      1280,
+      730
+     ]
+    },
+    {
+     "title": "Mount Everest Photo License Plate",
+     "image": "https://images-na.ssl-images-amazon.com/images/I/510znRtuWTL.jpg",
+     "page": "https://www.amazon.com/Mount-Everest-Photo-License-Plate/dp/B0755SFP2R",
+     "source": "amazon.com",
+     "engine": "brave.images",
+     "size": [
+      null,
+      null
+     ]
+    },
+    {
+     "title": "Mount Everest landscape mountain outdoors. | Free P…",
+     "image": "https://images.rawpixel.com/image_social_landscape/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIzLTEyL3Jhd3BpeGVsX29mZmljZV8zOF9tb3VudF9ldmVyZXN0X19oaW50X29mX2xhbmRtYXJrX191c2Vfb2Zfd2lkZV82MDliNDQ2Zi1hMGU1LTQwMzgtOTgxMC1hMGNiNWM4YWZiZGZfMS5qcGc.jpg",
+     "page": "https://www.rawpixel.com/image/12920184/mount-everest-landscape-mountain-outdoors-generated-image-rawpixel",
+     "source": "rawpixel.com",
+     "engine": "bing images",
+     "size": [
+      1000,
+      667
+     ]
+    },
+    {
+     "title": "commons.wikimedia.org",
+     "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c7/Mount-Everest.jpg/1280px-Mount-Everest.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail",
+     "page": "https://commons.wikimedia.org/wiki/File:Mount-Everest.jpg",
+     "source": "commons.wikimedia.org",
+     "engine": "google images",
+     "size": [
+      1280,
+      851
+     ]
+    },
+    {
+     "title": "Free Tibet Mount Everest photo and picture",
+     "image": "https://cdn.pixabay.com/photo/2019/03/02/10/08/tibet-4029552_640.jpg",
+     "page": "https://pixabay.com/images/search/mount%20everest/",
+     "source": "pixabay.com",
+     "engine": "brave.images",
+     "size": [
+      null,
+      null
+     ]
+    },
+    {
+     "title": "Everest Base Camp under snow in Nepal image - Fre…",
+     "image": "https://www.goodfreephotos.com/albums/nepal/other/everest-base-camp-under-snow-nepal.jpg",
+     "page": "https://www.goodfreephotos.com/nepal/other/everest-base-camp-under-snow-nepal.jpg.php",
+     "source": "goodfreephotos.com",
+     "engine": "bing images",
+     "size": [
+      5472,
+      3648
+     ]
+    },
+    {
+     "title": "commons.wikimedia.org",
+     "image": "https://upload.wikimedia.org/wikipedia/commons/9/90/Everest%2C_Himalayas.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original",
+     "page": "https://commons.wikimedia.org/wiki/File:Everest,_Himalayas.jpg",
+     "source": "commons.wikimedia.org",
+     "engine": "google images",
+     "size": [
+      4032,
+      2688
+     ]
+    },
+    {
+     "title": "Thumbnail for version as of 21:52, 17 April 2014",
+     "image": "https://upload.wikimedia.org/wikipedia/commons/c/c7/Mount-Everest.jpg",
+     "page": "https://en.wikipedia.org/wiki/File:Mount-Everest.jpg",
+     "source": "en.wikipedia.org",
+     "engine": "brave.images",
+     "size": [
+      null,
+      null
+     ]
+    },
+    {
+     "title": "200+ Free Everest & Mount Everest Images - Pixabay",
+     "image": "https://cdn.pixabay.com/photo/2018/04/07/01/44/snow-3297561_1280.jpg",
+     "page": "https://pixabay.com/images/search/%20everest/",
+     "source": "pixabay.com",
+     "engine": "bing images",
+     "size": [
+      1280,
+      719
+     ]
+    },
+    {
+     "title": "commons.wikimedia.org",
+     "image": "https://upload.wikimedia.org/wikipedia/commons/8/82/Mt.Everest.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original",
+     "page": "https://commons.wikimedia.org/wiki/File:Mt.Everest.jpg",
+     "source": "commons.wikimedia.org",
+     "engine": "google images",
+     "size": [
+      2100,
+      1361
+     ]
+    },
+    {
+     "title": "A snow covered mountain with clouds in the sky",
+     "image": "https://images.unsplash.com/photo-1720939485733-43c874b6044d?fm=jpg&q=60&w=3000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fG1vdW50JTIwZXZlcmVzdHxlbnwwfHwwfHx8MA==",
+     "page": "https://unsplash.com/s/photos/mount-everest",
+     "source": "unsplash.com",
+     "engine": "brave.images",
+     "size": [
+      null,
+      null
+     ]
+    },
+    {
+     "title": "3,000+ Free Mount Everest. & Everest Images - Pixabay",
+     "image": "https://cdn.pixabay.com/photo/2023/01/04/08/27/nature-7696147_1280.jpg",
+     "page": "https://pixabay.com/images/search/mount%20everest./",
+     "source": "pixabay.com",
+     "engine": "bing images",
+     "size": [
+      1280,
+      853
+     ]
+    }
+   ]
+  },
+  {
+   "q": "infographic showing india's population by state, not AI-generated",
+   "full_ms": 687,
+   "providers": [
+    {
+     "provider": "searxng",
+     "status": "ok",
+     "message": "3 of 4 search engines answered; Duckduckgo Images (did not answer) did not."
+    }
+   ],
+   "top": [
+    {
+     "title": "India's Population Distribution by State i…",
+     "image": "https://indiadatamap.com/wp-content/uploads/2025/08/state-wise-population-of-india-in-2025.png",
+     "page": "https://indiadatamap.com/2025/08/14/state-wise-population-of-india-in-2025/",
+     "source": "indiadatamap.com",
+     "engine": "bing images",
+     "size": [
+      474,
+      474
+     ]
+    },
+    {
+     "title": "visualcapitalist.com",
+     "image": "https://www.visualcapitalist.com/wp-content/uploads/2022/12/India-states-compared-countries-MAIN-2.jpg",
+     "page": "https://www.visualcapitalist.com/population-of-india-compared-with-countries/",
+     "source": "visualcapitalist.com",
+     "engine": "google images",
+     "size": [
+      1200,
+      1476
+     ]
+    },
+    {
+     "title": "Education Parametric Graph Showing Enrollment, Graduation, and Literacy Rates Over Years",
+     "image": "https://media.easy-peasy.ai/27feb2bb-aeb4-4a83-9fb6-8f3f2a15885e/7e2599ee-255d-4437-9ad1-62b7ce724e54_thumb.webp",
+     "page": "https://easy-peasy.ai/ai-image-generator/images/population-growth-india-statistical-line-graph-1950-present",
+     "source": "easy-peasy.ai",
+     "engine": "brave.images",
+     "size": [
+      null,
+      null
+     ]
+    },
+    {
+     "title": "State-wise Population of India: A Comprehensiv…",
+     "image": "https://i.pinimg.com/736x/b0/15/11/b0151159d0a4dbb6b33bcea12fc200d6.jpg",
+     "page": "https://uk.pinterest.com/pin/statewise-population-of-india-a-comprehensive-breakdown--1101763496333431804/",
+     "source": "uk.pinterest.com",
+     "engine": "bing images",
+     "size": [
+      736,
+      736
+     ]
+    },
+    {
+     "title": "www.instagram.com",
+     "image": "https://lookaside.instagram.com/seo/google_widget/crawler/?media_id=3851923133268466109",
+     "page": "https://www.instagram.com/p/DV0x65sk5m9/",
+     "source": "instagram.com",
+     "engine": "google images",
+     "size": [
+      1350,
+      1688
+     ]
+    },
+    {
+     "title": "Bar chart ranking countries by visits to AI tool websites in 2025, led by the United States, India, and Brazil.",
+     "image": "https://www.visualcapitalist.com/wp-content/uploads/2026/09/ai-usage-by-country-2025-share-final-400x240.webp",
+     "page": "https://www.visualcapitalist.com/population-of-india-compared-with-countries/",
+     "source": "visualcapitalist.com",
+     "engine": "brave.images",
+     "size": [
+      null,
+      null
+     ]
+    },
+    {
+     "title": "Massive population size by Indian states 2023 - Data Player",
+     "image": "https://data-player.com/wp-content/uploads/2023/06/Feature-image-population-of-Indian-states-1000x600.png",
+     "page": "https://data-player.com/massive-population-size-by-indian-states-2023/",
+     "source": "data-player.com",
+     "engine": "bing images",
+     "size": [
+      1000,
+      600
+     ]
+    },
+    {
+     "title": "visualcapitalist.com",
+     "image": "https://www.visualcapitalist.com/wp-content/uploads/2022/12/India-states-compared-countries-SHARE-1.jpg",
+     "page": "https://www.visualcapitalist.com/population-of-india-compared-with-countries/",
+     "source": "visualcapitalist.com",
+     "engine": "google images",
+     "size": [
+      1200,
+      628
+     ]
+    },
+    {
+     "title": "Bar chart ranking countries by visits to AI tool websites in 2025, led by the United States, India, and Brazil.",
+     "image": "https://www.visualcapitalist.com/wp-content/uploads/2026/09/ai-usage-by-country-2025-share-final-80x80.webp",
+     "page": "https://www.visualcapitalist.com/population-of-india-compared-with-countries/",
+     "source": "visualcapitalist.com",
+     "engine": "brave.images",
+     "size": [
+      null,
+      null
+     ]
+    },
+    {
+     "title": "Population Map of India 2021 - India …",
+     "image": "https://www.indiaonlinepages.com/population/gifs/population-map-of-india.jpg",
+     "page": "https://www.indiaonlinepages.com/population/population-map-of-india.html",
+     "source": "indiaonlinepages.com",
+     "engine": "bing images",
+     "size": [
+      680,
+      829
+     ]
+    },
+    {
+     "title": "magnific.com",
+     "image": "https://img.magnific.com/free-vector/flat-design-india-map-infographics_23-2148846232.jpg?semt=ais_hybrid&w=740&q=80",
+     "page": "https://www.magnific.com/free-photos-vectors/india-states-map-demographics/2",
+     "source": "magnific.com",
+     "engine": "google images",
+     "size": [
+      740,
+      740
+     ]
+    },
+    {
+     "title": "Free Vector gradient india map infographic",
+     "image": "https://img.freepik.com/free-vector/gradient-india-map-infographic_52683-57148.jpg?semt=ais_hybrid&w=740",
+     "page": "https://freepik.com/vectors/india-population-map",
+     "source": "freepik.com",
+     "engine": "brave.images",
+     "size": [
+      null,
+      null
+     ]
+    }
+   ]
+  }
+ ],
+ "finished": "2026-09-26T13:06:24.689Z",
+ "budgets_used": {
+  "reddit_signals": 2,
+  "embeddings": 11,
+  "youtube_caption_jobs": 15,
+  "jev_exploration_calls": 2,
+  "discovery_jobs": 2,
+  "critic_calls": 2,
+  "enrichment_jobs": 162,
+  "planner_calls:inception/mercury-2.5": 2,
+  "youtube_units": 92,
+  "judge_calls": 52,
+  "discovery:brave": 18,
+  "discovery:searxng": 14,
+  "planner_calls:mistralai/ministral-14b-2512": 2,
+  "jev_doc_hunt_calls": 35,
+  "source_health_jobs": 17,
+  "jev_screen_calls": 13,
+  "doc_sources": 24,
+  "anilist_calls": 12,
+  "planner_calls:google/gemma-4-31b-it": 2,
+  "jev_judge_calls": 194
+ },
+ "health": "searxng:google videos\t13\tblocked by a CAPTCHA\t2026-09-26 13:03:44.146103+00\nopenrouter:google/gemma-4-31b-it\t1\ttimeout\t2026-09-26 13:05:14.201218+00\ngemini:gemini-3.6-flash\t1\tupstream_failure_503 UNAVAILABLE\t2026-09-26 13:05:47.334066+00\ngemini:gemini-3.5-flash\t3\ttimeout\t2026-09-26 13:06:07.352897+00\n"
+}

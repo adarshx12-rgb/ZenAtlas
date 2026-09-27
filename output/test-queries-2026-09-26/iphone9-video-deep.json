@@ -1,0 +1,128 @@
+{
+ "query": "Find Apple's official 2018 iPhone 9 launch keynote and its original announcement article. Exclude iPhone X, XR, XS, SE, rumours and concept videos.",
+ "search_id": "7432af84-22a6-4e47-9abe-5bfac64eccd1",
+ "status": "partial",
+ "depth": "deep",
+ "stage": null,
+ "results": [],
+ "has_more": false,
+ "next_cursor": null,
+ "discovered": [],
+ "catalogue_total": 0,
+ "ranked": [],
+ "discovery_job_id": "90ab0598-5244-4962-99ad-a8134359595a",
+ "providers": [
+  {
+   "status": "ok",
+   "message": "Brave discovery completed.",
+   "provider": "brave"
+  },
+  {
+   "status": "ok",
+   "message": "14 of 19 search engines answered; Privacywall Videos (access denied), Privacywall (access denied), Google (blocked by a CAPTCHA), Brave (rate-limited), Brave Videos (rate-limited) did not. Filled in for 11 of 22 searches where Brave failed or found too little.",
+   "provider": "searxng"
+  },
+  {
+   "status": "ok",
+   "message": "Internet Archive film catalogue searched directly.",
+   "provider": "internet_archive"
+  },
+  {
+   "status": "ok",
+   "message": "AI planned 4 searches for lesser-known sources.",
+   "provider": "planner"
+  },
+  {
+   "status": "ok",
+   "message": "AI followed 8 leads from what it found, in 2 rounds.",
+   "provider": "leads"
+  },
+  {
+   "status": "ok",
+   "message": "Looked for evidence on 3 unmet requirements: 1 targeted searches, 2 pages or videos opened, 1 closed.",
+   "provider": "gap_exploration"
+  },
+  {
+   "status": "partial",
+   "message": "657 candidates found; up to 60 candidates were selected for checking after all sources answered.",
+   "provider": "candidate_pool"
+  },
+  {
+   "status": "ok",
+   "message": "Screened 120 of 657 leads to prioritize evidence checks; final relevance is checked separately.",
+   "provider": "jev_screener"
+  },
+  {
+   "status": "ok",
+   "message": "YouTube details and viewer comments checked.",
+   "provider": "youtube"
+  },
+  {
+   "status": "ok",
+   "message": "Reddit discussions checked.",
+   "provider": "reddit"
+  },
+  {
+   "status": "ok",
+   "message": "16 of 20 result pages were checked, 3 in a browser.",
+   "provider": "pages"
+  },
+  {
+   "status": "partial",
+   "message": "0 comment/review samples and 0 caption tracks available across 11 checked results.",
+   "provider": "archive_evidence"
+  },
+  {
+   "status": "ok",
+   "message": "Results were checked for relevance by AI.",
+   "provider": "judge"
+  },
+  {
+   "status": "ok",
+   "message": "No sufficiently supported matches were found. Weak, uncertain and unchecked candidates were excluded.",
+   "provider": "relevance_filter"
+  }
+ ],
+ "ranking_version": "relevance-v8-requirements",
+ "interpretation": {
+  "intent": "Find Apple's official 2018 launch keynote video and press release article specifically for an 'iPhone 9', excluding other iPhone models, rumours, and concept videos.",
+  "requirements": [
+   {
+    "id": "R1",
+    "text": "Is an article or a video",
+    "hardness": "hard",
+    "scope": "each"
+   },
+   {
+    "id": "R2",
+    "text": "From an official Apple source",
+    "hardness": "hard",
+    "scope": "each"
+   },
+   {
+    "id": "R3",
+    "text": "Official Apple 2018 iPhone 9 launch keynote and announcement article",
+    "hardness": "hard",
+    "scope": "each"
+   },
+   {
+    "id": "R4",
+    "text": "Exclude iPhone X, XR, XS, SE, rumours and concept videos",
+    "hardness": "hard",
+    "scope": "each"
+   }
+  ],
+  "assumptions": [
+   "Searches are configured to verify whether any official Apple documentation or video exists for an 'iPhone 9' in 2018 while respecting all exclusions."
+  ],
+  "ambiguities": [
+   "Apple did not officially announce or release a product named 'iPhone 9' in 2018 or any other year."
+  ],
+  "unmet": [
+   "No result could be verified for: Is an article or a video",
+   "No result could be verified for: From an official Apple source",
+   "No result could be verified for: Official Apple 2018 iPhone 9 launch keynote and announcement article",
+   "No result could be verified for: Exclude iPhone X, XR, XS, SE, rumours and concept videos"
+  ]
+ }
+}

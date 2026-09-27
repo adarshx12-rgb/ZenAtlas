@@ -1,0 +1,678 @@
+{
+ "cascade": {
+  "border": [
+   4,
+   6
+  ],
+  "scorer": "openai/gpt-5.6-terra",
+  "strong": "google/gemini-3.8-flash",
+  "summary": {
+   "case_runs": 18,
+   "failures": [],
+   "missing_verdicts": 0,
+   "label_accuracy": 0.989,
+   "pair_accuracy": 0.98,
+   "cost_per_case": 0.01474,
+   "median_ms": 19313,
+   "p90_ms": 45683,
+   "per_role": {
+    "scorer": {
+     "calls_per_case": 1,
+     "cost_per_case": 0.01088,
+     "ms_per_call": 7555
+    },
+    "jev": {
+     "calls_per_case": 2.5,
+     "cost_per_case": 0.00012,
+     "ms_per_call": 1006
+    },
+    "strong": {
+     "calls_per_case": 0.5,
+     "cost_per_case": 0.00374,
+     "ms_per_call": 12371
+    }
+   }
+  },
+  "rows": [
+   {
+    "case": "aot-official",
+    "run": 1,
+    "ms": 6320,
+    "spend": {
+     "scorer": {
+      "calls": 1,
+      "cost": 0.010291,
+      "ms": 6304
+     }
+    },
+    "scores": {
+     "c1": 8,
+     "c2": 7,
+     "c3": 3,
+     "c4": 1,
+     "c5": 3
+    },
+    "stages": {
+     "decided_by_jev": 0,
+     "audited": 0,
+     "scored": 5,
+     "escalated": 0,
+     "reasons": {}
+    },
+    "jev": {},
+    "error": null
+   },
+   {
+    "case": "mapreduce-canonical",
+    "run": 1,
+    "ms": 4246,
+    "spend": {
+     "jev": {
+      "calls": 5,
+      "cost": 0.00020773200000000002,
+      "ms": 4105
+     },
+     "scorer": {
+      "calls": 1,
+      "cost": 0.0049752,
+      "ms": 3358
+     }
+    },
+    "scores": {
+     "c1": 10,
+     "c2": 7,
+     "c3": 1,
+     "c4": 1,
+     "c5": 1
+    },
+    "stages": {
+     "decided_by_jev": 3,
+     "audited": 0,
+     "scored": 2,
+     "escalated": 0,
+     "reasons": {}
+    },
+    "jev": {
+     "rejected": 3,
+     "forwarded": 2
+    },
+    "error": null
+   },
+   {
+    "case": "rice-authority",
+    "run": 1,
+    "ms": 6972,
+    "spend": {
+     "scorer": {
+      "calls": 1,
+      "cost": 0.0099242,
+      "ms": 6961
+     }
+    },
+    "scores": {
+     "c1": 9,
+     "c2": 3,
+     "c3": 0,
+     "c4": 10
+    },
+    "stages": {
+     "decided_by_jev": 0,
+     "audited": 0,
+     "scored": 4,
+     "escalated": 0,
+     "reasons": {}
+    },
+    "jev": {},
+    "error": null
+   },
+   {
+    "case": "upi-constraints",
+    "run": 1,
+    "ms": 45683,
+    "spend": {
+     "jev": {
+      "calls": 5,
+      "cost": 0.000237552,
+      "ms": 4233
+     },
+     "scorer": {
+      "calls": 1,
+      "cost": 0.014405,
+      "ms": 9747
+     }
+    },
+    "scores": {
+     "c1": 8,
+     "c2": 3,
+     "c3": 4,
+     "c4": 4,
+     "c5": 8
+    },
+    "stages": {
+     "decided_by_jev": 0,
+     "audited": 0,
+     "scored": 5,
+     "escalated": 2,
+     "reasons": {
+      "borderline": 2
+     }
+    },
+    "jev": {
+     "forwarded": 5
+    },
+    "error": null
+   },
+   {
+    "case": "postgres-firsthand",
+    "run": 1,
+    "ms": 23759,
+    "spend": {
+     "jev": {
+      "calls": 5,
+      "cost": 0.00025250399999999997,
+      "ms": 5031
+     },
+     "scorer": {
+      "calls": 1,
+      "cost": 0.019534,
+      "ms": 15347
+     },
+     "strong": {
+      "calls": 1,
+      "cost": 0.00492825,
+      "ms": 7160
+     }
+    },
+    "scores": {
+     "c1": 1,
+     "c2": 9,
+     "c3": 10,
+     "c4": 1,
+     "c5": 2
+    },
+    "stages": {
+     "decided_by_jev": 2,
+     "audited": 0,
+     "scored": 3,
+     "escalated": 1,
+     "reasons": {
+      "unbacked": 1
+     }
+    },
+    "jev": {
+     "rejected": 2,
+     "forwarded": 3
+    },
+    "error": null
+   },
+   {
+    "case": "free-solo",
+    "run": 1,
+    "ms": 28486,
+    "spend": {
+     "scorer": {
+      "calls": 1,
+      "cost": 0.0096876,
+      "ms": 5949
+     },
+     "strong": {
+      "calls": 1,
+      "cost": 0.0124995,
+      "ms": 22526
+     }
+    },
+    "scores": {
+     "c1": 7,
+     "c2": 1,
+     "c3": 4,
+     "c4": 8,
+     "c5": 1
+    },
+    "stages": {
+     "decided_by_jev": 0,
+     "audited": 0,
+     "scored": 5,
+     "escalated": 1,
+     "reasons": {
+      "borderline": 1
+     }
+    },
+    "jev": {},
+    "error": null
+   },
+   {
+    "case": "aot-official",
+    "run": 2,
+    "ms": 5450,
+    "spend": {
+     "scorer": {
+      "calls": 1,
+      "cost": 0.009211,
+      "ms": 5447
+     }
+    },
+    "scores": {
+     "c1": 8,
+     "c2": 7,
+     "c3": 3,
+     "c4": 1,
+     "c5": 3
+    },
+    "stages": {
+     "decided_by_jev": 0,
+     "audited": 0,
+     "scored": 5,
+     "escalated": 0,
+     "reasons": {}
+    },
+    "jev": {},
+    "error": null
+   },
+   {
+    "case": "mapreduce-canonical",
+    "run": 2,
+    "ms": 3837,
+    "spend": {
+     "jev": {
+      "calls": 5,
+      "cost": 0.00020773199999999997,
+      "ms": 2385
+     },
+     "scorer": {
+      "calls": 1,
+      "cost": 0.0052872,
+      "ms": 3326
+     }
+    },
+    "scores": {
+     "c1": 10,
+     "c2": 7,
+     "c3": 1,
+     "c4": 1,
+     "c5": 1
+    },
+    "stages": {
+     "decided_by_jev": 3,
+     "audited": 0,
+     "scored": 2,
+     "escalated": 0,
+     "reasons": {}
+    },
+    "jev": {
+     "rejected": 3,
+     "forwarded": 2
+    },
+    "error": null
+   },
+   {
+    "case": "rice-authority",
+    "run": 2,
+    "ms": 16011,
+    "spend": {
+     "scorer": {
+      "calls": 1,
+      "cost": 0.0102602,
+      "ms": 6666
+     },
+     "strong": {
+      "calls": 1,
+      "cost": 0.00466725,
+      "ms": 9342
+     }
+    },
+    "scores": {
+     "c1": 9,
+     "c2": 7,
+     "c3": 1,
+     "c4": 10
+    },
+    "stages": {
+     "decided_by_jev": 0,
+     "audited": 0,
+     "scored": 4,
+     "escalated": 1,
+     "reasons": {
+      "borderline": 1
+     }
+    },
+    "jev": {},
+    "error": null
+   },
+   {
+    "case": "upi-constraints",
+    "run": 2,
+    "ms": 46938,
+    "spend": {
+     "jev": {
+      "calls": 5,
+      "cost": 0.000237552,
+      "ms": 2294
+     },
+     "scorer": {
+      "calls": 1,
+      "cost": 0.015833,
+      "ms": 11425
+     }
+    },
+    "scores": {
+     "c1": 8,
+     "c2": 3,
+     "c3": 4,
+     "c4": 4,
+     "c5": 8
+    },
+    "stages": {
+     "decided_by_jev": 0,
+     "audited": 0,
+     "scored": 5,
+     "escalated": 4,
+     "reasons": {
+      "unbacked": 2,
+      "borderline": 2
+     }
+    },
+    "jev": {
+     "forwarded": 5
+    },
+    "error": null
+   },
+   {
+    "case": "postgres-firsthand",
+    "run": 2,
+    "ms": 22759,
+    "spend": {
+     "jev": {
+      "calls": 5,
+      "cost": 0.00025250399999999997,
+      "ms": 2311
+     },
+     "scorer": {
+      "calls": 1,
+      "cost": 0.011506,
+      "ms": 8194
+     },
+     "strong": {
+      "calls": 1,
+      "cost": 0.01036875,
+      "ms": 14088
+     }
+    },
+    "scores": {
+     "c1": 1,
+     "c2": 9,
+     "c3": 9,
+     "c4": 1,
+     "c5": 3
+    },
+    "stages": {
+     "decided_by_jev": 2,
+     "audited": 0,
+     "scored": 3,
+     "escalated": 2,
+     "reasons": {
+      "unbacked": 2
+     }
+    },
+    "jev": {
+     "forwarded": 3,
+     "rejected": 2
+    },
+    "error": null
+   },
+   {
+    "case": "free-solo",
+    "run": 2,
+    "ms": 22808,
+    "spend": {
+     "scorer": {
+      "calls": 1,
+      "cost": 0.0095196,
+      "ms": 5883
+     },
+     "strong": {
+      "calls": 1,
+      "cost": 0.00489,
+      "ms": 16921
+     }
+    },
+    "scores": {
+     "c1": 7,
+     "c2": 1,
+     "c3": 4,
+     "c4": 8,
+     "c5": 1
+    },
+    "stages": {
+     "decided_by_jev": 0,
+     "audited": 0,
+     "scored": 5,
+     "escalated": 1,
+     "reasons": {
+      "borderline": 1
+     }
+    },
+    "jev": {},
+    "error": null
+   },
+   {
+    "case": "aot-official",
+    "run": 3,
+    "ms": 7860,
+    "spend": {
+     "scorer": {
+      "calls": 1,
+      "cost": 0.011611,
+      "ms": 7856
+     }
+    },
+    "scores": {
+     "c1": 8,
+     "c2": 7,
+     "c3": 3,
+     "c4": 1,
+     "c5": 3
+    },
+    "stages": {
+     "decided_by_jev": 0,
+     "audited": 0,
+     "scored": 5,
+     "escalated": 0,
+     "reasons": {}
+    },
+    "jev": {},
+    "error": null
+   },
+   {
+    "case": "mapreduce-canonical",
+    "run": 3,
+    "ms": 4793,
+    "spend": {
+     "jev": {
+      "calls": 5,
+      "cost": 0.000207732,
+      "ms": 7971
+     },
+     "scorer": {
+      "calls": 1,
+      "cost": 0.0050112,
+      "ms": 3085
+     }
+    },
+    "scores": {
+     "c1": 10,
+     "c2": 7,
+     "c3": 1,
+     "c4": 1,
+     "c5": 1
+    },
+    "stages": {
+     "decided_by_jev": 3,
+     "audited": 0,
+     "scored": 2,
+     "escalated": 0,
+     "reasons": {}
+    },
+    "jev": {
+     "forwarded": 2,
+     "rejected": 3
+    },
+    "error": null
+   },
+   {
+    "case": "rice-authority",
+    "run": 3,
+    "ms": 15134,
+    "spend": {
+     "scorer": {
+      "calls": 1,
+      "cost": 0.0099002,
+      "ms": 8311
+     },
+     "strong": {
+      "calls": 1,
+      "cost": 0.00431475,
+      "ms": 6819
+     }
+    },
+    "scores": {
+     "c1": 10,
+     "c2": 7,
+     "c3": 1,
+     "c4": 10
+    },
+    "stages": {
+     "decided_by_jev": 0,
+     "audited": 0,
+     "scored": 4,
+     "escalated": 1,
+     "reasons": {
+      "borderline": 1
+     }
+    },
+    "jev": {},
+    "error": null
+   },
+   {
+    "case": "upi-constraints",
+    "run": 3,
+    "ms": 24991,
+    "spend": {
+     "jev": {
+      "calls": 5,
+      "cost": 0.000237552,
+      "ms": 8585
+     },
+     "scorer": {
+      "calls": 1,
+      "cost": 0.016853,
+      "ms": 11294
+     },
+     "strong": {
+      "calls": 1,
+      "cost": 0.01033275,
+      "ms": 11715
+     }
+    },
+    "scores": {
+     "c1": 8,
+     "c2": 2,
+     "c3": 3,
+     "c4": 3,
+     "c5": 8
+    },
+    "stages": {
+     "decided_by_jev": 0,
+     "audited": 0,
+     "scored": 5,
+     "escalated": 4,
+     "reasons": {
+      "unbacked": 2,
+      "borderline": 2
+     }
+    },
+    "jev": {
+     "forwarded": 5
+    },
+    "error": null
+   },
+   {
+    "case": "postgres-firsthand",
+    "run": 3,
+    "ms": 21990,
+    "spend": {
+     "jev": {
+      "calls": 5,
+      "cost": 0.00025250399999999997,
+      "ms": 8351
+     },
+     "scorer": {
+      "calls": 1,
+      "cost": 0.012754,
+      "ms": 9259
+     },
+     "strong": {
+      "calls": 1,
+      "cost": 0.00877125,
+      "ms": 11026
+     }
+    },
+    "scores": {
+     "c1": 1,
+     "c2": 9,
+     "c3": 10,
+     "c4": 1,
+     "c5": 3
+    },
+    "stages": {
+     "decided_by_jev": 2,
+     "audited": 0,
+     "scored": 3,
+     "escalated": 2,
+     "reasons": {
+      "unbacked": 2
+     }
+    },
+    "jev": {
+     "rejected": 2,
+     "forwarded": 3
+    },
+    "error": null
+   },
+   {
+    "case": "free-solo",
+    "run": 3,
+    "ms": 19313,
+    "spend": {
+     "scorer": {
+      "calls": 1,
+      "cost": 0.0093276,
+      "ms": 7573
+     },
+     "strong": {
+      "calls": 1,
+      "cost": 0.00663075,
+      "ms": 11738
+     }
+    },
+    "scores": {
+     "c1": 8,
+     "c2": 1,
+     "c3": 3,
+     "c4": 8,
+     "c5": 1
+    },
+    "stages": {
+     "decided_by_jev": 0,
+     "audited": 0,
+     "scored": 5,
+     "escalated": 1,
+     "reasons": {
+      "borderline": 1
+     }
+    },
+    "jev": {},
+    "error": null
+   }
+  ]
+ }
+}

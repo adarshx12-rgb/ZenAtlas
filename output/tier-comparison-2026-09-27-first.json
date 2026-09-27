@@ -1,0 +1,1472 @@
+{
+ "grader": "anthropic/claude-sonnet-5",
+ "rows": [
+  {
+   "q": "Gen X Soft Club aesthetic",
+   "kind": "web",
+   "tier": "ssj3",
+   "kept": 14,
+   "ms": 68265,
+   "cost_usd": 0.168184,
+   "calls": 9,
+   "by_role": {
+    "query_rewrite": 0.0002846,
+    "judge_calls": 0.0211445,
+    "council_checker_calls": 0.069499,
+    "council_chair_calls": 0.077256
+   },
+   "items": [
+    {
+     "url": "https://cari.institute/aesthetics/gen-x-soft-club",
+     "title": "CARI | Aesthetic | Gen X Soft Club",
+     "snippet": "[An excerpt of the longer description by Sloane] Contrary to contemporaneous Y2K Aesthetic, and also McBling style of the early 2000s, Gen X Y/AC models in editorial fashion or artist marketing were much more \"natural\". You will see tons of nude lipstick, hair parted down the middle or natural textured hair, natural leathers, knee high boots, duster jackets, natural and muted colors - especially greens, beiges, tans, greys, and black. Design and fashion was moving from 60s revival into early 70s. Retro-futurism was Y2K Aesthetic, but Gen X YAC was more terrestrial."
+    },
+    {
+     "url": "https://www.yahoo.com/lifestyle/gen-x-soft-club-aesthetic-191043325.html",
+     "title": "What is the ‘Gen X Soft Club’ aesthetic, and is Gen Z reviving the look?",
+     "snippet": "The aesthetic, according to the ... a turn for the more minimalistic. It was a time characterized by nude lips, middle-parted hair and a paler color palette...."
+    },
+    {
+     "url": "https://etheriamag.com/article/Gen-X-Soft-Club-Aesthetic",
+     "title": "The Sterile Dream: Deciphering the Gen X Soft Club Aesthetic | Etheria Magazine",
+     "snippet": "Gen X Soft Club was essentially the \"downtempo\" of Rave culture. After the neon explosions and chemical euphoria of the early 90s, the world hit a collective Monday morning comedown."
+    },
+    {
+     "url": "https://aesthetics.fandom.com/wiki/Gen_X_Soft_Club",
+     "title": "Gen X Soft Club | Aesthetics Wiki | Fandom",
+     "snippet": "Gen X Soft Club was an aesthetic prevalent from the late 1990s to early 2000s, branching from the popular Y2K Futurism aesthetic of the time. It is considered a more natural and \"down-to-earth\" look at the futurism of the time, representing ..."
+    },
+    {
+     "url": "https://www.reddit.com/r/rs_x/comments/1odxadq/the_gen_x_soft_club_aesthetic/",
+     "title": "r/rs_x on Reddit: The “Gen X Soft Club” aesthetic",
+     "snippet": "Aesthetic of the Week: Gen X Soft Club (Considered a more natural and \"down-to-earth\" look at futurist optimism of the time."
+    },
+    {
+     "url": "https://www.nssgclub.com/en/fashion/41478/gen-x-soft-club-minimalism-anti-y2k-gen-z",
+     "title": "Gen X Soft Club: The Minimalist Aesthetic Blending ‘90s Nostalgia and Quiet Rebellion - nss g-club",
+     "snippet": "Forget the loud aesthetic of the Boom Boom revival or the sparkle of the McBling era: Gen X Soft Club is the (old) new visual code that speaks to a more introspective nostalgia, minimalist and quietly rebellious."
+    },
+    {
+     "url": "https://us.mingalondon.com/blogs/mingazine/wtf-is-gen-x-soft-club-and-why-is-everyone-talking-about-it",
+     "title": "WTF Is Gen X Soft Club and why is everyone talking about it?",
+     "snippet": "For the Gen X Soft Club aesthetic, moody, muted tones are key. Think deep blacks, faded greys, and washed-out denims for a chill base."
+    },
+    {
+     "url": "https://www.reddit.com/r/y2kaesthetic/comments/18hjc1b/why_does_no_one_mention_the_gen_x_soft_club/",
+     "title": "r/y2kaesthetic on Reddit: Why Does No One Mention The Gen X Soft Club Aesthetic?",
+     "snippet": "The Gen X Young Adult Contemporary Soft Club Aesthetic (yeah I know mouth full) is a sort of sub genre to Y2K, it came about around the exact same time as Y2K and influenced a tone of art styles, decor and especially music as the sound is very ..."
+    },
+    {
+     "url": "https://elements.envato.com/learn/gen-x-soft-club-aesthetic",
+     "title": "Gen X Soft Club: the 90s aesthetic trending with Gen Z",
+     "snippet": "If K-Pop isn’t your scene, Soft Club has a lofty lone-wolf vibe, with the trend diverting from the mainstream. Gen X Soft Club is moodier than other nostalgic design trends like Y2K, lending it cool, alternative appeal."
+    },
+    {
+     "url": "https://fashionista.com/2023/12/gen-x-soft-club-aesthetic-tiktok",
+     "title": "TikTok's New 'It' Aesthetic Trend Is a '90s Deep Cut - Fashionista",
+     "snippet": "First coined by Sloane Angel Hilton of the Consumer Aesthetics Research Institute (CARI), an online community dedicated to developing a visual lexicon of consumer ephemera from the 1970s until now, Gen-X Soft Club refers to a natural, gentler approach to the Y2K era’s often-glittery futurism that emerged and declined in a seven year period, between 1996 and 2002, and represented a rejection of the blingy, cyber-obsessed aesthetic that became dominant during the same period."
+    },
+    {
+     "url": "https://www.reddit.com/r/GenX/comments/1ca77hb/what_is_the_gen_x_soft_club_aesthetic_and_is_gen/",
+     "title": "r/GenX on Reddit: What is the ‘Gen X Soft Club’ aesthetic, and is Gen Z reviving the look?",
+     "snippet": "Ultraviolet (2006) gives me Gen X Soft Club/ Y2K Futurism vibes!!"
+    },
+    {
+     "url": "https://www.threads.com/@denis.ibm/post/DPtBCuDiqNL/gen-x-soft-club-was-a-popular-aesthetic-in-the-late-90s-to-late-2000s-characteri?hl=en",
+     "title": "gen x soft club was a popular aesthetic in the late 90s to late 2000s, characterized by urban typography, cool or muted colors, urban environments like train stations and heavy use of minimalism. it was a more refined futuristic version of y2k.",
+     "snippet": "gen x soft club was a popular aesthetic in the late 90s to late 2000s, characterized by urban typography, cool or muted colors, urban environments like train stations and heavy use of minimalism. it was a more refined futuristic version of y2k."
+    },
+    {
+     "url": "https://www.are.na/evan-collins-1522646491/gen-x-soft-club",
+     "title": "Gen-X Soft Club | Are.na",
+     "snippet": "The following description was written by Sloane Angel Hilton, the creator of the… start of gentrification as it would come to be known in post-industrial cities."
+    },
+    {
+     "url": "https://www.lipstickalley.com/threads/gen-x-millennials-do-you-remember-this-aesthetic-gen-x-soft-club.5464622/",
+     "title": "Gen X & Millennials...do you remember this aesthetic, Gen X soft club?? | Lipstick Alley",
+     "snippet": "Also seems to be related to the 1990s minimalism push. \"Gen X Soft Club was a popular aesthetic in the Late-1990s to Late-2000s, branching from the popular Cybercore movement of the time."
+    }
+   ],
+   "grades": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ]
+  },
+  {
+   "q": "Gen X Soft Club aesthetic",
+   "kind": "web",
+   "tier": "ssj1",
+   "kept": 19,
+   "ms": 43495,
+   "cost_usd": 0.019637,
+   "calls": 9,
+   "by_role": {
+    "query_rewrite": 0.0000474,
+    "judge_calls": 0.0049229,
+    "council_checker_calls": 0.00756325,
+    "council_chair_calls": 0.007103
+   },
+   "items": [
+    {
+     "url": "https://cari.institute/aesthetics/gen-x-soft-club",
+     "title": "CARI | Aesthetic | Gen X Soft Club",
+     "snippet": "[An excerpt of the longer description by Sloane] Contrary to contemporaneous Y2K Aesthetic, and also McBling style of the early 2000s, Gen X Y/AC models in editorial fashion or artist marketing were much more \"natural\". You will see tons of nude lipstick, hair parted down the middle or natural textured hair, natural leathers, knee high boots, duster jackets, natural and muted colors - especially greens, beiges, tans, greys, and black. Design and fashion was moving from 60s revival into early 70s. Retro-futurism was Y2K Aesthetic, but Gen X YAC was more terrestrial."
+    },
+    {
+     "url": "https://www.yahoo.com/lifestyle/gen-x-soft-club-aesthetic-191043325.html",
+     "title": "What is the ‘Gen X Soft Club’ aesthetic, and is Gen Z reviving the look?",
+     "snippet": "The aesthetic, according to the ... a turn for the more minimalistic. It was a time characterized by nude lips, middle-parted hair and a paler color palette...."
+    },
+    {
+     "url": "https://aesthetics.fandom.com/wiki/Gen_X_Soft_Club",
+     "title": "Gen X Soft Club | Aesthetics Wiki | Fandom",
+     "snippet": "Gen X Soft Club was an aesthetic prevalent from the late 1990s to early 2000s, branching from the popular Y2K Futurism aesthetic of the time. It is considered a more natural and \"down-to-earth\" look at the futurism of the time, representing ..."
+    },
+    {
+     "url": "https://www.reddit.com/r/rs_x/comments/1odxadq/the_gen_x_soft_club_aesthetic/",
+     "title": "r/rs_x on Reddit: The “Gen X Soft Club” aesthetic",
+     "snippet": "Aesthetic of the Week: Gen X Soft Club (Considered a more natural and \"down-to-earth\" look at futurist optimism of the time."
+    },
+    {
+     "url": "https://www.reddit.com/r/y2kaesthetic/comments/18hjc1b/why_does_no_one_mention_the_gen_x_soft_club/",
+     "title": "r/y2kaesthetic on Reddit: Why Does No One Mention The Gen X Soft Club Aesthetic?",
+     "snippet": "The Gen X Young Adult Contemporary Soft Club Aesthetic (yeah I know mouth full) is a sort of sub genre to Y2K, it came about around the exact same time as Y2K and influenced a tone of art styles, decor and especially music as the sound is very ..."
+    },
+    {
+     "url": "https://www.pinterest.com/ideas/gen-x-soft-club/904135906597/",
+     "title": "Gen X Soft Club",
+     "snippet": "Discover Pinterest’s best ideas and inspiration for Gen x soft club."
+    },
+    {
+     "url": "https://fashionista.com/2023/12/gen-x-soft-club-aesthetic-tiktok",
+     "title": "TikTok's New 'It' Aesthetic Trend Is a '90s Deep Cut - Fashionista",
+     "snippet": "First coined by Sloane Angel Hilton of the Consumer Aesthetics Research Institute (CARI), an online community dedicated to developing a visual lexicon of consumer ephemera from the 1970s until now, Gen-X Soft Club refers to a natural, gentler approach to the Y2K era’s often-glittery futurism that emerged and declined in a seven year period, between 1996 and 2002, and represented a rejection of the blingy, cyber-obsessed aesthetic that became dominant during the same period."
+    },
+    {
+     "url": "https://www.preview.ph/fashion/gen-x-soft-club-aesthetic-explainer-a00388-20231102",
+     "title": "The Gen X Soft Club Aesthetic Is the Newest Cybercore Trend You Should Try Next",
+     "snippet": "Also referred to as the GXSC aesthetic, the Gen X Soft Club aesthetic first emerged to balance out the prevalence of the youthful Y2K trend and the splashy McBling style during the late 1990s and the early 2000s."
+    },
+    {
+     "url": "https://www.reddit.com/r/AskPhotography/comments/1hbt6f7/how_do_i_achive_this_genx_soft_club_look/",
+     "title": "r/AskPhotography on Reddit: How do I achive this Gen-X Soft Club look?",
+     "snippet": "It was a popular aesthetic in the early 2000. ... it was used to market a lot of products (albums, clothing, pieces of technology, travel destinations) for the young adults of the time, being Gen X"
+    },
+    {
+     "url": "https://www.threads.com/@denis.ibm/post/DPtBCuDiqNL/gen-x-soft-club-was-a-popular-aesthetic-in-the-late-90s-to-late-2000s-characteri?hl=en",
+     "title": "gen x soft club was a popular aesthetic in the late 90s to late 2000s, characterized by urban typography, cool or muted colors, urban environments like train stations and heavy use of minimalism. it was a more refined futuristic version of y2k.",
+     "snippet": "gen x soft club was a popular aesthetic in the late 90s to late 2000s, characterized by urban typography, cool or muted colors, urban environments like train stations and heavy use of minimalism. it was a more refined futuristic version of y2k."
+    },
+    {
+     "url": "https://us.mingalondon.com/blogs/mingazine/wtf-is-gen-x-soft-club-and-why-is-everyone-talking-about-it",
+     "title": "WTF Is Gen X Soft Club and why is everyone talking about it?",
+     "snippet": "For the Gen X Soft Club aesthetic, moody, muted tones are key. Think deep blacks, faded greys, and washed-out denims for a chill base."
+    },
+    {
+     "url": "https://www.nssgclub.com/en/fashion/41478/gen-x-soft-club-minimalism-anti-y2k-gen-z",
+     "title": "Gen X Soft Club: The Minimalist Aesthetic Blending ‘90s Nostalgia and Quiet Rebellion - nss g-club",
+     "snippet": "Forget the loud aesthetic of the Boom Boom revival or the sparkle of the McBling era: Gen X Soft Club is the (old) new visual code that speaks to a more introspective nostalgia, minimalist and quietly rebellious."
+    },
+    {
+     "url": "https://elements.envato.com/learn/gen-x-soft-club-aesthetic",
+     "title": "Gen X Soft Club: the 90s aesthetic trending with Gen Z",
+     "snippet": "If K-Pop isn’t your scene, Soft Club has a lofty lone-wolf vibe, with the trend diverting from the mainstream. Gen X Soft Club is moodier than other nostalgic design trends like Y2K, lending it cool, alternative appeal."
+    },
+    {
+     "url": "https://etheriamag.com/article/Gen-X-Soft-Club-Aesthetic",
+     "title": "The Sterile Dream: Deciphering the Gen X Soft Club Aesthetic | Etheria Magazine",
+     "snippet": "Gen X Soft Club was essentially the \"downtempo\" of Rave culture. After the neon explosions and chemical euphoria of the early 90s, the world hit a collective Monday morning comedown."
+    },
+    {
+     "url": "https://www.pinterest.com/pin/gen-x-soft-club--752312312768835614/",
+     "title": "Gen X Soft Club",
+     "snippet": "Gen X Soft Club | Aesthetics Wiki | Fandom | Gen z soft club, Soft club 90s aesthetic, Gen x soft club aesthetic · Skip to content · When autocomplete results are available use up and down arrows to review and enter to select. Touch device users, explore by touch or with swipe gestures · ..."
+    }
+   ],
+   "grades": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ]
+  },
+  {
+   "q": "free websites to remove video background",
+   "kind": "web",
+   "tier": "ssj3",
+   "kept": 24,
+   "ms": 48425,
+   "cost_usd": 0.108924,
+   "calls": 10,
+   "by_role": {
+    "query_rewrite": 0.0002724,
+    "judge_calls": 0.030335800000000003,
+    "council_checker_calls": 0.054836,
+    "council_chair_calls": 0.02348
+   },
+   "items": [
+    {
+     "url": "https://www.nobg.space/video-bg-remover",
+     "title": "Free Video Background Remover - Remove Background from Video Online | NOBG | NOBG.space",
+     "snippet": "Yes, NOBG's video background remover is completely free to use."
+    },
+    {
+     "url": "https://www.bgremover.video/",
+     "title": "Free Video Background Remover – No Watermark | BGRemover.video",
+     "snippet": "Remove backgrounds from videos with AI in seconds. Free online video background remover trusted by 2M+ creators. Make transparent backgrounds, green screen effects, GIFs, and more. No watermark, 100% free. According to industry research, AI-powered background removal is 95% faster than manual ..."
+    },
+    {
+     "url": "https://picsart.com/video-background-remover/",
+     "title": "Video Background Remover - Erase Video Backgrounds for Free",
+     "snippet": "The easiest way to remove the background from a video is to use a free online video background remover tool like the one from Picsart."
+    },
+    {
+     "url": "https://www.unscreen.io/en/free-video-background-remover",
+     "title": "FREE Video Background Remover | 100% Free Unscreen Alternative | unscreen.io",
+     "snippet": "Remove video backgrounds for FREE with AI. No watermarks, no credit card. Best free Unscreen alternative — process offline in your browser with transparent backgrounds."
+    },
+    {
+     "url": "https://vidbgrem.media.io/",
+     "title": "Online Video Background Remover from Media.io [Automatically with AI]",
+     "snippet": "Launch our online video background remover on your browser to initiate the process, click the Upload button and then select the file you want to remove the background from. Once your video is uploaded, our platform will start processing it and automatically erase the background from the video. This process can take several minutes based on the original video length. Once this free video background remover erases the background of your video, you will see the result in the preview window."
+    },
+    {
+     "url": "https://vmake.ai/video-background-remover",
+     "title": "Free Video Background Remover Online ｜ Vmake Labs",
+     "snippet": "Remove background from video for free online with AI. Instantly replace with green screen or transparent background to create clean, professional videos in seconds."
+    },
+    {
+     "url": "https://www.pixelcut.ai/video-background-remover",
+     "title": "Free Online Video Background Remover | One-Click, No Watermark",
+     "snippet": "Remove the background from your video in one click. Get a clean cutout frame-to-frame, no green screen needed. No watermark and free to try!"
+    },
+    {
+     "url": "https://backgroundremove.io/video-background-remover/",
+     "title": "Free Video Background Remover : Clean Video Backgrounds Fast",
+     "snippet": "Our AI detects subjects frame by frame and removes unwanted backgrounds in seconds with clean, natural edges. Export your transparent or edited video and publish it directly to TikTok, YouTube, or Instagram Reels. Lights, camera—cleanup! Our Free video background remover makes it easy to turn messy footage into clean, professional visuals."
+    },
+    {
+     "url": "https://www.fotor.com/video-background-remover/",
+     "title": "Free AI Video Background Remover | Fotor",
+     "snippet": "Remove background from video in one single click. Make background transparent, or change video background with color or image for free."
+    },
+    {
+     "url": "https://www.media.io/remove-video-background-online.html",
+     "title": "Remove Video Background Online Free – No Greenscreen | Media.io",
+     "snippet": "Yes, you can change the background of an existing video easily with media.io. ... Follow these step guides: Step 1: Go to the Media.io Video BG Remover website. Step 2: Upload the file you want to have the background removed."
+    },
+    {
+     "url": "https://www.erase.bg/video-erase",
+     "title": "Free Online Video Background Remover (No Login No Signup)",
+     "snippet": "Yes. Erase.bg is a web-based tool. It works directly from your browser without needing to download any software or install a plugin. Erase.bg’s free video background remover online helps you delete or replace backdrops from videos effortlessly, without the need for green screens or editing skills."
+    },
+    {
+     "url": "https://removevideobackground.org/",
+     "title": "Remove Video Background - Free Online AI Background Removal Tool",
+     "snippet": "Remove video background and replace it with Transparent, Green Screen, Alpha Mask, or Foreground Mask in seconds online for free with advanced AI. ... Watch the showreel video to see the Remove Video Background performance."
+    },
+    {
+     "url": "https://unscreen.pro/",
+     "title": "Unscreen Pro: Video Background Remover & Remove Video Background",
+     "snippet": "You can use the processed videos in your business projects, client work, marketing materials, and commercial content without any restrictions. Free tier usage is limited to personal, non-commercial projects only. Yes! Unscreen.pro (also known as Unscreen Pro) is designed as the best alternative after Unscreen's shutdown. We use advanced AI technology that delivers the same high-quality background removal you're used to, with added features and improvements."
+    },
+    {
+     "url": "https://www.cutout.pro/remove-video-background/upload",
+     "title": "Upload Video to Remove Video Background without Green Screen - Cutout.Pro",
+     "snippet": "Select a video to remove video background online without a single click, producing background free video automatically and free, no need for chroma keying, green screens, or after effects."
+    },
+    {
+     "url": "https://www.easemate.ai/video-background-remover",
+     "title": "Video Background Remover: Remove Background from Video Free Online - EaseMate AI",
+     "snippet": "Remove video background easily and quickly with our online video background remover. Drop any clip to enjoy automatic subject detection, one-click processing, and transparent exports without watermarks for free now."
+    }
+   ],
+   "grades": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    1,
+    2,
+    2
+   ]
+  },
+  {
+   "q": "free websites to remove video background",
+   "kind": "web",
+   "tier": "ssj1",
+   "kept": 19,
+   "ms": 33075,
+   "cost_usd": 0.025497,
+   "calls": 10,
+   "by_role": {
+    "query_rewrite": 0.0000471,
+    "judge_calls": 0.004417,
+    "council_checker_calls": 0.0064647,
+    "council_chair_calls": 0.014568000000000001
+   },
+   "items": [
+    {
+     "url": "https://vmake.ai/video-background-remover",
+     "title": "Free Video Background Remover Online ｜ Vmake Labs",
+     "snippet": "Remove background from video for free online with AI. Instantly replace with green screen or transparent background to create clean, professional videos in seconds."
+    },
+    {
+     "url": "https://www.cutout.pro/remove-video-background",
+     "title": "Remove video background without green screen, fully automatic and free - Cutout.Pro",
+     "snippet": "Cutout.Pro - online video background remover without a single click, producing background free video automatically and free, no need for chroma keying, green screens, or after effects. erase background from footage shot anywhere. simple and ..."
+    },
+    {
+     "url": "https://www.unscreen.io/en/free-video-background-remover",
+     "title": "FREE Video Background Remover | 100% Free Unscreen Alternative | unscreen.io",
+     "snippet": "Remove video backgrounds for FREE with AI. No watermarks, no credit card. Best free Unscreen alternative — process offline in your browser with transparent backgrounds."
+    },
+    {
+     "url": "https://www.bgremover.video/",
+     "title": "Free Video Background Remover – No Watermark | BGRemover.video",
+     "snippet": "Remove backgrounds from videos with AI in seconds. Free online video background remover trusted by 2M+ creators. Make transparent backgrounds, green screen effects, GIFs, and more. No watermark, 100% free. According to industry research, AI-powered background removal is 95% faster than manual ..."
+    },
+    {
+     "url": "https://www.nobg.space/video-bg-remover",
+     "title": "Free Video Background Remover - Remove Background from Video Online | NOBG | NOBG.space",
+     "snippet": "Yes, NOBG's video background remover is completely free to use."
+    },
+    {
+     "url": "https://vidbgrem.media.io/",
+     "title": "Online Video Background Remover from Media.io [Automatically with AI]",
+     "snippet": "Use Media.io video background remover online free across desktop and mobile browsers. ... Our AI tool will detect, recognize, and isolate people from the video background and then remove the background."
+    },
+    {
+     "url": "https://www.pixelcut.ai/video-background-remover",
+     "title": "Free Online Video Background Remover | One-Click, No Watermark",
+     "snippet": "Remove the background from your video in one click. Get a clean cutout frame-to-frame, no green screen needed. No watermark and free to try!"
+    },
+    {
+     "url": "https://backgroundremove.io/video-background-remover/",
+     "title": "Free Video Background Remover : Clean Video Backgrounds Fast",
+     "snippet": "Our AI detects subjects frame by frame and removes unwanted backgrounds in seconds with clean, natural edges. Export your transparent or edited video and publish it directly to TikTok, YouTube, or Instagram Reels. Lights, camera—cleanup! Our Free video background remover makes it easy to turn messy footage into clean, professional visuals."
+    },
+    {
+     "url": "https://www.fotor.com/video-background-remover/",
+     "title": "Free AI Video Background Remover | Fotor",
+     "snippet": "Remove background from video in one single click. Make background transparent, or change video background with color or image for free."
+    },
+    {
+     "url": "https://www.erase.bg/video-erase",
+     "title": "Free Online Video Background Remover (No Login No Signup)",
+     "snippet": "Yes. Erase.bg is a web-based tool. It works directly from your browser without needing to download any software or install a plugin. Erase.bg’s free video background remover online helps you delete or replace backdrops from videos effortlessly, without the need for green screens or editing skills."
+    },
+    {
+     "url": "https://www.vidyard.com/free-video-background-remover/",
+     "title": "Free Video Background Remover | Remove Background - Vidyard",
+     "snippet": "Use AI to blur, replace, or remove your background directly in the Vidyard browser extension to create distraction-free videos."
+    },
+    {
+     "url": "https://videocutout.net/",
+     "title": "Video Background Remover Online – AI Video Cutout | VideoCutout",
+     "snippet": "Remove video backgrounds with AI. Try it free. No payment required.Try it free ... Remove backgrounds from videos automatically — no green screen or frame-by-frame masking required. ... Remove the background and export a transparent WebM video. ... Upload a video or GIF to enable processing."
+    },
+    {
+     "url": "https://www.videobgremover.org/",
+     "title": "Video Background Remover - Remove Video Background Online Free",
+     "snippet": "AI-powered video background remover tool removes background from video online for free. Upload any video format and get background-free video in 2 minutes with advanced AI video background removal technology. Support MP4, AVI, MOV formats with our professional video background remover."
+    },
+    {
+     "url": "https://www.capcut.com/tools/video-background-remover",
+     "title": "Remove Video Background — CapCut | Just One-Click",
+     "snippet": "It's available in a browser, on a PC, or on a smartphone. Simple interface. Easy to use. Let your creation shine. Make your videos stand out by removing backgrounds for a variety of needs. Remove background from video free and add a brand-new background color or image for different contexts."
+    },
+    {
+     "url": "https://picsart.com/video-background-remover/",
+     "title": "Video Background Remover - Erase Video Backgrounds for Free",
+     "snippet": "The easiest way to remove the background from a video is to use a free online video background remover tool like the one from Picsart."
+    }
+   ],
+   "grades": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    1,
+    2,
+    2,
+    2,
+    2
+   ]
+  },
+  {
+   "q": "rtx 5090 teardown",
+   "kind": "web",
+   "tier": "ssj3",
+   "kept": 14,
+   "ms": 45648,
+   "cost_usd": 0.108324,
+   "calls": 9,
+   "by_role": {
+    "query_rewrite": 0.0003233,
+    "judge_calls": 0.0237642,
+    "council_checker_calls": 0.0625485,
+    "council_chair_calls": 0.021688
+   },
+   "items": [
+    {
+     "url": "https://www.notebookcheck.net/Nvidia-RTX-5090-Founders-Edition-teardown-reveals-fragile-modular-design-that-repair-experts-call-a-disaster.1147864.0.html",
+     "title": "Nvidia RTX 5090 Founders Edition teardown reveals fragile modular design that repair experts call “a disaster” - Notebookcheck News",
+     "snippet": "The other card, however, a Founders Edition, became a nightmare. A teardown revealed that Nvidia chose to split the card into multiple interconnected boards rather than use a single printed circuit board (PCB)."
+    },
+    {
+     "url": "https://en.gamegpu.com/news/zhelezo/razborka-rtx-5090-founders-edition-zakonchilas-gibelyu-karty",
+     "title": "RTX 5090 Founders Edition teardown ends in card failure",
+     "snippet": "The NorthridgeFix team published a detailed teardown video of the GeForce RTX 5090 Founders Edition , demonstrating an attempt to repair two cards after installing water blocks."
+    },
+    {
+     "url": "https://www.gsmgotech.com/2025/10/nvidia-rtx-5090-founders-edition.html",
+     "title": "Nvidia RTX 5090 Founders Edition Teardown Reveals Fragile Modular Design That Repair Experts Call “A Disaster”",
+     "snippet": "Beyond the fragile connector, the teardown highlighted what the repair expert calls \"over-the-top\" internal complexity. Dismantling the RTX 5090 Founders Edition required the removal of a labyrinth of screws, brackets, and shields."
+    },
+    {
+     "url": "https://www.techpowerup.com/review/nvidia-geforce-rtx-5090-founders-edition/5.html",
+     "title": "NVIDIA GeForce RTX 5090 Founders Edition Review - The New Flagship - Disassembly & Teardown | TechPowerUp",
+     "snippet": "While NVIDIA did not try to make disassembly extra difficult, it's still a complex multistep process. Make sure you have the right tools, prefer plastic tools over metal tools where possible, to avoid scratching the PCB or components."
+    },
+    {
+     "url": "https://www.techpowerup.com/review/asus-geforce-rtx-5090-tuf/2.html",
+     "title": "ASUS GeForce RTX 5090 TUF Review - Pictures & Teardown | TechPowerUp",
+     "snippet": "Both interfaces support DSC (display stream compression). With DSC enabled, a single DisplayPort on this card can drive 4K 12-bit HDR at 480 Hz; or 8K 12-bit HDR at up to 165 Hz. The RTX 5090 features an updated media acceleration engine with support for 4:2:2 video formats, AV1 UHQ, and MV-HEVC."
+    },
+    {
+     "url": "https://www.reddit.com/r/watercooling/comments/1je544x/nvidia_rtx_5090_founders_edition_teardown/",
+     "title": "r/watercooling on Reddit: NVIDIA RTX 5090 Founders Edition Teardown 🛠",
+     "snippet": "Yeah this video is from R&D it was not intended for socials but as reference for internal use. I saw the footage whilst chatting to the R&D team and thought we should post the teardown videos, was excited for the RTX 5090 FE as the triple PCB layout."
+    },
+    {
+     "url": "https://www.reddit.com/r/hardware/comments/1i8x14q/nvidias_partners_should_worry_rtx_5090_founders/",
+     "title": "r/hardware on Reddit: NVIDIA's Partners Should Worry: RTX 5090 Founders Edition Tear-Down & Disassembly",
+     "snippet": "\"Forbidden\" Disassembly: NVIDIA Laptop RTX \"5090\" with Water Cooling"
+    },
+    {
+     "url": "https://www.overclockers.com/forums/threads/forbidden-disassembly-nvidia-laptop-rtx-5090-with-water-cooling.806427/",
+     "title": "\"Forbidden\" Disassembly: NVIDIA Laptop RTX \"5090\" with Water Cooling | Overclockers Forums",
+     "snippet": "\"This video features an NVIDIA laptop with an RTX 5090 laptop GPU and Intel Ultra 9 275HX CPU, both of which are paired in the XMG Neo 16 that Just Josh brought with him to our studio when we helped with some testing insights this past week. The laptop has an interesting thermal solution, three blower fans, and technically supports water cooling (although the unit we have didn't seem to work - so maybe a future test)."
+    },
+    {
+     "url": "https://www.facebook.com/EKbyLMTEK/videos/rog-astral-rtx-5090-teardown-part-1-nvidia-rtx5090-ekwb/669660782411534/",
+     "title": "ROG Astral RTX 5090 Teardown Part 1 #NVIDIA #RTX5090 ...",
+     "snippet": "EK by LM TEK, Komenda. 148,758 likes · 1,202 talking about this. EK by LM TEK offers the ultimate liquid-cooling solutions for Gaming PCs, Workstations, HPC and AI Server solutions."
+    },
+    {
+     "url": "https://www.reddit.com/r/EKWB/comments/1je4zz5/nvidia_rtx_5090_founders_edition_teardown/",
+     "title": "r/EKWB on Reddit: NVIDIA RTX 5090 Founders Edition Teardown 🛠",
+     "snippet": "Probably, but that has nothing ... down a sheet of paper instead of this cgi nonsense ... Nvidia's RTX 5090 vanishes from online retail in the US — third-party sellers now demand as much as $9,500 for Nvidia's fastest ..."
+    },
+    {
+     "url": "https://www.facebook.com/EKbyLMTEK/videos/nvidia-rtx-5090-founders-edition-teardown-watch-up-prep-this-rtx-5090-fe-ready-f/1328072558560641/",
+     "title": "NVIDIA RTX 5090 Founders Edition Teardown 🛠 Watch up ...",
+     "snippet": "EK by LM TEK, Komenda. 148,758 likes · 1,202 talking about this. EK by LM TEK offers the ultimate liquid-cooling solutions for Gaming PCs, Workstations, HPC and AI Server solutions."
+    },
+    {
+     "url": "https://www.facebook.com/EKbyLMTEK/posts/rog-astral-rtx-5090-teardown-part-2-nvidia-rtx5090-ekwb/1080158284150531/",
+     "title": "ROG ASTRAL RTX 5090 Teardown Part 2 #NVIDIA ...",
+     "snippet": "EK by LM TEK, Komenda. 148,758 likes · 1,202 talking about this. EK by LM TEK offers the ultimate liquid-cooling solutions for Gaming PCs, Workstations, HPC and AI Server solutions."
+    },
+    {
+     "url": "https://www.reddit.com/r/EKWB/comments/1jkd4c3/asus_rog_astral_rtx_5090_teardown/",
+     "title": "r/EKWB on Reddit: ASUS ROG Astral RTX 5090 Teardown 🛠",
+     "snippet": "There is something I can’t understand Why water cool probably the best air cooled 5090 Why don’t water-cooling brands make the water blocks For the high end asus gpu And not for brands who may not have the best cooling solution ⚫️ ... It hasn't yet gotten to the point where air cooling has become impractical, but it's getting there. ... He can give a high five with those thumbs. ... They made it easier to take apart it seems. ASUS ROG Astral RTX 5090 Surprisingly Catches Fire, Burn Marks Seen On GPU PCB As Well As Motherboard Heatsink"
+    },
+    {
+     "url": "https://x.com/ASUS_ROGNA/status/1912581849467220107",
+     "title": "ROG North America on X: \"@mchu05 @BitspowerHQ Watch Part 2 - TUF Gaming RTX 5090 Teardown & Install 👇 https://t.co/A3BapuaiFc\" / X",
+     "snippet": "🤔 See the results from JCustom (@mchu05) utilizing a prototype @BitspowerHQ waterblock to test the ROG Astral GeForce RTX 5090 ⚡⚡⚡ Find the full video series in the links below 👇 ... Watercooling ASUS ROG ASTRAL 5090 & TUF 5090: Bitspower Prototypes. Part 1: Intro & Astral Teardown"
+    }
+   ],
+   "grades": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    1,
+    0,
+    2,
+    1,
+    2,
+    2,
+    2,
+    1
+   ]
+  },
+  {
+   "q": "rtx 5090 teardown",
+   "kind": "web",
+   "tier": "ssj1",
+   "kept": 16,
+   "ms": 32954,
+   "cost_usd": 0.017148,
+   "calls": 9,
+   "by_role": {
+    "query_rewrite": 0.0000479,
+    "judge_calls": 0.0043849,
+    "council_checker_calls": 0.00734855,
+    "council_chair_calls": 0.005367
+   },
+   "items": [
+    {
+     "url": "https://www.youtube.com/watch?v=IyeoVe_8T3A",
+     "title": "NVIDIA's Partners Should Worry: RTX 5090 Founders Edition Tear-Down & Disassembly - YouTube",
+     "snippet": "Sponsor: Hyte Y70 Case on Amazon https://geni.us/p2lWP (or blue Y70 on Amazon https://geni.us/586E5q)In this video, we tear down the NVIDIA RTX 5090 Founders"
+    },
+    {
+     "url": "https://en.gamegpu.com/news/zhelezo/razborka-rtx-5090-founders-edition-zakonchilas-gibelyu-karty",
+     "title": "RTX 5090 Founders Edition teardown ends in card failure",
+     "snippet": "The NorthridgeFix team published a detailed teardown video of the GeForce RTX 5090 Founders Edition , demonstrating an attempt to repair two cards after installing water blocks."
+    },
+    {
+     "url": "https://www.youtube.com/watch?v=xfXSnboBTyw",
+     "title": "Nvidia RTX 5090 Founders Edition Teardown Reveals Shocking Design - YouTube",
+     "snippet": "Nvidia’s RTX 5090 Founders Edition may dominate benchmarks, but a shocking teardown by Northridge Fix reveals a design nightmare hidden beneath the surface. ..."
+    },
+    {
+     "url": "https://www.notebookcheck.net/Nvidia-RTX-5090-Founders-Edition-teardown-reveals-fragile-modular-design-that-repair-experts-call-a-disaster.1147864.0.html",
+     "title": "Nvidia RTX 5090 Founders Edition teardown reveals fragile modular design that repair experts call “a disaster” - Notebookcheck News",
+     "snippet": "The other card, however, a Founders Edition, became a nightmare. A teardown revealed that Nvidia chose to split the card into multiple interconnected boards rather than use a single printed circuit board (PCB)."
+    },
+    {
+     "url": "https://www.techpowerup.com/review/nvidia-geforce-rtx-5090-founders-edition/5.html",
+     "title": "NVIDIA GeForce RTX 5090 Founders Edition Review - The New Flagship - Disassembly & Teardown | TechPowerUp",
+     "snippet": "While NVIDIA did not try to make disassembly extra difficult, it's still a complex multistep process. Make sure you have the right tools, prefer plastic tools over metal tools where possible, to avoid scratching the PCB or components."
+    },
+    {
+     "url": "https://www.reddit.com/r/watercooling/comments/1je544x/nvidia_rtx_5090_founders_edition_teardown/",
+     "title": "r/watercooling on Reddit: NVIDIA RTX 5090 Founders Edition Teardown 🛠",
+     "snippet": "Yeah this video is from R&D it was not intended for socials but as reference for internal use. I saw the footage whilst chatting to the R&D team and thought we should post the teardown videos, was excited for the RTX 5090 FE as the triple PCB layout."
+    },
+    {
+     "url": "https://www.facebook.com/EKbyLMTEK/videos/nvidia-rtx-5090-founders-edition-teardown-watch-up-prep-this-rtx-5090-fe-ready-t/997377659020514/",
+     "title": "NVIDIA RTX 5090 Founders Edition Teardown Watch up prep ...",
+     "snippet": "EK by LM TEK, Komenda. 148,758 likes · 1,202 talking about this. EK by LM TEK offers the ultimate liquid-cooling solutions for Gaming PCs, Workstations, HPC and AI Server solutions."
+    },
+    {
+     "url": "https://www.facebook.com/EKbyLMTEK/posts/rog-astral-rtx-5090-teardown-part-1-nvidia-rtx5090-ekwb/1080153024151057/",
+     "title": "ROG Astral RTX 5090 Teardown Part 1 #NVIDIA ...",
+     "snippet": "EK by LM TEK, Komenda. 148,758 likes · 1,202 talking about this. EK by LM TEK offers the ultimate liquid-cooling solutions for Gaming PCs, Workstations, HPC and AI Server solutions."
+    },
+    {
+     "url": "https://www.reddit.com/r/hardware/comments/1i8x14q/nvidias_partners_should_worry_rtx_5090_founders/",
+     "title": "r/hardware on Reddit: NVIDIA's Partners Should Worry: RTX 5090 Founders Edition Tear-Down & Disassembly",
+     "snippet": "\"Forbidden\" Disassembly: NVIDIA Laptop RTX \"5090\" with Water Cooling"
+    },
+    {
+     "url": "https://www.reddit.com/r/EKWB/comments/1je4zz5/nvidia_rtx_5090_founders_edition_teardown/",
+     "title": "r/EKWB on Reddit: NVIDIA RTX 5090 Founders Edition Teardown 🛠",
+     "snippet": "Probably, but that has nothing ... down a sheet of paper instead of this cgi nonsense ... Nvidia's RTX 5090 vanishes from online retail in the US — third-party sellers now demand as much as $9,500 for Nvidia's fastest ..."
+    },
+    {
+     "url": "https://www.facebook.com/EKbyLMTEK/videos/rog-astral-rtx-5090-teardown-part-1-nvidia-rtx5090-ekwb/669660782411534/",
+     "title": "ROG Astral RTX 5090 Teardown Part 1 #NVIDIA #RTX5090 ...",
+     "snippet": "EK by LM TEK, Komenda. 148,758 likes · 1,202 talking about this. EK by LM TEK offers the ultimate liquid-cooling solutions for Gaming PCs, Workstations, HPC and AI Server solutions."
+    },
+    {
+     "url": "https://www.facebook.com/EKbyLMTEK/videos/nvidia-rtx-5090-founders-edition-teardown-watch-up-prep-this-rtx-5090-fe-ready-f/1328072558560641/",
+     "title": "NVIDIA RTX 5090 Founders Edition Teardown 🛠 Watch up ...",
+     "snippet": "EK by LM TEK, Komenda. 148,758 likes · 1,202 talking about this. EK by LM TEK offers the ultimate liquid-cooling solutions for Gaming PCs, Workstations, HPC and AI Server solutions."
+    },
+    {
+     "url": "https://www.facebook.com/EKbyLMTEK/posts/rog-astral-rtx-5090-teardown-part-2-nvidia-rtx5090-ekwb/1080158284150531/",
+     "title": "ROG ASTRAL RTX 5090 Teardown Part 2 #NVIDIA ...",
+     "snippet": "EK by LM TEK, Komenda. 148,758 likes · 1,202 talking about this. EK by LM TEK offers the ultimate liquid-cooling solutions for Gaming PCs, Workstations, HPC and AI Server solutions."
+    },
+    {
+     "url": "https://www.reddit.com/r/EKWB/comments/1jkd4c3/asus_rog_astral_rtx_5090_teardown/",
+     "title": "r/EKWB on Reddit: ASUS ROG Astral RTX 5090 Teardown 🛠",
+     "snippet": "There is something I can’t understand Why water cool probably the best air cooled 5090 Why don’t water-cooling brands make the water blocks For the high end asus gpu And not for brands who may not have the best cooling solution ⚫️ ... It hasn't yet gotten to the point where air cooling has become impractical, but it's getting there. ... He can give a high five with those thumbs. ... They made it easier to take apart it seems. ASUS ROG Astral RTX 5090 Surprisingly Catches Fire, Burn Marks Seen On GPU PCB As Well As Motherboard Heatsink"
+    },
+    {
+     "url": "https://x.com/ASUS_ROGNA/status/1912581849467220107",
+     "title": "ROG North America on X: \"@mchu05 @BitspowerHQ Watch Part 2 - TUF Gaming RTX 5090 Teardown & Install 👇 https://t.co/A3BapuaiFc\" / X",
+     "snippet": "🤔 See the results from JCustom (@mchu05) utilizing a prototype @BitspowerHQ waterblock to test the ROG Astral GeForce RTX 5090 ⚡⚡⚡ Find the full video series in the links below 👇 ... Watercooling ASUS ROG ASTRAL 5090 & TUF 5090: Bitspower Prototypes. Part 1: Intro & Astral Teardown"
+    }
+   ],
+   "grades": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    1,
+    2,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2,
+    1
+   ]
+  },
+  {
+   "q": "y2k visual design style catalogue",
+   "kind": "docs",
+   "tier": "ssj3",
+   "kept": 5,
+   "ms": 90726,
+   "cost_usd": 0.196161,
+   "calls": 11,
+   "by_role": {
+    "query_rewrite": 0.0002952,
+    "judge_calls": 0.0224155,
+    "council_checker_calls": 0.0792365,
+    "council_chair_calls": 0.09421399999999999
+   },
+   "items": [
+    {
+     "url": "https://www.scribd.com/document/1031111560/y2k-Prompt-Generator",
+     "title": "Y2k Prompt Generator | PDF | Typography | Color",
+     "snippet": "This document outlines a system for generating Y2K-style poster prompts using the Nano Banana Pro image editor. It details the process for analyzing uploaded images and creating prompts that include typography styles, graphic elements, and text structures characteristic of late-90s and early-2000s aesthetics. The document also provides guidelines for color matching, texture application, and ..."
+    },
+    {
+     "url": "https://www.scribd.com/document/872038266/DPP-123-D-EN",
+     "title": "Character Design Guide: Y2K Aesthetic | PDF | Comics - Scribd",
+     "snippet": "The document discusses character design, particularly focusing on the y2k aesthetic, which reflects early 2000s fashion and youth culture, and provides guidance on creating characters that embody this style."
+    },
+    {
+     "url": "https://www.politesi.polimi.it/retrieve/8e30b831-7512-45fb-868f-a534b7992a44/2024_07_De_Souza_Junior.pdf",
+     "title": "Y2K Typography: Origins, Examples, and Characteristics of Experimental",
+     "snippet": "Figure 44 - 1964 Letraset sample distributed by Visual Art Industries ............... 36 · Figure 45 - 1984 Letraset catalogue."
+    },
+    {
+     "url": "https://www.scribd.com/document/967240472/Y2K-Presentation-in-Sky-Blue-Silver-Cyber-Futurism-Style",
+     "title": "Y2K Graphic Design Essentials Guide | PDF | The Arts - Scribd",
+     "snippet": "Free download as PDF File. SIGNATURE ELEMENTS Iridescent/ Bubble shapes Glitch aesthetics holographic and rounded and digital surfaces forms distortion Chrome ..."
+    },
+    {
+     "url": "https://www.researchgate.net/publication/389701421_Y2K_Aesthetics_and_its_Influence_on_Singaporean_Punk_Zines_of_the_1990s_and_Early_2000s",
+     "title": "(PDF) Y2K Aesthetics and its Influence on Singaporean Punk Zines of the 1990s and Early 2000s",
+     "snippet": "Through a visual analysis of zine graphics, layouts, and graphic composition, this paper investigates how the Y2K aesthetic and emergent technological tools influenced the visual language of punk zines ultimately changing the course of its design approach and aesthetic direction. By highlighting the interplay between global design trends, technological innovation, and local punk DIY practices, this paper offers insight into how the visual styles of the late 1990s and early 2000s left a lasting imprint on Singaporean punk zine culture."
+    }
+   ],
+   "grades": [
+    2,
+    1,
+    1,
+    2,
+    1
+   ]
+  },
+  {
+   "q": "y2k visual design style catalogue",
+   "kind": "docs",
+   "tier": "ssj1",
+   "kept": 6,
+   "ms": 93567,
+   "cost_usd": 0.033543,
+   "calls": 11,
+   "by_role": {
+    "query_rewrite": 0.0000488,
+    "judge_calls": 0.0043512,
+    "council_checker_calls": 0.0086962,
+    "council_chair_calls": 0.020447
+   },
+   "items": [
+    {
+     "url": "https://www.scribd.com/document/875934720/Anti-Design-Ugly-Experiment",
+     "title": "Y2K Aesthetic: Embracing Anti-Design | PDF - Scribd",
+     "snippet": "14 Jun 2025 · Visual elements associated with the Y2K aesthetic include chrome and metallic gradients, bubble type and pixel fonts, translucent plastic ..."
+    },
+    {
+     "url": "https://www.scribd.com/document/872038266/DPP-123-D-EN",
+     "title": "Character Design Guide: Y2K Aesthetic | PDF | Comics - Scribd",
+     "snippet": "The document discusses character design, particularly focusing on the y2k aesthetic, which reflects early 2000s fashion and youth culture, and provides guidance on creating characters that embody this style."
+    },
+    {
+     "url": "https://www.politesi.polimi.it/retrieve/8e30b831-7512-45fb-868f-a534b7992a44/2024_07_De_Souza_Junior.pdf",
+     "title": "Y2K Typography: Origins, Examples, and Characteristics of Experimental",
+     "snippet": "Figure 44 - 1964 Letraset sample distributed by Visual Art Industries ............... 36 · Figure 45 - 1984 Letraset catalogue."
+    },
+    {
+     "url": "https://www.scribd.com/document/967240472/Y2K-Presentation-in-Sky-Blue-Silver-Cyber-Futurism-Style",
+     "title": "Y2K Graphic Design Essentials Guide | PDF | The Arts - Scribd",
+     "snippet": "Free download as PDF File. SIGNATURE ELEMENTS Iridescent/ Bubble shapes Glitch aesthetics holographic and rounded and digital surfaces forms distortion Chrome ..."
+    },
+    {
+     "url": "https://www.researchgate.net/publication/370865559_Retro_Futurism_The_Resurgence_of_Y2K_Style_in_the_Fashion_Field",
+     "title": "Retro Futurism: The Resurgence of Y2K Style in the Fashion Field",
+     "snippet": "May 18, 2023 · Therefore, this aesthetic style with both the sense of future technology and a little retro flavor was integrated into the design field. Y2K style has been popular for a period of time, and began ..."
+    },
+    {
+     "url": "https://www.researchgate.net/publication/389701421_Y2K_Aesthetics_and_its_Influence_on_Singaporean_Punk_Zines_of_the_1990s_and_Early_2000s",
+     "title": "Y2K Aesthetics and its Influence on Singaporean Punk Zines of ...",
+     "snippet": "17 Apr 2026 · Characterized by futuristic elements, bold vivid colours, gradient and translucent elements, Web 1.0 aesthetics, metallic textures, and ..."
+    }
+   ],
+   "grades": [
+    2,
+    1,
+    1,
+    2,
+    1,
+    1
+   ]
+  },
+  {
+   "q": "IPCC AR6 synthesis report 2023",
+   "kind": "docs",
+   "tier": "ssj3",
+   "kept": 12,
+   "ms": 111218,
+   "cost_usd": 0.190008,
+   "calls": 11,
+   "by_role": {
+    "query_rewrite": 0.0003389,
+    "judge_calls": 0.0327375,
+    "council_checker_calls": 0.064356,
+    "council_chair_calls": 0.09257599999999999
+   },
+   "items": [
+    {
+     "url": "https://www.ipcc.ch/report/ar6/syr/downloads/report/IPCC_AR6_SYR_FullVolume.pdf",
+     "title": "1 CLIMATE CHANGE 2023 Synthesis Report",
+     "snippet": "This Synthesis Report (SYR) of the IPCC Sixth Assessment Report (AR6) summarises the state of knowledge of climate change, its widespread impacts and risks, and climate change mitigation and adaptation. It integrates the main findings of the Sixth · Assessment Report (AR6) based on contributions ..."
+    },
+    {
+     "url": "https://www.ipcc.ch/report/ar6/syr/downloads/report/IPCC_AR6_SYR_LongerReport.pdf",
+     "title": "35 Climate Change 2023 Synthesis Report",
+     "snippet": "In: Climate Change 2023: Synthesis Report. Contribution of Working Groups I, II and III to the Sixth · Assessment Report of the Intergovernmental Panel on Climate Change [Core Writing Team, H. Lee and J. Romero (eds.)]. IPCC, Geneva, Switzerland, pp. 35-115, doi: 10.59327/IPCC/AR6-9789291691647"
+    },
+    {
+     "url": "https://s.wsj.net/public/resources/documents/IPCC-Sixth-Assessment-Report-Synthesis-03-20-2023.pdf",
+     "title": "IPCC Sixth Assessment Report (AR6)",
+     "snippet": "This Synthesis Report (SYR) of the IPCC Sixth Assessment Report (AR6) summarises the state of knowledge"
+    },
+    {
+     "url": "https://www.scribd.com/document/677838222/Ipcc-Ar6-Syr-Fullvolume",
+     "title": "IPCC 2023 Synthesis Report on Nuclear Energy | PDF | Climate ...",
+     "snippet": "Ipcc Ar6 Syr Fullvolume - Free download as PDF File (.pdf), Text File (.txt) or read online for free. This document is the Synthesis Report of the Sixth Assessment Report of the Intergovernmental Panel on Climate Change. It synthesizes and integrates the findings of the three Working Group reports and three Special Reports on climate change ..."
+    },
+    {
+     "url": "https://brasil.un.org/sites/default/files/2023-04/IPCC_AR6_SYR_LongerReport.pdf",
+     "title": "SYNTHESIS REPORT OF THE IPCC SIXTH ...",
+     "snippet": "This Synthesis Report (SYR) of the IPCC Sixth Assessment Report (AR6) summarises the state of knowledge"
+    },
+    {
+     "url": "https://presbyearthcare.org/wp-content/uploads/2023/04/IPCC-AR6-Synthesis-Report-for-PEC.pdf",
+     "title": "Sixth Assessment Report Synthesis Report 20 March 2023 https://www.ipcc.ch",
+     "snippet": "The Rev. Courtenay Willcox is the transitional pastor of Northampton Presbyterian Church in Holland, Pennsylvania, the moderator of Presbyterians for Earth Care (PEC), and “Gigi” to three granddaughters. The Rev. Andrew Black is the associate pastor of First Presbyterian Church of Santa ..."
+    },
+    {
+     "url": "https://www.energy.gov/sites/default/files/2023-07/Attachment%20V%20-%20IPCC%20Synthesis%20Report.pdf",
+     "title": "ATTACHMENT V",
+     "snippet": "ATTACHMENT V"
+    },
+    {
+     "url": "https://www.scribd.com/document/676768311/IPCC-AR6-SYR-LongerReport",
+     "title": "IPCC 2023 Climate Change Synthesis Report | PDF | Greenhouse ...",
+     "snippet": "IPCC_AR6_SYR_LongerReport - Free download as PDF File (.pdf), Text File (.txt) or read online for free. This document is the Synthesis Report from the IPCC's Sixth Assessment Report. It summarizes the state of knowledge on climate change based on literature since 2014. Section 1 introduces the report and its context. Section 2 assesses observed ..."
+    },
+    {
+     "url": "https://www.researchgate.net/publication/372768149_Climate_Change_2023_Synthesis_Report_Full_Volume_Contribution_of_Working_Groups_I_II_and_III_to_the_Sixth_Assessment_Report_of_the_Intergovernmental_Panel_on_Climate_Change",
+     "title": "Climate Change 2023: Synthesis Report (Full Volume ...",
+     "snippet": "Jul 27, 2023 · Abstract This Synthesis Report (SYR) concludes the Sixth Assessment Report (AR6) of the Intergovernmental Panel on Climate Change (IPCC)."
+    },
+    {
+     "url": "https://www.scribd.com/document/960326091/1",
+     "title": "IPCC 2023 Climate Change Synthesis Report",
+     "snippet": "The AR6 Synthesis Report by the IPCC is the culminating document of the Sixth Assessment Cycle, summarizing findings from three working groups. It offers a comprehensive scientific overview of climate change, including its physical science, impacts on ecosystems and societies, and necessary mitigation pathways to limit global warming. The report spans approximately 85 pages, with full ..."
+    },
+    {
+     "url": "https://www.researchgate.net/publication/370465535_Climate_Change_2023_Synthesis_Report_Contribution_of_Working_Groups_I_II_and_III_to_the_Sixth_Assessment_Report_of_the_Intergovernmental_Panel_on_Climate_Change",
+     "title": "Climate Change 2023: Synthesis Report. Contribution of ...",
+     "snippet": "Mar 20, 2023 · 1. Introduction This Synthesis Repor t (SYR) of th e IPCC Sixth Assessment Report (AR6) summarises the state of know ledge of climate change, its widespread impacts and risks, and climate change ..."
+    },
+    {
+     "url": "https://www.slideshare.net/slideshow/climate-change-2023-synthesis-report-of-the-ipcc-ar6-adaptation-challenges-and-opportunities/258655278",
+     "title": "Climate Change 2023: Synthesis Report of the IPCC AR6 ...",
+     "snippet": "The Intergovernmental Panel on Climate Change (IPCC) and Al Gore were awarded the 2007 Nobel Peace Prize for their efforts to increase knowledge about human-caused climate change and identify measures needed to address it. The IPCC assesses scientific, technical, and socioeconomic information related to climate change risks, impacts, and adaptation and mitigation options in its reports, which ..."
+    }
+   ],
+   "grades": [
+    2,
+    2,
+    2,
+    1,
+    2,
+    2,
+    1,
+    2,
+    2,
+    2,
+    2,
+    1
+   ]
+  },
+  {
+   "q": "IPCC AR6 synthesis report 2023",
+   "kind": "docs",
+   "tier": "ssj1",
+   "kept": 18,
+   "ms": 96228,
+   "cost_usd": 0.047507,
+   "calls": 15,
+   "by_role": {
+    "query_rewrite": 0.0000526,
+    "judge_calls": 0.0074605,
+    "council_checker_calls": 0.009659200000000001,
+    "council_chair_calls": 0.030334999999999997
+   },
+   "items": [
+    {
+     "url": "https://www.ipcc.ch/report/ar6/syr/downloads/report/IPCC_AR6_SYR_FullVolume.pdf",
+     "title": "1 CLIMATE CHANGE 2023 Synthesis Report",
+     "snippet": "This Synthesis Report (SYR) of the IPCC Sixth Assessment Report (AR6) summarises the state of knowledge of climate change, its widespread impacts and risks, and climate change mitigation and adaptation. It integrates the main findings of the Sixth · Assessment Report (AR6) based on contributions ..."
+    },
+    {
+     "url": "https://presbyearthcare.org/wp-content/uploads/2023/04/IPCC-AR6-Synthesis-Report-for-PEC.pdf",
+     "title": "Sixth Assessment Report Synthesis Report 20 March 2023 https://www.ipcc.ch",
+     "snippet": "The Rev. Courtenay Willcox is the transitional pastor of Northampton Presbyterian Church in Holland, Pennsylvania, the moderator of Presbyterians for Earth Care (PEC), and “Gigi” to three granddaughters. The Rev. Andrew Black is the associate pastor of First Presbyterian Church of Santa ..."
+    },
+    {
+     "url": "https://www.scribd.com/document/676768311/IPCC-AR6-SYR-LongerReport",
+     "title": "IPCC 2023 Climate Change Synthesis Report | PDF | Greenhouse ...",
+     "snippet": "IPCC_AR6_SYR_LongerReport - Free download as PDF File (.pdf), Text File (.txt) or read online for free. This document is the Synthesis Report from the IPCC's Sixth Assessment Report. It summarizes the state of knowledge on climate change based on literature since 2014. Section 1 introduces the report and its context. Section 2 assesses observed ..."
+    },
+    {
+     "url": "https://www.sas.upenn.edu/~vr0j/4230-25/IPCC_AR6_SYR_SPM.pdf",
+     "title": "IPCC Sixth Assessment Report (AR6)",
+     "snippet": "This Synthesis Report (SYR) of the IPCC Sixth Assessment Report (AR6) summarises the state of knowledge"
+    },
+    {
+     "url": "https://www.researchgate.net/publication/372768149_Climate_Change_2023_Synthesis_Report_Full_Volume_Contribution_of_Working_Groups_I_II_and_III_to_the_Sixth_Assessment_Report_of_the_Intergovernmental_Panel_on_Climate_Change",
+     "title": "Climate Change 2023: Synthesis Report (Full Volume ...",
+     "snippet": "Jul 27, 2023 · Abstract This Synthesis Report (SYR) concludes the Sixth Assessment Report (AR6) of the Intergovernmental Panel on Climate Change (IPCC)."
+    },
+    {
+     "url": "https://zenodo.org/records/14515606/files/IPCC_AR6_SYR_AnnexesIndex.pdf?download=1",
+     "title": "Archive of the IPCC Sixth Assessment Report hash://md5/aef6c47df4795ed3dab36dedd46156fe",
+     "snippet": "This publication contains tracked copies of the Sixth assessment report (2021/2023) of the Intergovernmental Panel on Climate Change (IPCC) including, but not limited to: IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report of the Intergovernmental Panel on Climate Change [Masson-Delmotte, V., P. Zhai, A. Pirani, S.L. Connors, C. P&eacute;an, S. Berger, N. Caud, Y. Chen, L. Goldfarb, M.I. Gomis, M. Huang, K. Leitzell, E. Lonnoy, J.B.R. Matthews, T.K. Maycock, T. Waterfield, O. Yelek&ccedil;i, R. Yu, and B. Zhou (eds.)]. Cam"
+    },
+    {
+     "url": "https://zenodo.org/records/17673829/files/IPCC%204%20You(th).pdf?download=1",
+     "title": "IPCC for You(th): Assessment Report 6 Summary for Policymakers",
+     "snippet": "This document is an independent, youth-led summary of the Intergovernmental Panel on Climate Change (IPCC) Climate Change 2023: Synthesis Report &ndash; Summary for Policymakers. It was developed by members of The Keeling Society, an international network of early-career researchers, emerging policy thinkers, and science communicators working to make climate science more accessible to young people and early-career professionals. The report distils the key findings of the AR6 SPM into clear, concise, and approachable language while preserving the structure, terminology, and confidence levels us"
+    },
+    {
+     "url": "https://www.ipcc.ch/report/ar6/syr/downloads/report/IPCC_AR6_SYR_LongerReport.pdf",
+     "title": "35 Climate Change 2023 Synthesis Report",
+     "snippet": "In: Climate Change 2023: Synthesis Report. Contribution of Working Groups I, II and III to the Sixth · Assessment Report of the Intergovernmental Panel on Climate Change [Core Writing Team, H. Lee and J. Romero (eds.)]. IPCC, Geneva, Switzerland, pp. 35-115, doi: 10.59327/IPCC/AR6-9789291691647"
+    },
+    {
+     "url": "http://www.climate.go.kr/home/cc_data/2023/2.%EC%95%84%EC%9B%83%EB%A6%AC%EC%B9%98_Presentation_IPCC_Outreach_event_June_2023(27_June).pdf",
+     "title": "IPCC AR6 Synthesis Report IPCC AR6 Synthesis Report June 27, 2023",
+     "snippet": "IPCC AR6 Synthesis Report · June 27, 2023 · Climate Change 2023 · Synthesis Report · Sixth Assessment Report · José Romero, Head SYR TSU · Intergovernmental Panel on Climate Change (IPCC) 1/2 · • Established in 1988, 195 member governments. • Objective: to provide scientific information ..."
+    },
+    {
+     "url": "https://brasil.un.org/sites/default/files/2023-04/IPCC_AR6_SYR_LongerReport.pdf",
+     "title": "SYNTHESIS REPORT OF THE IPCC SIXTH ...",
+     "snippet": "This Synthesis Report (SYR) of the IPCC Sixth Assessment Report (AR6) summarises the state of knowledge"
+    },
+    {
+     "url": "https://www.energy.gov/sites/default/files/2023-07/Attachment%20V%20-%20IPCC%20Synthesis%20Report.pdf",
+     "title": "ATTACHMENT V",
+     "snippet": "ATTACHMENT V"
+    },
+    {
+     "url": "https://www.sei.org/wp-content/uploads/2023/09/merw-day-2-2.the-state-of-climate-science-and-policy-selected-findings-from-the-ipcc-6th-assessment.pdf",
+     "title": "Mekong Environmental Resilience Week 14 September 2023 The State of Climate",
+     "snippet": "Mekong Environmental · Resilience Week · 14 September 2023 · The State of Climate · selected findings from the · IPCC 6th Assessment · Building Climate Resilience in the Mekong · Region: Bridging Science, Policy, and Practice"
+    },
+    {
+     "url": "https://www.ipcc.ch/site/assets/uploads/2023/03/IPCC_AR6_SYR_PressRelease_en.pdf",
+     "title": "IPCC Press Release Urgent climate action can secure a ...",
+     "snippet": "disproportionately affected,” said Aditi Mukherji, one of the 93 authors of this Synthesis Report, the"
+    },
+    {
+     "url": "https://www.scribd.com/document/960326091/1",
+     "title": "IPCC 2023 Climate Change Synthesis Report",
+     "snippet": "The AR6 Synthesis Report by the IPCC is the culminating document of the Sixth Assessment Cycle, summarizing findings from three working groups. It offers a comprehensive scientific overview of climate change, including its physical science, impacts on ecosystems and societies, and necessary mitigation pathways to limit global warming. The report spans approximately 85 pages, with full ..."
+    },
+    {
+     "url": "https://www.slideshare.net/slideshow/climate-change-2023-synthesis-report-of-the-ipcc-ar6-adaptation-challenges-and-opportunities/258655278",
+     "title": "Climate Change 2023: Synthesis Report of the IPCC AR6 ...",
+     "snippet": "The Intergovernmental Panel on Climate Change (IPCC) and Al Gore were awarded the 2007 Nobel Peace Prize for their efforts to increase knowledge about human-caused climate change and identify measures needed to address it. The IPCC assesses scientific, technical, and socioeconomic information related to climate change risks, impacts, and adaptation and mitigation options in its reports, which ..."
+    }
+   ],
+   "grades": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    1,
+    1,
+    2,
+    2,
+    2,
+    1,
+    1,
+    2,
+    2,
+    1
+   ]
+  },
+  {
+   "q": "python asyncio tutorial",
+   "kind": "docs",
+   "tier": "ssj3",
+   "kept": 7,
+   "ms": 121133,
+   "cost_usd": 0.087278,
+   "calls": 6,
+   "by_role": {
+    "query_rewrite": 0.0002665,
+    "judge_calls": 0.009775800000000001,
+    "council_checker_calls": 0.0366035,
+    "council_chair_calls": 0.040632
+   },
+   "items": [
+    {
+     "url": "https://python.berlin/en/latest/_downloads/5b71fc0ee83094bfa1105d8fd56b2cb0/AsyncIO_%20Python%20Users%20Berlin.pdf",
+     "title": "AsyncIO: Python Users Berlin",
+     "snippet": "The asyncio module gives · us the ability to create · an event loop to run our · async code in. async “hello world!” · import asyncio · async def main_async(): await asyncio.sleep(0.5) print('Hello Python Users Berlin!') asyncio.run(main_async()) --- Output: Hello Python Users Berlin!!!"
+    },
+    {
+     "url": "https://archive.fosdem.org/2017/schedule/event/python_coroutines/attachments/slides/1462/export/events/attachments/python_coroutines/slides/1462/AsyncProgrammingInPython.pdf",
+     "title": "Asynchronous programming with Coroutines - in Python",
+     "snippet": "▶There where a few predecessors to what we got in Python3.5 · ▶gevent (greenlets, c stack hack) ▶tulip (now asyncio) ▶twisted (event driven) ▶tornado · ▶. . . ▶all a bit hacked on top of Python2 · ▶asyncio provisional package in 3.4 · 22 · Introduction ·"
+    },
+    {
+     "url": "https://riptutorial.com/Download/python-asyncio.pdf",
+     "title": "python-asyncio",
+     "snippet": "It is an unofficial and free python-asyncio ebook created for educational purposes. All the content is extracted from Stack Overflow Documentation, which is written by many hardworking individuals at Stack Overflow. It is neither affiliated with Stack Overflow nor official python-asyncio."
+    },
+    {
+     "url": "https://archive.fosdem.org/2023/schedule/event/python_telegram_bot/attachments/slides/5463/export/events/attachments/python_telegram_bot/slides/5463/FOSDEM_2023_Talk_Intro_to_Async.pdf",
+     "title": "(c) 2023 eGenix.com Software, Skills and Services GmbH, info@egenix.com",
+     "snippet": "FOSDEM 2023 – 05.02.2023"
+    },
+    {
+     "url": "https://zestedesavoir.com/articles/pdf/1568/decouvrons-la-programmation-asynchrone-en-python.pdf",
+     "title": "nohar Découvrons la programmation asynchrone en Python 2 septembre 2022",
+     "snippet": "La notion fondamentale autour de laquelle asyncio a été construite est celle de coroutine."
+    },
+    {
+     "url": "https://www.usenix.org/system/files/login/articles/09_beazley.pdf",
+     "title": "38 JUNE 2014 VOL. 39, NO. 3 www.usenix.org COLUMNS",
+     "snippet": "There is much more to asyncio than presented here."
+    },
+    {
+     "url": "https://www.lincs.fr/wp-content/uploads/2021/05/asyncio-slides.pdf",
+     "title": "asyncio slides - LINCS",
+     "snippet": "Subprocesses async def log_stream(stream): while line := await stream.readline(): logging.info(line.decode('utf-8')) proc = await asyncio.create_subprocess_shell( \"tee --\", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, ) logger = loop.create_task(log_stream(proc.stdout)) proc.stdin.write(b\"Hello\\n\") proc.stdin.write(b\"World\\n\")"
+    }
+   ],
+   "grades": [
+    2,
+    1,
+    2,
+    1,
+    1,
+    0,
+    2
+   ]
+  },
+  {
+   "q": "python asyncio tutorial",
+   "kind": "docs",
+   "tier": "ssj1",
+   "kept": 8,
+   "ms": 76490,
+   "cost_usd": 0.016072,
+   "calls": 6,
+   "by_role": {
+    "query_rewrite": 0.0000432,
+    "judge_calls": 0.0024534,
+    "council_checker_calls": 0.00440775,
+    "council_chair_calls": 0.009168
+   },
+   "items": [
+    {
+     "url": "https://riptutorial.com/Download/python-asyncio.pdf",
+     "title": "python-asyncio",
+     "snippet": "It is an unofficial and free python-asyncio ebook created for educational purposes. All the content is extracted from Stack Overflow Documentation, which is written by many hardworking individuals at Stack Overflow. It is neither affiliated with Stack Overflow nor official python-asyncio."
+    },
+    {
+     "url": "https://archive.fosdem.org/2017/schedule/event/python_coroutines/attachments/slides/1462/export/events/attachments/python_coroutines/slides/1462/AsyncProgrammingInPython.pdf",
+     "title": "Asynchronous programming with Coroutines - in Python",
+     "snippet": "▶There where a few predecessors to what we got in Python3.5 · ▶gevent (greenlets, c stack hack) ▶tulip (now asyncio) ▶twisted (event driven) ▶tornado · ▶. . . ▶all a bit hacked on top of Python2 · ▶asyncio provisional package in 3.4 · 22 · Introduction ·"
+    },
+    {
+     "url": "https://www.lincs.fr/wp-content/uploads/2021/05/asyncio-slides.pdf",
+     "title": "asyncio slides - LINCS",
+     "snippet": "Subprocesses async def log_stream(stream): while line := await stream.readline(): logging.info(line.decode('utf-8')) proc = await asyncio.create_subprocess_shell( \"tee --\", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, ) logger = loop.create_task(log_stream(proc.stdout)) proc.stdin.write(b\"Hello\\n\") proc.stdin.write(b\"World\\n\")"
+    },
+    {
+     "url": "https://archive.fosdem.org/2023/schedule/event/python_telegram_bot/attachments/slides/5463/export/events/attachments/python_telegram_bot/slides/5463/FOSDEM_2023_Talk_Intro_to_Async.pdf",
+     "title": "(c) 2023 eGenix.com Software, Skills and Services GmbH, info@egenix.com",
+     "snippet": "FOSDEM 2023 – 05.02.2023"
+    },
+    {
+     "url": "https://python.berlin/en/latest/_downloads/5b71fc0ee83094bfa1105d8fd56b2cb0/AsyncIO_%20Python%20Users%20Berlin.pdf",
+     "title": "AsyncIO: Python Users Berlin",
+     "snippet": "The asyncio module gives · us the ability to create · an event loop to run our · async code in. async “hello world!” · import asyncio · async def main_async(): await asyncio.sleep(0.5) print('Hello Python Users Berlin!') asyncio.run(main_async()) --- Output: Hello Python Users Berlin!!!"
+    },
+    {
+     "url": "https://link.springer.com/content/pdf/bfm:978-1-4842-4401-2/1.pdf",
+     "title": "asyncio Recipes A Problem-Solution Approach Mohamed Mustapha Tahrioui",
+     "snippet": "Since its advent, asyncio has added countless APIs and keywords to the · Python language (async/await). Its steep learning curve scares some · developers from trying it. However, it’s a powerful technology that’s even · been used by big players like Instagram3."
+    },
+    {
+     "url": "https://www.usenix.org/system/files/login/articles/09_beazley.pdf",
+     "title": "38 JUNE 2014 VOL. 39, NO. 3 www.usenix.org COLUMNS",
+     "snippet": "There is much more to asyncio than presented here."
+    },
+    {
+     "url": "https://zestedesavoir.com/articles/pdf/1568/decouvrons-la-programmation-asynchrone-en-python.pdf",
+     "title": "nohar Découvrons la programmation asynchrone en Python 2 septembre 2022",
+     "snippet": "La notion fondamentale autour de laquelle asyncio a été construite est celle de coroutine."
+    }
+   ],
+   "grades": [
+    2,
+    1,
+    2,
+    1,
+    2,
+    1,
+    0,
+    1
+   ]
+  },
+  {
+   "q": "underrated osint tools",
+   "kind": "videos",
+   "tier": "ssj3",
+   "kept": 4,
+   "ms": 47135,
+   "cost_usd": 0.00072,
+   "calls": 2,
+   "by_role": {
+    "planner_calls": 0.0007196699999999999
+   },
+   "items": [
+    {
+     "title": "The Most Underrated Network OSINT Tools On GitHub",
+     "snippet": "15 views - 3 months ago - YouTube - Digital AI World"
+    },
+    {
+     "title": "5 Underrated Network OSINT Tools on GitHub You ... - YouTube",
+     "snippet": null
+    },
+    {
+     "title": "6 Hidden OSINT Tools Found on GitHub No One is Talking About",
+     "snippet": "6 Hidden OSINT Tools Found on GitHub No One is Talking About Everyone recommends the same OSINT tools. These aren't those tools. In this video I cover 6 genuinely underrated OSINT tools sitting on GitHub that most creators completely skip — Maigret, Photon, Metagoofil, GitDorker, Osintgram, and CrossLinked. Each one covers an intelligence ..."
+    },
+    {
+     "title": "6 Hidden OSINT GitHub Tools Every Hacker & Researcher Should Know (FREE & Open Source)",
+     "snippet": "In this video, you'll discover 6 powerful and underrated open-source OSINT tools available on GitHub. These tools are used by security researchers and penetration testers for authorized reconnaissance, cybersecurity assessments, and OSINT investigations. 🔥 Featured Tools: Maigret Photon Metagoofil GitDorker OSINTGram CrossLinked These tools ..."
+    }
+   ],
+   "grades": [
+    2,
+    2,
+    2,
+    2
+   ]
+  },
+  {
+   "q": "underrated osint tools",
+   "kind": "videos",
+   "tier": "ssj1",
+   "kept": 4,
+   "ms": 3889,
+   "cost_usd": 0,
+   "calls": 0,
+   "by_role": {},
+   "items": [
+    {
+     "title": "The Most Underrated Network OSINT Tools On GitHub",
+     "snippet": "15 views - 3 months ago - YouTube - Digital AI World"
+    },
+    {
+     "title": "5 Underrated Network OSINT Tools on GitHub You ... - YouTube",
+     "snippet": null
+    },
+    {
+     "title": "6 Hidden OSINT Tools Found on GitHub No One is Talking About",
+     "snippet": "6 Hidden OSINT Tools Found on GitHub No One is Talking About Everyone recommends the same OSINT tools. These aren't those tools. In this video I cover 6 genuinely underrated OSINT tools sitting on GitHub that most creators completely skip — Maigret, Photon, Metagoofil, GitDorker, Osintgram, and CrossLinked. Each one covers an intelligence ..."
+    },
+    {
+     "title": "6 Hidden OSINT GitHub Tools Every Hacker & Researcher Should Know (FREE & Open Source)",
+     "snippet": "In this video, you'll discover 6 powerful and underrated open-source OSINT tools available on GitHub. These tools are used by security researchers and penetration testers for authorized reconnaissance, cybersecurity assessments, and OSINT investigations. 🔥 Featured Tools: Maigret Photon Metagoofil GitDorker OSINTGram CrossLinked These tools ..."
+    }
+   ],
+   "grades": [
+    2,
+    2,
+    2,
+    2
+   ]
+  },
+  {
+   "q": "ghost story short film",
+   "kind": "videos",
+   "tier": "ssj3",
+   "kept": 20,
+   "ms": 3835,
+   "cost_usd": 0,
+   "calls": 0,
+   "by_role": {},
+   "items": [
+    {
+     "title": "Horror Short Film 👀👻💀 #horror #horrorshortfilm #horrorstories",
+     "snippet": "Horror Short Film 👀👻💀 #horror #horrorshortfilm #horrorstories Horror Short Films, Scary Short Films, Horror Stories, Ghost Stories, Paranormal Horror, Haunted House, Creepy Videos, Jump Scare, Psychological Horror, Supernatural Horror, Monster Stories, Demon Stories, Dark Mystery, Suspense Thriller, Found Footage Horror, Scary ..."
+    },
+    {
+     "title": "Horror Short Film 👀👻💀 #horror #horrorshortfilm #horrorstories",
+     "snippet": "Horror Short Film 👀👻💀 #horror #horrorshortfilm #horrorstories Horror Short Films, Scary Short Films, Horror Stories, Ghost Stories, Paranormal Horror, Haunted House, Creepy Videos, Jump Scare, Psychological Horror, Supernatural Horror, Monster Stories, Demon Stories, Dark Mystery, Suspense Thriller, Found Footage Horror, Scary ..."
+    },
+    {
+     "title": "Horror Short Film 👀👻💀 #horror #horrorshortfilm #horrorstories",
+     "snippet": "Horror Short Film 👀👻💀 #horror #horrorshortfilm #horrorstories Horror Short Films, Scary Short Films, Horror Stories, Ghost Stories, Paranormal Horror, Haunted House, Creepy Videos, Jump Scare, Psychological Horror, Supernatural Horror, Monster Stories, Demon Stories, Dark Mystery, Suspense Thriller, Found Footage Horror, Scary ..."
+    },
+    {
+     "title": "Horror Short Film 👀👻💀 #horror #horrorshortfilm #horrorstories",
+     "snippet": "Horror Short Film 👀👻💀 #horror #horrorshortfilm #horrorstories Horror Short Films, Scary Short Films, Horror Stories, Ghost Stories, Paranormal Horror, Haunted House, Creepy Videos, Jump Scare, Psychological Horror, Supernatural Horror, Monster Stories, Demon Stories, Dark Mystery, Suspense Thriller, Found Footage Horror, Scary ..."
+    },
+    {
+     "title": "One Winter's Night (a gothic animated short) - YouTube",
+     "snippet": "My first short and animated film, based on a rhyme I wrote back in 2008. Anyone who really loves ghost stories, gothic tales, horror stories, Halloween, scar..."
+    },
+    {
+     "title": "Horror Short Film 👀👻💀 #horror #horrorshortfilm #horrorstories",
+     "snippet": "Horror Short Film 👀👻💀 #horror #horrorshortfilm #horrorstories Horror Short Films, Scary Short Films, Horror Stories, Ghost Stories, Paranormal Horror, Haunted House, Creepy Videos, Jump Scare, Psychological Horror, Supernatural Horror, Monster Stories, Demon Stories, Dark Mystery, Suspense Thriller, Found Footage Horror, Scary ..."
+    },
+    {
+     "title": "Horror Short Film 👀👻💀 #horror #horrorshortfilm #horrorstories",
+     "snippet": "Horror Short Film 👀👻💀 #horror #horrorshortfilm #horrorstories Horror Short Films, Scary Short Films, Horror Stories, Ghost Stories, Paranormal Horror, Haunted House, Creepy Videos, Jump Scare, Psychological Horror, Supernatural Horror, Monster Stories, Demon Stories, Dark Mystery, Suspense Thriller, Found Footage Horror, Scary ..."
+    },
+    {
+     "title": "👁️ DON'T LOOK BEHIND YOU... 😨 | Scariest Horror Short You'll Watch Today",
+     "snippet": "Something is watching... but you won't see it until it's too late. 👁️ Watch this cinematic horror short till the end for the terrifying twist. 🎥 Ultra-realistic horror story 👻 Ghost encounter 😱 Psychological suspense 🎬 Cinematic horror short If you enjoy horror stories, suspense, and scary short films, follow for more. # ..."
+    },
+    {
+     "title": "The short horror film Koreatown Ghost Story starring ...",
+     "snippet": null
+    },
+    {
+     "title": "Show me your original horror plot ideas : r/horror - Reddit",
+     "snippet": "I had an idea for a short film a few years back; basically it would be an augmented reality app called GhostVision (or something catchier) where you'd be able to see \"ghosts\" through your camera on your phone. The app would have fake ghosts for everyone, but in this story a real ghost would be picked up.I had an idea for a short film a few years back; basically it would be an augmented reality app called GhostVision (or something catchier) where you'd be able to see \"ghosts\" through your camera on your phone. The app would have fake ghosts for everyone, but in this story a real ghost would be picked up."
+    },
+    {
+     "title": "r/tipofmytongue on Reddit: [TOMT][MOVIE][2000s+] Horror movie where film student making documentary and shadow figure gets closer to the camera each shot.",
+     "snippet": "The movie isn&#x27;t Shutter or It Follows, but it is kind of like a mix of both. ... Hmm... Sort of like Lights Out then, particularly the original short. That one had a woman in her apartment so it&#x27;s not that. Maybe the original short for Oculus?"
+    },
+    {
+     "title": "The Numismatist - A Ghost Story - Short Film - YouTube",
+     "snippet": null
+    },
+    {
+     "title": "\"Double Vision\" | Independent Horror Short Film",
+     "snippet": null
+    },
+    {
+     "title": "DON'T STEP ON THE CURSED SYMBOL! 😱 | Horror Short Film 2026 | Ghost Story#Horror #Ghost #Scary#viral",
+     "snippet": "😱 DON'T STEP ON THE CURSED SYMBOL! A simple game turns into a terrifying nightmare when a mysterious cursed symbol is disturbed. What starts as fun quickly becomes a fight for survival as a dark presence begins to haunt everyone involved. 👻 Watch till the end for a shocking twist! If you enjoy horror stories, ghost videos, and scary short ..."
+    },
+    {
+     "title": "रुह | Horror Short Film | Unexpected Twist Ending | GLIMSFLIMS",
+     "snippet": "A haunted haveli. A lonely photographer. A mysterious girl in white. What starts as a casual meeting inside an abandoned mansion slowly turns into a chilling psychological nightmare. But when reality starts breaking apart, Watch till the end for the shocking twist ending. 🎬 Short Film: The Real Ghost 🎭 Genre: Horror | Psychological ..."
+    }
+   ],
+   "grades": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ]
+  },
+  {
+   "q": "ghost story short film",
+   "kind": "videos",
+   "tier": "ssj1",
+   "kept": 20,
+   "ms": 7523,
+   "cost_usd": 0,
+   "calls": 0,
+   "by_role": {},
+   "items": [
+    {
+     "title": "Horror Short Film 👀👻💀 #horror #horrorshortfilm #horrorstories",
+     "snippet": "Horror Short Film 👀👻💀 #horror #horrorshortfilm #horrorstories Horror Short Films, Scary Short Films, Horror Stories, Ghost Stories, Paranormal Horror, Haunted House, Creepy Videos, Jump Scare, Psychological Horror, Supernatural Horror, Monster Stories, Demon Stories, Dark Mystery, Suspense Thriller, Found Footage Horror, Scary ..."
+    },
+    {
+     "title": "Horror Short Film 👀👻💀 #horror #horrorshortfilm #horrorstories",
+     "snippet": "Horror Short Film 👀👻💀 #horror #horrorshortfilm #horrorstories Horror Short Films, Scary Short Films, Horror Stories, Ghost Stories, Paranormal Horror, Haunted House, Creepy Videos, Jump Scare, Psychological Horror, Supernatural Horror, Monster Stories, Demon Stories, Dark Mystery, Suspense Thriller, Found Footage Horror, Scary ..."
+    },
+    {
+     "title": "Horror Short Film 👀👻💀 #horror #horrorshortfilm #horrorstories",
+     "snippet": "Horror Short Film 👀👻💀 #horror #horrorshortfilm #horrorstories Horror Short Films, Scary Short Films, Horror Stories, Ghost Stories, Paranormal Horror, Haunted House, Creepy Videos, Jump Scare, Psychological Horror, Supernatural Horror, Monster Stories, Demon Stories, Dark Mystery, Suspense Thriller, Found Footage Horror, Scary ..."
+    },
+    {
+     "title": "Horror Short Film 👀👻💀 #horror #horrorshortfilm #horrorstories",
+     "snippet": "Horror Short Film 👀👻💀 #horror #horrorshortfilm #horrorstories Horror Short Films, Scary Short Films, Horror Stories, Ghost Stories, Paranormal Horror, Haunted House, Creepy Videos, Jump Scare, Psychological Horror, Supernatural Horror, Monster Stories, Demon Stories, Dark Mystery, Suspense Thriller, Found Footage Horror, Scary ..."
+    },
+    {
+     "title": "One Winter's Night (a gothic animated short) - YouTube",
+     "snippet": "My first short and animated film, based on a rhyme I wrote back in 2008. Anyone who really loves ghost stories, gothic tales, horror stories, Halloween, scar..."
+    },
+    {
+     "title": "Horror Short Film 👀👻💀 #horror #horrorshortfilm #horrorstories",
+     "snippet": "Horror Short Film 👀👻💀 #horror #horrorshortfilm #horrorstories Horror Short Films, Scary Short Films, Horror Stories, Ghost Stories, Paranormal Horror, Haunted House, Creepy Videos, Jump Scare, Psychological Horror, Supernatural Horror, Monster Stories, Demon Stories, Dark Mystery, Suspense Thriller, Found Footage Horror, Scary ..."
+    },
+    {
+     "title": "Horror Short Film 👀👻💀 #horror #horrorshortfilm #horrorstories",
+     "snippet": "Horror Short Film 👀👻💀 #horror #horrorshortfilm #horrorstories Horror Short Films, Scary Short Films, Horror Stories, Ghost Stories, Paranormal Horror, Haunted House, Creepy Videos, Jump Scare, Psychological Horror, Supernatural Horror, Monster Stories, Demon Stories, Dark Mystery, Suspense Thriller, Found Footage Horror, Scary ..."
+    },
+    {
+     "title": "👁️ DON'T LOOK BEHIND YOU... 😨 | Scariest Horror Short You'll Watch Today",
+     "snippet": "Something is watching... but you won't see it until it's too late. 👁️ Watch this cinematic horror short till the end for the terrifying twist. 🎥 Ultra-realistic horror story 👻 Ghost encounter 😱 Psychological suspense 🎬 Cinematic horror short If you enjoy horror stories, suspense, and scary short films, follow for more. # ..."
+    },
+    {
+     "title": "The short horror film Koreatown Ghost Story starring ...",
+     "snippet": null
+    },
+    {
+     "title": "Show me your original horror plot ideas : r/horror - Reddit",
+     "snippet": "I had an idea for a short film a few years back; basically it would be an augmented reality app called GhostVision (or something catchier) where you'd be able to see \"ghosts\" through your camera on your phone. The app would have fake ghosts for everyone, but in this story a real ghost would be picked up.I had an idea for a short film a few years back; basically it would be an augmented reality app called GhostVision (or something catchier) where you'd be able to see \"ghosts\" through your camera on your phone. The app would have fake ghosts for everyone, but in this story a real ghost would be picked up."
+    },
+    {
+     "title": "r/tipofmytongue on Reddit: [TOMT][MOVIE][2000s+] Horror movie where film student making documentary and shadow figure gets closer to the camera each shot.",
+     "snippet": "The movie isn&#x27;t Shutter or It Follows, but it is kind of like a mix of both. ... Hmm... Sort of like Lights Out then, particularly the original short. That one had a woman in her apartment so it&#x27;s not that. Maybe the original short for Oculus?"
+    },
+    {
+     "title": "The Numismatist - A Ghost Story - Short Film - YouTube",
+     "snippet": null
+    },
+    {
+     "title": "\"Double Vision\" | Independent Horror Short Film",
+     "snippet": null
+    },
+    {
+     "title": "DON'T STEP ON THE CURSED SYMBOL! 😱 | Horror Short Film 2026 | Ghost Story#Horror #Ghost #Scary#viral",
+     "snippet": "😱 DON'T STEP ON THE CURSED SYMBOL! A simple game turns into a terrifying nightmare when a mysterious cursed symbol is disturbed. What starts as fun quickly becomes a fight for survival as a dark presence begins to haunt everyone involved. 👻 Watch till the end for a shocking twist! If you enjoy horror stories, ghost videos, and scary short ..."
+    },
+    {
+     "title": "रुह | Horror Short Film | Unexpected Twist Ending | GLIMSFLIMS",
+     "snippet": "A haunted haveli. A lonely photographer. A mysterious girl in white. What starts as a casual meeting inside an abandoned mansion slowly turns into a chilling psychological nightmare. But when reality starts breaking apart, Watch till the end for the shocking twist ending. 🎬 Short Film: The Real Ghost 🎭 Genre: Horror | Psychological ..."
+    }
+   ],
+   "grades": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ]
+  }
+ ],
+ "council": [
+  {
+   "event": "council",
+   "checked": 15,
+   "disputed": 6,
+   "chaired": 6,
+   "agreement": 0.6,
+   "checker": "openai/gpt-5.6-terra",
+   "chair": "anthropic/claude-sonnet-5",
+   "checker_ms": 22195,
+   "chair_ms": 29329
+  },
+  {
+   "event": "council",
+   "checked": 15,
+   "disputed": 2,
+   "chaired": 2,
+   "agreement": 0.8666666666666667,
+   "checker": "openai/gpt-5.6-luna",
+   "chair": "anthropic/claude-haiku-4.5",
+   "checker_ms": 12001,
+   "chair_ms": 9168
+  },
+  {
+   "event": "council",
+   "checked": 15,
+   "disputed": 1,
+   "chaired": 1,
+   "agreement": 0.9333333333333333,
+   "checker": "openai/gpt-5.6-terra",
+   "chair": "anthropic/claude-sonnet-5",
+   "checker_ms": 10626,
+   "chair_ms": 18064
+  },
+  {
+   "event": "council",
+   "checked": 15,
+   "disputed": 5,
+   "chaired": 5,
+   "agreement": 0.6666666666666666,
+   "checker": "openai/gpt-5.6-luna",
+   "chair": "anthropic/claude-haiku-4.5",
+   "checker_ms": 9800,
+   "chair_ms": 6011
+  },
+  {
+   "event": "council",
+   "checked": 15,
+   "disputed": 1,
+   "chaired": 1,
+   "agreement": 0.9333333333333333,
+   "checker": "openai/gpt-5.6-terra",
+   "chair": "anthropic/claude-sonnet-5",
+   "checker_ms": 14242,
+   "chair_ms": 14200
+  },
+  {
+   "event": "council",
+   "checked": 15,
+   "disputed": 1,
+   "chaired": 1,
+   "agreement": 0.9333333333333333,
+   "checker": "openai/gpt-5.6-luna",
+   "chair": "anthropic/claude-haiku-4.5",
+   "checker_ms": 12788,
+   "chair_ms": 4578
+  },
+  {
+   "event": "council",
+   "checked": 15,
+   "disputed": 9,
+   "chaired": 9,
+   "agreement": 0.4,
+   "checker": "openai/gpt-5.6-terra",
+   "chair": "anthropic/claude-sonnet-5",
+   "checker_ms": 22803,
+   "chair_ms": 23826
+  },
+  {
+   "event": "council",
+   "checked": 15,
+   "disputed": 7,
+   "chaired": 7,
+   "agreement": 0.5333333333333333,
+   "checker": "openai/gpt-5.6-luna",
+   "chair": "anthropic/claude-haiku-4.5",
+   "checker_ms": 18245,
+   "chair_ms": 19456
+  },
+  {
+   "event": "council",
+   "checked": 15,
+   "disputed": 6,
+   "chaired": 6,
+   "agreement": 0.6,
+   "checker": "openai/gpt-5.6-terra",
+   "chair": "anthropic/claude-sonnet-5",
+   "checker_ms": 19770,
+   "chair_ms": 40670
+  },
+  {
+   "event": "council",
+   "checked": 15,
+   "disputed": 9,
+   "chaired": 9,
+   "agreement": 0.4,
+   "checker": "openai/gpt-5.6-luna",
+   "chair": "anthropic/claude-haiku-4.5",
+   "checker_ms": 17309,
+   "chair_ms": 10242
+  },
+  {
+   "event": "council",
+   "checked": 1,
+   "disputed": 1,
+   "chaired": 1,
+   "agreement": 0,
+   "checker": "openai/gpt-5.6-luna",
+   "chair": "anthropic/claude-haiku-4.5",
+   "checker_ms": 6903,
+   "chair_ms": 6152
+  },
+  {
+   "event": "council",
+   "checked": 8,
+   "disputed": 3,
+   "chaired": 3,
+   "agreement": 0.625,
+   "checker": "openai/gpt-5.6-terra",
+   "chair": "google/gemini-3.1-pro-preview",
+   "checker_ms": 13134,
+   "chair_ms": 64752
+  },
+  {
+   "event": "council",
+   "checked": 9,
+   "disputed": 3,
+   "chaired": 3,
+   "agreement": 0.6666666666666666,
+   "checker": "openai/gpt-5.6-luna",
+   "chair": "anthropic/claude-haiku-4.5",
+   "checker_ms": 10068,
+   "chair_ms": 8675
+  }
+ ]
+}

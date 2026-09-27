@@ -1,0 +1,253 @@
+{
+ "qwen/qwen3.8-flash": {
+  "summary": {
+   "calls": 18,
+   "failures": [
+    "aot-official#1: timeout",
+    "mapreduce-canonical#1: timeout",
+    "rice-authority#1: timeout",
+    "upi-constraints#1: timeout",
+    "postgres-firsthand#1: timeout",
+    "free-solo#1: timeout",
+    "aot-official#2: timeout",
+    "mapreduce-canonical#2: timeout",
+    "rice-authority#2: timeout",
+    "upi-constraints#2: timeout",
+    "postgres-firsthand#2: timeout",
+    "free-solo#2: timeout",
+    "aot-official#3: timeout",
+    "mapreduce-canonical#3: timeout",
+    "rice-authority#3: timeout",
+    "upi-constraints#3: timeout",
+    "postgres-firsthand#3: timeout",
+    "free-solo#3: timeout"
+   ],
+   "missing_verdicts": 87,
+   "label_accuracy": 0,
+   "pair_accuracy": 0,
+   "mean_spread": null,
+   "median_ms": null,
+   "p90_ms": null,
+   "cost_usd_per_call": null,
+   "tokens_per_call": null
+  },
+  "runs": [
+   {
+    "case": "aot-official",
+    "run": 1,
+    "ms": 20022,
+    "usage": {
+     "prompt": 0,
+     "completion": 0,
+     "cost": 0
+    },
+    "scores": {},
+    "error": "timeout"
+   },
+   {
+    "case": "mapreduce-canonical",
+    "run": 1,
+    "ms": 36765,
+    "usage": {
+     "prompt": 0,
+     "completion": 0,
+     "cost": 0
+    },
+    "scores": {},
+    "error": "timeout"
+   },
+   {
+    "case": "rice-authority",
+    "run": 1,
+    "ms": 35328,
+    "usage": {
+     "prompt": 0,
+     "completion": 0,
+     "cost": 0
+    },
+    "scores": {},
+    "error": "timeout"
+   },
+   {
+    "case": "upi-constraints",
+    "run": 1,
+    "ms": 35053,
+    "usage": {
+     "prompt": 0,
+     "completion": 0,
+     "cost": 0
+    },
+    "scores": {},
+    "error": "timeout"
+   },
+   {
+    "case": "postgres-firsthand",
+    "run": 1,
+    "ms": 20021,
+    "usage": {
+     "prompt": 0,
+     "completion": 0,
+     "cost": 0
+    },
+    "scores": {},
+    "error": "timeout"
+   },
+   {
+    "case": "free-solo",
+    "run": 1,
+    "ms": 35810,
+    "usage": {
+     "prompt": 0,
+     "completion": 0,
+     "cost": 0
+    },
+    "scores": {},
+    "error": "timeout"
+   },
+   {
+    "case": "aot-official",
+    "run": 2,
+    "ms": 20005,
+    "usage": {
+     "prompt": 0,
+     "completion": 0,
+     "cost": 0
+    },
+    "scores": {},
+    "error": "timeout"
+   },
+   {
+    "case": "mapreduce-canonical",
+    "run": 2,
+    "ms": 20005,
+    "usage": {
+     "prompt": 0,
+     "completion": 0,
+     "cost": 0
+    },
+    "scores": {},
+    "error": "timeout"
+   },
+   {
+    "case": "rice-authority",
+    "run": 2,
+    "ms": 20004,
+    "usage": {
+     "prompt": 0,
+     "completion": 0,
+     "cost": 0
+    },
+    "scores": {},
+    "error": "timeout"
+   },
+   {
+    "case": "upi-constraints",
+    "run": 2,
+    "ms": 20005,
+    "usage": {
+     "prompt": 0,
+     "completion": 0,
+     "cost": 0
+    },
+    "scores": {},
+    "error": "timeout"
+   },
+   {
+    "case": "postgres-firsthand",
+    "run": 2,
+    "ms": 20005,
+    "usage": {
+     "prompt": 0,
+     "completion": 0,
+     "cost": 0
+    },
+    "scores": {},
+    "error": "timeout"
+   },
+   {
+    "case": "free-solo",
+    "run": 2,
+    "ms": 20005,
+    "usage": {
+     "prompt": 0,
+     "completion": 0,
+     "cost": 0
+    },
+    "scores": {},
+    "error": "timeout"
+   },
+   {
+    "case": "aot-official",
+    "run": 3,
+    "ms": 20016,
+    "usage": {
+     "prompt": 0,
+     "completion": 0,
+     "cost": 0
+    },
+    "scores": {},
+    "error": "timeout"
+   },
+   {
+    "case": "mapreduce-canonical",
+    "run": 3,
+    "ms": 20016,
+    "usage": {
+     "prompt": 0,
+     "completion": 0,
+     "cost": 0
+    },
+    "scores": {},
+    "error": "timeout"
+   },
+   {
+    "case": "rice-authority",
+    "run": 3,
+    "ms": 20017,
+    "usage": {
+     "prompt": 0,
+     "completion": 0,
+     "cost": 0
+    },
+    "scores": {},
+    "error": "timeout"
+   },
+   {
+    "case": "upi-constraints",
+    "run": 3,
+    "ms": 20017,
+    "usage": {
+     "prompt": 0,
+     "completion": 0,
+     "cost": 0
+    },
+    "scores": {},
+    "error": "timeout"
+   },
+   {
+    "case": "postgres-firsthand",
+    "run": 3,
+    "ms": 20018,
+    "usage": {
+     "prompt": 0,
+     "completion": 0,
+     "cost": 0
+    },
+    "scores": {},
+    "error": "timeout"
+   },
+   {
+    "case": "free-solo",
+    "run": 3,
+    "ms": 20018,
+    "usage": {
+     "prompt": 0,
+     "completion": 0,
+     "cost": 0
+    },
+    "scores": {},
+    "error": "timeout"
+   }
+  ]
+ }
+}

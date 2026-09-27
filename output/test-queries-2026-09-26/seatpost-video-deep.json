@@ -1,0 +1,137 @@
+{
+ "query": "Find a bicycle repair video where someone removes a stuck seatpost using heat, then successfully pulls it out. Give timestamps covering both actions. Exclude videos that only discuss the method, and exclude background music. Any spoken language is acceptable.",
+ "search_id": "d983c1b1-2402-4a5b-ab27-1bd1b15888b3",
+ "status": "partial",
+ "depth": "deep",
+ "stage": null,
+ "results": [],
+ "has_more": false,
+ "next_cursor": null,
+ "discovered": [],
+ "catalogue_total": 0,
+ "ranked": [],
+ "discovery_job_id": "eda7a1cc-1097-4aab-8916-6ccde59f3c73",
+ "providers": [
+  {
+   "status": "ok",
+   "message": "Brave discovery completed.",
+   "provider": "brave"
+  },
+  {
+   "status": "ok",
+   "message": "9 of 11 search engines answered; Privacywall Videos (access denied), Brave Videos (rate-limited) did not. Filled in for 5 of 26 searches where Brave failed or found too little.",
+   "provider": "searxng"
+  },
+  {
+   "status": "ok",
+   "message": "Internet Archive film catalogue searched directly.",
+   "provider": "internet_archive"
+  },
+  {
+   "status": "ok",
+   "message": "AI planned 6 searches for lesser-known sources.",
+   "provider": "planner"
+  },
+  {
+   "status": "ok",
+   "message": "AI followed 8 leads from what it found, in 2 rounds.",
+   "provider": "leads"
+  },
+  {
+   "status": "ok",
+   "message": "Looked for evidence on 4 unmet requirements: 0 targeted searches, 0 pages or videos opened, 0 closed.",
+   "provider": "gap_exploration"
+  },
+  {
+   "status": "partial",
+   "message": "844 candidates found; up to 60 candidates were selected for checking after all sources answered.",
+   "provider": "candidate_pool"
+  },
+  {
+   "status": "ok",
+   "message": "Screened 120 of 844 leads to prioritize evidence checks; final relevance is checked separately.",
+   "provider": "jev_screener"
+  },
+  {
+   "status": "ok",
+   "message": "YouTube details and viewer comments checked.",
+   "provider": "youtube"
+  },
+  {
+   "status": "ok",
+   "message": "Reddit discussions checked.",
+   "provider": "reddit"
+  },
+  {
+   "status": "ok",
+   "message": "17 of 20 result pages were checked, 5 in a browser.",
+   "provider": "pages"
+  },
+  {
+   "status": "partial",
+   "message": "0 comment/review samples and 0 caption tracks available across 1 checked results.",
+   "provider": "archive_evidence"
+  },
+  {
+   "status": "ok",
+   "message": "Results were checked for relevance by AI.",
+   "provider": "judge"
+  },
+  {
+   "status": "ok",
+   "message": "No sufficiently supported matches were found. Weak, uncertain and unchecked candidates were excluded.",
+   "provider": "relevance_filter"
+  }
+ ],
+ "ranking_version": "relevance-v8-requirements",
+ "interpretation": {
+  "intent": "Find a bicycle repair video showing heat-assisted stuck seatpost removal with timestamps for both heating and pulling actions.",
+  "requirements": [
+   {
+    "id": "R1",
+    "text": "Is a video",
+    "hardness": "hard",
+    "scope": "each"
+   },
+   {
+    "id": "R2",
+    "text": "video showing heat application",
+    "hardness": "hard",
+    "scope": "each"
+   },
+   {
+    "id": "R3",
+    "text": "video showing successful removal",
+    "hardness": "hard",
+    "scope": "each"
+   },
+   {
+    "id": "R4",
+    "text": "no background music",
+    "hardness": "hard",
+    "scope": "each"
+   },
+   {
+    "id": "R5",
+    "text": "demonstration not just discussion",
+    "hardness": "hard",
+    "scope": "each"
+   }
+  ],
+  "assumptions": [
+   "User accepts non-English language videos",
+   "Heat application is visually identifiable in the video"
+  ],
+  "ambiguities": [
+   "Definition of background music versus natural workshop noise",
+   "Acceptable heat tools (torch vs heat gun)"
+  ],
+  "unmet": [
+   "No result could be verified for: Is a video",
+   "No result could be verified for: video showing heat application",
+   "No result could be verified for: video showing successful removal",
+   "No result could be verified for: no background music",
+   "No result could be verified for: demonstration not just discussion"
+  ]
+ }
+}

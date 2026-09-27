@@ -1,0 +1,106 @@
+{
+ "query": "Find a bicycle repair video where someone removes a stuck seatpost using heat, then successfully pulls it out. Give timestamps covering both actions. Exclude videos that only discuss the method, and exclude background music. Any spoken language is acceptable.",
+ "search_id": "17dde0ba-a2f3-4d69-a0ec-c07f3347b4a9",
+ "status": "complete",
+ "depth": "quick",
+ "stage": null,
+ "results": [],
+ "has_more": false,
+ "next_cursor": null,
+ "discovered": [],
+ "catalogue_total": 0,
+ "ranked": [],
+ "discovery_job_id": "a4caa60c-c1f5-4e57-9caf-8c71a8290e14",
+ "providers": [
+  {
+   "status": "ok",
+   "message": "Brave discovery completed.",
+   "provider": "brave"
+  },
+  {
+   "status": "ok",
+   "message": "Not needed: Brave answered every search.",
+   "provider": "searxng"
+  },
+  {
+   "status": "ok",
+   "message": "AI planned 4 searches for videos.",
+   "provider": "planner"
+  },
+  {
+   "status": "ok",
+   "message": "Looked for evidence on 4 unmet requirements: 1 targeted searches, 0 pages or videos opened, 0 closed.",
+   "provider": "gap_exploration"
+  },
+  {
+   "status": "ok",
+   "message": "Screened 44 of 44 leads to prioritize evidence checks; final relevance is checked separately.",
+   "provider": "jev_screener"
+  },
+  {
+   "status": "ok",
+   "message": "YouTube details and viewer comments checked.",
+   "provider": "youtube"
+  },
+  {
+   "status": "ok",
+   "message": "Reddit discussions checked.",
+   "provider": "reddit"
+  },
+  {
+   "status": "ok",
+   "message": "Results were checked for relevance by AI.",
+   "provider": "judge"
+  },
+  {
+   "status": "ok",
+   "message": "No sufficiently supported matches were found. Weak, uncertain and unchecked candidates were excluded.",
+   "provider": "relevance_filter"
+  }
+ ],
+ "ranking_version": "relevance-v8-requirements",
+ "interpretation": {
+  "intent": "Find a demonstration video of a stuck bicycle seatpost being removed using heat.",
+  "requirements": [
+   {
+    "id": "R1",
+    "text": "Is a video",
+    "hardness": "hard",
+    "scope": "each"
+   },
+   {
+    "id": "R2",
+    "text": "removes a stuck seatpost using heat",
+    "hardness": "hard",
+    "scope": "each"
+   },
+   {
+    "id": "R3",
+    "text": "successfully pulls it out",
+    "hardness": "hard",
+    "scope": "each"
+   },
+   {
+    "id": "R4",
+    "text": "exclude background music",
+    "hardness": "hard",
+    "scope": "each"
+   },
+   {
+    "id": "R5",
+    "text": "exclude videos that only discuss the method",
+    "hardness": "hard",
+    "scope": "each"
+   }
+  ],
+  "assumptions": [],
+  "ambiguities": [],
+  "unmet": [
+   "No result could be verified for: Is a video",
+   "No result could be verified for: removes a stuck seatpost using heat",
+   "No result could be verified for: successfully pulls it out",
+   "No result could be verified for: exclude background music",
+   "No result could be verified for: exclude videos that only discuss the method"
+  ]
+ }
+}

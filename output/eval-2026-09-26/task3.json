@@ -1,0 +1,2169 @@
+{
+ "task": "task3",
+ "started": "2026-09-26T12:51:33.117Z",
+ "finished": "2026-09-26T12:59:39.805Z",
+ "budgets_used": {
+  "scene_analysis_requests": 16,
+  "embeddings": 28,
+  "reddit_signals": 6,
+  "discovery_jobs": 6,
+  "discovery:internet_archive": 3,
+  "scene_auto_jobs": 11,
+  "youtube_caption_jobs": 13,
+  "youtube_units": 246,
+  "critic_calls": 12,
+  "planner_calls:inception/mercury-2.5": 12,
+  "supadata_requests": 1,
+  "discovery:brave": 98,
+  "judge_calls": 59,
+  "jev_exploration_calls": 12,
+  "enrichment_jobs": 354,
+  "planner_calls:mistralai/ministral-14b-2512": 12,
+  "discovery:searxng": 102,
+  "source_health_jobs": 35,
+  "planner_calls:google/gemma-4-31b-it": 12,
+  "jev_screen_calls": 31,
+  "jev_judge_calls": 229,
+  "anilist_calls": 36
+ },
+ "health": "searxng:brave\t14\trate-limited\t2026-09-26 12:58:11.67665+00\nsearxng:privacywall\t31\taccess denied\t2026-09-26 12:59:02.109703+00\nsearxng:google videos\t11\tblocked by a CAPTCHA\t2026-09-26 12:59:03.490055+00\nsearxng:brave.videos\t9\trate-limited\t2026-09-26 12:59:03.492937+00\nsearxng:privacywall videos\t65\taccess denied\t2026-09-26 12:59:04.373741+00\n",
+ "runs": [
+  {
+   "q": "the part in the Interstellar docking scene where the music kicks in",
+   "search_id": "f0206108-1d25-4c59-bb1e-8e6af280b169",
+   "status": "partial",
+   "first_ms": 57926,
+   "full_ms": 57926,
+   "job": "a28645a0-7ef6-4f69-b784-fd3373ccdf27",
+   "providers": [
+    {
+     "status": "ok",
+     "message": "Brave discovery completed.",
+     "provider": "brave"
+    },
+    {
+     "status": "ok",
+     "message": "Not needed: Brave answered every search.",
+     "provider": "searxng"
+    },
+    {
+     "status": "ok",
+     "message": "AI planned 4 searches for videos.",
+     "provider": "planner"
+    },
+    {
+     "status": "ok",
+     "message": "Looked for evidence on 2 unmet requirements: 2 targeted searches, 1 pages or videos opened, 0 closed.",
+     "provider": "gap_exploration"
+    },
+    {
+     "status": "ok",
+     "message": "Screened 58 of 58 leads to prioritize evidence checks; final relevance is checked separately.",
+     "provider": "jev_screener"
+    },
+    {
+     "status": "partial",
+     "message": "Some YouTube comments could not be read.",
+     "provider": "youtube"
+    },
+    {
+     "status": "ok",
+     "message": "Reddit discussions checked.",
+     "provider": "reddit"
+    },
+    {
+     "status": "ok",
+     "message": "7 of 17 result pages were checked, 5 in a browser.",
+     "provider": "pages"
+    },
+    {
+     "status": "ok",
+     "message": "Results were checked for relevance by AI.",
+     "provider": "judge"
+    },
+    {
+     "status": "ok",
+     "message": "45 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+     "provider": "relevance_filter"
+    },
+    {
+     "status": "partial",
+     "message": "3 videos queued for scene analysis; these pending analyses are not evidence in this ranking.",
+     "provider": "scene_analysis"
+    },
+    {
+     "status": "partial",
+     "message": "5 videos queued for caption fetching; their transcripts help later searches, not this one.",
+     "provider": "youtube_captions"
+    }
+   ],
+   "interpretation": {
+    "intent": "The user wants to find the specific clip of the docking scene from Interstellar at the moment the music becomes prominent.",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "Interstellar docking scene",
+      "hardness": "hard",
+      "scope": "each"
+     },
+     {
+      "id": "R2",
+      "text": "where the music kicks in",
+      "hardness": "hard",
+      "scope": "each"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unmet": []
+   },
+   "top": [
+    {
+     "title": "Interstellar - Docking Scene 1080p IMAX HD - YouTube",
+     "url": "https://www.youtube.com/watch?v=a3lcGnMhvsA",
+     "creator": "Jay M",
+     "source": "YouTube",
+     "duration": 263,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Viewers discuss how the music builds to perfection and points to timestamps in the docking scene where the music kicks in. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 55,
+       "end": 99,
+       "type": "viewer_timestamp",
+       "summary": "1:00 · 1:04 · 1:08 six seven"
+      }
+     ],
+     "requirements": [
+      "supported: Interstellar docking scene",
+      "supported: where the music kicks in"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": "pending"
+    },
+    {
+     "title": "Interstellar Official Soundtrack | No Time For Caution – Hans Zimmer | WaterTower - YouTube",
+     "url": "https://www.youtube.com/watch?v=kpK4cDk2bRs",
+     "creator": "WaterTower Music",
+     "source": "YouTube",
+     "duration": 247,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Viewers point out at 2:35 that the music kicks in and reaches its most powerful chord during the Interstellar docking scene. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 145,
+       "end": 186,
+       "type": "viewer_timestamp",
+       "summary": "Most Powerful Chord ever 2:35 (( My honesty parameter is 99% )) · 2:36 when you're typing a message 3 seconds before your friend blocks you on discord · The goosebumps of 2:35 hit different."
+      }
+     ],
+     "requirements": [
+      "supported: Interstellar docking scene",
+      "supported: where the music kicks in"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": "pending"
+    },
+    {
+     "title": "Hans Zimmer - No Time For Caution (Interstellar Soundtrack)(Docking Scene) - YouTube",
+     "url": "https://www.youtube.com/watch?v=85C-IAoL-nA",
+     "creator": "Jennyni20 (Epic Music)",
+     "source": "YouTube",
+     "duration": 246,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Viewers note the exact moment at 2:35 where the music kicks in during the Interstellar docking scene. Supporting evidence only; exact match unverified.",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 150,
+       "end": 195,
+       "type": "viewer_timestamp",
+       "summary": "2:35 · 2:35 · 2:35"
+      }
+     ],
+     "requirements": [
+      "supported: Interstellar docking scene",
+      "supported: where the music kicks in"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": "pending"
+    },
+    {
+     "title": "Interstellar | Docking Scene (Matthew McConaughey, Matt Damon, Anne Hathaway) | Paramount Movies - YouTube",
+     "url": "https://www.youtube.com/watch?v=v2H1s9gj5DA",
+     "creator": "Paramount Movies",
+     "source": "YouTube",
+     "duration": 428,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Official movie clip showing the complete Interstellar docking sequence where the music kicks in. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 124,
+       "end": 169,
+       "type": "viewer_timestamp",
+       "summary": "2:09 · 2:10 👌 · its not possible....  NO,  IT'S necessary @2:19"
+      }
+     ],
+     "requirements": [
+      "supported: Interstellar docking scene",
+      "supported: where the music kicks in"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "1h No Time for Caution - Dock Scene music - Interstellar- Hans Zimmer - YouTube",
+     "url": "https://www.youtube.com/watch?v=zxCXqC8YbOI",
+     "creator": "José Juan Sánchez",
+     "source": "YouTube",
+     "duration": 3695,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Extended loop of the Interstellar docking scene featuring the iconic musical cue. Supporting evidence only; exact match unverified.",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 151,
+       "end": 186,
+       "type": "viewer_timestamp",
+       "summary": "2:36"
+      }
+     ],
+     "requirements": [
+      "supported: Interstellar docking scene",
+      "supported: where the music kicks in"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Interstellar (music scene) - No time for caution (Docking scene) - YouTube",
+     "url": "https://www.youtube.com/watch?v=yLxzg9r-teg",
+     "creator": "Music scenes",
+     "source": "YouTube",
+     "duration": 250,
+     "language": "es",
+     "relevance": 8,
+     "reason": "Interstellar music scene focusing on No Time for Caution without dialogues or sound effects.",
+     "badges": [
+      "Discussed on Reddit",
+      "Underrated find"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Interstellar docking scene",
+      "supported: where the music kicks in"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Interstellar Docking Scene 4K | No Time For Caution – Hans Zimmer | Interstellar Official Soundtrack - YouTube",
+     "url": "https://www.youtube.com/watch?v=tcze8kIzgzk",
+     "creator": "Reverblaster",
+     "source": "YouTube",
+     "duration": 247,
+     "language": null,
+     "relevance": 6,
+     "reason": "Video titled Interstellar Docking Scene 4K with No Time For Caution soundtrack. Metadata only; contents unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Interstellar docking scene",
+      "supported: where the music kicks in"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Docking Scene - Interstellar (2014) - YouTube",
+     "url": "https://www.youtube.com/watch?v=O0VDClObu0Y",
+     "creator": "Saki Nama",
+     "source": "YouTube",
+     "duration": 199,
+     "language": "en",
+     "relevance": 6,
+     "reason": "Direct upload of the Interstellar docking scene featuring the iconic Hans Zimmer music. Metadata only; contents unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Interstellar docking scene",
+      "supported: where the music kicks in"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Interstellar Live. Docking Scene ( Cinema in Concert - Live in Brussels 2026 ) - YouTube",
+     "url": "https://www.youtube.com/watch?v=XZHVVl-bfZQ",
+     "creator": "Verbing",
+     "source": "YouTube",
+     "duration": 379,
+     "language": "zxx",
+     "relevance": 6,
+     "reason": "This is a live concert performance of the Interstellar docking scene music rather than the movie footage.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Interstellar docking scene",
+      "supported: where the music kicks in"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    }
+   ],
+   "total": 9,
+   "closest": [
+    {
+     "title": "Hans Zimmer - No Time For Caution (Interstellar Soundtrack)(Docking)(Interstellar OST) - YouTube",
+     "url": "https://www.youtube.com/watch?v=m3zvVGJrTP8",
+     "creator": "711TAC",
+     "source": "YouTube",
+     "duration": 241,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Soundtrack upload of No Time For Caution from the Interstellar docking scene.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "unknown: Interstellar docking scene",
+      "supported: where the music kicks in"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "The Docking Scene | From the Soundtrack to \"Interstellar\" by Hans Zimmer - YouTube",
+     "url": "https://www.youtube.com/watch?v=1GhGN14R7Jg",
+     "creator": "SonySoundtracksVEVO",
+     "source": "YouTube",
+     "duration": 222,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Performance/soundtrack version of The Docking Scene from Interstellar by Hans Zimmer.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "unknown: Interstellar docking scene",
+      "supported: where the music kicks in"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Interstellar Soundtrack - No Time For Caution (Docking Sequence) (Movie Edit) - YouTube",
+     "url": "https://www.youtube.com/watch?v=1x52RuOosgU",
+     "creator": "alxhrlms",
+     "source": "YouTube",
+     "duration": 248,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Soundtrack edit of the Interstellar docking sequence track rather than the exact movie footage.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "unknown: Interstellar docking scene",
+      "supported: where the music kicks in"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Interstellar - Docking Scene (HDR - 4K - 5.1) - YouTube",
+     "url": "https://www.youtube.com/watch?v=onVhbeY7nLM",
+     "creator": "4K HDR Media",
+     "source": "YouTube",
+     "duration": 259,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Full 4K HDR Endurance docking scene from Interstellar, capturing the visual sequence and music score. Metadata only; contents unverified.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Interstellar docking scene",
+      "unknown: where the music kicks in"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Interstellar Docking Scene [HD]",
+     "url": "https://music.youtube.com/watch?v=c4tPQYNpW9k",
+     "creator": null,
+     "source": "music.youtube.com",
+     "duration": null,
+     "language": null,
+     "relevance": 5,
+     "reason": "The video metadata mentions the Interstellar docking scene, but it provides no explicit proof or comment on the music moment. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Interstellar docking scene",
+      "unknown: where the music kicks in"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "not_permitted",
+      "comments": "not_permitted",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Interstellar - Docking Scene (No Time For Caution) 1080p - YouTube",
+     "url": "https://www.youtube.com/watch?v=ztN37tHsCAA",
+     "creator": "Kenneth Greaves",
+     "source": "YouTube",
+     "duration": 281,
+     "language": "en",
+     "relevance": 5,
+     "reason": "The candidate provides a video titled Interstellar - Docking Scene (No Time For Caution), but lacks detailed viewer comments or timestamps confirming the exact moment. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Interstellar docking scene",
+      "unknown: where the music kicks in"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Hans Zimmer LIVE :- Docking scene :- No Time for Caution - YouTube",
+     "url": "https://www.youtube.com/watch?v=DcsbWhxd1mI",
+     "creator": "Benedictus",
+     "source": "YouTube",
+     "duration": 716,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Live performance recording of the track, not the original movie scene footage. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "unknown: Interstellar docking scene",
+      "supported: where the music kicks in"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Hans Zimmer - No Time for Caution || Interstellar, The Docking Scene #interstellar #hanszimmer - YouTube",
+     "url": "https://www.youtube.com/watch?v=H1q41UEoSqc",
+     "creator": "Movie and Music Cross-Link",
+     "source": "YouTube",
+     "duration": 235,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Short clip of the track with Interstellar hashtags, but sparse evidence of the exact scene context. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "unknown: Interstellar docking scene",
+      "supported: where the music kicks in"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Hans Zimmer - The Docking Scene - Interstellar Soundtrack - YouTube",
+     "url": "https://www.youtube.com/watch?v=kAoG151tKQc",
+     "creator": "cigarKK",
+     "source": "YouTube",
+     "duration": 223,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Comments confirm this is the tense docking scene where the music kicks in from Interstellar. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Interstellar docking scene",
+      "unknown: where the music kicks in"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "No Time for Caution - YouTube",
+     "url": "https://www.youtube.com/watch?v=2o9KfyPqQzY",
+     "creator": "Hans Zimmer - Topic",
+     "source": "YouTube",
+     "duration": 247,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Audio track only, lacks the visual docking scene footage. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "unknown: Interstellar docking scene",
+      "supported: where the music kicks in"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    }
+   ],
+   "deep": {
+    "status": "partial",
+    "ms": 102165,
+    "providers": [
+     {
+      "status": "ok",
+      "message": "Brave discovery completed.",
+      "provider": "brave"
+     },
+     {
+      "status": "ok",
+      "message": "12 of 15 search engines answered; Privacywall Videos (access denied), Privacywall (access denied), Brave Videos (rate-limited) did not. Filled in for 6 of 27 searches where Brave failed or found too little.",
+      "provider": "searxng"
+     },
+     {
+      "status": "ok",
+      "message": "Internet Archive film catalogue searched directly.",
+      "provider": "internet_archive"
+     },
+     {
+      "status": "ok",
+      "message": "AI planned 6 searches for lesser-known sources.",
+      "provider": "planner"
+     },
+     {
+      "status": "ok",
+      "message": "AI followed 8 leads from what it found, in 2 rounds.",
+      "provider": "leads"
+     },
+     {
+      "status": "ok",
+      "message": "Looked for evidence on 1 unmet requirement: 1 targeted searches, 0 pages or videos opened, 0 closed.",
+      "provider": "gap_exploration"
+     },
+     {
+      "status": "partial",
+      "message": "703 candidates found; up to 60 candidates were selected for checking after all sources answered.",
+      "provider": "candidate_pool"
+     },
+     {
+      "status": "ok",
+      "message": "Screened 120 of 703 leads to prioritize evidence checks; final relevance is checked separately.",
+      "provider": "jev_screener"
+     },
+     {
+      "status": "partial",
+      "message": "Some YouTube comments could not be read.",
+      "provider": "youtube"
+     },
+     {
+      "status": "ok",
+      "message": "Reddit discussions checked.",
+      "provider": "reddit"
+     },
+     {
+      "status": "ok",
+      "message": "16 of 20 result pages were checked, 3 in a browser.",
+      "provider": "pages"
+     },
+     {
+      "status": "partial",
+      "message": "0 comment/review samples and 0 caption tracks available across 4 checked results.",
+      "provider": "archive_evidence"
+     },
+     {
+      "status": "ok",
+      "message": "Results were checked for relevance by AI.",
+      "provider": "judge"
+     },
+     {
+      "status": "ok",
+      "message": "49 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+      "provider": "relevance_filter"
+     },
+     {
+      "status": "partial",
+      "message": "2 videos queued for scene analysis; these pending analyses are not evidence in this ranking.",
+      "provider": "scene_analysis"
+     },
+     {
+      "status": "partial",
+      "message": "3 videos queued for caption fetching; their transcripts help later searches, not this one.",
+      "provider": "youtube_captions"
+     }
+    ],
+    "top": [
+     {
+      "title": "Interstellar - Docking Scene 1080p IMAX HD - YouTube",
+      "url": "https://www.youtube.com/watch?v=a3lcGnMhvsA",
+      "creator": "Jay M",
+      "source": "YouTube",
+      "duration": 263,
+      "language": "en",
+      "relevance": 9,
+      "reason": "Viewers and scene descriptions confirm this is the exact film docking scene where the music builds and kicks in.",
+      "badges": [],
+      "origin": "discovery",
+      "evidence": "viewer_timestamp",
+      "moments": [
+       {
+        "start": 55,
+        "end": 99,
+        "type": "viewer_timestamp",
+        "summary": "1:00 · 1:04 · 1:08 six seven"
+       }
+      ],
+      "requirements": [
+       "supported: the part in the Interstellar docking scene where the music kicks in"
+      ],
+      "coverage": {
+       "basis": "direct_evidence",
+       "captions": "unavailable",
+       "comments": "available",
+       "analysed_scenes": 3,
+       "transcript_passages": 0
+      },
+      "scene_analysis": "complete"
+     },
+     {
+      "title": "The Docking Scene | From the Soundtrack to \"Interstellar\" by Hans Zimmer - YouTube",
+      "url": "https://www.youtube.com/watch?v=1GhGN14R7Jg",
+      "creator": "SonySoundtracksVEVO",
+      "source": "YouTube",
+      "duration": 222,
+      "language": "en",
+      "relevance": 8,
+      "reason": "Audio/performance video of The Docking Scene soundtrack piece by Hans Zimmer, with comments discussing the music.",
+      "badges": [],
+      "origin": "discovery",
+      "evidence": "viewer_timestamp",
+      "moments": [
+       {
+        "start": 131,
+        "end": 182,
+        "type": "viewer_timestamp",
+        "summary": "2:16 perfection · 2:16 Orginal was good but this, this made you feel the music 🎶❤️🎧 · Lion Ling - King of Pride Rock 2:22.-2:32"
+       }
+      ],
+      "requirements": [
+       "supported: the part in the Interstellar docking scene where the music kicks in"
+      ],
+      "coverage": {
+       "basis": "viewer_claims",
+       "captions": "unavailable",
+       "comments": "available",
+       "analysed_scenes": 0,
+       "transcript_passages": 0
+      },
+      "scene_analysis": "pending"
+     },
+     {
+      "title": "Hans Zimmer - No Time For Caution (Interstellar Soundtrack)(Docking)(Interstellar OST) - YouTube",
+      "url": "https://www.youtube.com/watch?v=m3zvVGJrTP8",
+      "creator": "711TAC",
+      "source": "YouTube",
+      "duration": 241,
+      "language": "en",
+      "relevance": 8,
+      "reason": "YouTube video featuring the Interstellar soundtrack 'No Time For Caution' associated with the docking scene. Supporting evidence only; exact match unverified.",
+      "badges": [],
+      "origin": "discovery",
+      "evidence": "viewer_timestamp",
+      "moments": [
+       {
+        "start": 114,
+        "end": 147,
+        "type": "viewer_timestamp",
+        "summary": "2:00 - Doing math homework while in math class · \"No problem No Time For Caution 1:59\" · When the test ends in 1 minute and you remember the answer to the last question: 2:00"
+       },
+       {
+        "start": 147,
+        "end": 185,
+        "type": "viewer_timestamp",
+        "summary": "2:35 - Doing math homework while the teachers collecting it · 2:35 trying to apply the lego sticker · 2:35 trying to apply an eye sticker on a gundam model kit"
+       },
+       {
+        "start": 234,
+        "end": 241,
+        "type": "viewer_timestamp",
+        "summary": "4:00 - Realizing that currently most schools are not opened · 3:59 - Doing math homework while the teacher is finished checking the whole class' homeworks"
+       }
+      ],
+      "requirements": [
+       "supported: the part in the Interstellar docking scene where the music kicks in"
+      ],
+      "coverage": {
+       "basis": "viewer_claims",
+       "captions": "unavailable",
+       "comments": "available",
+       "analysed_scenes": 0,
+       "transcript_passages": 0
+      },
+      "scene_analysis": "pending"
+     },
+     {
+      "title": "Interstellar | Docking Scene (Matthew McConaughey, Matt Damon, Anne Hathaway) | Paramount Movies",
+      "url": "https://www.youtube.com/watch?v=v2H1s9gj5DA",
+      "creator": "Paramount Movies",
+      "source": "YouTube",
+      "duration": 428,
+      "language": "en",
+      "relevance": 8,
+      "reason": "Viewers note the music kicking in at the docking scene, confirming this video matches the request. Supporting evidence only; exact match unverified.",
+      "badges": [],
+      "origin": "discovery",
+      "evidence": "viewer_timestamp",
+      "moments": [
+       {
+        "start": 124,
+        "end": 169,
+        "type": "viewer_timestamp",
+        "summary": "2:09 · 2:10 👌 · its not possible....  NO,  IT'S necessary @2:19"
+       }
+      ],
+      "requirements": [
+       "supported: the part in the Interstellar docking scene where the music kicks in"
+      ],
+      "coverage": {
+       "basis": "viewer_claims",
+       "captions": "unavailable",
+       "comments": "available",
+       "analysed_scenes": 0,
+       "transcript_passages": 0
+      },
+      "scene_analysis": null
+     },
+     {
+      "title": "Hans Zimmer - The Docking Scene - Interstellar Soundtrack - YouTube",
+      "url": "https://www.youtube.com/watch?v=kAoG151tKQc",
+      "creator": "cigarKK",
+      "source": "YouTube",
+      "duration": 223,
+      "language": "en",
+      "relevance": 8,
+      "reason": "YouTube video of the Interstellar soundtrack focusing on the docking scene score and the famous music crescendo.",
+      "badges": [
+       "Underrated find"
+      ],
+      "origin": "discovery",
+      "evidence": "metadata_match",
+      "moments": [],
+      "requirements": [
+       "supported: the part in the Interstellar docking scene where the music kicks in"
+      ],
+      "coverage": {
+       "basis": "viewer_claims",
+       "captions": "unavailable",
+       "comments": "available",
+       "analysed_scenes": 0,
+       "transcript_passages": 0
+      },
+      "scene_analysis": null
+     },
+     {
+      "title": "Interstellar Live. Docking Scene ( Cinema in Concert - Live in Brussels 2026 )",
+      "url": "https://www.youtube.com/watch?v=XZHVVl-bfZQ",
+      "creator": "Verbing",
+      "source": "YouTube",
+      "duration": 379,
+      "language": "zxx",
+      "relevance": 7,
+      "reason": "This video shows a live concert performance of the Interstellar docking scene with comments mentioning the music building up.",
+      "badges": [],
+      "origin": "discovery",
+      "evidence": "viewer_timestamp",
+      "moments": [
+       {
+        "start": 145,
+        "end": 180,
+        "type": "viewer_timestamp",
+        "summary": "2:30 I've watched that scene lots of time, what a masterpiece, thank you hanz zimmer, thank you Christopher nolan"
+       },
+       {
+        "start": 277,
+        "end": 312,
+        "type": "viewer_timestamp",
+        "summary": "4:42 best scene✨"
+       }
+      ],
+      "requirements": [
+       "supported: the part in the Interstellar docking scene where the music kicks in"
+      ],
+      "coverage": {
+       "basis": "viewer_claims",
+       "captions": "unavailable",
+       "comments": "available",
+       "analysed_scenes": 0,
+       "transcript_passages": 0
+      },
+      "scene_analysis": null
+     },
+     {
+      "title": "The Docking Scene: No Time for Caution (Extended) - YouTube",
+      "url": "https://www.youtube.com/watch?v=C5gJvA3b0Zg",
+      "creator": "Patrick Bennett",
+      "source": "YouTube",
+      "duration": 1961,
+      "language": "en",
+      "relevance": 7,
+      "reason": "Extended fan edit video of The Docking Scene music by Hans Zimmer.",
+      "badges": [
+       "Underrated find"
+      ],
+      "origin": "discovery",
+      "evidence": "metadata_match",
+      "moments": [],
+      "requirements": [
+       "supported: the part in the Interstellar docking scene where the music kicks in"
+      ],
+      "coverage": {
+       "basis": "viewer_claims",
+       "captions": "unavailable",
+       "comments": "available",
+       "analysed_scenes": 0,
+       "transcript_passages": 0
+      },
+      "scene_analysis": null
+     },
+     {
+      "title": "Interstellar Soundtrack - No Time For Caution (Docking Scene) - Hans Zimmer",
+      "url": "https://www.dailymotion.com/video/x2hr5c3",
+      "creator": null,
+      "source": "www.dailymotion.com",
+      "duration": 245,
+      "language": null,
+      "relevance": 6,
+      "reason": "Dailymotion video featuring the 'No Time For Caution' track from the Interstellar docking scene. Metadata only; contents unverified.",
+      "badges": [
+       "Discussed on Reddit"
+      ],
+      "origin": "discovery",
+      "evidence": "metadata_match",
+      "moments": [],
+      "requirements": [
+       "supported: the part in the Interstellar docking scene where the music kicks in"
+      ],
+      "coverage": {
+       "basis": "direct_evidence",
+       "captions": "unavailable",
+       "comments": "unavailable",
+       "analysed_scenes": 0,
+       "transcript_passages": 0
+      },
+      "scene_analysis": null
+     },
+     {
+      "title": "Interstellar Docking Scene [HD]",
+      "url": "https://music.youtube.com/watch?v=c4tPQYNpW9k",
+      "creator": null,
+      "source": "music.youtube.com",
+      "duration": null,
+      "language": null,
+      "relevance": 6,
+      "reason": "This video features the Interstellar Docking Scene in HD. Metadata only; contents unverified.",
+      "badges": [],
+      "origin": "discovery",
+      "evidence": "metadata_match",
+      "moments": [],
+      "requirements": [
+       "supported: the part in the Interstellar docking scene where the music kicks in"
+      ],
+      "coverage": {
+       "basis": "direct_evidence",
+       "captions": "not_permitted",
+       "comments": "not_permitted",
+       "analysed_scenes": 0,
+       "transcript_passages": 0
+      },
+      "scene_analysis": null
+     },
+     {
+      "title": "Interstellar 星际穿越 - Docking Scene 对接【4K】",
+      "url": "http://www.bilibili.com/video/av668079322",
+      "creator": "JasonBru",
+      "source": "www.bilibili.com",
+      "duration": 259,
+      "language": null,
+      "relevance": 6,
+      "reason": "Bilibili video is the Interstellar docking scene in 4K, capturing the scene where the music builds and kicks in. Metadata only; contents unverified.",
+      "badges": [],
+      "origin": "discovery",
+      "evidence": "metadata_match",
+      "moments": [],
+      "requirements": [
+       "supported: the part in the Interstellar docking scene where the music kicks in"
+      ],
+      "coverage": {
+       "basis": "metadata",
+       "captions": "unavailable",
+       "comments": "unavailable",
+       "analysed_scenes": 0,
+       "transcript_passages": 0
+      },
+      "scene_analysis": null
+     }
+    ],
+    "total": 11
+   }
+  },
+  {
+   "q": "moment in a MKBHD review where he drops the phone",
+   "search_id": "76c8be10-b917-4d8a-8f7a-fb180dfecb65",
+   "status": "partial",
+   "first_ms": null,
+   "full_ms": 51390,
+   "job": "2907ccf5-af17-45e7-8a77-c0459a3b332e",
+   "providers": [
+    {
+     "status": "ok",
+     "message": "Brave discovery completed.",
+     "provider": "brave"
+    },
+    {
+     "status": "ok",
+     "message": "Not needed: Brave answered every search.",
+     "provider": "searxng"
+    },
+    {
+     "status": "ok",
+     "message": "AI planned 4 searches for videos.",
+     "provider": "planner"
+    },
+    {
+     "status": "ok",
+     "message": "Looked for evidence on 2 unmet requirements: 2 targeted searches, 0 pages or videos opened, 0 closed.",
+     "provider": "gap_exploration"
+    },
+    {
+     "status": "partial",
+     "message": "80 candidates found; up to 60 candidates were selected for checking after all sources answered.",
+     "provider": "candidate_pool"
+    },
+    {
+     "status": "ok",
+     "message": "Screened 80 of 80 leads to prioritize evidence checks; final relevance is checked separately.",
+     "provider": "jev_screener"
+    },
+    {
+     "status": "ok",
+     "message": "YouTube details and viewer comments checked.",
+     "provider": "youtube"
+    },
+    {
+     "status": "ok",
+     "message": "Reddit discussions checked.",
+     "provider": "reddit"
+    },
+    {
+     "status": "ok",
+     "message": "7 of 20 result pages were checked, 6 in a browser.",
+     "provider": "pages"
+    },
+    {
+     "status": "ok",
+     "message": "Results were checked for relevance by AI.",
+     "provider": "judge"
+    },
+    {
+     "status": "ok",
+     "message": "No sufficiently supported matches were found. Weak, uncertain and unchecked candidates were excluded.",
+     "provider": "relevance_filter"
+    },
+    {
+     "status": "ok",
+     "message": "No candidate video has been watched yet, so what happens in them (actions, their order, sound) is unverified. 1 were queued for inspection; search again in a few minutes to check them.",
+     "provider": "video_inspection"
+    }
+   ],
+   "interpretation": {
+    "intent": "Find a specific clip or moment in an MKBHD review where he accidentally drops a phone.",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "moment in a MKBHD review",
+      "hardness": "hard",
+      "scope": "each"
+     },
+     {
+      "id": "R2",
+      "text": "where he drops the phone",
+      "hardness": "hard",
+      "scope": "each"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unmet": [
+     "No result could be verified for: moment in a MKBHD review",
+     "No result could be verified for: where he drops the phone"
+    ]
+   },
+   "top": [],
+   "total": 0,
+   "closest": [
+    {
+     "title": "Ya'll remember DXOMark? There used to be a moment in ...",
+     "url": "https://www.facebook.com/MKBHD/posts/yall-remember-dxomark-there-used-to-be-a-moment-in-every-smartphone-keynote-with/1277101133777457/",
+     "creator": null,
+     "source": "www.facebook.com",
+     "duration": null,
+     "language": null,
+     "relevance": 4,
+     "reason": "Mentions MKBHD review contexts but lacks evidence of an actual dropped phone video moment. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: moment in a MKBHD review",
+      "unknown: where he drops the phone"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Reviewing The iPhone's Screen | Is iPhone's screen good? | By MKBHD | Facebook",
+     "url": "https://www.facebook.com/MKBHD/videos/reviewing-the-iphones-screen/861134141117656/",
+     "creator": null,
+     "source": "www.facebook.com",
+     "duration": null,
+     "language": null,
+     "relevance": 4,
+     "reason": "Facebook video link about iPhone screen reviewing without evidence of a phone drop moment. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: moment in a MKBHD review",
+      "unknown: where he drops the phone"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Every Mistake I Made in 2025 - YouTube",
+     "url": "https://www.youtube.com/watch?v=v-sCZN3FbR0",
+     "creator": "Marques Brownlee",
+     "source": "YouTube",
+     "duration": 825,
+     "language": "en",
+     "relevance": 4,
+     "reason": "Video is by Marques Brownlee, but it discusses mistakes in 2025 rather than featuring a phone drop. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "unknown: moment in a MKBHD review",
+      "unknown: where he drops the phone"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": "pending"
+    },
+    {
+     "title": "Dope Tech: Nothing Phone 2 Redesign! - YouTube",
+     "url": "https://www.youtube.com/watch?v=RM7SobH8ZO0",
+     "creator": "Marques Brownlee",
+     "source": "YouTube",
+     "duration": 1028,
+     "language": "en",
+     "relevance": 4,
+     "reason": "MKBHD preview video, but no phone drop moment is mentioned or shown in the metadata. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: moment in a MKBHD review",
+      "unknown: where he drops the phone"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Smartphone Awards 2023! - YouTube",
+     "url": "https://www.youtube.com/watch?v=JkRXhe3KaPE",
+     "creator": "Marques Brownlee",
+     "source": "YouTube",
+     "duration": 1583,
+     "language": "en",
+     "relevance": 4,
+     "reason": "An official MKBHD smartphone awards video, but lacks evidence of him dropping a phone. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: moment in a MKBHD review",
+      "unknown: where he drops the phone"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Nothing Phone 3 Review: They Lied! - YouTube",
+     "url": "https://www.youtube.com/watch?v=4KbrxIpQgkM",
+     "creator": "Marques Brownlee",
+     "source": "YouTube",
+     "duration": 938,
+     "language": "en",
+     "relevance": 3,
+     "reason": "It is an MKBHD review video, but there is no evidence of him dropping the phone. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: moment in a MKBHD review",
+      "unknown: where he drops the phone"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Nothing Phone 4b: They Can't Say It! - YouTube",
+     "url": "https://www.youtube.com/watch?v=DUgPFNRmsCQ",
+     "creator": "Marques Brownlee",
+     "source": "YouTube",
+     "duration": 621,
+     "language": "en",
+     "relevance": 3,
+     "reason": "This is an MKBHD review of the Nothing Phone 4b, but it does not contain a moment where he drops the phone. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: moment in a MKBHD review",
+      "unknown: where he drops the phone"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "This Phone is Bad... Which Makes it Better? - YouTube",
+     "url": "https://www.youtube.com/watch?v=xwTub7_we0w",
+     "creator": "Marques Brownlee",
+     "source": "YouTube",
+     "duration": 576,
+     "language": "en",
+     "relevance": 3,
+     "reason": "This is an MKBHD review of the Boox Palma, but it does not contain a moment where he drops the device. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: moment in a MKBHD review",
+      "unknown: where he drops the phone"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "The Truth About the Bezelless Concept Phone - YouTube",
+     "url": "https://www.youtube.com/watch?v=ngPkbaZliaU",
+     "creator": "Marques Brownlee",
+     "source": "YouTube",
+     "duration": 389,
+     "language": "en",
+     "relevance": 3,
+     "reason": "MKBHD reviews a concept phone here, but viewers do not mention or point to a phone drop. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: moment in a MKBHD review",
+      "unknown: where he drops the phone"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "What's On My Phone: 2020! - YouTube",
+     "url": "https://www.youtube.com/watch?v=2xiCVNwhrDU",
+     "creator": "Marques Brownlee",
+     "source": "YouTube",
+     "duration": 503,
+     "language": "en",
+     "relevance": 3,
+     "reason": "This is an older MKBHD phone tour video, but it does not contain a dropped phone moment. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: moment in a MKBHD review",
+      "unknown: where he drops the phone"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    }
+   ],
+   "deep": {
+    "status": "partial",
+    "ms": 105539,
+    "providers": [
+     {
+      "status": "ok",
+      "message": "Brave discovery completed.",
+      "provider": "brave"
+     },
+     {
+      "status": "ok",
+      "message": "15 of 19 search engines answered; Privacywall Videos (access denied), Privacywall (access denied), Brave Videos (rate-limited), Brave (rate-limited) did not. Filled in for 2 of 29 searches where Brave failed or found too little.",
+      "provider": "searxng"
+     },
+     {
+      "status": "ok",
+      "message": "Internet Archive film catalogue searched directly.",
+      "provider": "internet_archive"
+     },
+     {
+      "status": "ok",
+      "message": "AI planned 6 searches for lesser-known sources.",
+      "provider": "planner"
+     },
+     {
+      "status": "ok",
+      "message": "AI followed 8 leads from what it found, in 2 rounds.",
+      "provider": "leads"
+     },
+     {
+      "status": "ok",
+      "message": "Looked for evidence on 3 unmet requirements: 3 targeted searches, 0 pages or videos opened, 0 closed.",
+      "provider": "gap_exploration"
+     },
+     {
+      "status": "partial",
+      "message": "794 candidates found; up to 60 candidates were selected for checking after all sources answered.",
+      "provider": "candidate_pool"
+     },
+     {
+      "status": "ok",
+      "message": "Screened 120 of 794 leads to prioritize evidence checks; final relevance is checked separately.",
+      "provider": "jev_screener"
+     },
+     {
+      "status": "ok",
+      "message": "YouTube details and viewer comments checked.",
+      "provider": "youtube"
+     },
+     {
+      "status": "ok",
+      "message": "Reddit discussions checked.",
+      "provider": "reddit"
+     },
+     {
+      "status": "ok",
+      "message": "11 of 20 result pages were checked, 3 in a browser.",
+      "provider": "pages"
+     },
+     {
+      "status": "ok",
+      "message": "Results were checked for relevance by AI.",
+      "provider": "judge"
+     },
+     {
+      "status": "ok",
+      "message": "No sufficiently supported matches were found. Weak, uncertain and unchecked candidates were excluded.",
+      "provider": "relevance_filter"
+     },
+     {
+      "status": "ok",
+      "message": "No candidate video has been watched yet, so what happens in them (actions, their order, sound) is unverified. 2 were queued for inspection; search again in a few minutes to check them.",
+      "provider": "video_inspection"
+     }
+    ],
+    "top": [],
+    "total": 0
+   }
+  },
+  {
+   "q": "scene in a horror short where a figure appears behind the person and they don't notice",
+   "search_id": "fed391ab-1666-43ed-9994-feab2b14c4c1",
+   "status": "partial",
+   "first_ms": 579,
+   "full_ms": 60986,
+   "job": "88dd366c-03b3-4349-be09-26b5e2be2be8",
+   "providers": [
+    {
+     "status": "ok",
+     "message": "Brave discovery completed.",
+     "provider": "brave"
+    },
+    {
+     "status": "ok",
+     "message": "4 of 6 search engines answered; Dailymotion (timed out), Google Videos (blocked by a CAPTCHA) did not. Filled in for 2 of 5 searches where Brave failed or found too little.",
+     "provider": "searxng"
+    },
+    {
+     "status": "ok",
+     "message": "AI planned 4 searches for videos.",
+     "provider": "planner"
+    },
+    {
+     "status": "ok",
+     "message": "Looked for evidence on 3 unmet requirements: 1 targeted searches, 6 pages or videos opened, 0 closed.",
+     "provider": "gap_exploration"
+    },
+    {
+     "status": "partial",
+     "message": "204 candidates found; up to 60 candidates were selected for checking after all sources answered.",
+     "provider": "candidate_pool"
+    },
+    {
+     "status": "ok",
+     "message": "Screened 120 of 204 leads to prioritize evidence checks; final relevance is checked separately.",
+     "provider": "jev_screener"
+    },
+    {
+     "status": "ok",
+     "message": "YouTube details and viewer comments checked.",
+     "provider": "youtube"
+    },
+    {
+     "status": "ok",
+     "message": "Reddit discussions checked.",
+     "provider": "reddit"
+    },
+    {
+     "status": "ok",
+     "message": "3 of 14 result pages were checked, 3 in a browser.",
+     "provider": "pages"
+    },
+    {
+     "status": "ok",
+     "message": "Results were checked for relevance by AI.",
+     "provider": "judge"
+    },
+    {
+     "status": "ok",
+     "message": "57 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+     "provider": "relevance_filter"
+    },
+    {
+     "status": "partial",
+     "message": "3 videos queued for scene analysis; these pending analyses are not evidence in this ranking.",
+     "provider": "scene_analysis"
+    },
+    {
+     "status": "partial",
+     "message": "3 videos queued for caption fetching; their transcripts help later searches, not this one.",
+     "provider": "youtube_captions"
+    }
+   ],
+   "interpretation": {
+    "intent": "Find video clips of a specific trope in horror short films where a figure manifests behind an oblivious character.",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "horror short",
+      "hardness": "hard",
+      "scope": "each"
+     },
+     {
+      "id": "R2",
+      "text": "figure appears behind the person",
+      "hardness": "hard",
+      "scope": "each"
+     },
+     {
+      "id": "R3",
+      "text": "they don't notice",
+      "hardness": "hard",
+      "scope": "each"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unmet": []
+   },
+   "top": [
+    {
+     "title": "😱 Ghost Girl Caught Him in the Forest! 👻 | Scary AI Horror Shorts #shorts",
+     "url": "https://www.youtube.com/watch?v=XtzVk66Sm9w",
+     "creator": "Ai Bhoot Reels ",
+     "source": "YouTube",
+     "duration": 11,
+     "language": "en",
+     "relevance": 6,
+     "reason": "Description confirms a ghost girl appears behind an unsuspecting man in a horror short. Metadata only; contents unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: horror short",
+      "supported: figure appears behind the person",
+      "supported: they don't notice"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": "pending"
+    },
+    {
+     "title": "He Didn't Notice the Ghost Behind Him... 😱👻 | AI Horror Short",
+     "url": "https://www.youtube.com/watch?v=jDA6kb0wT8w",
+     "creator": null,
+     "source": "YouTube",
+     "duration": 11,
+     "language": null,
+     "relevance": 6,
+     "reason": "Description confirms an AI horror short where a ghost follows an unsuspecting man who does not notice. Metadata only; contents unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: horror short",
+      "supported: figure appears behind the person",
+      "supported: they don't notice"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": "inaccessible"
+    },
+    {
+     "title": "She Took a Selfie… But Something Was Behind Her 😱 | Horror Short",
+     "url": "https://www.youtube.com/watch?v=QrcE_UJUHWE",
+     "creator": "Nightmare Ai",
+     "source": "YouTube",
+     "duration": 50,
+     "language": "en",
+     "relevance": 6,
+     "reason": "Description states a shadowy figure appeared behind a girl taking a selfie, matching a horror short scene. Metadata only; contents unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: horror short",
+      "supported: figure appears behind the person",
+      "supported: they don't notice"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": "pending"
+    }
+   ],
+   "total": 3,
+   "closest": [
+    {
+     "title": "💀 Don't Look Behind You! 😱 | Terrifying Horror Short #Shorts #horror #horrorshorts",
+     "url": "https://www.youtube.com/watch?v=k6jutCXNyUI",
+     "creator": "ʜᴏʀʀᴏʀ ʜᴀᴠᴇɴ",
+     "source": "YouTube",
+     "duration": 11,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Description indicates a mysterious figure appearing behind him in a horror short, but no direct scene evidence. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: horror short",
+      "supported: figure appears behind the person",
+      "unknown: they don't notice"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "It Was Behind You! | Horror Short 3D POV Jump-Scare #shorts #horror #viral",
+     "url": "https://www.youtube.com/watch?v=74vCOA3Biuo",
+     "creator": "Dark Play 3D",
+     "source": "YouTube",
+     "duration": 21,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Description references a pale figure waiting behind you in a horror POV short, but visual scenes are missing. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: horror short",
+      "supported: figure appears behind the person",
+      "unknown: they don't notice"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "\"Jump Scare\" Horror Short Film || Velle Production",
+     "url": "https://www.youtube.com/watch?v=WhDU1MWag-0",
+     "creator": "Velle Production",
+     "source": "YouTube",
+     "duration": 187,
+     "language": "en",
+     "relevance": 5,
+     "reason": "A jump scare horror short film, though lacks explicit confirmation of a figure appearing behind an unaware person. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: horror short",
+      "unknown: figure appears behind the person",
+      "unknown: they don't notice"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "😱 Trapped in the Dark: A Terrifying Jump Scare! Don't Look Behind You... (Horror Short)",
+     "url": "https://www.youtube.com/watch?v=nPwtmN9NlkM",
+     "creator": "itz_dhanush_56",
+     "source": "YouTube",
+     "duration": 11,
+     "language": "hi",
+     "relevance": 5,
+     "reason": "Description mentions a horror short and a figure emerging behind, but lacks direct visual verification. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: horror short",
+      "supported: figure appears behind the person",
+      "unknown: they don't notice"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Don't Look Behind You... 😱💀 #shorts #horror #apexhorror",
+     "url": "https://www.youtube.com/watch?v=EXnKAeTXP5Q",
+     "creator": "Apex horror ",
+     "source": "YouTube",
+     "duration": 11,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Description mentions short stories and jumpscares, but lacks specific details on the figure behind a person. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: horror short",
+      "unknown: figure appears behind the person",
+      "unknown: they don't notice"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "DON'T LOOK BEHIND YOU 👁️ | Elevator Horror Short",
+     "url": "https://www.youtube.com/watch?v=CHZ7JvtBbbg",
+     "creator": "Static Hour Horror Film",
+     "source": "YouTube",
+     "duration": 20,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Description mentions an elevator horror short where someone is warned not to look behind, but scenes are uninspected. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: horror short",
+      "unknown: figure appears behind the person",
+      "supported: they don't notice"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "horror short film jumpscare #horrorstories #horrorstation #horrorfilm #horror #horrorstory #scary",
+     "url": "https://www.youtube.com/watch?v=qJ4mPAMHYAk",
+     "creator": "Aks Storytelling",
+     "source": "YouTube",
+     "duration": 20,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Tagged as horror short jumpscare, but lacks specific details on the figure appearing. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: horror short",
+      "unknown: figure appears behind the person",
+      "unknown: they don't notice"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "📱 \"Wait... Who's Standing Behind You?\" 😨 | POV Horror Short",
+     "url": "https://www.youtube.com/watch?v=y82vsx4pvcA",
+     "creator": "Grim Darkness",
+     "source": "YouTube",
+     "duration": 21,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Description mentions a mysterious figure appears during a FaceTime call in a POV horror short. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: horror short",
+      "supported: figure appears behind the person",
+      "unknown: they don't notice"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Behind you | The Mime painting | Short Horror Film | bb production",
+     "url": "https://www.youtube.com/watch?v=K8iSPLUDcZ4",
+     "creator": "BB production",
+     "source": "YouTube",
+     "duration": 459,
+     "language": "en",
+     "relevance": 5,
+     "reason": "The title and description indicate a short horror film, but lack specific scene confirmation for the figure appearing. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: horror short",
+      "unknown: figure appears behind the person",
+      "unknown: they don't notice"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Did You See It Behind the Door ?.. #horror #paranormal #scary #shorts #youtubeshorts",
+     "url": "https://www.youtube.com/watch?v=yj2vmxmSeXk",
+     "creator": "HorrorWood Lore",
+     "source": "YouTube",
+     "duration": 21,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Title mentions a figure behind a door in a short horror video, but lacks detailed character awareness evidence. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: horror short",
+      "supported: figure appears behind the person",
+      "unknown: they don't notice"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    }
+   ],
+   "deep": {
+    "status": "partial",
+    "ms": 107996,
+    "providers": [
+     {
+      "status": "ok",
+      "message": "Brave discovery completed.",
+      "provider": "brave"
+     },
+     {
+      "status": "ok",
+      "message": "14 of 19 search engines answered; Privacywall Videos (access denied), Google Videos (blocked by a CAPTCHA), Brave Videos (rate-limited), Privacywall (access denied), Brave (rate-limited) did not. Filled in for 15 of 25 searches where Brave failed or found too little.",
+      "provider": "searxng"
+     },
+     {
+      "status": "ok",
+      "message": "Internet Archive film catalogue searched directly.",
+      "provider": "internet_archive"
+     },
+     {
+      "status": "ok",
+      "message": "AI planned 6 searches for lesser-known sources.",
+      "provider": "planner"
+     },
+     {
+      "status": "ok",
+      "message": "AI followed 8 leads from what it found, in 2 rounds.",
+      "provider": "leads"
+     },
+     {
+      "status": "ok",
+      "message": "Looked for evidence on 3 unmet requirements: 0 targeted searches, 3 pages or videos opened, 0 closed.",
+      "provider": "gap_exploration"
+     },
+     {
+      "status": "partial",
+      "message": "1073 candidates found; up to 60 candidates were selected for checking after all sources answered.",
+      "provider": "candidate_pool"
+     },
+     {
+      "status": "ok",
+      "message": "Screened 120 of 1073 leads to prioritize evidence checks; final relevance is checked separately.",
+      "provider": "jev_screener"
+     },
+     {
+      "status": "ok",
+      "message": "YouTube details and viewer comments checked.",
+      "provider": "youtube"
+     },
+     {
+      "status": "ok",
+      "message": "Reddit discussions checked.",
+      "provider": "reddit"
+     },
+     {
+      "status": "ok",
+      "message": "10 of 20 result pages were checked, 4 in a browser.",
+      "provider": "pages"
+     },
+     {
+      "status": "ok",
+      "message": "Results were checked for relevance by AI.",
+      "provider": "judge"
+     },
+     {
+      "status": "ok",
+      "message": "58 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+      "provider": "relevance_filter"
+     },
+     {
+      "status": "partial",
+      "message": "2 videos queued for caption fetching; their transcripts help later searches, not this one.",
+      "provider": "youtube_captions"
+     }
+    ],
+    "top": [
+     {
+      "title": "Behind the Frame (Short Horror Film) - YouTube",
+      "url": "https://www.youtube.com/watch?v=BKL8B9H_LDI",
+      "creator": "Dylan Clark",
+      "source": "YouTube",
+      "duration": 455,
+      "language": "en",
+      "relevance": 8,
+      "reason": "Viewers note that the scene around 5:28 features a figure behind her that is terrifying. Supporting evidence only; exact match unverified.",
+      "badges": [],
+      "origin": "discovery",
+      "evidence": "viewer_timestamp",
+      "moments": [
+       {
+        "start": 321,
+        "end": 368,
+        "type": "viewer_timestamp",
+        "summary": "5:28 scariest thing I’ve seen in atleast a decade of binging horror movies · Really shows how effective you can be (and maybe even better) without something like it. Absolutely amazing. The shots are "
+       }
+      ],
+      "requirements": [
+       "supported: horror short",
+       "supported: figure appears behind the person",
+       "supported: they don't notice"
+      ],
+      "coverage": {
+       "basis": "viewer_claims",
+       "captions": "unavailable",
+       "comments": "available",
+       "analysed_scenes": 0,
+       "transcript_passages": 0
+      },
+      "scene_analysis": "pending"
+     },
+     {
+      "title": "Behind You Horror Short Film | Screamfest - YouTube",
+      "url": "https://www.youtube.com/watch?v=7LoUsl0BqtM",
+      "creator": "Screamfest",
+      "source": "YouTube",
+      "duration": 553,
+      "language": "en",
+      "relevance": 8,
+      "reason": "Viewers and description confirm the horror short features a woman who doesn't notice the ominous figure lurking behind her. Supporting evidence only; exact match unverified.",
+      "badges": [
+       "Livestream replay"
+      ],
+      "origin": "discovery",
+      "evidence": "metadata_match",
+      "moments": [],
+      "requirements": [
+       "supported: horror short",
+       "supported: figure appears behind the person",
+       "supported: they don't notice"
+      ],
+      "coverage": {
+       "basis": "viewer_claims",
+       "captions": "unavailable",
+       "comments": "available",
+       "analysed_scenes": 0,
+       "transcript_passages": 0
+      },
+      "scene_analysis": "pending"
+     }
+    ],
+    "total": 2
+   }
+  }
+ ]
+}

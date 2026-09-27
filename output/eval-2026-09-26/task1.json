@@ -1,0 +1,3714 @@
+{
+ "task": "task1",
+ "started": "2026-09-26T12:44:40.710Z",
+ "finished": "2026-09-26T12:47:49.058Z",
+ "budgets_used": {
+  "embeddings": 23,
+  "scene_analysis_requests": 12,
+  "reddit_signals": 3,
+  "scene_auto_jobs": 3,
+  "discovery_jobs": 3,
+  "youtube_caption_jobs": 15,
+  "youtube_units": 140,
+  "critic_calls": 4,
+  "judge_calls": 30,
+  "enrichment_jobs": 177,
+  "planner_calls:inception/mercury-2.5": 3,
+  "discovery:brave": 17,
+  "jev_exploration_calls": 6,
+  "discovery:searxng": 6,
+  "source_health_jobs": 31,
+  "planner_calls:mistralai/ministral-14b-2512": 3,
+  "anilist_calls": 9,
+  "planner_calls:google/gemma-4-31b-it": 3,
+  "jev_screen_calls": 11,
+  "jev_judge_calls": 142
+ },
+ "health": "",
+ "runs": [
+  {
+   "q": "lofi hip hop study music",
+   "search_id": "98cbd463-18fa-4772-8e6a-59b7e21e6d33",
+   "status": "partial",
+   "first_ms": 58261,
+   "full_ms": 58261,
+   "job": "163b3c8a-22e7-440d-888e-16a6abf0e8c3",
+   "providers": [
+    {
+     "status": "ok",
+     "message": "Brave discovery completed.",
+     "provider": "brave"
+    },
+    {
+     "status": "ok",
+     "message": "Not needed: Brave answered every search.",
+     "provider": "searxng"
+    },
+    {
+     "status": "ok",
+     "message": "AI planned 4 searches for mixed.",
+     "provider": "planner"
+    },
+    {
+     "status": "ok",
+     "message": "Looked for evidence on 2 unmet requirements: 2 targeted searches, 0 pages or videos opened, 0 closed.",
+     "provider": "gap_exploration"
+    },
+    {
+     "status": "ok",
+     "message": "Screened 57 of 57 leads to prioritize evidence checks; final relevance is checked separately.",
+     "provider": "jev_screener"
+    },
+    {
+     "status": "partial",
+     "message": "Some YouTube comments could not be read.",
+     "provider": "youtube"
+    },
+    {
+     "status": "ok",
+     "message": "Reddit discussions checked.",
+     "provider": "reddit"
+    },
+    {
+     "status": "ok",
+     "message": "14 of 18 result pages were checked, 6 in a browser.",
+     "provider": "pages"
+    },
+    {
+     "status": "ok",
+     "message": "Results were checked for relevance by AI.",
+     "provider": "judge"
+    },
+    {
+     "status": "ok",
+     "message": "19 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+     "provider": "relevance_filter"
+    },
+    {
+     "status": "partial",
+     "message": "5 videos queued for caption fetching; their transcripts help later searches, not this one.",
+     "provider": "youtube_captions"
+    }
+   ],
+   "interpretation": {
+    "intent": "Find lofi hip hop music specifically curated for studying.",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "lofi hip hop",
+      "hardness": "hard",
+      "scope": "each"
+     },
+     {
+      "id": "R2",
+      "text": "study music",
+      "hardness": "hard",
+      "scope": "each"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unmet": []
+   },
+   "top": [
+    {
+     "title": "ＳＴＵＤＹ ＴＩＭＥ 📚 Lofi Hip Hop | Study Music ~ Lofi Music To Put You In A Better Mood ✍️ Beats To Relax / Study To / Deep Focus ~ Chill Lofi Beats - YouTube",
+     "url": "https://www.youtube.com/playlist?list=PL3Rd_Q1n-uEmzrjVbyMQmgSoKk6qbWmCg",
+     "creator": null,
+     "source": "YouTube",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "YouTube playlist with lofi hip hop music curated for study time.",
+     "badges": [
+      "3D: WebGL"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unsupported",
+      "comments": "unsupported",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "lofi hip hop beats to relax, code, study and focus during late night sessions on Apple Music",
+     "url": "https://music.apple.com/us/playlist/lofi-hip-hop-beats-to-relax-code-study-and-focus/pl.e27dd96b0d73426fba75dffd2a7f3607",
+     "creator": null,
+     "source": "music.apple.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Apple Music playlist featuring lofi hip hop beats for study and focus.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "lofi hip hop beats - music to study/relax to",
+     "url": "https://open.spotify.com/playlist/74sUjcvpGfdOvCHvgzNEDO",
+     "creator": null,
+     "source": "open.spotify.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Jev: R1 — \"lofi hip hop beats - music to study/relax to | Focus Music | Chillhop Music 2026 - playlis\"; R2 — \"lofi hip hop beats - music to study/relax to | Focus Music | Chillhop Music 2026 - playlis\"",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Stream 1 A.M Study Session 📚 - [lofi hip hop/chill beats] by Lofi Girl | Listen online for free on SoundCloud",
+     "url": "https://soundcloud.com/lofi_girl/compilation",
+     "creator": null,
+     "source": "soundcloud.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Jev: R1 — \"Stream 1 A.M Study Session 📚 - [lofi hip hop/chill beats] by Lofi Girl | Listen online fo\"; R2 — \"Stream 1 A.M Study Session 📚 - [lofi hip hop/chill beats] by Lofi Girl | Listen online fo\"",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Lofi Hip Hop - Lofi beats to study - Study music / Relaxing ...",
+     "url": "https://www.youtube.com/playlist?list=PLXIclLvfETS3AgCnZg4N6QqHu_T27XKIq",
+     "creator": null,
+     "source": "YouTube",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "YouTube playlist collection of lofi hip hop beats for studying.",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unsupported",
+      "comments": "unsupported",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "lofi.cafe - lofi music 🎧",
+     "url": "https://www.lofi.cafe/",
+     "creator": null,
+     "source": "www.lofi.cafe",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Website featuring lofi music streams specifically curated for studying.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "lofi hip hop mix 📚 beats to relax/study to (Part 1) - YouTube",
+     "url": "https://www.youtube.com/watch?v=CFGLoQIhmow",
+     "creator": "Lofi Girl",
+     "source": "YouTube",
+     "duration": 10615,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Popular YouTube lofi hip hop study mix by Lofi Girl, directly matches all criteria. Supporting evidence only; exact match unverified.",
+     "badges": [
+      "Livestream replay"
+     ],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 8455,
+       "end": 8490,
+       "type": "viewer_timestamp",
+       "summary": "2:21:00"
+      }
+     ],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Lofi Hip Hop Music To Study and Relax To ( Lo fi Beats) Beats To Sleep To playlist | Listen on Deezer",
+     "url": "https://www.deezer.com/us/playlist/7065984624",
+     "creator": null,
+     "source": "www.deezer.com",
+     "duration": null,
+     "language": null,
+     "relevance": 8,
+     "reason": "Deezer playlist of lofi hip hop music for studying and relaxing.",
+     "badges": [
+      "3D: WebGL",
+      "Discussed on Reddit"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "1 A.M Study Session 📚 - [lofi hip hop/chill beats] - YouTube",
+     "url": "https://www.youtube.com/watch?v=lTRiuFIWV54",
+     "creator": "ChilledCow",
+     "source": "YouTube",
+     "duration": 3674,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Classic lofi hip hop 1 hour study session video by Lofi Girl. Supporting evidence only; exact match unverified.",
+     "badges": [
+      "Livestream replay"
+     ],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 71,
+       "end": 106,
+       "type": "viewer_timestamp",
+       "summary": "Any one September 23 2026 time is 1:16"
+      },
+      {
+       "start": 230,
+       "end": 265,
+       "type": "viewer_timestamp",
+       "summary": "Thanks to you i started 2:35am  and i finish my homwork in just 3:55"
+      },
+      {
+       "start": 540,
+       "end": 575,
+       "type": "viewer_timestamp",
+       "summary": "which track start at 09:05"
+      }
+     ],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Best of lofi hip hop 2023 🎉 - beats to relax/study to - YouTube",
+     "url": "https://www.youtube.com/watch?v=mmKguZohAck",
+     "creator": "Lofi Girl",
+     "source": "YouTube",
+     "duration": 8789,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Best of lofi hip hop compilation specifically for study and relaxation. Supporting evidence only; exact match unverified.",
+     "badges": [
+      "Livestream replay",
+      "Discussed on Reddit"
+     ],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 3224,
+       "end": 3259,
+       "type": "viewer_timestamp",
+       "summary": "@Wildbunnies 53:49 and 1:45:01 - thanks for asking! :)"
+      },
+      {
+       "start": 3484,
+       "end": 3519,
+       "type": "viewer_timestamp",
+       "summary": "Starting at 58:09 - Hourglass with Lawrence Walther and Recalibration Machine 🙏 @Wildbunnies"
+      },
+      {
+       "start": 6296,
+       "end": 6331,
+       "type": "viewer_timestamp",
+       "summary": "@Wildbunnies 53:49 and 1:45:01 - thanks for asking! :)"
+      }
+     ],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    }
+   ],
+   "total": 30,
+   "round": 1
+  },
+  {
+   "q": "how to tie a tie",
+   "search_id": "f58da3d8-b7dd-4f01-b73b-9f70dc3386be",
+   "status": "partial",
+   "first_ms": 537,
+   "full_ms": 70175,
+   "job": "d1de1ddb-eed5-4793-9ad5-350c8d5771f4",
+   "providers": [
+    {
+     "status": "ok",
+     "message": "Brave discovery completed.",
+     "provider": "brave"
+    },
+    {
+     "status": "ok",
+     "message": "Not needed: Brave answered every search.",
+     "provider": "searxng"
+    },
+    {
+     "status": "ok",
+     "message": "AI planned 4 searches for mixed.",
+     "provider": "planner"
+    },
+    {
+     "status": "ok",
+     "message": "Looked for evidence on 1 unmet requirement: 1 targeted searches, 1 pages or videos opened, 0 closed.",
+     "provider": "gap_exploration"
+    },
+    {
+     "status": "partial",
+     "message": "68 candidates found; up to 60 candidates were selected for checking after all sources answered.",
+     "provider": "candidate_pool"
+    },
+    {
+     "status": "ok",
+     "message": "Screened 68 of 68 leads to prioritize evidence checks; final relevance is checked separately.",
+     "provider": "jev_screener"
+    },
+    {
+     "status": "ok",
+     "message": "YouTube details and viewer comments checked.",
+     "provider": "youtube"
+    },
+    {
+     "status": "ok",
+     "message": "Reddit discussions checked.",
+     "provider": "reddit"
+    },
+    {
+     "status": "ok",
+     "message": "15 of 20 result pages were checked, 5 in a browser.",
+     "provider": "pages"
+    },
+    {
+     "status": "ok",
+     "message": "Results were checked for relevance by AI.",
+     "provider": "judge"
+    },
+    {
+     "status": "ok",
+     "message": "13 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+     "provider": "relevance_filter"
+    },
+    {
+     "status": "partial",
+     "message": "5 videos queued for caption fetching; their transcripts help later searches, not this one.",
+     "provider": "youtube_captions"
+    }
+   ],
+   "interpretation": {
+    "intent": "The user wants to learn the method of tying a necktie.",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "how to tie a tie",
+      "hardness": "hard",
+      "scope": "each"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unmet": []
+   },
+   "top": [
+    {
+     "title": "How To Tie A Tie: Four-In-Hand & Windsor Knots | Paul Fredrick",
+     "url": "https://www.paulfredrick.com/pages/how-to-tie-a-tie",
+     "creator": null,
+     "source": "www.paulfredrick.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Paul Fredrick instructions for the Four-in-Hand and Windsor knots.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "How to Tie a Tie | Learn How to Tie a Tie using Step-by-Step Animations | Animated Knots by Grog",
+     "url": "https://www.animatedknots.com/how-to-tie-a-tie-necktie-knots",
+     "creator": null,
+     "source": "www.animatedknots.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Step-by-step animations explaining how to tie a tie.",
+     "badges": [
+      "3D: WebGL"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "How To: Tie a Tie – BlackTie.com",
+     "url": "https://blacktie.com/blogs/news/how-to-tie-a-tie",
+     "creator": null,
+     "source": "blacktie.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Step-by-step instructions for tying neckties and bow ties.",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "How to Tie a Tie: Easy Guide to Necktie Knots",
+     "url": "https://www.theknot.com/content/how-to-tie-a-tie",
+     "creator": null,
+     "source": "www.theknot.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "The page provides a complete guide explaining how to tie a necktie.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "How to Tie a Tie Video and Steps",
+     "url": "https://www.realsimple.com/beauty-fashion/shoes-accessories/tie-necktie",
+     "creator": null,
+     "source": "www.realsimple.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Real Simple provides step-by-step instructions and video for tying a necktie.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "4 Ways to Tie a Tie - wikiHow",
+     "url": "https://www.wikihow.com/Tie-a-Tie",
+     "creator": null,
+     "source": "www.wikihow.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "WikiHow guide providing step-by-step instructions on tying a tie.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "How to Tie a Tie: The Complete Guide | The Art of Manliness",
+     "url": "https://www.artofmanliness.com/style/ties/how-to-tie-a-tie/",
+     "creator": null,
+     "source": "www.artofmanliness.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Guide provides instructions and videos for tying classic necktie knots.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "How To Tie A Tie Knot - 18 Different Ways of Tying Necktie Knots",
+     "url": "https://www.realmenrealstyle.com/how-to-tie-a-tie/",
+     "creator": null,
+     "source": "www.realmenrealstyle.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Article and guides detail step-by-step instructions for tying necktie knots.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Learn How to Tie a Tie | Tie-a-Tie.net",
+     "url": "https://www.tie-a-tie.net/",
+     "creator": null,
+     "source": "www.tie-a-tie.net",
+     "duration": null,
+     "language": null,
+     "relevance": 8,
+     "reason": "Comprehensive guide with instructions and diagrams on how to tie a tie.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "How To Tie a Tie | Tie Knot Tutorial | Learn Tie Knots | OTAA",
+     "url": "https://www.otaa.com/en-us/pages/how-to-tie-a-tie",
+     "creator": null,
+     "source": "www.otaa.com",
+     "duration": null,
+     "language": null,
+     "relevance": 8,
+     "reason": "OTAA tie knot guide and overview for men.",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    }
+   ],
+   "total": 30,
+   "round": 1
+  },
+  {
+   "q": "attack on titan opening 1",
+   "search_id": "38e5fe49-49f8-4418-a4a9-e968f2c0a48a",
+   "status": "partial",
+   "first_ms": 55569,
+   "full_ms": 55569,
+   "job": "472cdb1c-9120-4704-b5de-0b16ac28b8ea",
+   "providers": [
+    {
+     "status": "ok",
+     "message": "Brave discovery completed.",
+     "provider": "brave"
+    },
+    {
+     "status": "ok",
+     "message": "Not needed: Brave answered every search.",
+     "provider": "searxng"
+    },
+    {
+     "status": "ok",
+     "message": "AI planned 4 searches for videos.",
+     "provider": "planner"
+    },
+    {
+     "status": "ok",
+     "message": "Recognised the anime \"Attack on Titan\"; searches and AI checks use its official titles and details.",
+     "provider": "anilist"
+    },
+    {
+     "status": "ok",
+     "message": "Looked for evidence on 2 unmet requirements: 2 targeted searches, 0 pages or videos opened, 0 closed.",
+     "provider": "gap_exploration"
+    },
+    {
+     "status": "partial",
+     "message": "70 candidates found; up to 60 candidates were selected for checking after all sources answered.",
+     "provider": "candidate_pool"
+    },
+    {
+     "status": "ok",
+     "message": "Screened 70 of 70 leads to prioritize evidence checks; final relevance is checked separately.",
+     "provider": "jev_screener"
+    },
+    {
+     "status": "ok",
+     "message": "YouTube details and viewer comments checked.",
+     "provider": "youtube"
+    },
+    {
+     "status": "ok",
+     "message": "Reddit discussions checked.",
+     "provider": "reddit"
+    },
+    {
+     "status": "ok",
+     "message": "13 of 18 result pages were checked, 6 in a browser.",
+     "provider": "pages"
+    },
+    {
+     "status": "ok",
+     "message": "Results were checked for relevance by AI.",
+     "provider": "judge"
+    },
+    {
+     "status": "ok",
+     "message": "45 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+     "provider": "relevance_filter"
+    },
+    {
+     "status": "partial",
+     "message": "3 videos queued for scene analysis; these pending analyses are not evidence in this ranking.",
+     "provider": "scene_analysis"
+    },
+    {
+     "status": "partial",
+     "message": "5 videos queued for caption fetching; their transcripts help later searches, not this one.",
+     "provider": "youtube_captions"
+    }
+   ],
+   "interpretation": {
+    "intent": "The user wants to find the first opening sequence of the anime Attack on Titan.",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "attack on titan",
+      "hardness": "hard",
+      "scope": "each"
+     },
+     {
+      "id": "R2",
+      "text": "opening 1",
+      "hardness": "hard",
+      "scope": "each"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unmet": []
+   },
+   "top": [
+    {
+     "title": "Attack on Titan - Opening 1 | 4K | 60FPS | Creditless | - YouTube",
+     "url": "https://www.youtube.com/watch?v=StLX4kITjWU",
+     "creator": "Anicrad",
+     "source": "YouTube",
+     "duration": 106,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Video features Attack on Titan opening 1 Guren no Yumiya cleanly. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 1,
+       "end": 41,
+       "type": "viewer_timestamp",
+       "summary": "Armin’s leap from 0:17 to 0:22 never stops to amaze me 😂 · 0:36 is my favorite part. Nothing can replace the feeling of watching attack on titan for the first time · 0:24 mikasa checking eren...oh my"
+      },
+      {
+       "start": 41,
+       "end": 105,
+       "type": "viewer_timestamp",
+       "summary": "1:15 still gives me goosebumps · 0:47 my favorite part · 0:47 - 1:09 , gives me goosebumps, such an incredible opening."
+      }
+     ],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": "pending"
+    },
+    {
+     "title": "Attack on Titan - Opening 1 【Guren no Yumiya】 4K / UHD Creditless | CC - YouTube",
+     "url": "https://www.youtube.com/watch?v=bHUcvHx9zlA",
+     "creator": "Neobrane",
+     "source": "YouTube",
+     "duration": 128,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Video presents Attack on Titan Opening 1 with Guren no Yumiya in high quality. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 0,
+       "end": 32,
+       "type": "viewer_timestamp",
+       "summary": "0:16 my favorite part of the Opening · 0:01"
+      },
+      {
+       "start": 32,
+       "end": 67,
+       "type": "viewer_timestamp",
+       "summary": "0:37 best part ong"
+      }
+     ],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": "pending"
+    },
+    {
+     "title": "Shingeki no Kyojin S1 OP1 | Linked Horizon - Guren no Yumiya (Lyrics with English Translation) - YouTube",
+     "url": "https://www.youtube.com/watch?v=CgAeJxvFubI",
+     "creator": "goodvibe",
+     "source": "YouTube",
+     "duration": 310,
+     "language": "en",
+     "relevance": 8,
+     "reason": "YouTube video features the exact first opening sequence of Attack on Titan with Guren no Yumiya. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 126,
+       "end": 157,
+       "type": "viewer_timestamp",
+       "summary": "2:11 - 2:44"
+      },
+      {
+       "start": 157,
+       "end": 214,
+       "type": "viewer_timestamp",
+       "summary": "2:11 - 2:44 · The beat drop at 3:04 is one of the best things I've ever heard · 2:42😎"
+      },
+      {
+       "start": 260,
+       "end": 302,
+       "type": "viewer_timestamp",
+       "summary": "Hot take, but them shouting \"Eren!\" at 4:25 hits harder than them shouting \"Jager!\" at 1:13. · 4:32"
+      }
+     ],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": "pending"
+    },
+    {
+     "title": "Attack on Titan – Opening Theme – Feuerroter Pfeil und Bogen - YouTube",
+     "url": "https://www.youtube.com/watch?v=8OkpRK2_gVs",
+     "creator": "Funimation",
+     "source": "YouTube",
+     "duration": 93,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Crunchyroll upload of the exact first opening sequence of Attack on Titan with the song Guren no Yumiya. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 25,
+       "end": 74,
+       "type": "viewer_timestamp",
+       "summary": "0:30 chud gye guru😂 · 0:56  YEAGERR!!!"
+      },
+      {
+       "start": 74,
+       "end": 93,
+       "type": "viewer_timestamp",
+       "summary": "1:19 i legit cant with all of them falling like that-"
+      }
+     ],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Shingeki No Kyojin Opening 1 [With Lyrics] - YouTube",
+     "url": "https://www.youtube.com/watch?v=AgBUP8TJqV8",
+     "creator": "kimmeh",
+     "source": "YouTube",
+     "duration": 92,
+     "language": "en",
+     "relevance": 8,
+     "reason": "This is the original creditless opening sequence of Attack on Titan featuring the song Guren no Yumiya. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 0,
+       "end": 34,
+       "type": "viewer_timestamp",
+       "summary": "0:05 The opening is literally on fire · Me and the boys realizing we lost him: 0:15 · 0:01 The wall which indirectly led to extermination of 80% world"
+      }
+     ],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Guren No Yumiya OP.1 | Shingeki No Kyojin. | Subtitulado Al Español. - YouTube",
+     "url": "https://www.youtube.com/watch?v=Py-TSHurUUw",
+     "creator": "meena♡",
+     "source": "YouTube",
+     "duration": 310,
+     "language": "es",
+     "relevance": 8,
+     "reason": "The video provides the first opening sequence of Attack on Titan with the song Guren no Yumiya. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 24,
+       "end": 86,
+       "type": "viewer_timestamp",
+       "summary": "0:29 · 0:56 👌👌👌"
+      }
+     ],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Linked Horizon - Guren No Yumiya (Attack On Titan) FULL Opening Theme HQ - YouTube",
+     "url": "https://www.youtube.com/watch?v=Pn7dCgtwX2c",
+     "creator": "Ngoc Le",
+     "source": "YouTube",
+     "duration": 317,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Full opening theme video for Attack on Titan Opening 1 'Guren No Yumiya'. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 72,
+       "end": 107,
+       "type": "viewer_timestamp",
+       "summary": "1:17 YEAAGEEEAARRR"
+      },
+      {
+       "start": 136,
+       "end": 190,
+       "type": "viewer_timestamp",
+       "summary": "Plus the phrase \"Wir sind die Jäger!\" - \"We are the hunters!\" gets repeated multiple times fro 2:21 onwards. · 2:50 i love this part."
+      },
+      {
+       "start": 190,
+       "end": 225,
+       "type": "viewer_timestamp",
+       "summary": "Then you have the monologue at 3:15, which is also in German:"
+      }
+     ],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Attack On Titans - All Openings (1-9) | 4K 60FPS - YouTube",
+     "url": "https://www.youtube.com/watch?v=euX_8PYBvr4",
+     "creator": "Itz terreur mt",
+     "source": "YouTube",
+     "duration": 848,
+     "language": "fr",
+     "relevance": 7,
+     "reason": "Video is a compilation of all Attack on Titan openings starting with Opening 1.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 183,
+       "end": 218,
+       "type": "viewer_timestamp",
+       "summary": "3:08 The best one for me 🥲🥲"
+      },
+      {
+       "start": 332,
+       "end": 392,
+       "type": "viewer_timestamp",
+       "summary": "06:02 animators: \"how much spoilers do you want in this opening?\" · 5:37 when young Eren grabs his older self making me cry 😭 · 5:52 there's fucking Marcel guys."
+      },
+      {
+       "start": 401,
+       "end": 436,
+       "type": "viewer_timestamp",
+       "summary": "6:46 The subtitles say \"The devil temptingly whispers \"Tread your path with corpses.\""
+      }
+     ],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Attack On Titan - Opening 1 FULL『Guren No Yumiya』by Linked Horizon (Lyrics) - YouTube",
+     "url": "https://www.youtube.com/watch?v=2c1s_gXDiVk",
+     "creator": "AYANO",
+     "source": "YouTube",
+     "duration": 311,
+     "language": null,
+     "relevance": 6,
+     "reason": "This is a YouTube video featuring the full first opening sequence and song Guren No Yumiya for Attack On Titan. Metadata only; contents unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Shingeki no Kyojin -『Guren no Yumiya』| OP 1 | sub. español ; lycris ; letra - YouTube",
+     "url": "https://www.youtube.com/watch?v=7UWBme1R8Zc",
+     "creator": "traposaurio",
+     "source": "YouTube",
+     "duration": 307,
+     "language": "es",
+     "relevance": 6,
+     "reason": "Spanish subbed video containing the original Attack on Titan opening 1 song and visuals.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    }
+   ],
+   "total": 15,
+   "round": 1
+  },
+  {
+   "q": "lofi hip hop study music",
+   "search_id": "343faedf-c312-425c-bde2-127a194f4d5e",
+   "status": "partial",
+   "first_ms": 818,
+   "full_ms": 818,
+   "job": "163b3c8a-22e7-440d-888e-16a6abf0e8c3",
+   "providers": [
+    {
+     "status": "ok",
+     "message": "Brave discovery completed.",
+     "provider": "brave"
+    },
+    {
+     "status": "ok",
+     "message": "Not needed: Brave answered every search.",
+     "provider": "searxng"
+    },
+    {
+     "status": "ok",
+     "message": "AI planned 4 searches for mixed.",
+     "provider": "planner"
+    },
+    {
+     "status": "ok",
+     "message": "Looked for evidence on 2 unmet requirements: 2 targeted searches, 0 pages or videos opened, 0 closed.",
+     "provider": "gap_exploration"
+    },
+    {
+     "status": "ok",
+     "message": "Screened 57 of 57 leads to prioritize evidence checks; final relevance is checked separately.",
+     "provider": "jev_screener"
+    },
+    {
+     "status": "partial",
+     "message": "Some YouTube comments could not be read.",
+     "provider": "youtube"
+    },
+    {
+     "status": "ok",
+     "message": "Reddit discussions checked.",
+     "provider": "reddit"
+    },
+    {
+     "status": "ok",
+     "message": "14 of 18 result pages were checked, 6 in a browser.",
+     "provider": "pages"
+    },
+    {
+     "status": "ok",
+     "message": "Results were checked for relevance by AI.",
+     "provider": "judge"
+    },
+    {
+     "status": "ok",
+     "message": "19 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+     "provider": "relevance_filter"
+    },
+    {
+     "status": "partial",
+     "message": "5 videos queued for caption fetching; their transcripts help later searches, not this one.",
+     "provider": "youtube_captions"
+    }
+   ],
+   "interpretation": {
+    "intent": "Find lofi hip hop music specifically curated for studying.",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "lofi hip hop",
+      "hardness": "hard",
+      "scope": "each"
+     },
+     {
+      "id": "R2",
+      "text": "study music",
+      "hardness": "hard",
+      "scope": "each"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unmet": []
+   },
+   "top": [
+    {
+     "title": "ＳＴＵＤＹ ＴＩＭＥ 📚 Lofi Hip Hop | Study Music ~ Lofi Music To Put You In A Better Mood ✍️ Beats To Relax / Study To / Deep Focus ~ Chill Lofi Beats - YouTube",
+     "url": "https://www.youtube.com/playlist?list=PL3Rd_Q1n-uEmzrjVbyMQmgSoKk6qbWmCg",
+     "creator": null,
+     "source": "YouTube",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "YouTube playlist with lofi hip hop music curated for study time.",
+     "badges": [
+      "3D: WebGL"
+     ],
+     "origin": "catalogue",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unsupported",
+      "comments": "unsupported",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "lofi hip hop beats to relax, code, study and focus during late night sessions on Apple Music",
+     "url": "https://music.apple.com/us/playlist/lofi-hip-hop-beats-to-relax-code-study-and-focus/pl.e27dd96b0d73426fba75dffd2a7f3607",
+     "creator": null,
+     "source": "music.apple.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Apple Music playlist featuring lofi hip hop beats for study and focus.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "lofi hip hop beats - music to study/relax to",
+     "url": "https://open.spotify.com/playlist/74sUjcvpGfdOvCHvgzNEDO",
+     "creator": null,
+     "source": "open.spotify.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Jev: R1 — \"lofi hip hop beats - music to study/relax to | Focus Music | Chillhop Music 2026 - playlis\"; R2 — \"lofi hip hop beats - music to study/relax to | Focus Music | Chillhop Music 2026 - playlis\"",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Stream 1 A.M Study Session 📚 - [lofi hip hop/chill beats] by Lofi Girl | Listen online for free on SoundCloud",
+     "url": "https://soundcloud.com/lofi_girl/compilation",
+     "creator": null,
+     "source": "soundcloud.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Jev: R1 — \"Stream 1 A.M Study Session 📚 - [lofi hip hop/chill beats] by Lofi Girl | Listen online fo\"; R2 — \"Stream 1 A.M Study Session 📚 - [lofi hip hop/chill beats] by Lofi Girl | Listen online fo\"",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Lofi Hip Hop - Lofi beats to study - Study music / Relaxing ...",
+     "url": "https://www.youtube.com/playlist?list=PLXIclLvfETS3AgCnZg4N6QqHu_T27XKIq",
+     "creator": null,
+     "source": "YouTube",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "YouTube playlist collection of lofi hip hop beats for studying.",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "origin": "catalogue",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unsupported",
+      "comments": "unsupported",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "lofi.cafe - lofi music 🎧",
+     "url": "https://www.lofi.cafe/",
+     "creator": null,
+     "source": "www.lofi.cafe",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Website featuring lofi music streams specifically curated for studying.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "lofi hip hop mix 📚 beats to relax/study to (Part 1) - YouTube",
+     "url": "https://www.youtube.com/watch?v=CFGLoQIhmow",
+     "creator": "Lofi Girl",
+     "source": "YouTube",
+     "duration": 10615,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Popular YouTube lofi hip hop study mix by Lofi Girl, directly matches all criteria. Supporting evidence only; exact match unverified.",
+     "badges": [
+      "Livestream replay"
+     ],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 8455,
+       "end": 8490,
+       "type": "viewer_timestamp",
+       "summary": "2:21:00"
+      }
+     ],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Lofi Hip Hop Music To Study and Relax To ( Lo fi Beats) Beats To Sleep To playlist | Listen on Deezer",
+     "url": "https://www.deezer.com/us/playlist/7065984624",
+     "creator": null,
+     "source": "www.deezer.com",
+     "duration": null,
+     "language": null,
+     "relevance": 8,
+     "reason": "Deezer playlist of lofi hip hop music for studying and relaxing.",
+     "badges": [
+      "3D: WebGL",
+      "Discussed on Reddit"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "1 A.M Study Session 📚 - [lofi hip hop/chill beats] - YouTube",
+     "url": "https://www.youtube.com/watch?v=lTRiuFIWV54",
+     "creator": "ChilledCow",
+     "source": "YouTube",
+     "duration": 3674,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Classic lofi hip hop 1 hour study session video by Lofi Girl. Supporting evidence only; exact match unverified.",
+     "badges": [
+      "Livestream replay"
+     ],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 71,
+       "end": 106,
+       "type": "viewer_timestamp",
+       "summary": "Any one September 23 2026 time is 1:16"
+      },
+      {
+       "start": 230,
+       "end": 265,
+       "type": "viewer_timestamp",
+       "summary": "Thanks to you i started 2:35am  and i finish my homwork in just 3:55"
+      },
+      {
+       "start": 540,
+       "end": 575,
+       "type": "viewer_timestamp",
+       "summary": "which track start at 09:05"
+      }
+     ],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Best of lofi hip hop 2023 🎉 - beats to relax/study to - YouTube",
+     "url": "https://www.youtube.com/watch?v=mmKguZohAck",
+     "creator": "Lofi Girl",
+     "source": "YouTube",
+     "duration": 8789,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Best of lofi hip hop compilation specifically for study and relaxation. Supporting evidence only; exact match unverified.",
+     "badges": [
+      "Livestream replay",
+      "Discussed on Reddit"
+     ],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 3224,
+       "end": 3259,
+       "type": "viewer_timestamp",
+       "summary": "@Wildbunnies 53:49 and 1:45:01 - thanks for asking! :)"
+      },
+      {
+       "start": 3484,
+       "end": 3519,
+       "type": "viewer_timestamp",
+       "summary": "Starting at 58:09 - Hourglass with Lawrence Walther and Recalibration Machine 🙏 @Wildbunnies"
+      },
+      {
+       "start": 6296,
+       "end": 6331,
+       "type": "viewer_timestamp",
+       "summary": "@Wildbunnies 53:49 and 1:45:01 - thanks for asking! :)"
+      }
+     ],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    }
+   ],
+   "total": 30,
+   "round": 2
+  },
+  {
+   "q": "how to tie a tie",
+   "search_id": "fabc9a41-9fd9-415f-a08e-3c18fdd00d96",
+   "status": "partial",
+   "first_ms": 554,
+   "full_ms": 554,
+   "job": "d1de1ddb-eed5-4793-9ad5-350c8d5771f4",
+   "providers": [
+    {
+     "status": "ok",
+     "message": "Brave discovery completed.",
+     "provider": "brave"
+    },
+    {
+     "status": "ok",
+     "message": "Not needed: Brave answered every search.",
+     "provider": "searxng"
+    },
+    {
+     "status": "ok",
+     "message": "AI planned 4 searches for mixed.",
+     "provider": "planner"
+    },
+    {
+     "status": "ok",
+     "message": "Looked for evidence on 1 unmet requirement: 1 targeted searches, 1 pages or videos opened, 0 closed.",
+     "provider": "gap_exploration"
+    },
+    {
+     "status": "partial",
+     "message": "68 candidates found; up to 60 candidates were selected for checking after all sources answered.",
+     "provider": "candidate_pool"
+    },
+    {
+     "status": "ok",
+     "message": "Screened 68 of 68 leads to prioritize evidence checks; final relevance is checked separately.",
+     "provider": "jev_screener"
+    },
+    {
+     "status": "ok",
+     "message": "YouTube details and viewer comments checked.",
+     "provider": "youtube"
+    },
+    {
+     "status": "ok",
+     "message": "Reddit discussions checked.",
+     "provider": "reddit"
+    },
+    {
+     "status": "ok",
+     "message": "15 of 20 result pages were checked, 5 in a browser.",
+     "provider": "pages"
+    },
+    {
+     "status": "ok",
+     "message": "Results were checked for relevance by AI.",
+     "provider": "judge"
+    },
+    {
+     "status": "ok",
+     "message": "13 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+     "provider": "relevance_filter"
+    },
+    {
+     "status": "partial",
+     "message": "5 videos queued for caption fetching; their transcripts help later searches, not this one.",
+     "provider": "youtube_captions"
+    }
+   ],
+   "interpretation": {
+    "intent": "The user wants to learn the method of tying a necktie.",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "how to tie a tie",
+      "hardness": "hard",
+      "scope": "each"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unmet": []
+   },
+   "top": [
+    {
+     "title": "How To Tie A Tie: Four-In-Hand & Windsor Knots | Paul Fredrick",
+     "url": "https://www.paulfredrick.com/pages/how-to-tie-a-tie",
+     "creator": null,
+     "source": "www.paulfredrick.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Paul Fredrick instructions for the Four-in-Hand and Windsor knots.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "How to Tie a Tie | Learn How to Tie a Tie using Step-by-Step Animations | Animated Knots by Grog",
+     "url": "https://www.animatedknots.com/how-to-tie-a-tie-necktie-knots",
+     "creator": null,
+     "source": "www.animatedknots.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Step-by-step animations explaining how to tie a tie.",
+     "badges": [
+      "3D: WebGL"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "How To: Tie a Tie – BlackTie.com",
+     "url": "https://blacktie.com/blogs/news/how-to-tie-a-tie",
+     "creator": null,
+     "source": "blacktie.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Step-by-step instructions for tying neckties and bow ties.",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "How to Tie a Tie: Easy Guide to Necktie Knots",
+     "url": "https://www.theknot.com/content/how-to-tie-a-tie",
+     "creator": null,
+     "source": "www.theknot.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "The page provides a complete guide explaining how to tie a necktie.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "How to Tie a Tie Video and Steps",
+     "url": "https://www.realsimple.com/beauty-fashion/shoes-accessories/tie-necktie",
+     "creator": null,
+     "source": "www.realsimple.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Real Simple provides step-by-step instructions and video for tying a necktie.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "4 Ways to Tie a Tie - wikiHow",
+     "url": "https://www.wikihow.com/Tie-a-Tie",
+     "creator": null,
+     "source": "www.wikihow.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "WikiHow guide providing step-by-step instructions on tying a tie.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "How to Tie a Tie: The Complete Guide | The Art of Manliness",
+     "url": "https://www.artofmanliness.com/style/ties/how-to-tie-a-tie/",
+     "creator": null,
+     "source": "www.artofmanliness.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Guide provides instructions and videos for tying classic necktie knots.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "How To Tie A Tie Knot - 18 Different Ways of Tying Necktie Knots",
+     "url": "https://www.realmenrealstyle.com/how-to-tie-a-tie/",
+     "creator": null,
+     "source": "www.realmenrealstyle.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Article and guides detail step-by-step instructions for tying necktie knots.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Learn How to Tie a Tie | Tie-a-Tie.net",
+     "url": "https://www.tie-a-tie.net/",
+     "creator": null,
+     "source": "www.tie-a-tie.net",
+     "duration": null,
+     "language": null,
+     "relevance": 8,
+     "reason": "Comprehensive guide with instructions and diagrams on how to tie a tie.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "How To Tie a Tie | Tie Knot Tutorial | Learn Tie Knots | OTAA",
+     "url": "https://www.otaa.com/en-us/pages/how-to-tie-a-tie",
+     "creator": null,
+     "source": "www.otaa.com",
+     "duration": null,
+     "language": null,
+     "relevance": 8,
+     "reason": "OTAA tie knot guide and overview for men.",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    }
+   ],
+   "total": 30,
+   "round": 2
+  },
+  {
+   "q": "attack on titan opening 1",
+   "search_id": "cd0b01ee-0279-4fd1-82f0-0653b122dee7",
+   "status": "partial",
+   "first_ms": 599,
+   "full_ms": 599,
+   "job": "472cdb1c-9120-4704-b5de-0b16ac28b8ea",
+   "providers": [
+    {
+     "status": "ok",
+     "message": "Brave discovery completed.",
+     "provider": "brave"
+    },
+    {
+     "status": "ok",
+     "message": "Not needed: Brave answered every search.",
+     "provider": "searxng"
+    },
+    {
+     "status": "ok",
+     "message": "AI planned 4 searches for videos.",
+     "provider": "planner"
+    },
+    {
+     "status": "ok",
+     "message": "Recognised the anime \"Attack on Titan\"; searches and AI checks use its official titles and details.",
+     "provider": "anilist"
+    },
+    {
+     "status": "ok",
+     "message": "Looked for evidence on 2 unmet requirements: 2 targeted searches, 0 pages or videos opened, 0 closed.",
+     "provider": "gap_exploration"
+    },
+    {
+     "status": "partial",
+     "message": "70 candidates found; up to 60 candidates were selected for checking after all sources answered.",
+     "provider": "candidate_pool"
+    },
+    {
+     "status": "ok",
+     "message": "Screened 70 of 70 leads to prioritize evidence checks; final relevance is checked separately.",
+     "provider": "jev_screener"
+    },
+    {
+     "status": "ok",
+     "message": "YouTube details and viewer comments checked.",
+     "provider": "youtube"
+    },
+    {
+     "status": "ok",
+     "message": "Reddit discussions checked.",
+     "provider": "reddit"
+    },
+    {
+     "status": "ok",
+     "message": "13 of 18 result pages were checked, 6 in a browser.",
+     "provider": "pages"
+    },
+    {
+     "status": "ok",
+     "message": "Results were checked for relevance by AI.",
+     "provider": "judge"
+    },
+    {
+     "status": "ok",
+     "message": "45 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+     "provider": "relevance_filter"
+    },
+    {
+     "status": "partial",
+     "message": "3 videos queued for scene analysis; these pending analyses are not evidence in this ranking.",
+     "provider": "scene_analysis"
+    },
+    {
+     "status": "partial",
+     "message": "5 videos queued for caption fetching; their transcripts help later searches, not this one.",
+     "provider": "youtube_captions"
+    }
+   ],
+   "interpretation": {
+    "intent": "The user wants to find the first opening sequence of the anime Attack on Titan.",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "attack on titan",
+      "hardness": "hard",
+      "scope": "each"
+     },
+     {
+      "id": "R2",
+      "text": "opening 1",
+      "hardness": "hard",
+      "scope": "each"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unmet": []
+   },
+   "top": [
+    {
+     "title": "Attack on Titan - Opening 1 | 4K | 60FPS | Creditless | - YouTube",
+     "url": "https://www.youtube.com/watch?v=StLX4kITjWU",
+     "creator": "Anicrad",
+     "source": "YouTube",
+     "duration": 106,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Video features Attack on Titan opening 1 Guren no Yumiya cleanly. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "origin": "catalogue",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 1,
+       "end": 41,
+       "type": "viewer_timestamp",
+       "summary": "Armin’s leap from 0:17 to 0:22 never stops to amaze me 😂 · 0:36 is my favorite part. Nothing can replace the feeling of watching attack on titan for the first time · 0:24 mikasa checking eren...oh my"
+      },
+      {
+       "start": 41,
+       "end": 105,
+       "type": "viewer_timestamp",
+       "summary": "1:15 still gives me goosebumps · 0:47 my favorite part · 0:47 - 1:09 , gives me goosebumps, such an incredible opening."
+      }
+     ],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": "pending"
+    },
+    {
+     "title": "Attack on Titan - Opening 1 【Guren no Yumiya】 4K / UHD Creditless | CC - YouTube",
+     "url": "https://www.youtube.com/watch?v=bHUcvHx9zlA",
+     "creator": "Neobrane",
+     "source": "YouTube",
+     "duration": 128,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Video presents Attack on Titan Opening 1 with Guren no Yumiya in high quality. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "origin": "catalogue",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 0,
+       "end": 32,
+       "type": "viewer_timestamp",
+       "summary": "0:16 my favorite part of the Opening · 0:01"
+      },
+      {
+       "start": 32,
+       "end": 67,
+       "type": "viewer_timestamp",
+       "summary": "0:37 best part ong"
+      }
+     ],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": "pending"
+    },
+    {
+     "title": "Shingeki no Kyojin S1 OP1 | Linked Horizon - Guren no Yumiya (Lyrics with English Translation) - YouTube",
+     "url": "https://www.youtube.com/watch?v=CgAeJxvFubI",
+     "creator": "goodvibe",
+     "source": "YouTube",
+     "duration": 310,
+     "language": "en",
+     "relevance": 8,
+     "reason": "YouTube video features the exact first opening sequence of Attack on Titan with Guren no Yumiya. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 126,
+       "end": 157,
+       "type": "viewer_timestamp",
+       "summary": "2:11 - 2:44"
+      },
+      {
+       "start": 157,
+       "end": 214,
+       "type": "viewer_timestamp",
+       "summary": "2:11 - 2:44 · The beat drop at 3:04 is one of the best things I've ever heard · 2:42😎"
+      },
+      {
+       "start": 260,
+       "end": 302,
+       "type": "viewer_timestamp",
+       "summary": "Hot take, but them shouting \"Eren!\" at 4:25 hits harder than them shouting \"Jager!\" at 1:13. · 4:32"
+      }
+     ],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": "pending"
+    },
+    {
+     "title": "Attack on Titan – Opening Theme – Feuerroter Pfeil und Bogen - YouTube",
+     "url": "https://www.youtube.com/watch?v=8OkpRK2_gVs",
+     "creator": "Funimation",
+     "source": "YouTube",
+     "duration": 93,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Crunchyroll upload of the exact first opening sequence of Attack on Titan with the song Guren no Yumiya. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 25,
+       "end": 74,
+       "type": "viewer_timestamp",
+       "summary": "0:30 chud gye guru😂 · 0:56  YEAGERR!!!"
+      },
+      {
+       "start": 74,
+       "end": 93,
+       "type": "viewer_timestamp",
+       "summary": "1:19 i legit cant with all of them falling like that-"
+      }
+     ],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Shingeki No Kyojin Opening 1 [With Lyrics] - YouTube",
+     "url": "https://www.youtube.com/watch?v=AgBUP8TJqV8",
+     "creator": "kimmeh",
+     "source": "YouTube",
+     "duration": 92,
+     "language": "en",
+     "relevance": 8,
+     "reason": "This is the original creditless opening sequence of Attack on Titan featuring the song Guren no Yumiya. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 0,
+       "end": 34,
+       "type": "viewer_timestamp",
+       "summary": "0:05 The opening is literally on fire · Me and the boys realizing we lost him: 0:15 · 0:01 The wall which indirectly led to extermination of 80% world"
+      }
+     ],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Guren No Yumiya OP.1 | Shingeki No Kyojin. | Subtitulado Al Español. - YouTube",
+     "url": "https://www.youtube.com/watch?v=Py-TSHurUUw",
+     "creator": "meena♡",
+     "source": "YouTube",
+     "duration": 310,
+     "language": "es",
+     "relevance": 8,
+     "reason": "The video provides the first opening sequence of Attack on Titan with the song Guren no Yumiya. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 24,
+       "end": 86,
+       "type": "viewer_timestamp",
+       "summary": "0:29 · 0:56 👌👌👌"
+      }
+     ],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Linked Horizon - Guren No Yumiya (Attack On Titan) FULL Opening Theme HQ - YouTube",
+     "url": "https://www.youtube.com/watch?v=Pn7dCgtwX2c",
+     "creator": "Ngoc Le",
+     "source": "YouTube",
+     "duration": 317,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Full opening theme video for Attack on Titan Opening 1 'Guren No Yumiya'. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 72,
+       "end": 107,
+       "type": "viewer_timestamp",
+       "summary": "1:17 YEAAGEEEAARRR"
+      },
+      {
+       "start": 136,
+       "end": 190,
+       "type": "viewer_timestamp",
+       "summary": "Plus the phrase \"Wir sind die Jäger!\" - \"We are the hunters!\" gets repeated multiple times fro 2:21 onwards. · 2:50 i love this part."
+      },
+      {
+       "start": 190,
+       "end": 225,
+       "type": "viewer_timestamp",
+       "summary": "Then you have the monologue at 3:15, which is also in German:"
+      }
+     ],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Attack On Titans - All Openings (1-9) | 4K 60FPS - YouTube",
+     "url": "https://www.youtube.com/watch?v=euX_8PYBvr4",
+     "creator": "Itz terreur mt",
+     "source": "YouTube",
+     "duration": 848,
+     "language": "fr",
+     "relevance": 7,
+     "reason": "Video is a compilation of all Attack on Titan openings starting with Opening 1.",
+     "badges": [],
+     "origin": "catalogue",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 183,
+       "end": 218,
+       "type": "viewer_timestamp",
+       "summary": "3:08 The best one for me 🥲🥲"
+      },
+      {
+       "start": 332,
+       "end": 392,
+       "type": "viewer_timestamp",
+       "summary": "06:02 animators: \"how much spoilers do you want in this opening?\" · 5:37 when young Eren grabs his older self making me cry 😭 · 5:52 there's fucking Marcel guys."
+      },
+      {
+       "start": 401,
+       "end": 436,
+       "type": "viewer_timestamp",
+       "summary": "6:46 The subtitles say \"The devil temptingly whispers \"Tread your path with corpses.\""
+      }
+     ],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Attack On Titan - Opening 1 FULL『Guren No Yumiya』by Linked Horizon (Lyrics) - YouTube",
+     "url": "https://www.youtube.com/watch?v=2c1s_gXDiVk",
+     "creator": "AYANO",
+     "source": "YouTube",
+     "duration": 311,
+     "language": null,
+     "relevance": 6,
+     "reason": "This is a YouTube video featuring the full first opening sequence and song Guren No Yumiya for Attack On Titan. Metadata only; contents unverified.",
+     "badges": [],
+     "origin": "catalogue",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Shingeki no Kyojin -『Guren no Yumiya』| OP 1 | sub. español ; lycris ; letra - YouTube",
+     "url": "https://www.youtube.com/watch?v=7UWBme1R8Zc",
+     "creator": "traposaurio",
+     "source": "YouTube",
+     "duration": 307,
+     "language": "es",
+     "relevance": 6,
+     "reason": "Spanish subbed video containing the original Attack on Titan opening 1 song and visuals.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    }
+   ],
+   "total": 15,
+   "round": 2
+  },
+  {
+   "q": "lofi hip hop study music",
+   "search_id": "d9526821-3410-493e-8d03-450b998600bd",
+   "status": "partial",
+   "first_ms": 556,
+   "full_ms": 556,
+   "job": "163b3c8a-22e7-440d-888e-16a6abf0e8c3",
+   "providers": [
+    {
+     "status": "ok",
+     "message": "Brave discovery completed.",
+     "provider": "brave"
+    },
+    {
+     "status": "ok",
+     "message": "Not needed: Brave answered every search.",
+     "provider": "searxng"
+    },
+    {
+     "status": "ok",
+     "message": "AI planned 4 searches for mixed.",
+     "provider": "planner"
+    },
+    {
+     "status": "ok",
+     "message": "Looked for evidence on 2 unmet requirements: 2 targeted searches, 0 pages or videos opened, 0 closed.",
+     "provider": "gap_exploration"
+    },
+    {
+     "status": "ok",
+     "message": "Screened 57 of 57 leads to prioritize evidence checks; final relevance is checked separately.",
+     "provider": "jev_screener"
+    },
+    {
+     "status": "partial",
+     "message": "Some YouTube comments could not be read.",
+     "provider": "youtube"
+    },
+    {
+     "status": "ok",
+     "message": "Reddit discussions checked.",
+     "provider": "reddit"
+    },
+    {
+     "status": "ok",
+     "message": "14 of 18 result pages were checked, 6 in a browser.",
+     "provider": "pages"
+    },
+    {
+     "status": "ok",
+     "message": "Results were checked for relevance by AI.",
+     "provider": "judge"
+    },
+    {
+     "status": "ok",
+     "message": "19 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+     "provider": "relevance_filter"
+    },
+    {
+     "status": "partial",
+     "message": "5 videos queued for caption fetching; their transcripts help later searches, not this one.",
+     "provider": "youtube_captions"
+    }
+   ],
+   "interpretation": {
+    "intent": "Find lofi hip hop music specifically curated for studying.",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "lofi hip hop",
+      "hardness": "hard",
+      "scope": "each"
+     },
+     {
+      "id": "R2",
+      "text": "study music",
+      "hardness": "hard",
+      "scope": "each"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unmet": []
+   },
+   "top": [
+    {
+     "title": "ＳＴＵＤＹ ＴＩＭＥ 📚 Lofi Hip Hop | Study Music ~ Lofi Music To Put You In A Better Mood ✍️ Beats To Relax / Study To / Deep Focus ~ Chill Lofi Beats - YouTube",
+     "url": "https://www.youtube.com/playlist?list=PL3Rd_Q1n-uEmzrjVbyMQmgSoKk6qbWmCg",
+     "creator": null,
+     "source": "YouTube",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "YouTube playlist with lofi hip hop music curated for study time.",
+     "badges": [
+      "3D: WebGL"
+     ],
+     "origin": "catalogue",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unsupported",
+      "comments": "unsupported",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "lofi hip hop beats to relax, code, study and focus during late night sessions on Apple Music",
+     "url": "https://music.apple.com/us/playlist/lofi-hip-hop-beats-to-relax-code-study-and-focus/pl.e27dd96b0d73426fba75dffd2a7f3607",
+     "creator": null,
+     "source": "music.apple.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Apple Music playlist featuring lofi hip hop beats for study and focus.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "lofi hip hop beats - music to study/relax to",
+     "url": "https://open.spotify.com/playlist/74sUjcvpGfdOvCHvgzNEDO",
+     "creator": null,
+     "source": "open.spotify.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Jev: R1 — \"lofi hip hop beats - music to study/relax to | Focus Music | Chillhop Music 2026 - playlis\"; R2 — \"lofi hip hop beats - music to study/relax to | Focus Music | Chillhop Music 2026 - playlis\"",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Stream 1 A.M Study Session 📚 - [lofi hip hop/chill beats] by Lofi Girl | Listen online for free on SoundCloud",
+     "url": "https://soundcloud.com/lofi_girl/compilation",
+     "creator": null,
+     "source": "soundcloud.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Jev: R1 — \"Stream 1 A.M Study Session 📚 - [lofi hip hop/chill beats] by Lofi Girl | Listen online fo\"; R2 — \"Stream 1 A.M Study Session 📚 - [lofi hip hop/chill beats] by Lofi Girl | Listen online fo\"",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Lofi Hip Hop - Lofi beats to study - Study music / Relaxing ...",
+     "url": "https://www.youtube.com/playlist?list=PLXIclLvfETS3AgCnZg4N6QqHu_T27XKIq",
+     "creator": null,
+     "source": "YouTube",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "YouTube playlist collection of lofi hip hop beats for studying.",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "origin": "catalogue",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unsupported",
+      "comments": "unsupported",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "lofi.cafe - lofi music 🎧",
+     "url": "https://www.lofi.cafe/",
+     "creator": null,
+     "source": "www.lofi.cafe",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Website featuring lofi music streams specifically curated for studying.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "lofi hip hop mix 📚 beats to relax/study to (Part 1) - YouTube",
+     "url": "https://www.youtube.com/watch?v=CFGLoQIhmow",
+     "creator": "Lofi Girl",
+     "source": "YouTube",
+     "duration": 10615,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Popular YouTube lofi hip hop study mix by Lofi Girl, directly matches all criteria. Supporting evidence only; exact match unverified.",
+     "badges": [
+      "Livestream replay"
+     ],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 8455,
+       "end": 8490,
+       "type": "viewer_timestamp",
+       "summary": "2:21:00"
+      }
+     ],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Lofi Hip Hop Music To Study and Relax To ( Lo fi Beats) Beats To Sleep To playlist | Listen on Deezer",
+     "url": "https://www.deezer.com/us/playlist/7065984624",
+     "creator": null,
+     "source": "www.deezer.com",
+     "duration": null,
+     "language": null,
+     "relevance": 8,
+     "reason": "Deezer playlist of lofi hip hop music for studying and relaxing.",
+     "badges": [
+      "3D: WebGL",
+      "Discussed on Reddit"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "1 A.M Study Session 📚 - [lofi hip hop/chill beats] - YouTube",
+     "url": "https://www.youtube.com/watch?v=lTRiuFIWV54",
+     "creator": "ChilledCow",
+     "source": "YouTube",
+     "duration": 3674,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Classic lofi hip hop 1 hour study session video by Lofi Girl. Supporting evidence only; exact match unverified.",
+     "badges": [
+      "Livestream replay"
+     ],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 71,
+       "end": 106,
+       "type": "viewer_timestamp",
+       "summary": "Any one September 23 2026 time is 1:16"
+      },
+      {
+       "start": 230,
+       "end": 265,
+       "type": "viewer_timestamp",
+       "summary": "Thanks to you i started 2:35am  and i finish my homwork in just 3:55"
+      },
+      {
+       "start": 540,
+       "end": 575,
+       "type": "viewer_timestamp",
+       "summary": "which track start at 09:05"
+      }
+     ],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Best of lofi hip hop 2023 🎉 - beats to relax/study to - YouTube",
+     "url": "https://www.youtube.com/watch?v=mmKguZohAck",
+     "creator": "Lofi Girl",
+     "source": "YouTube",
+     "duration": 8789,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Best of lofi hip hop compilation specifically for study and relaxation. Supporting evidence only; exact match unverified.",
+     "badges": [
+      "Livestream replay",
+      "Discussed on Reddit"
+     ],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 3224,
+       "end": 3259,
+       "type": "viewer_timestamp",
+       "summary": "@Wildbunnies 53:49 and 1:45:01 - thanks for asking! :)"
+      },
+      {
+       "start": 3484,
+       "end": 3519,
+       "type": "viewer_timestamp",
+       "summary": "Starting at 58:09 - Hourglass with Lawrence Walther and Recalibration Machine 🙏 @Wildbunnies"
+      },
+      {
+       "start": 6296,
+       "end": 6331,
+       "type": "viewer_timestamp",
+       "summary": "@Wildbunnies 53:49 and 1:45:01 - thanks for asking! :)"
+      }
+     ],
+     "requirements": [
+      "supported: lofi hip hop",
+      "supported: study music"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    }
+   ],
+   "total": 30,
+   "round": 3
+  },
+  {
+   "q": "how to tie a tie",
+   "search_id": "8178fd81-c776-4fa8-8c16-6a167d27947e",
+   "status": "partial",
+   "first_ms": 535,
+   "full_ms": 535,
+   "job": "d1de1ddb-eed5-4793-9ad5-350c8d5771f4",
+   "providers": [
+    {
+     "status": "ok",
+     "message": "Brave discovery completed.",
+     "provider": "brave"
+    },
+    {
+     "status": "ok",
+     "message": "Not needed: Brave answered every search.",
+     "provider": "searxng"
+    },
+    {
+     "status": "ok",
+     "message": "AI planned 4 searches for mixed.",
+     "provider": "planner"
+    },
+    {
+     "status": "ok",
+     "message": "Looked for evidence on 1 unmet requirement: 1 targeted searches, 1 pages or videos opened, 0 closed.",
+     "provider": "gap_exploration"
+    },
+    {
+     "status": "partial",
+     "message": "68 candidates found; up to 60 candidates were selected for checking after all sources answered.",
+     "provider": "candidate_pool"
+    },
+    {
+     "status": "ok",
+     "message": "Screened 68 of 68 leads to prioritize evidence checks; final relevance is checked separately.",
+     "provider": "jev_screener"
+    },
+    {
+     "status": "ok",
+     "message": "YouTube details and viewer comments checked.",
+     "provider": "youtube"
+    },
+    {
+     "status": "ok",
+     "message": "Reddit discussions checked.",
+     "provider": "reddit"
+    },
+    {
+     "status": "ok",
+     "message": "15 of 20 result pages were checked, 5 in a browser.",
+     "provider": "pages"
+    },
+    {
+     "status": "ok",
+     "message": "Results were checked for relevance by AI.",
+     "provider": "judge"
+    },
+    {
+     "status": "ok",
+     "message": "13 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+     "provider": "relevance_filter"
+    },
+    {
+     "status": "partial",
+     "message": "5 videos queued for caption fetching; their transcripts help later searches, not this one.",
+     "provider": "youtube_captions"
+    }
+   ],
+   "interpretation": {
+    "intent": "The user wants to learn the method of tying a necktie.",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "how to tie a tie",
+      "hardness": "hard",
+      "scope": "each"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unmet": []
+   },
+   "top": [
+    {
+     "title": "How To Tie A Tie: Four-In-Hand & Windsor Knots | Paul Fredrick",
+     "url": "https://www.paulfredrick.com/pages/how-to-tie-a-tie",
+     "creator": null,
+     "source": "www.paulfredrick.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Paul Fredrick instructions for the Four-in-Hand and Windsor knots.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "How to Tie a Tie | Learn How to Tie a Tie using Step-by-Step Animations | Animated Knots by Grog",
+     "url": "https://www.animatedknots.com/how-to-tie-a-tie-necktie-knots",
+     "creator": null,
+     "source": "www.animatedknots.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Step-by-step animations explaining how to tie a tie.",
+     "badges": [
+      "3D: WebGL"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "How To: Tie a Tie – BlackTie.com",
+     "url": "https://blacktie.com/blogs/news/how-to-tie-a-tie",
+     "creator": null,
+     "source": "blacktie.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Step-by-step instructions for tying neckties and bow ties.",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "How to Tie a Tie: Easy Guide to Necktie Knots",
+     "url": "https://www.theknot.com/content/how-to-tie-a-tie",
+     "creator": null,
+     "source": "www.theknot.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "The page provides a complete guide explaining how to tie a necktie.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "How to Tie a Tie Video and Steps",
+     "url": "https://www.realsimple.com/beauty-fashion/shoes-accessories/tie-necktie",
+     "creator": null,
+     "source": "www.realsimple.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Real Simple provides step-by-step instructions and video for tying a necktie.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "4 Ways to Tie a Tie - wikiHow",
+     "url": "https://www.wikihow.com/Tie-a-Tie",
+     "creator": null,
+     "source": "www.wikihow.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "WikiHow guide providing step-by-step instructions on tying a tie.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "How to Tie a Tie: The Complete Guide | The Art of Manliness",
+     "url": "https://www.artofmanliness.com/style/ties/how-to-tie-a-tie/",
+     "creator": null,
+     "source": "www.artofmanliness.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Guide provides instructions and videos for tying classic necktie knots.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "How To Tie A Tie Knot - 18 Different Ways of Tying Necktie Knots",
+     "url": "https://www.realmenrealstyle.com/how-to-tie-a-tie/",
+     "creator": null,
+     "source": "www.realmenrealstyle.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Article and guides detail step-by-step instructions for tying necktie knots.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Learn How to Tie a Tie | Tie-a-Tie.net",
+     "url": "https://www.tie-a-tie.net/",
+     "creator": null,
+     "source": "www.tie-a-tie.net",
+     "duration": null,
+     "language": null,
+     "relevance": 8,
+     "reason": "Comprehensive guide with instructions and diagrams on how to tie a tie.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "How To Tie a Tie | Tie Knot Tutorial | Learn Tie Knots | OTAA",
+     "url": "https://www.otaa.com/en-us/pages/how-to-tie-a-tie",
+     "creator": null,
+     "source": "www.otaa.com",
+     "duration": null,
+     "language": null,
+     "relevance": 8,
+     "reason": "OTAA tie knot guide and overview for men.",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: how to tie a tie"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    }
+   ],
+   "total": 30,
+   "round": 3
+  },
+  {
+   "q": "attack on titan opening 1",
+   "search_id": "7b8c4794-dec6-4b19-af55-eff9edcb9cd7",
+   "status": "partial",
+   "first_ms": 611,
+   "full_ms": 611,
+   "job": "472cdb1c-9120-4704-b5de-0b16ac28b8ea",
+   "providers": [
+    {
+     "status": "ok",
+     "message": "Brave discovery completed.",
+     "provider": "brave"
+    },
+    {
+     "status": "ok",
+     "message": "Not needed: Brave answered every search.",
+     "provider": "searxng"
+    },
+    {
+     "status": "ok",
+     "message": "AI planned 4 searches for videos.",
+     "provider": "planner"
+    },
+    {
+     "status": "ok",
+     "message": "Recognised the anime \"Attack on Titan\"; searches and AI checks use its official titles and details.",
+     "provider": "anilist"
+    },
+    {
+     "status": "ok",
+     "message": "Looked for evidence on 2 unmet requirements: 2 targeted searches, 0 pages or videos opened, 0 closed.",
+     "provider": "gap_exploration"
+    },
+    {
+     "status": "partial",
+     "message": "70 candidates found; up to 60 candidates were selected for checking after all sources answered.",
+     "provider": "candidate_pool"
+    },
+    {
+     "status": "ok",
+     "message": "Screened 70 of 70 leads to prioritize evidence checks; final relevance is checked separately.",
+     "provider": "jev_screener"
+    },
+    {
+     "status": "ok",
+     "message": "YouTube details and viewer comments checked.",
+     "provider": "youtube"
+    },
+    {
+     "status": "ok",
+     "message": "Reddit discussions checked.",
+     "provider": "reddit"
+    },
+    {
+     "status": "ok",
+     "message": "13 of 18 result pages were checked, 6 in a browser.",
+     "provider": "pages"
+    },
+    {
+     "status": "ok",
+     "message": "Results were checked for relevance by AI.",
+     "provider": "judge"
+    },
+    {
+     "status": "ok",
+     "message": "45 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+     "provider": "relevance_filter"
+    },
+    {
+     "status": "partial",
+     "message": "3 videos queued for scene analysis; these pending analyses are not evidence in this ranking.",
+     "provider": "scene_analysis"
+    },
+    {
+     "status": "partial",
+     "message": "5 videos queued for caption fetching; their transcripts help later searches, not this one.",
+     "provider": "youtube_captions"
+    }
+   ],
+   "interpretation": {
+    "intent": "The user wants to find the first opening sequence of the anime Attack on Titan.",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "attack on titan",
+      "hardness": "hard",
+      "scope": "each"
+     },
+     {
+      "id": "R2",
+      "text": "opening 1",
+      "hardness": "hard",
+      "scope": "each"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unmet": []
+   },
+   "top": [
+    {
+     "title": "Attack on Titan - Opening 1 | 4K | 60FPS | Creditless | - YouTube",
+     "url": "https://www.youtube.com/watch?v=StLX4kITjWU",
+     "creator": "Anicrad",
+     "source": "YouTube",
+     "duration": 106,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Video features Attack on Titan opening 1 Guren no Yumiya cleanly. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "origin": "catalogue",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 1,
+       "end": 41,
+       "type": "viewer_timestamp",
+       "summary": "Armin’s leap from 0:17 to 0:22 never stops to amaze me 😂 · 0:36 is my favorite part. Nothing can replace the feeling of watching attack on titan for the first time · 0:24 mikasa checking eren...oh my"
+      },
+      {
+       "start": 41,
+       "end": 105,
+       "type": "viewer_timestamp",
+       "summary": "1:15 still gives me goosebumps · 0:47 my favorite part · 0:47 - 1:09 , gives me goosebumps, such an incredible opening."
+      }
+     ],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": "pending"
+    },
+    {
+     "title": "Attack on Titan - Opening 1 【Guren no Yumiya】 4K / UHD Creditless | CC - YouTube",
+     "url": "https://www.youtube.com/watch?v=bHUcvHx9zlA",
+     "creator": "Neobrane",
+     "source": "YouTube",
+     "duration": 128,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Video presents Attack on Titan Opening 1 with Guren no Yumiya in high quality. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "origin": "catalogue",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 0,
+       "end": 32,
+       "type": "viewer_timestamp",
+       "summary": "0:16 my favorite part of the Opening · 0:01"
+      },
+      {
+       "start": 32,
+       "end": 67,
+       "type": "viewer_timestamp",
+       "summary": "0:37 best part ong"
+      }
+     ],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": "pending"
+    },
+    {
+     "title": "Shingeki no Kyojin S1 OP1 | Linked Horizon - Guren no Yumiya (Lyrics with English Translation) - YouTube",
+     "url": "https://www.youtube.com/watch?v=CgAeJxvFubI",
+     "creator": "goodvibe",
+     "source": "YouTube",
+     "duration": 310,
+     "language": "en",
+     "relevance": 8,
+     "reason": "YouTube video features the exact first opening sequence of Attack on Titan with Guren no Yumiya. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 126,
+       "end": 157,
+       "type": "viewer_timestamp",
+       "summary": "2:11 - 2:44"
+      },
+      {
+       "start": 157,
+       "end": 214,
+       "type": "viewer_timestamp",
+       "summary": "2:11 - 2:44 · The beat drop at 3:04 is one of the best things I've ever heard · 2:42😎"
+      },
+      {
+       "start": 260,
+       "end": 302,
+       "type": "viewer_timestamp",
+       "summary": "Hot take, but them shouting \"Eren!\" at 4:25 hits harder than them shouting \"Jager!\" at 1:13. · 4:32"
+      }
+     ],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": "pending"
+    },
+    {
+     "title": "Attack on Titan – Opening Theme – Feuerroter Pfeil und Bogen - YouTube",
+     "url": "https://www.youtube.com/watch?v=8OkpRK2_gVs",
+     "creator": "Funimation",
+     "source": "YouTube",
+     "duration": 93,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Crunchyroll upload of the exact first opening sequence of Attack on Titan with the song Guren no Yumiya. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 25,
+       "end": 74,
+       "type": "viewer_timestamp",
+       "summary": "0:30 chud gye guru😂 · 0:56  YEAGERR!!!"
+      },
+      {
+       "start": 74,
+       "end": 93,
+       "type": "viewer_timestamp",
+       "summary": "1:19 i legit cant with all of them falling like that-"
+      }
+     ],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Shingeki No Kyojin Opening 1 [With Lyrics] - YouTube",
+     "url": "https://www.youtube.com/watch?v=AgBUP8TJqV8",
+     "creator": "kimmeh",
+     "source": "YouTube",
+     "duration": 92,
+     "language": "en",
+     "relevance": 8,
+     "reason": "This is the original creditless opening sequence of Attack on Titan featuring the song Guren no Yumiya. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 0,
+       "end": 34,
+       "type": "viewer_timestamp",
+       "summary": "0:05 The opening is literally on fire · Me and the boys realizing we lost him: 0:15 · 0:01 The wall which indirectly led to extermination of 80% world"
+      }
+     ],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Guren No Yumiya OP.1 | Shingeki No Kyojin. | Subtitulado Al Español. - YouTube",
+     "url": "https://www.youtube.com/watch?v=Py-TSHurUUw",
+     "creator": "meena♡",
+     "source": "YouTube",
+     "duration": 310,
+     "language": "es",
+     "relevance": 8,
+     "reason": "The video provides the first opening sequence of Attack on Titan with the song Guren no Yumiya. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 24,
+       "end": 86,
+       "type": "viewer_timestamp",
+       "summary": "0:29 · 0:56 👌👌👌"
+      }
+     ],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Linked Horizon - Guren No Yumiya (Attack On Titan) FULL Opening Theme HQ - YouTube",
+     "url": "https://www.youtube.com/watch?v=Pn7dCgtwX2c",
+     "creator": "Ngoc Le",
+     "source": "YouTube",
+     "duration": 317,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Full opening theme video for Attack on Titan Opening 1 'Guren No Yumiya'. Supporting evidence only; exact match unverified.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 72,
+       "end": 107,
+       "type": "viewer_timestamp",
+       "summary": "1:17 YEAAGEEEAARRR"
+      },
+      {
+       "start": 136,
+       "end": 190,
+       "type": "viewer_timestamp",
+       "summary": "Plus the phrase \"Wir sind die Jäger!\" - \"We are the hunters!\" gets repeated multiple times fro 2:21 onwards. · 2:50 i love this part."
+      },
+      {
+       "start": 190,
+       "end": 225,
+       "type": "viewer_timestamp",
+       "summary": "Then you have the monologue at 3:15, which is also in German:"
+      }
+     ],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Attack On Titans - All Openings (1-9) | 4K 60FPS - YouTube",
+     "url": "https://www.youtube.com/watch?v=euX_8PYBvr4",
+     "creator": "Itz terreur mt",
+     "source": "YouTube",
+     "duration": 848,
+     "language": "fr",
+     "relevance": 7,
+     "reason": "Video is a compilation of all Attack on Titan openings starting with Opening 1.",
+     "badges": [],
+     "origin": "catalogue",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 183,
+       "end": 218,
+       "type": "viewer_timestamp",
+       "summary": "3:08 The best one for me 🥲🥲"
+      },
+      {
+       "start": 332,
+       "end": 392,
+       "type": "viewer_timestamp",
+       "summary": "06:02 animators: \"how much spoilers do you want in this opening?\" · 5:37 when young Eren grabs his older self making me cry 😭 · 5:52 there's fucking Marcel guys."
+      },
+      {
+       "start": 401,
+       "end": 436,
+       "type": "viewer_timestamp",
+       "summary": "6:46 The subtitles say \"The devil temptingly whispers \"Tread your path with corpses.\""
+      }
+     ],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Attack On Titan - Opening 1 FULL『Guren No Yumiya』by Linked Horizon (Lyrics) - YouTube",
+     "url": "https://www.youtube.com/watch?v=2c1s_gXDiVk",
+     "creator": "AYANO",
+     "source": "YouTube",
+     "duration": 311,
+     "language": null,
+     "relevance": 6,
+     "reason": "This is a YouTube video featuring the full first opening sequence and song Guren No Yumiya for Attack On Titan. Metadata only; contents unverified.",
+     "badges": [],
+     "origin": "catalogue",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Shingeki no Kyojin -『Guren no Yumiya』| OP 1 | sub. español ; lycris ; letra - YouTube",
+     "url": "https://www.youtube.com/watch?v=7UWBme1R8Zc",
+     "creator": "traposaurio",
+     "source": "YouTube",
+     "duration": 307,
+     "language": "es",
+     "relevance": 6,
+     "reason": "Spanish subbed video containing the original Attack on Titan opening 1 song and visuals.",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: attack on titan",
+      "supported: opening 1"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    }
+   ],
+   "total": 15,
+   "round": 3
+  }
+ ]
+}

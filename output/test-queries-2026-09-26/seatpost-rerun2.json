@@ -1,0 +1,1497 @@
+{
+ "search": {
+  "query": "Find a bicycle repair video where someone removes a stuck seatpost using heat, then successfully pulls it out. Give timestamps covering both actions. Exclude videos that only discuss the method, and exclude background music. Any spoken language is acceptable.",
+  "search_id": "77321965-819b-4454-8430-7bafd963a8bf",
+  "status": "partial",
+  "depth": "quick",
+  "stage": null,
+  "results": [],
+  "has_more": false,
+  "next_cursor": null,
+  "discovered": [],
+  "catalogue_total": 0,
+  "ranked": [],
+  "discovery_job_id": "3421498c-a507-4a0e-a1a9-0e16602cbc21",
+  "providers": [
+   {
+    "status": "disabled",
+    "message": "Semantic search is unavailable; keyword search is active.",
+    "provider": "embeddings"
+   },
+   {
+    "status": "ok",
+    "message": "Brave discovery completed.",
+    "provider": "brave"
+   },
+   {
+    "status": "ok",
+    "message": "Not needed: Brave answered every search.",
+    "provider": "searxng"
+   },
+   {
+    "status": "ok",
+    "message": "AI planned 4 searches for videos.",
+    "provider": "planner"
+   },
+   {
+    "status": "ok",
+    "message": "Looked for evidence on 3 unmet requirements: 1 targeted searches, 0 pages or videos opened, 0 closed.",
+    "provider": "gap_exploration"
+   },
+   {
+    "status": "ok",
+    "message": "Screened 46 of 46 leads to prioritize evidence checks; final relevance is checked separately.",
+    "provider": "jev_screener"
+   },
+   {
+    "status": "ok",
+    "message": "YouTube details and viewer comments checked.",
+    "provider": "youtube"
+   },
+   {
+    "status": "ok",
+    "message": "Reddit discussions checked.",
+    "provider": "reddit"
+   },
+   {
+    "status": "ok",
+    "message": "Results were checked for relevance by AI.",
+    "provider": "judge"
+   },
+   {
+    "status": "ok",
+    "message": "No sufficiently supported matches were found. Weak, uncertain and unchecked candidates were excluded.",
+    "provider": "relevance_filter"
+   }
+  ],
+  "ranking_version": "relevance-v8-requirements",
+  "interpretation": {
+   "intent": "Find a video demonstrating the successful removal of a stuck bicycle seatpost using heat, without background music.",
+   "requirements": [
+    {
+     "id": "R1",
+     "text": "Is a video",
+     "hardness": "hard",
+     "scope": "each"
+    },
+    {
+     "id": "R2",
+     "text": "removes a stuck seatpost using heat",
+     "hardness": "hard",
+     "scope": "each"
+    },
+    {
+     "id": "R3",
+     "text": "successfully pulls it out",
+     "hardness": "hard",
+     "scope": "each"
+    },
+    {
+     "id": "R4",
+     "text": "exclude background music",
+     "hardness": "hard",
+     "scope": "each"
+    }
+   ],
+   "assumptions": [],
+   "ambiguities": [],
+   "unmet": [
+    "No result could be verified for: Is a video",
+    "No result could be verified for: removes a stuck seatpost using heat",
+    "No result could be verified for: successfully pulls it out",
+    "No result could be verified for: exclude background music"
+   ]
+  }
+ },
+ "closest": {
+  "search_id": "77321965-819b-4454-8430-7bafd963a8bf",
+  "status": "ready",
+  "message": "These are partial or uncertain matches. Check the reason shown on each result.",
+  "results": [
+   {
+    "id": "c02bcf68-b806-4952-8231-1cec56c29746",
+    "title": "How to remove seized/frozen seatpost with blowtorch - YouTube",
+    "badges": [
+     "Underrated find",
+     "Closest match"
+    ],
+    "origin": "discovery",
+    "creator": "Jovanović",
+    "moments": [],
+    "preview": false,
+    "duration": 606,
+    "evidence": "metadata_match",
+    "language": "en",
+    "judgement": {
+     "model": "google/gemini-3.5-flash-lite",
+     "reason": "Video shows removing a stuck seatpost using a blowtorch and successfully pulling it out. Supporting evidence only; exact match unverified.",
+     "relevance": 5,
+     "intent_checks": [
+      {
+       "field": "title",
+       "quote": "How to remove seized/frozen seatpost with blowtorch",
+       "status": "supported",
+       "dimension": "subject"
+      },
+      {
+       "field": "description",
+       "quote": "How to remove a seized seat post with a blowtorch I explain how I remove my seized aluminum seat post from my steel bike frame.",
+       "status": "supported",
+       "dimension": "intent"
+      },
+      {
+       "field": "description",
+       "quote": "How to remove a seized seat post with a blowtorch I explain how I remove my seized aluminum seat post from my steel bike frame.",
+       "status": "supported",
+       "dimension": "relationship"
+      },
+      {
+       "field": "title",
+       "quote": "How to remove seized/frozen seatpost with blowtorch - YouTube",
+       "status": "supported",
+       "dimension": "format"
+      }
+     ]
+    },
+    "source_id": "3bfb9d94-75fe-4ff1-89e9-ecb03e696e70",
+    "thumbnail": "https://imgs.search.brave.com/CWP4N435dJetdyvSkoEdkhn0LPCWupD837QJ5Jf0OCc/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS8t/b2FkU1ZZNGx1Zy9t/YXhyZXNkZWZhdWx0/LmpwZw",
+    "embeddable": null,
+    "description": "How to remove a seized seat post with a blowtorchI explain how I remove my seized aluminum seat post from my steel bike frame. Links for other seized seatpos...",
+    "license_url": null,
+    "source_name": "YouTube",
+    "verified_at": null,
+    "availability": "unknown",
+    "published_at": "2017-04-14T19:22:46.000Z",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "Is a video",
+      "method": "url",
+      "status": "supported",
+      "excerpt": "youtube.com"
+     },
+     {
+      "id": "R2",
+      "text": "removes a stuck seatpost using heat",
+      "method": "judge",
+      "status": "supported",
+      "excerpt": "How to remove a seized seat post with a blowtorch"
+     },
+     {
+      "id": "R3",
+      "text": "successfully pulls it out",
+      "method": "judge",
+      "status": "supported",
+      "excerpt": "I dislodged 2 stuck seatppsts using a modified version of your instructions."
+     },
+     {
+      "id": "R4",
+      "text": "exclude background music",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     }
+    ],
+    "canonical_url": "https://www.youtube.com/watch?v=-oadSVY4lug",
+    "rights_status": "unknown",
+    "uncertainties": [
+     "Not confirmed: exclude background music"
+    ],
+    "evidence_coverage": {
+     "basis": "viewer_claims",
+     "captions": "unavailable",
+     "comments": "available",
+     "analysed_scenes": 0,
+     "transcript_passages": 0
+    },
+    "scene_analysis": null
+   },
+   {
+    "id": "362ebb09-b52a-4056-b8ac-e1371f95255e",
+    "title": "How to Remove a Seized Seatpost (Steel Frame, Aluminium Seatpost) - YouTube",
+    "badges": [
+     "Closest match"
+    ],
+    "origin": "discovery",
+    "creator": "The Muddy Cyclist",
+    "moments": [],
+    "preview": false,
+    "duration": 378,
+    "evidence": "metadata_match",
+    "language": "en",
+    "judgement": {
+     "model": "gemini-3.5-flash",
+     "reason": "Shows using a heat gun on a stuck seatpost, but the audio features background music. Match not verified from the evidence.",
+     "relevance": 5,
+     "intent_checks": [
+      {
+       "field": "title",
+       "quote": "How to Remove a Seized Seatpost",
+       "status": "supported",
+       "dimension": "subject"
+      },
+      {
+       "field": "description",
+       "quote": "In this video, I remove a seized aluminium seatpost from a steel bike frame.",
+       "status": "supported",
+       "dimension": "intent"
+      },
+      {
+       "field": "description",
+       "quote": "",
+       "status": "unknown",
+       "dimension": "relationship"
+      },
+      {
+       "field": "title",
+       "quote": "How to Remove a Seized Seatpost (Steel Frame, Aluminium Seatpost) - YouTube",
+       "status": "supported",
+       "dimension": "format"
+      }
+     ]
+    },
+    "source_id": "3bfb9d94-75fe-4ff1-89e9-ecb03e696e70",
+    "thumbnail": "https://imgs.search.brave.com/nQeJ6_QQlUYJxb9AnVJ90VOl56-3ze95rsEXYLvTe2Q/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS96/VEM0eGgzVW13US9t/YXhyZXNkZWZhdWx0/LmpwZw",
+    "embeddable": null,
+    "description": "In this video, I remove a seized aluminium seatpost from a steel bike frame. The seatpost on my steel Genesis IO had been stuck for years, and as I was prepa...",
+    "license_url": null,
+    "source_name": "YouTube",
+    "verified_at": null,
+    "availability": "unknown",
+    "published_at": "2021-08-25T12:00:26.000Z",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "Is a video",
+      "method": "url",
+      "status": "supported",
+      "excerpt": "youtube.com"
+     },
+     {
+      "id": "R2",
+      "text": "removes a stuck seatpost using heat",
+      "method": "judge",
+      "status": "supported",
+      "excerpt": "this video shows the methods we used to free a seized seatpost"
+     },
+     {
+      "id": "R3",
+      "text": "successfully pulls it out",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     },
+     {
+      "id": "R4",
+      "text": "exclude background music",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     }
+    ],
+    "canonical_url": "https://www.youtube.com/watch?v=zTC4xh3UmwQ",
+    "rights_status": "unknown",
+    "uncertainties": [
+     "Not confirmed: successfully pulls it out",
+     "Not confirmed: exclude background music"
+    ],
+    "evidence_coverage": {
+     "basis": "viewer_claims",
+     "captions": "unavailable",
+     "comments": "available",
+     "analysed_scenes": 0,
+     "transcript_passages": 0
+    },
+    "scene_analysis": null
+   },
+   {
+    "id": "c5758d4e-a5e1-44b9-a978-c06979aadb4f",
+    "title": "Removing Stuck Aluminum Seatpost From Steel Bike Frame - YouTube",
+    "badges": [
+     "Closest match"
+    ],
+    "origin": "discovery",
+    "creator": "RJ The Bike Guy",
+    "moments": [],
+    "preview": false,
+    "duration": 632,
+    "evidence": "metadata_match",
+    "language": "en",
+    "judgement": {
+     "model": "google/gemini-3.5-flash-lite",
+     "reason": "Mentions trying heat and other methods, but description and comments show it involves multiple techniques and lacks specific heat-removal timestamps. Match not verified from the evidence.",
+     "relevance": 5,
+     "intent_checks": [
+      {
+       "field": "title",
+       "quote": "Removing Stuck Aluminum Seatpost From Steel Bike Frame",
+       "status": "supported",
+       "dimension": "subject"
+      },
+      {
+       "field": "description",
+       "quote": "I resorted to using penetrating oil, ammonia, apple cider vinegar, cold, heat, pipe wrench and a cheater bar.",
+       "status": "unknown",
+       "dimension": "intent"
+      },
+      {
+       "field": "description",
+       "quote": "I resorted to using penetrating oil, ammonia, apple cider vinegar, cold, heat, pipe wrench and a cheater bar.",
+       "status": "unknown",
+       "dimension": "relationship"
+      },
+      {
+       "field": "url",
+       "quote": "https://www.youtube.com/watch?v=aXuc9dTH9qE",
+       "status": "supported",
+       "dimension": "format"
+      }
+     ]
+    },
+    "source_id": "3bfb9d94-75fe-4ff1-89e9-ecb03e696e70",
+    "thumbnail": "https://imgs.search.brave.com/lr9LH8l2sI9tI18yTcF-G4WSQr4dHhrw8empjkGebIY/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS9h/WHVjOWRUSDlxRS9t/YXhyZXNkZWZhdWx0/LmpwZw",
+    "embeddable": null,
+    "description": "The seatpost on the thrift store bike I bought was completely frozen. Watch my adventures in trying get it unstuck. I eventually got it out. The bike is a Mo...",
+    "license_url": null,
+    "source_name": "YouTube",
+    "verified_at": null,
+    "availability": "unknown",
+    "published_at": "2013-08-27T08:27:16.000Z",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "Is a video",
+      "method": "url",
+      "status": "supported",
+      "excerpt": "youtube.com"
+     },
+     {
+      "id": "R2",
+      "text": "removes a stuck seatpost using heat",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     },
+     {
+      "id": "R3",
+      "text": "successfully pulls it out",
+      "method": "judge",
+      "status": "supported",
+      "excerpt": "I eventually got it out."
+     },
+     {
+      "id": "R4",
+      "text": "exclude background music",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     }
+    ],
+    "canonical_url": "https://www.youtube.com/watch?v=aXuc9dTH9qE",
+    "rights_status": "unknown",
+    "uncertainties": [
+     "Not confirmed: removes a stuck seatpost using heat",
+     "Not confirmed: exclude background music"
+    ],
+    "evidence_coverage": {
+     "basis": "viewer_claims",
+     "captions": "unavailable",
+     "comments": "available",
+     "analysed_scenes": 0,
+     "transcript_passages": 0
+    },
+    "scene_analysis": null
+   },
+   {
+    "id": "22a57103-4e5d-4c80-ad27-ecb33d13cead",
+    "title": "Removing A Stuck Seatpost From A Vintage Serotta Frame! - YouTube",
+    "badges": [
+     "Discussed on Reddit",
+     "Closest match"
+    ],
+    "origin": "discovery",
+    "creator": "Gringineer Cycles",
+    "moments": [],
+    "preview": false,
+    "duration": 1002,
+    "evidence": "metadata_match",
+    "language": "en",
+    "judgement": {
+     "model": "google/gemini-3.5-flash-lite",
+     "reason": "Uses a custom puller tool with heat mentioned in comments, but does not show heat removal and extraction with timestamps in the video itself. Match not verified from the evidence.",
+     "relevance": 5,
+     "intent_checks": [
+      {
+       "field": "title",
+       "quote": "Removing A Stuck Seatpost From A Vintage Serotta Frame!",
+       "status": "supported",
+       "dimension": "subject"
+      },
+      {
+       "field": "description",
+       "quote": "Today I use our custom seatpost puller to pull a stuck aluminum seatpost out of a vintage steel Serotta Colorado Legend AT Frame.",
+       "status": "unknown",
+       "dimension": "intent"
+      },
+      {
+       "field": "comments",
+       "quote": "Occasionally heating exposed post with a hair dryer or heat gun helps break corrosion",
+       "status": "unknown",
+       "dimension": "relationship"
+      },
+      {
+       "field": "url",
+       "quote": "https://www.youtube.com/watch?v=T-TDhbBA_qc",
+       "status": "supported",
+       "dimension": "format"
+      }
+     ]
+    },
+    "source_id": "3bfb9d94-75fe-4ff1-89e9-ecb03e696e70",
+    "thumbnail": "https://imgs.search.brave.com/__S1T_cZDHUAZXFn6jkBbjmk6JSmbHoF6Ltqaqz2LNo/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS9U/LVREaGJCQV9xYy9t/YXhyZXNkZWZhdWx0/LmpwZw",
+    "embeddable": null,
+    "description": "Today I use our custom seatpost puller to pull a stuck aluminum seatpost out of a vintage steel Serotta Colorado Legend AT Frame. Check out our Shop for tons...",
+    "license_url": null,
+    "source_name": "YouTube",
+    "verified_at": null,
+    "availability": "unknown",
+    "published_at": "2024-10-22T10:00:29.000Z",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "Is a video",
+      "method": "url",
+      "status": "supported",
+      "excerpt": "youtube.com"
+     },
+     {
+      "id": "R2",
+      "text": "removes a stuck seatpost using heat",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     },
+     {
+      "id": "R3",
+      "text": "successfully pulls it out",
+      "method": "judge",
+      "status": "supported",
+      "excerpt": "pull a stuck aluminum seatpost out"
+     },
+     {
+      "id": "R4",
+      "text": "exclude background music",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     }
+    ],
+    "canonical_url": "https://www.youtube.com/watch?v=T-TDhbBA_qc",
+    "rights_status": "unknown",
+    "uncertainties": [
+     "Not confirmed: removes a stuck seatpost using heat",
+     "Not confirmed: exclude background music"
+    ],
+    "evidence_coverage": {
+     "basis": "viewer_claims",
+     "captions": "unavailable",
+     "comments": "available",
+     "analysed_scenes": 0,
+     "transcript_passages": 0
+    },
+    "scene_analysis": null
+   },
+   {
+    "id": "ad866fd9-c0ed-4f61-a18f-7b176dd90579",
+    "title": "stuck seat post removal the easy way! - YouTube",
+    "badges": [
+     "Closest match"
+    ],
+    "origin": "discovery",
+    "creator": "retro bike stuff",
+    "moments": [],
+    "preview": false,
+    "duration": 409,
+    "evidence": "metadata_match",
+    "language": "en",
+    "judgement": {
+     "model": "google/gemini-3.5-flash-lite",
+     "reason": "Video demonstrates removing a stuck seat post using a blow torch and a vice. Match not verified from the evidence.",
+     "relevance": 5,
+     "intent_checks": [
+      {
+       "field": "title",
+       "quote": "stuck seat post removal the easy way!",
+       "status": "supported",
+       "dimension": "subject"
+      },
+      {
+       "field": "description",
+       "quote": "This method for removing seized seat posts has to be the easiest one ive tried... you will need a vice, blow torch",
+       "status": "supported",
+       "dimension": "intent"
+      },
+      {
+       "field": "description",
+       "quote": "This method for removing seized seat posts has to be the easiest one ive tried... you will need a vice, blow torch",
+       "status": "supported",
+       "dimension": "relationship"
+      },
+      {
+       "field": "title",
+       "quote": "stuck seat post removal the easy way! - YouTube",
+       "status": "supported",
+       "dimension": "format"
+      }
+     ]
+    },
+    "source_id": "3bfb9d94-75fe-4ff1-89e9-ecb03e696e70",
+    "thumbnail": "https://imgs.search.brave.com/zNHqwhEn6pDuNXdrCnhu6wpQIGnVvTTs5T4JX8u5I64/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS9T/QlhLVTJRRFk3Yy9t/YXhyZXNkZWZhdWx0/LmpwZw",
+    "embeddable": null,
+    "description": "This method for removing seized seat posts has to be the easiest one ive tried, and ive tried a few!you will need a vice, blow torch, m8 bolt and drill, o an...",
+    "license_url": null,
+    "source_name": "YouTube",
+    "verified_at": null,
+    "availability": "unknown",
+    "published_at": "2021-10-08T19:17:23.000Z",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "Is a video",
+      "method": "url",
+      "status": "supported",
+      "excerpt": "youtube.com"
+     },
+     {
+      "id": "R2",
+      "text": "removes a stuck seatpost using heat",
+      "method": "judge",
+      "status": "supported",
+      "excerpt": "you will need a vice, blow torch"
+     },
+     {
+      "id": "R3",
+      "text": "successfully pulls it out",
+      "method": "judge",
+      "status": "supported",
+      "excerpt": "Pull force toward your body, brace your leg backwards so when it comes out you don’t fall"
+     },
+     {
+      "id": "R4",
+      "text": "exclude background music",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     }
+    ],
+    "canonical_url": "https://www.youtube.com/watch?v=SBXKU2QDY7c",
+    "rights_status": "unknown",
+    "uncertainties": [
+     "Not confirmed: exclude background music"
+    ],
+    "evidence_coverage": {
+     "basis": "viewer_claims",
+     "captions": "unavailable",
+     "comments": "available",
+     "analysed_scenes": 0,
+     "transcript_passages": 0
+    },
+    "scene_analysis": null
+   },
+   {
+    "id": "d81baf70-7d70-4eeb-ac69-7968c29420da",
+    "title": "Testing the Nuclear Option for Seized Seatposts! (Shocking Result) - YouTube",
+    "badges": [
+     "Closest match"
+    ],
+    "origin": "discovery",
+    "creator": "BCR",
+    "moments": [],
+    "preview": false,
+    "duration": 1859,
+    "evidence": "metadata_match",
+    "language": "en",
+    "judgement": {
+     "model": "google/gemini-3.5-flash-lite",
+     "reason": "Mentions blowtorches in description and comments, but lacks specific timestamps covering heat removal and pulling out. Match not verified from the evidence.",
+     "relevance": 5,
+     "intent_checks": [
+      {
+       "field": "title",
+       "quote": "Testing the Nuclear Option for Seized Seatposts!",
+       "status": "supported",
+       "dimension": "subject"
+      },
+      {
+       "field": "description",
+       "quote": "Both frames have been subjected to every trick in the book—blowtorches, Stilson wrenches, and endless cans of penetrating oil.",
+       "status": "unknown",
+       "dimension": "intent"
+      },
+      {
+       "field": "comments",
+       "quote": "Heated it up it with a blow torch it was almost glowing, the post did not come out.",
+       "status": "unknown",
+       "dimension": "relationship"
+      },
+      {
+       "field": "title",
+       "quote": "Testing the Nuclear Option for Seized Seatposts! (Shocking Result) - YouTube",
+       "status": "supported",
+       "dimension": "format"
+      }
+     ]
+    },
+    "source_id": "3bfb9d94-75fe-4ff1-89e9-ecb03e696e70",
+    "thumbnail": "https://imgs.search.brave.com/b-nKJHzvWdYb5kYigbnw6yxE8HA8KJnvh1RBxo2XRnI/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS9l/eFU4ZnZzU0oxQS9t/YXhyZXNkZWZhdWx0/LmpwZw",
+    "embeddable": null,
+    "description": "Is your seatpost truly seized, or just \"stuck\"? In this video, I take on two \"impossible\" cases: a £5 Saracen and a classic GT Tequesta. Both frames have bee...",
+    "license_url": null,
+    "source_name": "YouTube",
+    "verified_at": null,
+    "availability": "unknown",
+    "published_at": "2026-02-18T17:01:08.000Z",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "Is a video",
+      "method": "url",
+      "status": "supported",
+      "excerpt": "youtube.com"
+     },
+     {
+      "id": "R2",
+      "text": "removes a stuck seatpost using heat",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     },
+     {
+      "id": "R3",
+      "text": "successfully pulls it out",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     },
+     {
+      "id": "R4",
+      "text": "exclude background music",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     }
+    ],
+    "canonical_url": "https://www.youtube.com/watch?v=exU8fvsSJ1A",
+    "rights_status": "unknown",
+    "uncertainties": [
+     "Not confirmed: removes a stuck seatpost using heat",
+     "Not confirmed: successfully pulls it out",
+     "Not confirmed: exclude background music"
+    ],
+    "evidence_coverage": {
+     "basis": "viewer_claims",
+     "captions": "unavailable",
+     "comments": "available",
+     "analysed_scenes": 0,
+     "transcript_passages": 0
+    },
+    "scene_analysis": null
+   },
+   {
+    "id": "7820e819-96eb-4143-b92c-356f2c67b089",
+    "title": "How much Force do you need to Pull out a Stuck Seatpost? - YouTube",
+    "badges": [
+     "Closest match"
+    ],
+    "origin": "discovery",
+    "creator": "Phil Vandelay",
+    "moments": [],
+    "preview": false,
+    "duration": 1639,
+    "evidence": "metadata_match",
+    "language": "en",
+    "judgement": {
+     "model": "google/gemini-3.5-flash-lite",
+     "reason": "Discusses pulling stuck seatposts and measuring forces, but lacks explicit details of heat application and successful extraction with timestamps. Match not verified from the evidence.",
+     "relevance": 5,
+     "intent_checks": [
+      {
+       "field": "title",
+       "quote": "How much Force do you need to Pull out a Stuck Seatpost?",
+       "status": "supported",
+       "dimension": "subject"
+      },
+      {
+       "field": "description",
+       "quote": "rescue more bike frames by pulling their stuck seatposts",
+       "status": "unknown",
+       "dimension": "intent"
+      },
+      {
+       "field": "description",
+       "quote": "pulling their stuck seatposts, but this time with 200% more science!",
+       "status": "unknown",
+       "dimension": "relationship"
+      },
+      {
+       "field": "title",
+       "quote": "How much Force do you need to Pull out a Stuck Seatpost? - YouTube",
+       "status": "supported",
+       "dimension": "format"
+      }
+     ]
+    },
+    "source_id": "3bfb9d94-75fe-4ff1-89e9-ecb03e696e70",
+    "thumbnail": "https://imgs.search.brave.com/Jp4lEHHEEN5zTsgNJPxpMvzNr-_SE4lrez-MfGCHxr4/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS90/VlhnbnFtMnFFcy9t/YXhyZXNkZWZhdWx0/LmpwZw",
+    "embeddable": null,
+    "description": "Here's the follow-up to the last video where we're going to rescue more bike frames by pulling their stuck seatposts, but this time with 200% more science! U...",
+    "license_url": null,
+    "source_name": "YouTube",
+    "verified_at": null,
+    "availability": "unknown",
+    "published_at": "2025-01-19T13:24:35.000Z",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "Is a video",
+      "method": "url",
+      "status": "supported",
+      "excerpt": "youtube.com"
+     },
+     {
+      "id": "R2",
+      "text": "removes a stuck seatpost using heat",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     },
+     {
+      "id": "R3",
+      "text": "successfully pulls it out",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     },
+     {
+      "id": "R4",
+      "text": "exclude background music",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     }
+    ],
+    "canonical_url": "https://www.youtube.com/watch?v=tVXgnqm2qEs",
+    "rights_status": "unknown",
+    "uncertainties": [
+     "Not confirmed: removes a stuck seatpost using heat",
+     "Not confirmed: successfully pulls it out",
+     "Not confirmed: exclude background music"
+    ],
+    "evidence_coverage": {
+     "basis": "metadata",
+     "captions": "unavailable",
+     "comments": "unavailable",
+     "analysed_scenes": 0,
+     "transcript_passages": 0
+    },
+    "scene_analysis": null
+   },
+   {
+    "id": "b96d1745-ce69-4545-9d6e-798cb1ab0cc8",
+    "title": "The Ultimate Tool to remove Stuck Seatposts from Bike Frames! - YouTube",
+    "badges": [
+     "Discussed on Reddit",
+     "Closest match"
+    ],
+    "origin": "discovery",
+    "creator": "Phil Vandelay",
+    "moments": [],
+    "preview": false,
+    "duration": 2182,
+    "evidence": "metadata_match",
+    "language": "en",
+    "judgement": {
+     "model": "gemini-3.5-flash",
+     "reason": "Builds a custom tool to pull out stuck seatposts, but does not use heat as requested. Match not verified from the evidence.",
+     "relevance": 4,
+     "intent_checks": [
+      {
+       "field": "title",
+       "quote": "The Ultimate Tool to remove Stuck Seatposts from Bike Frames!",
+       "status": "supported",
+       "dimension": "subject"
+      },
+      {
+       "field": "description",
+       "quote": "A stuck seatpost removal tool. Sometimes seatposts can become so seized in bike frames due to corrosion...",
+       "status": "unknown",
+       "dimension": "intent"
+      },
+      {
+       "field": "description",
+       "quote": "",
+       "status": "unknown",
+       "dimension": "relationship"
+      },
+      {
+       "field": "title",
+       "quote": "The Ultimate Tool to remove Stuck Seatposts from Bike Frames! - YouTube",
+       "status": "supported",
+       "dimension": "format"
+      }
+     ]
+    },
+    "source_id": "3bfb9d94-75fe-4ff1-89e9-ecb03e696e70",
+    "thumbnail": "https://imgs.search.brave.com/tpTPhEiASx-AUtJTAN_75W--l7etUIny6Qato6b9fx0/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS9t/SjhSX0RxazF1MC9t/YXhyZXNkZWZhdWx0/LmpwZw",
+    "embeddable": null,
+    "description": "Take your personal data back with Incogni! Use code VANDELAY at the link below and get 60% off an annual plan: http://incogni.com/vandelayIn todays video I'm",
+    "license_url": null,
+    "source_name": "YouTube",
+    "verified_at": null,
+    "availability": "unknown",
+    "published_at": "2024-10-06T13:01:53.000Z",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "Is a video",
+      "method": "url",
+      "status": "supported",
+      "excerpt": "youtube.com"
+     },
+     {
+      "id": "R2",
+      "text": "removes a stuck seatpost using heat",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     },
+     {
+      "id": "R3",
+      "text": "successfully pulls it out",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     },
+     {
+      "id": "R4",
+      "text": "exclude background music",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     }
+    ],
+    "canonical_url": "https://www.youtube.com/watch?v=mJ8R_Dqk1u0",
+    "rights_status": "unknown",
+    "uncertainties": [
+     "Not confirmed: removes a stuck seatpost using heat",
+     "Not confirmed: successfully pulls it out",
+     "Not confirmed: exclude background music"
+    ],
+    "evidence_coverage": {
+     "basis": "viewer_claims",
+     "captions": "unavailable",
+     "comments": "available",
+     "analysed_scenes": 0,
+     "transcript_passages": 0
+    },
+    "scene_analysis": null
+   },
+   {
+    "id": "d898d479-b003-4947-8ca1-6eeb349482c1",
+    "title": "How to remove Stuck bicycle Seat post without damaging it in minutes. - YouTube",
+    "badges": [
+     "Livestream replay",
+     "Discussed on Reddit",
+     "Closest match"
+    ],
+    "origin": "discovery",
+    "creator": "DeusXFlorida",
+    "moments": [],
+    "preview": false,
+    "duration": 169,
+    "evidence": "metadata_match",
+    "language": "zxx",
+    "judgement": {
+     "model": "google/gemini-3.5-flash-lite",
+     "reason": "Mentions heat gun as optional, but focuses primarily on car jack and wooden board method.",
+     "relevance": 4,
+     "intent_checks": [
+      {
+       "field": "title",
+       "quote": "How to remove Stuck bicycle Seat post without damaging it in minutes.",
+       "status": "supported",
+       "dimension": "subject"
+      },
+      {
+       "field": "description",
+       "quote": "(You can use the heat gun - but it is optional.)",
+       "status": "supported",
+       "dimension": "intent"
+      },
+      {
+       "field": "description",
+       "quote": "(You can use the heat gun - but it is optional.)",
+       "status": "supported",
+       "dimension": "relationship"
+      },
+      {
+       "field": "title",
+       "quote": "How to remove Stuck bicycle Seat post without damaging it in minutes. - YouTube",
+       "status": "supported",
+       "dimension": "format"
+      }
+     ]
+    },
+    "source_id": "3bfb9d94-75fe-4ff1-89e9-ecb03e696e70",
+    "thumbnail": "https://imgs.search.brave.com/UqFiwha4k5Jw_YWOR8bUcCO6vutuPK24x4u_J0AjaBI/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS81/MXRjcE1TLWoxRS9o/cWRlZmF1bHQuanBn",
+    "embeddable": null,
+    "description": "This is how you can easily remove the stuck seat post on your bicycle without damaging the frame or a seat post using only 3 items: car jack, wooden board a...",
+    "license_url": null,
+    "source_name": "YouTube",
+    "verified_at": null,
+    "availability": "unknown",
+    "published_at": "2020-09-12T04:18:24.000Z",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "Is a video",
+      "method": "url",
+      "status": "supported",
+      "excerpt": "youtube.com"
+     },
+     {
+      "id": "R2",
+      "text": "removes a stuck seatpost using heat",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     },
+     {
+      "id": "R3",
+      "text": "successfully pulls it out",
+      "method": "judge",
+      "status": "supported",
+      "excerpt": "This is how you can easily remove the stuck seat post on your bicycle"
+     },
+     {
+      "id": "R4",
+      "text": "exclude background music",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     }
+    ],
+    "canonical_url": "https://www.youtube.com/watch?v=51tcpMS-j1E",
+    "rights_status": "unknown",
+    "uncertainties": [
+     "Not confirmed: removes a stuck seatpost using heat",
+     "Not confirmed: exclude background music"
+    ],
+    "evidence_coverage": {
+     "basis": "metadata",
+     "captions": "unavailable",
+     "comments": "unavailable",
+     "analysed_scenes": 0,
+     "transcript_passages": 0
+    },
+    "scene_analysis": null
+   },
+   {
+    "id": "2954e308-91c7-44f5-aff6-76d249d7d213",
+    "title": "How To DIY Pull a Stuck Seatpost with Basic Tools - YouTube",
+    "badges": [
+     "Closest match"
+    ],
+    "origin": "discovery",
+    "creator": "Spinning True",
+    "moments": [],
+    "preview": false,
+    "duration": 334,
+    "evidence": "metadata_match",
+    "language": null,
+    "judgement": {
+     "model": "google/gemini-3.5-flash-lite",
+     "reason": "Title mentions pulling a stuck seatpost with basic tools, but evidence lacks heat usage details or timestamps. Match not verified from the evidence.",
+     "relevance": 4,
+     "intent_checks": [
+      {
+       "field": "title",
+       "quote": "How To DIY Pull a Stuck Seatpost with Basic Tools",
+       "status": "supported",
+       "dimension": "subject"
+      },
+      {
+       "field": "description",
+       "quote": "",
+       "status": "unknown",
+       "dimension": "intent"
+      },
+      {
+       "field": "description",
+       "quote": "",
+       "status": "unknown",
+       "dimension": "relationship"
+      },
+      {
+       "field": "title",
+       "quote": "How To DIY Pull a Stuck Seatpost with Basic Tools - YouTube",
+       "status": "supported",
+       "dimension": "format"
+      }
+     ]
+    },
+    "source_id": "3bfb9d94-75fe-4ff1-89e9-ecb03e696e70",
+    "thumbnail": "https://imgs.search.brave.com/L5e5Rbml3h-Ubtvu_L-VIaBO-aTxE0YS2SBrqztKtd8/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS83/Tk9VLUxaOGhaUS9o/cWRlZmF1bHQuanBn",
+    "embeddable": null,
+    "description": "I recently tried using a biga** wrench to remove a stuck seatpost and it worked. Here's what I did.Follow me on Instagram @spinningtruecyclingMy Website: ww...",
+    "license_url": null,
+    "source_name": "YouTube",
+    "verified_at": null,
+    "availability": "unknown",
+    "published_at": "2024-12-19T17:00:12.000Z",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "Is a video",
+      "method": "url",
+      "status": "supported",
+      "excerpt": "youtube.com"
+     },
+     {
+      "id": "R2",
+      "text": "removes a stuck seatpost using heat",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     },
+     {
+      "id": "R3",
+      "text": "successfully pulls it out",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     },
+     {
+      "id": "R4",
+      "text": "exclude background music",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     }
+    ],
+    "canonical_url": "https://www.youtube.com/watch?v=7NOU-LZ8hZQ",
+    "rights_status": "unknown",
+    "uncertainties": [
+     "Not confirmed: removes a stuck seatpost using heat",
+     "Not confirmed: successfully pulls it out",
+     "Not confirmed: exclude background music"
+    ],
+    "evidence_coverage": {
+     "basis": "metadata",
+     "captions": "unavailable",
+     "comments": "unavailable",
+     "analysed_scenes": 0,
+     "transcript_passages": 0
+    },
+    "scene_analysis": null
+   },
+   {
+    "id": "6ae4d533-3e83-4827-a942-6d98baac28ee",
+    "title": "I Tried the Internet’s Favourite Fix on a Stuck Bike Stem - YouTube",
+    "badges": [
+     "Closest match"
+    ],
+    "origin": "discovery",
+    "creator": "BCR",
+    "moments": [],
+    "preview": false,
+    "duration": 679,
+    "evidence": "metadata_match",
+    "language": "en",
+    "judgement": {
+     "model": "google/gemini-3.5-flash-lite",
+     "reason": "Video tackles a stuck quill stem and seatpost remains, but lacks specific evidence of heat application or successful pulling with timestamps. Match not verified from the evidence.",
+     "relevance": 4,
+     "intent_checks": [
+      {
+       "field": "title",
+       "quote": "I Tried the Internet’s Favourite Fix on a Stuck Bike Stem",
+       "status": "supported",
+       "dimension": "subject"
+      },
+      {
+       "field": "description",
+       "quote": "remove teh seatpost remains",
+       "status": "unknown",
+       "dimension": "intent"
+      },
+      {
+       "field": "description",
+       "quote": "tackle the last hurdle—the stuck quill stem—and then quickly remove teh seatpost remains",
+       "status": "unknown",
+       "dimension": "relationship"
+      },
+      {
+       "field": "url",
+       "quote": "https://www.youtube.com/watch?v=DVBG3FjYD3g",
+       "status": "supported",
+       "dimension": "format"
+      }
+     ]
+    },
+    "source_id": "3bfb9d94-75fe-4ff1-89e9-ecb03e696e70",
+    "thumbnail": "https://imgs.search.brave.com/eZmEX_4s5ArISTB4IEArVFoTcFqQp2BM_LEgbWjmtu0/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS9E/VkJHM0ZqWUQzZy9t/YXhyZXNkZWZhdWx0/LmpwZw",
+    "embeddable": null,
+    "description": "After the gallium, the puller, and weeks of staring at this seized frame in the stand, we’ve reached the final chapter...In this video, I tackle the last hur...",
+    "license_url": null,
+    "source_name": "YouTube",
+    "verified_at": null,
+    "availability": "unknown",
+    "published_at": "2026-04-15T16:00:19.000Z",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "Is a video",
+      "method": "url",
+      "status": "supported",
+      "excerpt": "youtube.com"
+     },
+     {
+      "id": "R2",
+      "text": "removes a stuck seatpost using heat",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     },
+     {
+      "id": "R3",
+      "text": "successfully pulls it out",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     },
+     {
+      "id": "R4",
+      "text": "exclude background music",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     }
+    ],
+    "canonical_url": "https://www.youtube.com/watch?v=DVBG3FjYD3g",
+    "rights_status": "unknown",
+    "uncertainties": [
+     "Not confirmed: removes a stuck seatpost using heat",
+     "Not confirmed: successfully pulls it out",
+     "Not confirmed: exclude background music"
+    ],
+    "evidence_coverage": {
+     "basis": "metadata",
+     "captions": "unavailable",
+     "comments": "unavailable",
+     "analysed_scenes": 0,
+     "transcript_passages": 0
+    },
+    "scene_analysis": null
+   },
+   {
+    "id": "6a65bc4b-1514-40b6-8728-91e16ff20fbe",
+    "title": "How To Remove A Seized Seatpost - What To Do If Your Bike's Seatpost Is Stuck - YouTube",
+    "badges": [
+     "Discussed on Reddit",
+     "Closest match"
+    ],
+    "origin": "discovery",
+    "creator": "Global Cycling Network",
+    "moments": [],
+    "preview": false,
+    "duration": 198,
+    "evidence": "metadata_match",
+    "language": "en",
+    "judgement": {
+     "model": "gemini-3.5-flash",
+     "reason": "Demonstrates removing a stuck seatpost using boiling water, not heat via a torch or heat gun. Match not verified from the evidence.",
+     "relevance": 3,
+     "intent_checks": [
+      {
+       "field": "title",
+       "quote": "How To Remove A Seized Seatpost",
+       "status": "supported",
+       "dimension": "subject"
+      },
+      {
+       "field": "description",
+       "quote": "Strong man and ex-professional cyclist Daniel Lloyd uses the humble kettle and shows you how to remove a seatpost",
+       "status": "unknown",
+       "dimension": "intent"
+      },
+      {
+       "field": "description",
+       "quote": "",
+       "status": "unknown",
+       "dimension": "relationship"
+      },
+      {
+       "field": "title",
+       "quote": "How To Remove A Seized Seatpost - What To Do If Your Bike's Seatpost Is Stuck - YouTube",
+       "status": "supported",
+       "dimension": "format"
+      }
+     ]
+    },
+    "source_id": "3bfb9d94-75fe-4ff1-89e9-ecb03e696e70",
+    "thumbnail": "https://imgs.search.brave.com/NCSMt-nmwoz3yDLvOuuDjUlbBU-s-bPHtGllwHYfgjc/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS81/NFdoZHJMS0t2WS9t/YXhyZXNkZWZhdWx0/LmpwZw",
+    "embeddable": null,
+    "description": "A seized seatpost is a common bicycle maintenance issue. Don't do anything drastic, GCN are here to help!Subscribe to GCN on YouTube: http://gcn.eu/gcnsubsA",
+    "license_url": null,
+    "source_name": "YouTube",
+    "verified_at": null,
+    "availability": "unknown",
+    "published_at": "2013-08-19T10:53:42.000Z",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "Is a video",
+      "method": "url",
+      "status": "supported",
+      "excerpt": "youtube.com"
+     },
+     {
+      "id": "R2",
+      "text": "removes a stuck seatpost using heat",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     },
+     {
+      "id": "R3",
+      "text": "successfully pulls it out",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     },
+     {
+      "id": "R4",
+      "text": "exclude background music",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     }
+    ],
+    "canonical_url": "https://www.youtube.com/watch?v=54WhdrLKKvY",
+    "rights_status": "unknown",
+    "uncertainties": [
+     "Not confirmed: removes a stuck seatpost using heat",
+     "Not confirmed: successfully pulls it out",
+     "Not confirmed: exclude background music"
+    ],
+    "evidence_coverage": {
+     "basis": "viewer_claims",
+     "captions": "unavailable",
+     "comments": "available",
+     "analysed_scenes": 0,
+     "transcript_passages": 0
+    },
+    "scene_analysis": null
+   },
+   {
+    "id": "0c72e16e-cdbc-40ea-b5cf-a7c465965ae3",
+    "title": "How to Remove a Seized Seatpost (updated) - YouTube",
+    "badges": [
+     "Closest match"
+    ],
+    "origin": "discovery",
+    "creator": "Sweet Life Beat Life",
+    "moments": [],
+    "preview": false,
+    "duration": 100,
+    "evidence": "metadata_match",
+    "language": "en",
+    "judgement": {
+     "model": "gemini-3.5-flash",
+     "reason": "Too brief description of removing a seized seatpost; lacks specific heat application and pulling out demonstration timestamps. Match not verified from the evidence.",
+     "relevance": 3,
+     "intent_checks": [
+      {
+       "field": "title",
+       "quote": "How to Remove a Seized Seatpost",
+       "status": "supported",
+       "dimension": "subject"
+      },
+      {
+       "field": "description",
+       "quote": "Learn the step-bythy process to remove a seized seatpost from your bike frame.",
+       "status": "unknown",
+       "dimension": "intent"
+      },
+      {
+       "field": "description",
+       "quote": "",
+       "status": "unknown",
+       "dimension": "relationship"
+      },
+      {
+       "field": "title",
+       "quote": "How to Remove a Seized Seatpost (updated) - YouTube",
+       "status": "supported",
+       "dimension": "format"
+      }
+     ]
+    },
+    "source_id": "3bfb9d94-75fe-4ff1-89e9-ecb03e696e70",
+    "thumbnail": "https://imgs.search.brave.com/Rd9uP_hxJfTRcQNMADtOclU1pJ_J3a9dYka6s8Tauq4/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS9U/X2ZILThJeTd6Zy9t/YXhyZXNkZWZhdWx0/LmpwZw",
+    "embeddable": null,
+    "description": "Learn the step-bythy process to remove a seized seatpost from your bike frame. This guide covers essential tools, techniques like applying penetrating oil an...",
+    "license_url": null,
+    "source_name": "YouTube",
+    "verified_at": null,
+    "availability": "unknown",
+    "published_at": "2026-02-16T11:56:13.000Z",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "Is a video",
+      "method": "url",
+      "status": "supported",
+      "excerpt": "youtube.com"
+     },
+     {
+      "id": "R2",
+      "text": "removes a stuck seatpost using heat",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     },
+     {
+      "id": "R3",
+      "text": "successfully pulls it out",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     },
+     {
+      "id": "R4",
+      "text": "exclude background music",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     }
+    ],
+    "canonical_url": "https://www.youtube.com/watch?v=T_fH-8Iy7zg",
+    "rights_status": "unknown",
+    "uncertainties": [
+     "Not confirmed: removes a stuck seatpost using heat",
+     "Not confirmed: successfully pulls it out",
+     "Not confirmed: exclude background music"
+    ],
+    "evidence_coverage": {
+     "basis": "metadata",
+     "captions": "unavailable",
+     "comments": "unavailable",
+     "analysed_scenes": 0,
+     "transcript_passages": 0
+    },
+    "scene_analysis": null
+   },
+   {
+    "id": "5384b8da-7e0b-4dae-8a26-a9dfaa3af5b1",
+    "title": "How to Remove a Stuck Seatpost - YouTube",
+    "badges": [
+     "Closest match"
+    ],
+    "origin": "discovery",
+    "creator": "Park Tool",
+    "moments": [],
+    "preview": false,
+    "duration": 1916,
+    "evidence": "metadata_match",
+    "language": "en",
+    "judgement": {
+     "model": "gemini-3.5-flash",
+     "reason": "A comprehensive tutorial discussing various methods, but it does not specifically demonstrate a successful seatpost removal using heat. Match not verified from the evidence.",
+     "relevance": 3,
+     "intent_checks": [
+      {
+       "field": "title",
+       "quote": "How to Remove a Stuck Seatpost",
+       "status": "supported",
+       "dimension": "subject"
+      },
+      {
+       "field": "description",
+       "quote": "",
+       "status": "unknown",
+       "dimension": "intent"
+      },
+      {
+       "field": "description",
+       "quote": "",
+       "status": "unknown",
+       "dimension": "relationship"
+      },
+      {
+       "field": "title",
+       "quote": "How to Remove a Stuck Seatpost",
+       "status": "supported",
+       "dimension": "format"
+      }
+     ]
+    },
+    "source_id": "3bfb9d94-75fe-4ff1-89e9-ecb03e696e70",
+    "thumbnail": "https://imgs.search.brave.com/agnBd5GtmKXaNsCCp81YvHLS-2RQ6oSs-lDj4fI7G2g/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS9x/d2l3eHV6eVhvby9t/YXhyZXNkZWZhdWx0/LmpwZw",
+    "embeddable": null,
+    "description": "There are few things worse than going to adjust your saddle height and finding your seatpost won't move. Immovable! Seized! Just plain stuck! In this video w...",
+    "license_url": null,
+    "source_name": "YouTube",
+    "verified_at": null,
+    "availability": "unknown",
+    "published_at": "2024-11-22T17:00:33.000Z",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "Is a video",
+      "method": "url",
+      "status": "supported",
+      "excerpt": "youtube.com"
+     },
+     {
+      "id": "R2",
+      "text": "removes a stuck seatpost using heat",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     },
+     {
+      "id": "R3",
+      "text": "successfully pulls it out",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     },
+     {
+      "id": "R4",
+      "text": "exclude background music",
+      "method": null,
+      "status": "unknown",
+      "excerpt": null
+     }
+    ],
+    "canonical_url": "https://www.youtube.com/watch?v=qwiwxuzyXoo",
+    "rights_status": "unknown",
+    "uncertainties": [
+     "Not confirmed: removes a stuck seatpost using heat",
+     "Not confirmed: successfully pulls it out",
+     "Not confirmed: exclude background music"
+    ],
+    "evidence_coverage": {
+     "basis": "viewer_claims",
+     "captions": "unavailable",
+     "comments": "available",
+     "analysed_scenes": 0,
+     "transcript_passages": 0
+    },
+    "scene_analysis": null
+   }
+  ]
+ }
+}

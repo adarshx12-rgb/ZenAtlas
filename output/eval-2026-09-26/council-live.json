@@ -1,0 +1,411 @@
+[
+ {
+  "q": "how long can cooked rice be safely kept in the fridge",
+  "kind": "web",
+  "sec": 37,
+  "providers": [],
+  "top": [
+   {
+    "rel": 9,
+    "src": "nytimes.com",
+    "title": "How Long Does Rice Last in the Fridge? - The New York Times",
+    "reason": "The New York Times page details how long rice lasts in the fridge according to HHS guidelines."
+   },
+   {
+    "rel": 9,
+    "src": "reencle.co",
+    "title": "How Long Does Cooked Rice Last in the Fridge? | Reencle",
+    "reason": "Directly answers with a 3-4 day fridge storage window citing USDA/FDA guidelines and cooling advice."
+   },
+   {
+    "rel": 9,
+    "src": "bhg.com.au",
+    "title": "How long will cooked rice keep in the fridge? The answer might surprise you",
+    "reason": "Checked page directly answers the question, states 3-4 day fridge guideline and offers spoilage/storage tips."
+   },
+   {
+    "rel": 9,
+    "src": "reencle.co",
+    "title": "How Long Is Rice Good for in the Fridge?",
+    "reason": "Directly states cooked rice lasts 3-5 days in fridge per USDA guidelines, with storage details."
+   },
+   {
+    "rel": 8,
+    "src": "redbeansanderic.com",
+    "title": "How Long Does Cooked Rice Last in the Fridge?",
+    "reason": "Title and description directly answer 3-4 day fridge storage, though from a recipe blog rather than authoritative source."
+   },
+   {
+    "rel": 8,
+    "src": "tasteofhome.com",
+    "title": "How Long Does Rice Last in the Fridge Before It Goes Bad?",
+    "reason": "The page gives a specific timeframe of four to six days for storing cooked rice safely in the fridge."
+   },
+   {
+    "rel": 8,
+    "src": "health.com",
+    "title": "How Long Does Leftover Rice Last in the Fridge? - HEALTH",
+    "reason": "The page addresses leftover rice safety and how long it remains fresh in the fridge."
+   },
+   {
+    "rel": 8,
+    "src": "realsimple.com",
+    "title": "How Long Can Rice Stay in the Fridge? Here’s What You Need to Know",
+    "reason": "The page explains safe storage durations and practices for keeping cooked rice in the refrigerator."
+   }
+  ]
+ },
+ {
+  "q": "the Google paper that introduced MapReduce",
+  "kind": "docs",
+  "sec": 77,
+  "providers": [],
+  "top": [
+   {
+    "rel": 9,
+    "src": "pdos.csail.mit.edu",
+    "title": "MapReduce: Simpliﬁed Data Processing on Large Clusters",
+    "reason": "Jev: R1 — \"MapReduce: Simpliﬁed Data Processing on Large Clusters Jeffrey Dean and Sanjay Ghemawat je\""
+   },
+   {
+    "rel": 9,
+    "src": "cse.buffalo.edu",
+    "title": "MapReduce: simplified data processing on large clusters",
+    "reason": "University-hosted PDF is the full MapReduce paper text by Dean and Ghemawat, matching subject and content exactly."
+   },
+   {
+    "rel": 9,
+    "src": "plus.ac.at",
+    "title": "MapReduce: Simpliﬁed Data Processing on Large Cluste",
+    "reason": "Provides the complete PDF document of the original MapReduce paper by Jeffrey Dean and Sanjay Ghemawat."
+   },
+   {
+    "rel": 9,
+    "src": "scribd.com",
+    "title": "Mapreduce Google Paper | PDF - Scribd",
+    "reason": "The page displays the original Google paper titled MapReduce: Simplified Data Processing on Large Clusters."
+   },
+   {
+    "rel": 5,
+    "src": "research.google.com",
+    "title": "MapReduce: Simpliﬁed Data Processing on Large Clusters",
+    "reason": "Official Google Research PDF hosting the exact Dean/Ghemawat MapReduce paper text and abstract. Match not verified from the evidence."
+   },
+   {
+    "rel": 5,
+    "src": "pdfs.semanticscholar.org",
+    "title": "Simpliﬁed Data Processing on Large Cluste - Semantic Scholar",
+    "reason": "Semantic Scholar PDF contains the same paper's title, authors, and OSDI'04 publication details, though formatted as slides/outline. Match not verified from the evidence."
+   },
+   {
+    "rel": 5,
+    "src": "researchgate.net",
+    "title": "MapReduce: Simplified Data Processing on Large Clusters",
+    "reason": "ResearchGate page referencing the MapReduce publication, but not the direct PDF document itself. Match not verified from the evidence."
+   },
+   {
+    "rel": 5,
+    "src": "academia.edu",
+    "title": "(PDF) MapReduce - Academia.edu",
+    "reason": "Academia.edu page hosting the MapReduce abstract, but not the direct PDF document link. Match not verified from the evidence."
+   }
+  ]
+ },
+ {
+  "q": "postgres vs mysql for write-heavy workloads from engineers who ran both, not vendor blogs",
+  "kind": "web",
+  "sec": 67,
+  "providers": [],
+  "top": [
+   {
+    "rel": 9,
+    "src": "binaryigor.com",
+    "title": "MySQL vs PostgreSQL Performance: throughput & latency, reads & writes",
+    "reason": "Independent benchmark explicitly tests write-heavy workloads across 17 cases, run by the author personally, not a vendor blog."
+   },
+   {
+    "rel": 5,
+    "src": "dev.to",
+    "title": "PostgreSQL vs MySQL Architecture: Deep Engine & Workload Analysis - DEV Community",
+    "reason": "DEV Community article provides a deep engine and workload analysis comparing PostgreSQL and MySQL architectures. Match not verified from the evidence."
+   },
+   {
+    "rel": 5,
+    "src": "basevolt.app",
+    "title": "MySQL vs PostgreSQL in 2026: A Practical Decision Framework - Basevolt Blog",
+    "reason": "Personal engineer account comparing MySQL/Postgres tradeoffs, but no explicit write-heavy workload data provided. Match not verified from the evidence."
+   },
+   {
+    "rel": 5,
+    "src": "reddit.com",
+    "title": "r/programming on Reddit: MySQL vs PostgreSQL Performance: throughput & latency, reads & writes",
+    "reason": "Reddit thread on programming discussing MySQL vs PostgreSQL performance, throughput, and write-heavy workloads. Match not verified from the evidence."
+   },
+   {
+    "rel": 5,
+    "src": "dev.to",
+    "title": "PostgreSQL vs MySQL in 2026: Performance, Features and When to Use Each - DEV Community",
+    "reason": "Provides a first-hand account of migrating from MySQL to PostgreSQL, but centers on complex read queries rather than write-heavy workloads. Match not verified from the evidence."
+   }
+  ]
+ },
+ {
+  "q": "attack on titan opening 1",
+  "kind": "videos",
+  "sec": 137,
+  "providers": [
+   {
+    "status": "ok",
+    "message": "Results were checked for relevance by AI.",
+    "provider": "judge"
+   },
+   {
+    "status": "ok",
+    "message": "57 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+    "provider": "relevance_filter"
+   }
+  ],
+  "top": [
+   {
+    "rel": 8,
+    "src": "TriaxFx",
+    "title": "「Creditless」Attack on Titan Season 1 OP / Opening 1「UHD 60FPS」 - YouTube",
+    "dur": 105,
+    "lang": "en",
+    "reason": "Jev: R1 — \"Shingeki no Kyojin Opening Theme 1 \"Guren no Yumiya (紅蓮の弓矢)\" by Linked Horizon TV Anime \"A\"; R2 — \"Shingeki no Kyojin Opening Theme 1 \"Guren no Yumiya (紅蓮の弓矢)\" by Linked Horizon TV Anime \"A\""
+   },
+   {
+    "rel": 8,
+    "src": "Funimation",
+    "title": "Attack on Titan – Opening Theme – Feuerroter Pfeil und Bogen - YouTube",
+    "dur": 93,
+    "lang": "en",
+    "reason": "Jev: R1 — \"Attack on Titan OP 1 \"Feuerroter Pfeil und Bogen\" by Linked Horizon.\"; R2 — \"Attack on Titan OP 1 \"Feuerroter Pfeil und Bogen\" by Linked Horizon.\""
+   }
+  ]
+ },
+ {
+  "q": "which article of the GDPR covers the right to be forgotten",
+  "kind": "docs",
+  "sec": 104,
+  "providers": [],
+  "top": [
+   {
+    "rel": 9,
+    "src": "pwc.lu",
+    "title": "PricewaterhouseCoopers Legal LLP Article 17 of the General Data Protection",
+    "reason": "PwC document explicitly states that Article 17 of the GDPR sets out the right to be forgotten."
+   },
+   {
+    "rel": 9,
+    "src": "ijfmr.com",
+    "title": "THE RIGHT TO BE FORGOTTEN UNDER GDPR: LEGAL ...",
+    "reason": "IJFMR paper confirms the Right to Be Forgotten is enshrined under Article 17 of the GDPR."
+   },
+   {
+    "rel": 6,
+    "src": "ijmr.net.in",
+    "title": "RIGHT TO BE FORGOTTEN",
+    "reason": "PDF description directly answers that Article 17 of GDPR covers the right to be forgotten. Metadata only; contents unverified."
+   },
+   {
+    "rel": 6,
+    "src": "researchgate.net",
+    "title": "The Right to Be Forgotten - ResearchGate",
+    "reason": "Research paper text links the right to be forgotten to Article 17 of the GDPR. Metadata only; contents unverified."
+   },
+   {
+    "rel": 5,
+    "src": "edpb.europa.eu",
+    "title": "Guidelines 5/2019 on the criteria of the Right to be Forgotten ...",
+    "reason": "The guidelines discuss the right to be forgotten under Article 17 GDPR. Match not verified from the evidence."
+   },
+   {
+    "rel": 5,
+    "src": "twobirds.com",
+    "title": "Individual rights | Right to erasure and right to restriction of processing",
+    "reason": "Discusses the right to erasure and to be forgotten under GDPR, but does not state which article covers it. Match not verified from the evidence."
+   },
+   {
+    "rel": 5,
+    "src": "trinitycollegelawreview.org",
+    "title": "TRINITY COLLEGE LAW REVIEW ONLINE THE RIGHT TO BE FORGOTTEN AND ITS POSSIBLE",
+    "reason": "The document states that the right to be forgotten is under Article 17 of the GDPR. Match not verified from the evidence."
+   },
+   {
+    "rel": 5,
+    "src": "reference-global.com",
+    "title": "Critical Views on the Right to be Forgotten after the Entry into ...",
+    "reason": "PDF mentions article 17 of the GDPR in relation to the right to be forgotten. Metadata only; contents unverified."
+   }
+  ]
+ },
+ {
+  "q": "the part in Steve Jobs' Stanford commencement speech where he talks about connecting the dots",
+  "kind": "videos",
+  "sec": 183,
+  "providers": [],
+  "top": [
+   {
+    "src": "Spark",
+    "title": "Steve Jobs Connect the Dots",
+    "dur": 319,
+    "lang": "en"
+   },
+   {
+    "src": "SMARTchannel",
+    "title": "Connecting the DotsSteve Jobs' Inspirational Commencement Speech at Stanford University",
+    "dur": 113,
+    "lang": "en"
+   },
+   {
+    "src": "Founder's Digest",
+    "title": "Steve Jobs: Connect the Dots for Your Future! #shorts",
+    "dur": 63,
+    "lang": "en"
+   },
+   {
+    "src": "www.instagram.com",
+    "title": "brag. on Instagram: \"In his 2005 Stanford commencement speech, Steve Jobs explained connecting the dots through his own life story. He talked about dropping out of college because he didn't see the …",
+    "dur": null,
+    "lang": null
+   },
+   {
+    "src": "Sage Sphere",
+    "title": "Life Lessons from #stevejobs - Trust your #instincts #stanford #connectthedots #inspiration",
+    "dur": 21,
+    "lang": "en"
+   },
+   {
+    "src": "Evolution Of CoCreator",
+    "title": "Steve Jobs Inspirational speech Connecting The Dots - Motivational - YouTube",
+    "dur": 356,
+    "lang": "en"
+   },
+   {
+    "src": "ALLEN Overseas",
+    "title": "Connecting the Dots: Respect💯| Ft. Steve Jobs | Motivational Speech at #stanforduniversity #allen - YouTube",
+    "dur": 59,
+    "lang": "en"
+   },
+   {
+    "src": "ElicCr",
+    "title": "Steve Jobs | Connecting The Dots Theory | Motivational Video - YouTube",
+    "dur": 289,
+    "lang": "en"
+   }
+  ]
+ },
+ {
+  "q": "hindi explainer on how UPI works, under 10 minutes, not from big news channels",
+  "kind": "videos",
+  "sec": 182,
+  "providers": [],
+  "top": [
+   {
+    "src": "www.reddit.com",
+    "title": "r/developersIndia on Reddit: How does UPI even work? Curious about its low-level specifics",
+    "dur": null,
+    "lang": null
+   },
+   {
+    "src": "Deepak TechTimes",
+    "title": "UPI क्या है? | UPI कैसे काम करता है? | What is UPI Payment System? | UPI Explained in Hindi - YouTube",
+    "dur": 481,
+    "lang": "hi"
+   },
+   {
+    "src": "RedCompass Labs",
+    "title": "What is UPI? India’s instant payment scheme explained | 100 Seconds Series - YouTube",
+    "dur": 186,
+    "lang": "en"
+   },
+   {
+    "src": "Firstpost",
+    "title": "UPI Turns 10: How India Built the World's Digital Payments Powerhouse | Vantage on Firstpost | 4K - YouTube",
+    "dur": 416,
+    "lang": "en"
+   },
+   {
+    "src": "www.reddit.com",
+    "title": "r/explainlikeimfive on Reddit: ELI5: What is UPI(Unified Payments Interface) used in India and how does it work?",
+    "dur": null,
+    "lang": null
+   },
+   {
+    "src": "Computer Tech Academy",
+    "title": "What is UPI in Hindi? | UPI Payment कैसे काम करता है | UPI Payment, Safe, Fast & Secure | CTA - YouTube",
+    "dur": 296,
+    "lang": "hi"
+   },
+   {
+    "src": "Bank Buddy India",
+    "title": "UPI ID KYA HOTA HAI || UPI सिस्टम कैसे काम करता है ? - YouTube",
+    "dur": 416,
+    "lang": "hi"
+   },
+   {
+    "src": "Basic Gyaan",
+    "title": "How UPI Payment Works | Benefits of UPI | Hindi - YouTube",
+    "dur": 352,
+    "lang": "hi"
+   }
+  ]
+ },
+ {
+  "q": "documentary about the guy who climbed El Capitan without ropes",
+  "kind": "videos",
+  "sec": 183,
+  "providers": [],
+  "top": [
+   {
+    "src": "ABC News",
+    "title": "Free climbing Yosemite's El Capitan without ropes or safety gear | 1st solo climb to top - YouTube",
+    "dur": 124,
+    "lang": "en"
+   },
+   {
+    "src": "ABC News",
+    "title": "How this climber made a solo journey up Yosemite's El Capitan with no gear - YouTube",
+    "dur": 560,
+    "lang": "en"
+   },
+   {
+    "src": "Stridelore",
+    "title": "Alex Honnold’s Impossible Climb | Free Solo El Capitan - YouTube",
+    "dur": 500,
+    "lang": "en"
+   },
+   {
+    "src": "www.reddit.com",
+    "title": "r/movies on Reddit: How They Filmed the First El Capitan Climb With No Ropes in \"Free Solo\"",
+    "dur": null,
+    "lang": null
+   },
+   {
+    "src": "Vanity Fair",
+    "title": "How They Filmed the First El Capitan Climb With No Ropes in \"Free Solo\" | Vanity Fair - YouTube",
+    "dur": 441,
+    "lang": "en"
+   },
+   {
+    "src": "Bits by Jerome",
+    "title": "The Most Dangerous Climb Ever - Free Solo (2018) - YouTube",
+    "dur": 54,
+    "lang": null
+   },
+   {
+    "src": "World Wonders",
+    "title": "How Alex Honnold Conquered El Capitan—No Ropes, No Fear - YouTube",
+    "dur": 494,
+    "lang": "en"
+   },
+   {
+    "src": "Nat Geo France",
+    "title": "Free Solo : Alex Honnold escalade El Capitan sans aucun équipement - YouTube",
+    "dur": 60,
+    "lang": "fr"
+   }
+  ]
+ }
+]

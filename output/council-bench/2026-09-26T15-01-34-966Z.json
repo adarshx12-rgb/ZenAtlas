@@ -1,0 +1,335 @@
+{
+ "openai/gpt-5.6-sol": {
+  "summary": {
+   "calls": 18,
+   "failures": [
+    "upi-constraints#1: timeout"
+   ],
+   "missing_verdicts": 5,
+   "label_accuracy": 0.874,
+   "pair_accuracy": 0.882,
+   "mean_spread": 0.14,
+   "median_ms": 15509,
+   "p90_ms": 32062,
+   "cost_usd_per_call": 0.01723,
+   "tokens_per_call": 4118
+  },
+  "runs": [
+   {
+    "case": "aot-official",
+    "run": 1,
+    "ms": 15509,
+    "usage": {
+     "prompt": 2373,
+     "completion": 1451,
+     "cost": 0.020441
+    },
+    "scores": {
+     "c1": 8,
+     "c2": 8,
+     "c3": 3,
+     "c4": 1,
+     "c5": 3
+    },
+    "error": null
+   },
+   {
+    "case": "mapreduce-canonical",
+    "run": 1,
+    "ms": 17108,
+    "usage": {
+     "prompt": 2878,
+     "completion": 1435,
+     "cost": 0.0215435
+    },
+    "scores": {
+     "c1": 10,
+     "c2": 9,
+     "c3": 2,
+     "c4": 1,
+     "c5": 1
+    },
+    "error": null
+   },
+   {
+    "case": "rice-authority",
+    "run": 1,
+    "ms": 13272,
+    "usage": {
+     "prompt": 2459,
+     "completion": 1201,
+     "cost": 0.014269
+    },
+    "scores": {
+     "c1": 9,
+     "c2": 4,
+     "c3": 1,
+     "c4": 10
+    },
+    "error": null
+   },
+   {
+    "case": "upi-constraints",
+    "run": 1,
+    "ms": 35012,
+    "usage": {
+     "prompt": 0,
+     "completion": 0,
+     "cost": 0
+    },
+    "scores": {},
+    "error": "timeout"
+   },
+   {
+    "case": "postgres-firsthand",
+    "run": 1,
+    "ms": 32062,
+    "usage": {
+     "prompt": 2895,
+     "completion": 2504,
+     "cost": 0.032276
+    },
+    "scores": {
+     "c1": 2,
+     "c2": 9,
+     "c3": 5,
+     "c4": 2,
+     "c5": 3
+    },
+    "error": null
+   },
+   {
+    "case": "free-solo",
+    "run": 1,
+    "ms": 15253,
+    "usage": {
+     "prompt": 2296,
+     "completion": 1329,
+     "cost": 0.0151415
+    },
+    "scores": {
+     "c1": 4,
+     "c2": 1,
+     "c3": 4,
+     "c4": 8,
+     "c5": 1
+    },
+    "error": null
+   },
+   {
+    "case": "aot-official",
+    "run": 2,
+    "ms": 7001,
+    "usage": {
+     "prompt": 2373,
+     "completion": 795,
+     "cost": 0.00843
+    },
+    "scores": {
+     "c1": 8,
+     "c2": 8,
+     "c3": 3,
+     "c4": 1,
+     "c5": 3
+    },
+    "error": null
+   },
+   {
+    "case": "mapreduce-canonical",
+    "run": 2,
+    "ms": 18425,
+    "usage": {
+     "prompt": 2878,
+     "completion": 1513,
+     "cost": 0.015711
+    },
+    "scores": {
+     "c1": 10,
+     "c2": 9,
+     "c3": 2,
+     "c4": 1,
+     "c5": 1
+    },
+    "error": null
+   },
+   {
+    "case": "rice-authority",
+    "run": 2,
+    "ms": 12295,
+    "usage": {
+     "prompt": 2459,
+     "completion": 1141,
+     "cost": 0.0119072
+    },
+    "scores": {
+     "c1": 10,
+     "c2": 2,
+     "c3": 1,
+     "c4": 10
+    },
+    "error": null
+   },
+   {
+    "case": "upi-constraints",
+    "run": 2,
+    "ms": 22025,
+    "usage": {
+     "prompt": 2543,
+     "completion": 2042,
+     "cost": 0.020934
+    },
+    "scores": {
+     "c1": 5,
+     "c2": 4,
+     "c3": 4,
+     "c4": 4,
+     "c5": 5
+    },
+    "error": null
+   },
+   {
+    "case": "postgres-firsthand",
+    "run": 2,
+    "ms": 33340,
+    "usage": {
+     "prompt": 2895,
+     "completion": 2385,
+     "cost": 0.0244344
+    },
+    "scores": {
+     "c1": 2,
+     "c2": 9,
+     "c3": 5,
+     "c4": 2,
+     "c5": 3
+    },
+    "error": null
+   },
+   {
+    "case": "free-solo",
+    "run": 2,
+    "ms": 10638,
+    "usage": {
+     "prompt": 2296,
+     "completion": 1070,
+     "cost": 0.0111646
+    },
+    "scores": {
+     "c1": 4,
+     "c2": 1,
+     "c3": 4,
+     "c4": 8,
+     "c5": 1
+    },
+    "error": null
+   },
+   {
+    "case": "aot-official",
+    "run": 3,
+    "ms": 12139,
+    "usage": {
+     "prompt": 2373,
+     "completion": 1257,
+     "cost": 0.01305
+    },
+    "scores": {
+     "c1": 8,
+     "c2": 8,
+     "c3": 3,
+     "c4": 1,
+     "c5": 3
+    },
+    "error": null
+   },
+   {
+    "case": "mapreduce-canonical",
+    "run": 3,
+    "ms": 24386,
+    "usage": {
+     "prompt": 2878,
+     "completion": 1841,
+     "cost": 0.018991
+    },
+    "scores": {
+     "c1": 10,
+     "c2": 9,
+     "c3": 3,
+     "c4": 1,
+     "c5": 1
+    },
+    "error": null
+   },
+   {
+    "case": "rice-authority",
+    "run": 3,
+    "ms": 10775,
+    "usage": {
+     "prompt": 2459,
+     "completion": 958,
+     "cost": 0.0100772
+    },
+    "scores": {
+     "c1": 10,
+     "c2": 3,
+     "c3": 1,
+     "c4": 10
+    },
+    "error": null
+   },
+   {
+    "case": "upi-constraints",
+    "run": 3,
+    "ms": 20587,
+    "usage": {
+     "prompt": 2543,
+     "completion": 1867,
+     "cost": 0.019184
+    },
+    "scores": {
+     "c1": 5,
+     "c2": 4,
+     "c3": 4,
+     "c4": 4,
+     "c5": 5
+    },
+    "error": null
+   },
+   {
+    "case": "postgres-firsthand",
+    "run": 3,
+    "ms": 26528,
+    "usage": {
+     "prompt": 2895,
+     "completion": 2229,
+     "cost": 0.0228744
+    },
+    "scores": {
+     "c1": 2,
+     "c2": 9,
+     "c3": 5,
+     "c4": 2,
+     "c5": 3
+    },
+    "error": null
+   },
+   {
+    "case": "free-solo",
+    "run": 3,
+    "ms": 12692,
+    "usage": {
+     "prompt": 2296,
+     "completion": 1197,
+     "cost": 0.0124346
+    },
+    "scores": {
+     "c1": 4,
+     "c2": 1,
+     "c3": 4,
+     "c4": 8,
+     "c5": 1
+    },
+    "error": null
+   }
+  ]
+ }
+}

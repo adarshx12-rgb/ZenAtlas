@@ -1,0 +1,95 @@
+{
+ "query": "Find Apple's official 2018 iPhone 9 launch keynote and its original announcement article. Exclude iPhone X, XR, XS, SE, rumours and concept videos.",
+ "search_id": "d482e7f0-47b1-49d6-8fe0-07cf22a18432",
+ "status": "partial",
+ "depth": "quick",
+ "stage": null,
+ "results": [],
+ "has_more": false,
+ "next_cursor": null,
+ "discovered": [],
+ "catalogue_total": 0,
+ "ranked": [],
+ "discovery_job_id": "a7391ea4-b594-4ef1-bc45-6015b948ba62",
+ "providers": [
+  {
+   "status": "ok",
+   "message": "Brave discovery completed.",
+   "provider": "brave"
+  },
+  {
+   "status": "ok",
+   "message": "Not needed: Brave answered every search.",
+   "provider": "searxng"
+  },
+  {
+   "status": "ok",
+   "message": "AI planned 4 searches for mixed.",
+   "provider": "planner"
+  },
+  {
+   "status": "ok",
+   "message": "Looked for evidence on 1 unmet requirement: 1 targeted searches, 0 pages or videos opened, 0 closed.",
+   "provider": "gap_exploration"
+  },
+  {
+   "status": "partial",
+   "message": "70 candidates found; up to 60 candidates were selected for checking after all sources answered.",
+   "provider": "candidate_pool"
+  },
+  {
+   "status": "ok",
+   "message": "Screened 70 of 70 leads to prioritize evidence checks; final relevance is checked separately.",
+   "provider": "jev_screener"
+  },
+  {
+   "status": "ok",
+   "message": "YouTube details and viewer comments checked.",
+   "provider": "youtube"
+  },
+  {
+   "status": "ok",
+   "message": "Reddit discussions checked.",
+   "provider": "reddit"
+  },
+  {
+   "status": "ok",
+   "message": "17 of 20 result pages were checked, 3 in a browser.",
+   "provider": "pages"
+  },
+  {
+   "status": "ok",
+   "message": "Results were checked for relevance by AI.",
+   "provider": "judge"
+  },
+  {
+   "status": "ok",
+   "message": "No sufficiently supported matches were found. Weak, uncertain and unchecked candidates were excluded.",
+   "provider": "relevance_filter"
+  }
+ ],
+ "ranking_version": "relevance-v8-requirements",
+ "interpretation": {
+  "intent": "Find Apple's official 2018 iPhone 9 launch keynote and its original announcement article. Exclude iPhone X, XR, XS, SE, rumours and concept videos.",
+  "requirements": [
+   {
+    "id": "R1",
+    "text": "Is an article or a video",
+    "hardness": "hard",
+    "scope": "each"
+   },
+   {
+    "id": "R2",
+    "text": "From an official 2018 source",
+    "hardness": "hard",
+    "scope": "each"
+   }
+  ],
+  "assumptions": [],
+  "ambiguities": [],
+  "unmet": [
+   "No result could be verified for: Is an article or a video",
+   "No result could be verified for: From an official 2018 source"
+  ]
+ }
+}

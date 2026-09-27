@@ -1,0 +1,1082 @@
+{
+ "task": "task2",
+ "started": "2026-09-26T12:48:16.479Z",
+ "finished": "2026-09-26T12:50:44.091Z",
+ "budgets_used": {
+  "scene_analysis_requests": 6,
+  "reddit_signals": 3,
+  "embeddings": 10,
+  "scene_auto_jobs": 2,
+  "youtube_caption_jobs": 5,
+  "discovery_jobs": 3,
+  "discovery:brave": 17,
+  "jev_exploration_calls": 6,
+  "youtube_units": 150,
+  "critic_calls": 5,
+  "enrichment_jobs": 154,
+  "planner_calls:inception/mercury-2.5": 3,
+  "judge_calls": 11,
+  "source_health_jobs": 26,
+  "discovery:searxng": 9,
+  "planner_calls:mistralai/ministral-14b-2512": 3,
+  "jev_screen_calls": 11,
+  "anilist_calls": 18,
+  "planner_calls:google/gemma-4-31b-it": 3,
+  "jev_judge_calls": 122
+ },
+ "health": "",
+ "runs": [
+  {
+   "q": "that anime where the guy gets reincarnated as a slime",
+   "search_id": "83c16007-f28c-4f59-be96-8aa7bbe622a2",
+   "status": "partial",
+   "first_ms": 64656,
+   "full_ms": 64656,
+   "job": "8e1c81f8-e670-4ad4-a811-da4aec04c4f5",
+   "providers": [
+    {
+     "status": "ok",
+     "message": "Brave discovery completed.",
+     "provider": "brave"
+    },
+    {
+     "status": "ok",
+     "message": "Not needed: Brave answered every search.",
+     "provider": "searxng"
+    },
+    {
+     "status": "ok",
+     "message": "AI planned 4 searches for mixed.",
+     "provider": "planner"
+    },
+    {
+     "status": "ok",
+     "message": "Looked for evidence on 1 unmet requirement: 1 targeted searches, 2 pages or videos opened, 0 closed.",
+     "provider": "gap_exploration"
+    },
+    {
+     "status": "partial",
+     "message": "82 candidates found; up to 60 candidates were selected for checking after all sources answered.",
+     "provider": "candidate_pool"
+    },
+    {
+     "status": "ok",
+     "message": "Screened 82 of 82 leads to prioritize evidence checks; final relevance is checked separately.",
+     "provider": "jev_screener"
+    },
+    {
+     "status": "ok",
+     "message": "YouTube details and viewer comments checked.",
+     "provider": "youtube"
+    },
+    {
+     "status": "ok",
+     "message": "Reddit discussions checked.",
+     "provider": "reddit"
+    },
+    {
+     "status": "ok",
+     "message": "15 of 20 result pages were checked, 6 in a browser.",
+     "provider": "pages"
+    },
+    {
+     "status": "ok",
+     "message": "Results were checked for relevance by AI.",
+     "provider": "judge"
+    },
+    {
+     "status": "ok",
+     "message": "30 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+     "provider": "relevance_filter"
+    },
+    {
+     "status": "partial",
+     "message": "5 videos queued for caption fetching; their transcripts help later searches, not this one.",
+     "provider": "youtube_captions"
+    }
+   ],
+   "interpretation": {
+    "intent": "Locate the anime series based on the reincarnation premise.",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "Matches title or synonym",
+      "hardness": "hard",
+      "scope": "each"
+     },
+     {
+      "id": "R2",
+      "text": "Depicts protagonist as slime",
+      "hardness": "preferred",
+      "scope": "each"
+     }
+    ],
+    "assumptions": [
+     "User refers to 2018 anime adaptation"
+    ],
+    "ambiguities": [],
+    "unmet": []
+   },
+   "top": [
+    {
+     "title": "That Time I Got Reincarnated as a Slime (TV) - Anime News Network",
+     "url": "https://www.animenewsnetwork.com/encyclopedia/anime.php?id=20736",
+     "creator": null,
+     "source": "www.animenewsnetwork.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Jev: R1 — \"That Time I Got Reincarnated as a Slime (TV) - Anime News Network:IN\"",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Matches title or synonym"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "That Time I Got Reincarnated as a Slime | Anime-Planet",
+     "url": "https://www.anime-planet.com/anime/that-time-i-got-reincarnated-as-a-slime",
+     "creator": null,
+     "source": "www.anime-planet.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Jev: R1 — \"That Time I Got Reincarnated as a Slime | Anime-Planet\"",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Matches title or synonym"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "That Time I Got Reincarnated as a Slime | Rotten Tomatoes",
+     "url": "https://www.rottentomatoes.com/tv/that_time_i_got_reincarnated_as_a_slime",
+     "creator": null,
+     "source": "www.rottentomatoes.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Jev: R1 — \"That Time I Got Reincarnated as a Slime | Rotten Tomatoes\"",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Matches title or synonym"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "That Time I Got Reincarnated as a Slime season 1 - Wikipedia",
+     "url": "https://en.wikipedia.org/wiki/That_Time_I_Got_Reincarnated_as_a_Slime_season_1",
+     "creator": null,
+     "source": "en.wikipedia.org",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Wikipedia article covers the first season of the requested anime.",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Matches title or synonym"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "That Time I Got Reincarnated as a Slime | PREMIUM BANDAI USA [Official] Online Store for Action Figures, Model Kits, Card Games, Toys, and more.",
+     "url": "https://p-bandai.com/us/series/thattimeigotreincarnatedasaslime-series/",
+     "creator": null,
+     "source": "p-bandai.com",
+     "duration": null,
+     "language": null,
+     "relevance": 9,
+     "reason": "Jev: R1 — \"That Time I Got Reincarnated as a Slime | PREMIUM BANDAI USA [Official] Online Store for A\"",
+     "badges": [],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Matches title or synonym"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "WFS - That Time I Got Reincarnated as a Slime: ISEKAI Memories",
+     "url": "https://www.wfs.games/en-us/service/ten-sura-m/",
+     "creator": null,
+     "source": "www.wfs.games",
+     "duration": null,
+     "language": null,
+     "relevance": 8,
+     "reason": "Official website for the mobile game adaptation of the requested anime series.",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Matches title or synonym"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "That Time I Got Reincarnated as a Slime Season 3 | OFFICIAL TRAILER - YouTube",
+     "url": "https://www.youtube.com/watch?v=gqrkjNpoeQM",
+     "creator": "Crunchyroll",
+     "source": "YouTube",
+     "duration": 101,
+     "language": "ja",
+     "relevance": 8,
+     "reason": "Official Crunchyroll trailer featuring Rimuru as a slime character. Supporting evidence only; exact match unverified.",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 5,
+       "end": 60,
+       "type": "viewer_timestamp",
+       "summary": "0:40 the studio never disappoint me with they're good sounds effects. · 0:10 aizen is that you · 0:23 damrada, granbell and Maria Bell debutttt lesssgooooo"
+      },
+      {
+       "start": 60,
+       "end": 101,
+       "type": "viewer_timestamp",
+       "summary": "Out of the whole trailer, I'm here for 1:05 · 1:14"
+      }
+     ],
+     "requirements": [
+      "supported: Matches title or synonym"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Rimuru vs Clayman | That Time I Got Reincarnated as a Slime Season 2 - YouTube",
+     "url": "https://www.youtube.com/watch?v=t5JcYsFGwbw",
+     "creator": "Crunchyroll",
+     "source": "YouTube",
+     "duration": 156,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Fight clip from That Time I Got Reincarnated as a Slime Season 2. Supporting evidence only; exact match unverified.",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 0,
+       "end": 43,
+       "type": "viewer_timestamp",
+       "summary": "0:03 This is kinda funny in retrospect. · 0:13 did Rimuru literally just \"Omava mou shindeiru\" Clayman? My boy...Lol"
+      },
+      {
+       "start": 55,
+       "end": 117,
+       "type": "viewer_timestamp",
+       "summary": "1:27 You think he'd admit defeat after seeing his own magic get scared of Rimuru · My favorite part about the second Beelzebub is at 1:27 when the dragon realizes it just jumped into an open mouth and"
+      },
+      {
+       "start": 121,
+       "end": 156,
+       "type": "viewer_timestamp",
+       "summary": "2:06 I love that detail of Rimuru smiling right before one of the punches. He might be taking the fight relatively serious, but that doesn’t stop him from feeling the satisfaction of getting revenge f"
+      }
+     ],
+     "requirements": [
+      "supported: Matches title or synonym"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Shion Tries to Hold Back | That Time I Got Reincarnated as a Slime Season 3 - YouTube",
+     "url": "https://www.youtube.com/watch?v=zvc4dLBCJ2Y",
+     "creator": "Crunchyroll",
+     "source": "YouTube",
+     "duration": 65,
+     "language": "ja",
+     "relevance": 8,
+     "reason": "Clip from That Time I Got Reincarnated as a Slime Season 3 featuring characters from the series. Supporting evidence only; exact match unverified.",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 0,
+       "end": 40,
+       "type": "viewer_timestamp",
+       "summary": "The way Shion punched the big guy and bounced on his brother like a bowling at 0:03 lol · 0:10 The white button shirt is trying to keep it together till the very end. · 0:03"
+      }
+     ],
+     "requirements": [
+      "supported: Matches title or synonym"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "That Time I Got Reincarnated as a Slime Season 2 Opening 2 \"Like Flames\" by MindaRyn - YouTube",
+     "url": "https://www.youtube.com/watch?v=jEDQmD7nhyQ",
+     "creator": "Crunchyroll",
+     "source": "YouTube",
+     "duration": 100,
+     "language": "en",
+     "relevance": 8,
+     "reason": "Official anime opening theme video for That Time I Got Reincarnated as a Slime Season 2.",
+     "badges": [
+      "Discussed on Reddit"
+     ],
+     "origin": "discovery",
+     "evidence": "viewer_timestamp",
+     "moments": [
+      {
+       "start": 45,
+       "end": 93,
+       "type": "viewer_timestamp",
+       "summary": "1:03 I’ll never be able to hear this as anything other than “stand up now, stand up now shawty” · Can we just apriciate Clayman at 0:50 with a mask WHILE HE is played by Dio's voice actor"
+      }
+     ],
+     "requirements": [
+      "supported: Matches title or synonym"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    }
+   ],
+   "total": 30,
+   "closest": [
+    {
+     "title": "That Time I Got Reincarnated as a Slime - Wikipedia",
+     "url": "https://en.wikipedia.org/wiki/That_Time_I_Got_Reincarnated_as_a_Slime",
+     "creator": null,
+     "source": "en.wikipedia.org",
+     "duration": null,
+     "language": null,
+     "relevance": 5,
+     "reason": "Wikipedia article details the anime and light novel series That Time I Got Reincarnated as a Slime. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Matches title or synonym"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Review: That Time I Got Reincarnated as a Slime – I Watched an Anime",
+     "url": "https://iwatchedananime.com/2019/03/30/review-that-time-i-got-reincarnated-as-a-slime/",
+     "creator": null,
+     "source": "iwatchedananime.com",
+     "duration": null,
+     "language": null,
+     "relevance": 5,
+     "reason": "Anime review discusses the premise of a man dying and getting reincarnated as a slime. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Matches title or synonym"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Watch That Time I Got Reincarnated as a Slime",
+     "url": "https://www.crunchyroll.com/series/GYZJ43JMR/that-time-i-got-reincarnated-as-a-slime",
+     "creator": null,
+     "source": "www.crunchyroll.com",
+     "duration": null,
+     "language": null,
+     "relevance": 5,
+     "reason": "Crunchyroll series page for That Time I Got Reincarnated as a Slime.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Matches title or synonym"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "That Time I Got Reincarnated as a Slime (TV series) - Wikipedia",
+     "url": "https://en.wikipedia.org/wiki/That_Time_I_Got_Reincarnated_as_a_Slime_(TV_series)",
+     "creator": null,
+     "source": "en.wikipedia.org",
+     "duration": null,
+     "language": null,
+     "relevance": 5,
+     "reason": "Wikipedia article details the anime series where a man is reincarnated as a slime. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Matches title or synonym"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "That Time I Got Reincarnated as a Slime ISEKAI Chronicles | Official Site",
+     "url": "https://www.bandainamcoent.com/games/isekai-chronicles",
+     "creator": null,
+     "source": "www.bandainamcoent.com",
+     "duration": null,
+     "language": null,
+     "relevance": 5,
+     "reason": "Official site for the game adaptation of the anime series. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Matches title or synonym"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Tensei shitara Slime Datta Ken - MyAnimeList.net",
+     "url": "https://myanimelist.net/anime/37430/Tensei_shitara_Slime_Datta_Ken",
+     "creator": null,
+     "source": "myanimelist.net",
+     "duration": null,
+     "language": null,
+     "relevance": 5,
+     "reason": "MyAnimeList database page for the requested anime series. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Matches title or synonym"
+     ],
+     "coverage": {
+      "basis": "direct_evidence",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Watch That Time I Got Reincarnated as a Slime | Netflix",
+     "url": "https://www.netflix.com/title/81028712",
+     "creator": null,
+     "source": "www.netflix.com",
+     "duration": null,
+     "language": null,
+     "relevance": 5,
+     "reason": "Netflix page for That Time I Got Reincarnated as a Slime, featuring the anime series. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Matches title or synonym"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "That Time I Got Reincarnated as a Slime (TV Series 2018– ) - Episode list - IMDb",
+     "url": "https://www.imdb.com/title/tt9054364/episodes/",
+     "creator": null,
+     "source": "www.imdb.com",
+     "duration": null,
+     "language": null,
+     "relevance": 5,
+     "reason": "IMDb episode list for That Time I Got Reincarnated as a Slime matches the anime. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Matches title or synonym"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Ordinary Boy Reincarnated As The Weakest Slime That Rivals The Strongest Demon Lords | Anime Recap - YouTube",
+     "url": "https://www.youtube.com/watch?v=HSFgR5vpqNU",
+     "creator": "AniVisor",
+     "source": "YouTube",
+     "duration": 14599,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Anime recap video covering the requested series on YouTube. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Matches title or synonym"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Anime | Tensei Shitara Slime Datta Ken Wiki | Fandom",
+     "url": "https://tensura.fandom.com/wiki/Anime",
+     "creator": null,
+     "source": "tensura.fandom.com",
+     "duration": null,
+     "language": null,
+     "relevance": 5,
+     "reason": "Wiki page about the anime, matches title and subject but lacks official streaming source. Match not verified from the evidence.",
+     "badges": [
+      "Discussed on Reddit",
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Matches title or synonym"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    }
+   ]
+  },
+  {
+   "q": "video of a cat knocking a glass off a table in slow motion",
+   "search_id": "3c951b0c-4402-4415-8ed3-06ab75223e43",
+   "status": "partial",
+   "first_ms": null,
+   "full_ms": 42286,
+   "job": "d812b18f-53ea-486a-8853-2e8d77454922",
+   "providers": [
+    {
+     "status": "ok",
+     "message": "Brave discovery completed.",
+     "provider": "brave"
+    },
+    {
+     "status": "ok",
+     "message": "Not needed: Brave answered every search.",
+     "provider": "searxng"
+    },
+    {
+     "status": "ok",
+     "message": "AI planned 4 searches for videos.",
+     "provider": "planner"
+    },
+    {
+     "status": "ok",
+     "message": "Recognised the anime \"Naruto\"; searches and AI checks use its official titles and details.",
+     "provider": "anilist"
+    },
+    {
+     "status": "ok",
+     "message": "Looked for evidence on 2 unmet requirements: 2 targeted searches, 2 pages or videos opened, 0 closed.",
+     "provider": "gap_exploration"
+    },
+    {
+     "status": "ok",
+     "message": "Screened 34 of 34 leads to prioritize evidence checks; final relevance is checked separately.",
+     "provider": "jev_screener"
+    },
+    {
+     "status": "ok",
+     "message": "YouTube details and viewer comments checked.",
+     "provider": "youtube"
+    },
+    {
+     "status": "ok",
+     "message": "Reddit discussions checked.",
+     "provider": "reddit"
+    },
+    {
+     "status": "unavailable",
+     "message": "Result pages could not be checked; websites are ranked from search snippets.",
+     "provider": "pages"
+    },
+    {
+     "status": "partial",
+     "message": "Some results could not be checked by AI and were excluded.",
+     "provider": "judge"
+    },
+    {
+     "status": "ok",
+     "message": "No sufficiently supported matches were found. Weak, uncertain and unchecked candidates were excluded.",
+     "provider": "relevance_filter"
+    },
+    {
+     "status": "ok",
+     "message": "No candidate video has been watched yet, so what happens in them (actions, their order, sound) is unverified. 2 were queued for inspection; search again in a few minutes to check them.",
+     "provider": "video_inspection"
+    }
+   ],
+   "interpretation": {
+    "intent": "Find slow-motion video footage of a cat knocking a glass off a table.",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "Is a video",
+      "hardness": "hard",
+      "scope": "each"
+     },
+     {
+      "id": "R2",
+      "text": "cat knocking a glass off a table",
+      "hardness": "hard",
+      "scope": "each"
+     },
+     {
+      "id": "R3",
+      "text": "slow motion",
+      "hardness": "hard",
+      "scope": "each"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unmet": [
+     "No result could be verified for: Is a video",
+     "No result could be verified for: cat knocking a glass off a table",
+     "No result could be verified for: slow motion"
+    ]
+   },
+   "top": [],
+   "total": 0,
+   "closest": [
+    {
+     "title": "Cat pushes stuff off table | On second thought...😼 | By 9GAG | Facebook",
+     "url": "https://www.facebook.com/9gag/videos/cat-pushes-stuff-off-table/451269739224510/",
+     "creator": null,
+     "source": "www.facebook.com",
+     "duration": null,
+     "language": null,
+     "relevance": 5,
+     "reason": "Metadata mentions a cat pushing stuff off a table, but slow motion is not verified. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "unknown: Is a video",
+      "supported: cat knocking a glass off a table",
+      "unknown: slow motion"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Cat moves vase to knock it off, gets caught and moves it back - YouTube",
+     "url": "https://www.youtube.com/watch?v=yXLHRuU4Ows",
+     "creator": "graced",
+     "source": "YouTube",
+     "duration": 10,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Shows a cat moving a vase on a table, but not in slow motion. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Is a video",
+      "supported: cat knocking a glass off a table",
+      "unknown: slow motion"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": "pending"
+    },
+    {
+     "title": "HILARIOUS CATS KNOCKING THINGS OFF OF TABLES! - YouTube",
+     "url": "https://www.youtube.com/watch?v=-IeB-4v3dcs",
+     "creator": "Floofz Inc.",
+     "source": "YouTube",
+     "duration": 630,
+     "language": "en",
+     "relevance": 5,
+     "reason": "Compilation of cats knocking things off tables, but no evidence of slow motion. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Is a video",
+      "supported: cat knocking a glass off a table",
+      "unknown: slow motion"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": "pending"
+    },
+    {
+     "title": "Cat knocks glass on sleeping owner - YouTube",
+     "url": "https://www.youtube.com/watch?v=w_LK_fryqZM",
+     "creator": "Sunny Skyz Videos",
+     "source": "YouTube",
+     "duration": 37,
+     "language": null,
+     "relevance": 4,
+     "reason": "Title references a cat knocking a glass, but no slow motion or table surface is confirmed. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Is a video",
+      "unknown: cat knocking a glass off a table",
+      "unknown: slow motion"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Why Cats Knock Stuff Off Tables (Science or Sass?) - YouTube",
+     "url": "https://www.youtube.com/watch?v=vbww2bphYGQ",
+     "creator": "That Cat Mommy",
+     "source": "YouTube",
+     "duration": 190,
+     "language": "en",
+     "relevance": 3,
+     "reason": "Discusses why cats knock things off tables in a commentary/essay format, not the requested footage. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Is a video",
+      "unknown: cat knocking a glass off a table",
+      "unknown: slow motion"
+     ],
+     "coverage": {
+      "basis": "metadata",
+      "captions": "unavailable",
+      "comments": "unavailable",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    },
+    {
+     "title": "Why Your Cat Keeps Knocking Things Over - YouTube",
+     "url": "https://www.youtube.com/watch?v=bOgkvU8i81A",
+     "creator": "History of Simple Things",
+     "source": "YouTube",
+     "duration": 494,
+     "language": "en",
+     "relevance": 3,
+     "reason": "Informational video about cats knocking things over, but lacks slow motion and specific glass-falling footage. Match not verified from the evidence.",
+     "badges": [
+      "Closest match"
+     ],
+     "origin": "discovery",
+     "evidence": "metadata_match",
+     "moments": [],
+     "requirements": [
+      "supported: Is a video",
+      "unknown: cat knocking a glass off a table",
+      "unknown: slow motion"
+     ],
+     "coverage": {
+      "basis": "viewer_claims",
+      "captions": "unavailable",
+      "comments": "available",
+      "analysed_scenes": 0,
+      "transcript_passages": 0
+     },
+     "scene_analysis": null
+    }
+   ]
+  },
+  {
+   "q": "documentary about the guy who climbed El Capitan without ropes",
+   "search_id": "7c934d2f-0d16-423d-93cb-162fb8d39bcb",
+   "status": "partial",
+   "first_ms": null,
+   "full_ms": 40023,
+   "job": "3ae680b1-6c00-4db2-87dd-9ac0c0c8cabc",
+   "providers": [
+    {
+     "status": "ok",
+     "message": "Brave discovery completed.",
+     "provider": "brave"
+    },
+    {
+     "status": "ok",
+     "message": "Not needed: Brave answered every search.",
+     "provider": "searxng"
+    },
+    {
+     "status": "ok",
+     "message": "AI planned 4 searches for videos.",
+     "provider": "planner"
+    },
+    {
+     "status": "ok",
+     "message": "Looked for evidence on 2 unmet requirements: 2 targeted searches, 5 pages or videos opened, 0 closed.",
+     "provider": "gap_exploration"
+    },
+    {
+     "status": "partial",
+     "message": "70 candidates found; up to 60 candidates were selected for checking after all sources answered.",
+     "provider": "candidate_pool"
+    },
+    {
+     "status": "ok",
+     "message": "Screened 70 of 70 leads to prioritize evidence checks; final relevance is checked separately.",
+     "provider": "jev_screener"
+    },
+    {
+     "status": "ok",
+     "message": "YouTube details and viewer comments checked.",
+     "provider": "youtube"
+    },
+    {
+     "status": "ok",
+     "message": "Reddit discussions checked.",
+     "provider": "reddit"
+    },
+    {
+     "status": "ok",
+     "message": "11 of 20 result pages were checked, 5 in a browser.",
+     "provider": "pages"
+    },
+    {
+     "status": "budget_exhausted",
+     "message": "The daily judge limit has been reached.",
+     "provider": "judge"
+    },
+    {
+     "status": "ok",
+     "message": "No sufficiently supported matches were found. Weak, uncertain and unchecked candidates were excluded.",
+     "provider": "relevance_filter"
+    }
+   ],
+   "interpretation": {
+    "intent": "Find the documentary about Alex Honnold's rope-less ascent of El Capitan.",
+    "requirements": [
+     {
+      "id": "R1",
+      "text": "documentary",
+      "hardness": "hard",
+      "scope": "each"
+     },
+     {
+      "id": "R2",
+      "text": "climbed El Capitan without ropes",
+      "hardness": "hard",
+      "scope": "each"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unmet": [
+     "No result could be verified for: documentary",
+     "No result could be verified for: climbed El Capitan without ropes"
+    ]
+   },
+   "top": [],
+   "total": 0,
+   "closest": []
+  }
+ ]
+}

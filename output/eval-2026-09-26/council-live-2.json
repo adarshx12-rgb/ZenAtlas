@@ -1,0 +1,739 @@
+[
+ {
+  "q": "how long can cooked rice be safely kept in the fridge",
+  "kind": "web",
+  "sec": 45,
+  "providers": [],
+  "top": [
+   {
+    "rel": 9,
+    "src": "nytimes.com",
+    "title": "How Long Does Rice Last in the Fridge? And Other Rice Questions, Answered - The New York Times",
+    "reason": "NYT article gives HHS's 4-6 day guidance for cooked rice storage and safety conditions like fridge temperature."
+   },
+   {
+    "rel": 9,
+    "src": "realsimple.com",
+    "title": "How Long Can Rice Stay in the Fridge? Here’s What You Need to Know",
+    "reason": "Directly states cooked rice stays 4-6 days in fridge if refrigerated within two hours, per FoodSafety.gov."
+   },
+   {
+    "rel": 9,
+    "src": "simplyrecipes.com",
+    "title": "How Long You Can Actually Keep Leftover Rice, According to Food Safety Experts",
+    "reason": "The page explicitly covers how long cooked rice can be safely stored in the fridge."
+   },
+   {
+    "rel": 9,
+    "src": "finedininglovers.com",
+    "title": "How Long Does Cooked Rice Last and How Long Can You Keep It?",
+    "reason": "Explicitly answers cooked rice keeps 3-5 days in fridge, citing USA Rice Federation guidance."
+   },
+   {
+    "rel": 8,
+    "src": "nytimes.com",
+    "title": "How Long Does Rice Last in the Fridge? - The New York Times",
+    "reason": "New York Times page provides official safety guidelines on storing cooked rice."
+   },
+   {
+    "rel": 8,
+    "src": "reencle.co",
+    "title": "How Long Does Cooked Rice Last in the Fridge? | Reencle",
+    "reason": "The page directly states that cooked rice lasts 3-4 days in the fridge according to USDA and FDA guidelines."
+   },
+   {
+    "rel": 8,
+    "src": "reencle.co",
+    "title": "How Long Is Rice Good for in the Fridge?",
+    "reason": "Directly states cooked rice lasts 3-5 days in fridge with USDA-based guidance and storage conditions."
+   },
+   {
+    "rel": 8,
+    "src": "tasteofhome.com",
+    "title": "How Long Does Rice Last in the Fridge Before It Goes Bad?",
+    "reason": "Taste of Home article specifies shelf life of cooked rice in the fridge."
+   }
+  ]
+ },
+ {
+  "q": "the part in Steve Jobs' Stanford commencement speech where he talks about connecting the dots",
+  "kind": "videos",
+  "status": "partial",
+  "sec": 80,
+  "providers": [
+   {
+    "status": "ok",
+    "message": "Results were checked for relevance by AI.",
+    "provider": "judge"
+   },
+   {
+    "status": "ok",
+    "message": "36 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+    "provider": "relevance_filter"
+   }
+  ],
+  "interpretation": [
+   {
+    "id": "R1",
+    "text": "Steve Jobs' Stanford commencement speech",
+    "hardness": "hard",
+    "scope": "each"
+   },
+   {
+    "id": "R2",
+    "text": "connecting the dots",
+    "hardness": "hard",
+    "scope": "each"
+   }
+  ],
+  "top": [
+   {
+    "rel": 8,
+    "src": "Steve Jobs Archive",
+    "title": "​​\"Trust that the dots will somehow connect,\" Steve Jobs, Stanford commencement address, 2005",
+    "dur": 35,
+    "lang": "en",
+    "reason": "Title and description explicitly cite the 2005 Stanford address and quote the connecting-the-dots line, from Steve Jobs Archive. Supporting evidence only; exact match unverified.",
+    "moments": [],
+    "uncertain": []
+   },
+   {
+    "rel": 6,
+    "src": "podcasts.apple.com",
+    "title": "Steve Jobs - 2005 Stanford Commencement Speech",
+    "dur": null,
+    "lang": null,
+    "reason": "Podcast episode of Steve Jobs' 2005 Stanford commencement speech featuring connecting the dots. Metadata only; contents unverified.",
+    "moments": [],
+    "uncertain": []
+   },
+   {
+    "rel": 6,
+    "src": "www.rev.com",
+    "title": "Steve Jobs Stanford Commencement Speech Transcript | Rev",
+    "dur": null,
+    "lang": null,
+    "reason": "Provides the complete transcript of Steve Jobs' 2005 Stanford commencement speech, specifically featuring the connecting the dots section. Metadata only; contents unverified.",
+    "moments": [],
+    "uncertain": []
+   },
+   {
+    "rel": 6,
+    "src": "Fearless Soul",
+    "title": "Steve Jobs - Connecting The Dots - Motivational Video - YouTube",
+    "dur": 390,
+    "lang": "en",
+    "reason": "Motivational video edit featuring Steve Jobs' commencement speech and his discussion on connecting the dots.",
+    "moments": [],
+    "uncertain": []
+   },
+   {
+    "rel": 6,
+    "src": "Echoes of Strength",
+    "title": "📌 Steve Jobs' Most Powerful Speech Ever l Connecting the dots",
+    "dur": 274,
+    "lang": "en",
+    "reason": "Motivational video edit highlighting Steve Jobs' 2005 Stanford Commencement Address and connecting the dots.",
+    "moments": [],
+    "uncertain": []
+   },
+   {
+    "rel": 6,
+    "src": "THRIVE",
+    "title": "Steve Jobs: \"You Can't Connect the Dots Looking Forward\" | Life-Changing Speech | Thrive Co.",
+    "dur": 30,
+    "lang": "en",
+    "reason": "A short edit of Steve Jobs mentioning that you cannot connect the dots looking forward in his 2005 Stanford speech. Metadata only; contents unverified.",
+    "moments": [],
+    "uncertain": []
+   },
+   {
+    "rel": 6,
+    "src": "Swarh",
+    "title": "Steve Jobs Lessons: Connect The Dots🔥",
+    "dur": 43,
+    "lang": "en",
+    "reason": "A short video clip featuring the connect the dots lesson from Steve Jobs' 2005 Stanford commencement address. Metadata only; contents unverified.",
+    "moments": [],
+    "uncertain": []
+   },
+   {
+    "rel": 6,
+    "src": "Blaq's Diary",
+    "title": "CONNECTING THE INVISIBLE DOTS - Until It Makes Sense",
+    "dur": 355,
+    "lang": "en",
+    "reason": "Features the Stanford 2005 commencement speech segment on connecting the dots and dropping out.",
+    "moments": [],
+    "uncertain": []
+   }
+  ],
+  "closest": [
+   {
+    "rel": 5,
+    "src": "Spark",
+    "title": "Steve Jobs Connect the Dots",
+    "dur": 319,
+    "lang": "en",
+    "reason": "Description confirms this is the first story about Connecting the Dots from Jobs' Stanford speech, though 2005 date not explicit.",
+    "moments": [],
+    "uncertain": [
+     "Not confirmed: Steve Jobs' Stanford commencement speech"
+    ]
+   },
+   {
+    "rel": 5,
+    "src": "www.dailymotion.com",
+    "title": "Steve Jobs' 2005 Stanford Commencement Address (Motivational Speech)",
+    "dur": 635,
+    "lang": null,
+    "reason": "Dailymotion video of Steve Jobs' 2005 Stanford commencement address. Metadata only; contents unverified.",
+    "moments": [],
+    "uncertain": [
+     "Not confirmed: connecting the dots"
+    ]
+   },
+   {
+    "rel": 5,
+    "src": "www.dailymotion.com",
+    "title": "The lasting life advice from Steve Jobs to young people in his viral Stanford commencement speech",
+    "dur": 71,
+    "lang": null,
+    "reason": "Dailymotion video clip mentioning Steve Jobs' Stanford commencement speech, but short and lacks specific connecting the dots speech footage. Match not verified from the evidence.",
+    "moments": [],
+    "uncertain": [
+     "Not confirmed: connecting the dots"
+    ]
+   },
+   {
+    "rel": 5,
+    "src": "www.ted.com",
+    "title": "Steve Jobs: How to live before you die | TED Talk",
+    "dur": 905,
+    "lang": null,
+    "reason": "TED Talk video of Steve Jobs' 2005 Stanford commencement speech. Match not verified from the evidence.",
+    "moments": [],
+    "uncertain": [
+     "Not confirmed: connecting the dots"
+    ]
+   },
+   {
+    "rel": 5,
+    "src": "www.dailymotion.com",
+    "title": "ENGLISH SPEECH Steve Jobs Stanford Commencement Speech 2005 (subtitles Anglicus)（subtitles in latin）",
+    "dur": 868,
+    "lang": null,
+    "reason": "Video upload of Steve Jobs' 2005 Stanford Commencement Speech with subtitles. Match not verified from the evidence.",
+    "moments": [],
+    "uncertain": [
+     "Not confirmed: connecting the dots"
+    ]
+   }
+  ]
+ },
+ {
+  "q": "the Google paper that introduced MapReduce",
+  "kind": "docs",
+  "sec": 99,
+  "providers": [],
+  "top": [
+   {
+    "rel": 9,
+    "src": "pdos.csail.mit.edu",
+    "title": "MapReduce: Simpliﬁed Data Processing on Large Clusters",
+    "reason": "MIT course-hosted PDF containing the full original Google MapReduce paper by Dean and Ghemawat."
+   },
+   {
+    "rel": 9,
+    "src": "cse.buffalo.edu",
+    "title": "MapReduce: simplified data processing on large clusters",
+    "reason": "PDF text is the actual Dean/Ghemawat MapReduce paper from Google, hosted as a course copy."
+   },
+   {
+    "rel": 9,
+    "src": "plus.ac.at",
+    "title": "MapReduce: Simpliﬁed Data Processing on Large Cluste",
+    "reason": "PDF text shows the full Dean/Ghemawat Google MapReduce paper abstract, a third-party hosted copy."
+   },
+   {
+    "rel": 9,
+    "src": "storage.googleapis.com",
+    "title": "Download",
+    "reason": "Jev: R1 — \"MapReduce: Simpli\u0002ed Data Processing on Large Clusters Jeffrey Dean and Sanjay Ghemawat je\""
+   },
+   {
+    "rel": 5,
+    "src": "research.google.com",
+    "title": "MapReduce: Simpliﬁed Data Processing on Large Clusters",
+    "reason": "The page is the original Google paper introducing MapReduce by Jeffrey Dean and Sanjay Ghemawat. Match not verified from the evidence."
+   },
+   {
+    "rel": 5,
+    "src": "researchgate.net",
+    "title": "MapReduce: Simplified Data Processing on Large Clusters",
+    "reason": "ResearchGate page for the MapReduce paper by Jeffrey Dean and Sanjay Ghemawat. Metadata only; contents unverified."
+   },
+   {
+    "rel": 5,
+    "src": "scribd.com",
+    "title": "Mapreduce Google Paper | PDF - Scribd",
+    "reason": "Page text shows the actual paper's title, authors, and abstract text matching the original OSDI'04 MapReduce paper. Match not verified from the evidence."
+   },
+   {
+    "rel": 5,
+    "src": "academia.edu",
+    "title": "(PDF) MapReduce - Academia.edu",
+    "reason": "Abstract matches the original MapReduce paper's language on map/reduce functions and fault-tolerant parallelization across clusters. Match not verified from the evidence."
+   }
+  ]
+ },
+ {
+  "q": "postgres vs mysql for write-heavy workloads from engineers who ran both, not vendor blogs",
+  "kind": "web",
+  "sec": 57,
+  "providers": [],
+  "top": [
+   {
+    "rel": 9,
+    "src": "binaryigor.com",
+    "title": "MySQL vs PostgreSQL Performance: throughput & latency, reads & writes",
+    "reason": "Independent benchmark blog runs 17 test cases and explicitly notes MySQL's edge on write-heavy workloads with real testing."
+   },
+   {
+    "rel": 5,
+    "src": "techsy.io",
+    "title": "PostgreSQL vs MySQL in 2026: Definitive Comparison | TECHSY",
+    "reason": "Techsy compares PostgreSQL and MySQL with benchmarks and cost calculations, but does not focus specifically on write-heavy workloads from dual-engine engineers. Match not verified from the evidence."
+   },
+   {
+    "rel": 5,
+    "src": "basevolt.app",
+    "title": "MySQL vs PostgreSQL in 2026: A Practical Decision Framework - Basevolt Blog",
+    "reason": "Personal blog claims dual experience with both databases but gives no explicit write-heavy workload data or benchmarks. Match not verified from the evidence."
+   },
+   {
+    "rel": 5,
+    "src": "reddit.com",
+    "title": "r/programming on Reddit: MySQL vs PostgreSQL Performance: throughput & latency, reads & writes",
+    "reason": "Reddit discussion thread on r/programming detailing throughput, latency, reads, and writes for MySQL vs PostgreSQL. Metadata only; contents unverified."
+   },
+   {
+    "rel": 5,
+    "src": "markaicode.com",
+    "title": "PostgreSQL vs MySQL: Choosing a Database for Your Stack | Markaicode",
+    "reason": "Markaicode guide discussing PostgreSQL vs MySQL for production workloads, mentioning CRUD queries and storage engines. Match not verified from the evidence."
+   },
+   {
+    "rel": 5,
+    "src": "dev.to",
+    "title": "PostgreSQL vs MySQL in 2026: Performance, Features and When to Use Each - DEV Community",
+    "reason": "DEV Community article discussing database migration and performance, though primarily recounting a query optimization experience rather than a write-heavy focus. Match not verified from the evidence."
+   }
+  ]
+ },
+ {
+  "q": "attack on titan opening 1",
+  "kind": "videos",
+  "status": "partial",
+  "sec": 206,
+  "providers": [],
+  "top": [
+   {
+    "src": "Piano Go Life",
+    "title": "Attack on Titan Opening 1 (Guren-No-Yumiya 進撃の巨人) - Piano Tutorial - YouTube",
+    "dur": 102,
+    "lang": "en",
+    "moments": [],
+    "uncertain": []
+   },
+   {
+    "src": "Neobrane",
+    "title": "Attack on Titan - Opening 1 【Guren no Yumiya】 4K / UHD Creditless | CC - YouTube",
+    "dur": 128,
+    "lang": "en",
+    "moments": [
+     "0s video_analysed"
+    ],
+    "uncertain": []
+   },
+   {
+    "src": "Animeke Channel",
+    "title": "Attack on Titan OP / Opening 1 - Creditless | 4K | 24FPS - YouTube",
+    "dur": 125,
+    "lang": "zxx",
+    "moments": [],
+    "uncertain": []
+   },
+   {
+    "src": "Sideralis",
+    "title": "Attack on Titan Opening 1 \"Guren no Yumiya\" English AI Cover - YouTube",
+    "dur": 28,
+    "lang": "en",
+    "moments": [],
+    "uncertain": []
+   },
+   {
+    "src": "Anicrad",
+    "title": "Attack on Titan - Opening 1 | 4K | 60FPS | Creditless | - YouTube",
+    "dur": 106,
+    "lang": "en",
+    "moments": [
+     "0s video_analysed"
+    ],
+    "uncertain": []
+   },
+   {
+    "src": "NoSekai react mashup",
+    "title": "Attack on Titan Opening 1 「Guren no Yumiya」 - React Mashup (進撃の巨人OP1) - YouTube",
+    "dur": 101,
+    "lang": "ja",
+    "moments": [],
+    "uncertain": []
+   },
+   {
+    "src": "廾丹メヨ句凵己",
+    "title": "Linked Horizon - Guren no Yumiya (LIVE) | Attack on Titan Opening 1 - YouTube",
+    "dur": 312,
+    "lang": "en",
+    "moments": [],
+    "uncertain": []
+   },
+   {
+    "src": "William DUHAMEL",
+    "title": "Attack on Titan Season 1 Opening 1 “Guren No Yumiya” The First Season (Guitar Cover) 「進撃の巨人」 - YouTube",
+    "dur": 97,
+    "lang": "fr",
+    "moments": [],
+    "uncertain": []
+   }
+  ],
+  "closest": [
+   {
+    "rel": 5,
+    "src": "goodvibe",
+    "title": "Shingeki no Kyojin S1 OP1 | Linked Horizon - Guren no Yumiya (Lyrics with English Translation) - YouTube",
+    "dur": 310,
+    "lang": "en",
+    "reason": "This video features the Season 1 Opening 1 song Guren no Yumiya with lyrics and English translation.",
+    "moments": [],
+    "uncertain": []
+   },
+   {
+    "rel": 5,
+    "src": "Ngoc Le",
+    "title": "Linked Horizon - Guren No Yumiya (Attack On Titan) FULL Opening Theme HQ - YouTube",
+    "dur": 317,
+    "lang": "en",
+    "reason": "Full-length audio of Guren no Yumiya with no scene/transcript evidence confirming actual OP1 anime animation is shown. Match not verified from the evidence.",
+    "moments": [],
+    "uncertain": [
+     "Not confirmed: attack on titan opening 1"
+    ]
+   },
+   {
+    "rel": 5,
+    "src": "Animeke Channel",
+    "title": "Attack on Titan OP / Opening 1 - Creditless | 4K | 24FPS - YouTube",
+    "dur": 125,
+    "lang": "zxx",
+    "reason": "Description labels it Attack on Titan OP1 with Guren no Yumiya, but no scenes or transcripts verify the animation. Match not verified from the evidence.",
+    "moments": [],
+    "uncertain": [
+     "Not confirmed: attack on titan opening 1"
+    ]
+   },
+   {
+    "rel": 4,
+    "src": "Sideralis",
+    "title": "Attack on Titan Opening 1 \"Guren no Yumiya\" English AI Cover - YouTube",
+    "dur": 28,
+    "lang": "en",
+    "reason": "This is an AI cover of the opening song rather than the actual opening animation sequence. Match not verified from the evidence.",
+    "moments": [],
+    "uncertain": [
+     "Not confirmed: attack on titan opening 1"
+    ]
+   }
+  ]
+ },
+ {
+  "q": "which article of the GDPR covers the right to be forgotten",
+  "kind": "docs",
+  "sec": 141,
+  "providers": [],
+  "top": [
+   {
+    "rel": 9,
+    "src": "edpb.europa.eu",
+    "title": "Guidelines 5/2019 on the criteria of the Right to be Forgotten ...",
+    "reason": "The official EDPB guidelines PDF directly answers the question in its search snippet by explicitly naming Article 17."
+   },
+   {
+    "rel": 9,
+    "src": "pwc.lu",
+    "title": "PricewaterhouseCoopers Legal LLP Article 17 of the General Data Protection",
+    "reason": "Explicitly states that Article 17 of the GDPR sets out the right to erasure, also known as the right to be forgotten."
+   },
+   {
+    "rel": 8,
+    "src": "ijfmr.com",
+    "title": "THE RIGHT TO BE FORGOTTEN UNDER GDPR: LEGAL ...",
+    "reason": "The paper directly addresses the right to be forgotten under GDPR and identifies it under Article 17."
+   },
+   {
+    "rel": 8,
+    "src": "scribd.com",
+    "title": "Right to Erasure Under EU Law | PDF | Privacy - Scribd",
+    "reason": "Directly points out that Article 17 provides for the right to erasure, previously termed the right to be forgotten."
+   },
+   {
+    "rel": 7,
+    "src": "trinitycollegelawreview.org",
+    "title": "TRINITY COLLEGE LAW REVIEW ONLINE THE RIGHT TO BE FORGOTTEN AND ITS POSSIBLE",
+    "reason": "Document text states Article 17 of the GDPR covers the right to be forgotten, directly answering the question."
+   },
+   {
+    "rel": 7,
+    "src": "scribd.com",
+    "title": "Right to be Forgotten in India | PDF | Privacy | Justice - Scribd",
+    "reason": "The paper's search snippet directly answers the question by stating that the Right to be Forgotten is defined under Article 17 of the GDPR."
+   },
+   {
+    "rel": 5,
+    "src": "twobirds.com",
+    "title": "Individual rights | Right to erasure and right to restriction of processing",
+    "reason": "The document mentions the right to be forgotten (erasure), but does not explicitly name Article 17 in the snippet. Match not verified from the evidence."
+   },
+   {
+    "rel": 5,
+    "src": "ijmr.net.in",
+    "title": "RIGHT TO BE FORGOTTEN",
+    "reason": "Description directly states that Article 17 of GDPR grants the right to request deletion. Metadata only; contents unverified."
+   }
+  ]
+ },
+ {
+  "q": "documentary about the guy who climbed El Capitan without ropes",
+  "kind": "videos",
+  "status": "partial",
+  "sec": 283,
+  "providers": [],
+  "top": [
+   {
+    "src": "Nat Geo France",
+    "title": "Free Solo : Alex Honnold escalade El Capitan sans aucun équipement - YouTube",
+    "dur": 60,
+    "lang": "fr",
+    "moments": [],
+    "uncertain": []
+   },
+   {
+    "src": "Bit Stories",
+    "title": "Alex Honnold-The Man Who Climbed Without a Rope | Free Solo Documentary - YouTube",
+    "dur": 392,
+    "lang": "en",
+    "moments": [],
+    "uncertain": []
+   },
+   {
+    "src": "Survival life Stories",
+    "title": "Free Solo: The Death-Defying Climb of Alex Honnold | True Story Documentary. - YouTube",
+    "dur": 272,
+    "lang": "zxx",
+    "moments": [],
+    "uncertain": []
+   },
+   {
+    "src": "Nat Geo France",
+    "title": "FREE SOLO : Vivez l'ascension la plus dangereuse de l'histoire en 360° - YouTube",
+    "dur": 409,
+    "lang": "en",
+    "moments": [],
+    "uncertain": []
+   }
+  ],
+  "closest": [
+   {
+    "rel": 5,
+    "src": "ABC News",
+    "title": "How this climber made a solo journey up Yosemite's El Capitan with no gear - YouTube",
+    "dur": 560,
+    "lang": "en",
+    "reason": "ABC News video discussing Alex Honnold's ropeless ascent of El Capitan.",
+    "moments": [],
+    "uncertain": []
+   },
+   {
+    "rel": 5,
+    "src": "Vince Sol",
+    "title": "Alex Honnold Free Solos El Capitan - YouTube",
+    "dur": 38,
+    "lang": "en",
+    "reason": "Short clip featuring Alex Honnold free soloing El Capitan from filmmakers Elizabeth Chai Vasarhelyi and Jimmy Chin. Match not verified from the evidence.",
+    "moments": [],
+    "uncertain": []
+   },
+   {
+    "rel": 5,
+    "src": "ESPN",
+    "title": "The making of the Oscar-winning film ‘Free Solo’ | E:60 - YouTube",
+    "dur": 370,
+    "lang": "en",
+    "reason": "ESPN video detailing the making of the Oscar-winning documentary Free Solo about Alex Honnold.",
+    "moments": [],
+    "uncertain": []
+   },
+   {
+    "rel": 5,
+    "src": "National Geographic",
+    "title": "Alex Honnold Climbs a 4,000 Foot Sea Wall (Full Episode) | Arctic Ascent | National Geographic - YouTube",
+    "dur": 2963,
+    "lang": "en",
+    "reason": "National Geographic documentary about Alex Honnold climbing a 4000 foot sea wall in Greenland rather than El Capitan. Match not verified from the evidence.",
+    "moments": [],
+    "uncertain": [
+     "Not confirmed: climbed El Capitan without ropes"
+    ]
+   },
+   {
+    "rel": 5,
+    "src": "High Performance",
+    "title": "How a 2000ft Mistake Nearly Ended Alex Honnold - YouTube",
+    "dur": 626,
+    "lang": "en",
+    "reason": "This is an interview discussion with Alex Honnold reflecting on fear, but it is not the documentary about his El Capitan free solo. Match not verified from the evidence.",
+    "moments": [],
+    "uncertain": [
+     "Not confirmed: climbed El Capitan without ropes"
+    ]
+   }
+  ]
+ },
+ {
+  "q": "hindi explainer on how UPI works, under 10 minutes, not from big news channels",
+  "kind": "videos",
+  "status": "partial",
+  "sec": 275,
+  "providers": [],
+  "top": [
+   {
+    "src": "Firstpost",
+    "title": "UPI Turns 10: How India Built the World's Digital Payments Powerhouse | Vantage on Firstpost | 4K - YouTube",
+    "dur": 416,
+    "lang": "en",
+    "moments": [],
+    "uncertain": []
+   },
+   {
+    "src": "www.reddit.com",
+    "title": "r/explainlikeimfive on Reddit: ELI5: What is UPI(Unified Payments Interface) used in India and how does it work?",
+    "dur": null,
+    "lang": null,
+    "moments": [],
+    "uncertain": []
+   },
+   {
+    "src": "DD India",
+    "title": "10 Years of UPI: India’s Digital Payment Revolution - YouTube",
+    "dur": 160,
+    "lang": "en",
+    "moments": [],
+    "uncertain": []
+   },
+   {
+    "src": "EXPOSUREEE",
+    "title": "The Biggest UPI Mistake Every Indian Streamer is Making - YouTube",
+    "dur": 388,
+    "lang": "hi",
+    "moments": [],
+    "uncertain": []
+   },
+   {
+    "src": "Baten UP Ki",
+    "title": "UPI Explained | मोबाइल से तुरंत और सुरक्षित डिजिटल भुगतान - YouTube",
+    "dur": 35,
+    "lang": "hi",
+    "moments": [],
+    "uncertain": []
+   },
+   {
+    "src": "Adda247 Skills",
+    "title": "IS UPI STILL FREE OR NOT? | What You Need to Know Now Explained By Prashant Dhawan - YouTube",
+    "dur": 674,
+    "lang": "hi",
+    "moments": [],
+    "uncertain": []
+   },
+   {
+    "src": "Yadnya Investment Academy",
+    "title": "How UPI works? | How to get started with UPI? - YouTube",
+    "dur": 435,
+    "lang": "en",
+    "moments": [],
+    "uncertain": []
+   }
+  ],
+  "closest": [
+   {
+    "rel": 5,
+    "src": "Infomax Computer Academy",
+    "title": "UPI क्या है? | Unified Payments Interface पूरी जानकारी हिंदी में - YouTube",
+    "dur": 315,
+    "lang": "hi",
+    "reason": "The video is under 10 minutes, from an independent academy channel, and its description explicitly states it explains how UPI works in Hindi.",
+    "moments": [],
+    "uncertain": [
+     "Not confirmed: Under 10 minutes"
+    ]
+   },
+   {
+    "rel": 5,
+    "src": "Computer Tech Academy",
+    "title": "What is UPI in Hindi? | UPI Payment कैसे काम करता है | UPI Payment, Safe, Fast & Secure | CTA - YouTube",
+    "dur": 296,
+    "lang": "hi",
+    "reason": "The video's duration is under 10 minutes and its metadata strongly confirms it is a Hindi explainer on how UPI works from an independent channel.",
+    "moments": [],
+    "uncertain": [
+     "Not confirmed: Under 10 minutes"
+    ]
+   },
+   {
+    "rel": 5,
+    "src": "Deepak TechTimes",
+    "title": "UPI क्या है? | UPI कैसे काम करता है? | What is UPI Payment System? | UPI Explained in Hindi - YouTube",
+    "dur": 481,
+    "lang": "hi",
+    "reason": "It is a Hindi explainer video on UPI under 10 minutes from an independent channel, but the evidence lacks explicit details about covering the technical architecture.",
+    "moments": [],
+    "uncertain": [
+     "Not confirmed: Explainer on how UPI works"
+    ]
+   },
+   {
+    "rel": 5,
+    "src": "Humsafar Tech",
+    "title": "UPI ID क्या है? | What is UPI ID In Hindi? | How to Check UPI ID? | UPI ID Explained in Hindi - YouTube",
+    "dur": 348,
+    "lang": "hi",
+    "reason": "Humsafar Tech provides an informative Hindi video explaining UPI ID and its usage, though it is more focused on the ID than the underlying routing architecture.",
+    "moments": [],
+    "uncertain": [
+     "Not confirmed: Explainer on how UPI works"
+    ]
+   },
+   {
+    "rel": 5,
+    "src": "Bank Buddy India",
+    "title": "UPI ID KYA HOTA HAI || UPI सिस्टम कैसे काम करता है ? - YouTube",
+    "dur": 416,
+    "lang": "hi",
+    "reason": "Hindi video explaining how UPI works in 6:56 from an independent channel. Metadata only; contents unverified.",
+    "moments": [],
+    "uncertain": [
+     "Not confirmed: Under 10 minutes"
+    ]
+   }
+  ]
+ }
+]

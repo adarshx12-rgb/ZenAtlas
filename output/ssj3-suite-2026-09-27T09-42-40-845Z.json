@@ -1,0 +1,2096 @@
+[
+ {
+  "tab": "videos",
+  "q": "the part in Steve Jobs' Stanford commencement speech where he talks about connecting the dots",
+  "run": 1,
+  "tier": "ssj3",
+  "ms": 114679,
+  "cost_usd": 0.26839,
+  "by_role": {
+   "planner_calls": 0.00067,
+   "judge_calls": 0.05813,
+   "cascade_strong_calls": 0.20961
+  },
+  "cascade": [
+   {
+    "event": "cascade",
+    "tier": "ssj3",
+    "judged": 50,
+    "escalated": 30,
+    "answered": 30,
+    "reasons": {
+     "borderline": 28,
+     "unbacked": 2
+    },
+    "strong": "openai/gpt-5.6-terra",
+    "strong_ms": 30579
+   }
+  ],
+  "council": [],
+  "status": "partial",
+  "providers": [
+   {
+    "status": "ok",
+    "message": "Brave discovery completed.",
+    "provider": "brave"
+   },
+   {
+    "status": "ok",
+    "message": "Not needed: Brave answered every search.",
+    "provider": "searxng"
+   },
+   {
+    "status": "ok",
+    "message": "AI planned 4 searches for videos.",
+    "provider": "planner"
+   },
+   {
+    "status": "ok",
+    "message": "Looked for evidence on 2 unmet requirements: 1 targeted searches, 5 pages or videos opened, 0 closed.",
+    "provider": "gap_exploration"
+   },
+   {
+    "status": "ok",
+    "message": "Screened 50 of 50 leads to prioritize evidence checks; final relevance is checked separately.",
+    "provider": "jev_screener"
+   },
+   {
+    "status": "ok",
+    "message": "YouTube details and viewer comments checked.",
+    "provider": "youtube"
+   },
+   {
+    "status": "ok",
+    "message": "Reddit discussions checked.",
+    "provider": "reddit"
+   },
+   {
+    "status": "ok",
+    "message": "13 of 20 result pages were checked, 4 in a browser.",
+    "provider": "pages"
+   },
+   {
+    "status": "ok",
+    "message": "Captions were fetched for 4 of 4 videos during this search to find the moment.",
+    "provider": "captions_now"
+   },
+   {
+    "status": "ok",
+    "message": "Results were checked for relevance by AI.",
+    "provider": "judge"
+   },
+   {
+    "status": "ok",
+    "message": "38 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+    "provider": "relevance_filter"
+   },
+   {
+    "status": "partial",
+    "message": "3 videos queued for scene analysis; these pending analyses are not evidence in this ranking.",
+    "provider": "scene_analysis"
+   }
+  ],
+  "results": [
+   {
+    "title": "Steve Jobs - 2005 Stanford Commencement Address (Enhanced to HD/1080p) - YouTube",
+    "url": "https://www.youtube.com/watch?v=jiHZqamCD8c",
+    "creator": "Steve Jobs Archive",
+    "duration": 886,
+    "language": "en",
+    "relevance": 9,
+    "reason": "High-definition full video of the 2005 Stanford commencement address by Steve Jobs with the connecting dots story. Supporting evidence only; exact match unverified.",
+    "moments": [
+     "0:01 transcript_supported: Thank you. I’m honored to be with you today for your commencement from one of the finest universities in the world.",
+     "0:36 transcript_supported: The first story is about connecting the dots.",
+     "7:45 viewer_timestamp: 7:50"
+    ],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "Steve Jobs Connect the Dots - YouTube",
+    "url": "https://www.youtube.com/watch?v=5BSbOc5VYY8",
+    "creator": "Spark",
+    "duration": 319,
+    "language": "en",
+    "relevance": 9,
+    "reason": "Video clip dedicated to the first part of Steve Jobs' Stanford commencement speech about connecting the dots.",
+    "moments": [
+     "0:40 transcript_supported: the first story is about connecting the dots"
+    ],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "​​”Trust that the dots will somehow connect,” Steve Jobs, Stanford commencement address, 2005 - YouTube",
+    "url": "https://www.youtube.com/watch?v=bp4OzXLxEv4",
+    "creator": "Steve Jobs Archive",
+    "duration": 35,
+    "language": "en",
+    "relevance": 9,
+    "reason": "A short video clip explicitly focusing on the 'connecting the dots' portion of Steve Jobs' 2005 Stanford speech.",
+    "moments": [
+     "0:00 transcript_supported: impossible to connect the dots looking forward",
+     "0:09 transcript_supported: you can’t connect the dots looking forward; you can only connect them looking backwards"
+    ],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "\"Stay Hungry Stay Foolish\" - Steve Jobs | Motivational Video | Stanford Commencement Speech - 2025 - YouTube",
+    "url": "https://www.youtube.com/watch?v=Zcwkp-SByFE",
+    "creator": "The Life Motivation",
+    "duration": 239,
+    "language": "en",
+    "relevance": 9,
+    "reason": "Video transcript contains the complete 'connecting the dots' segment from Steve Jobs' 2005 Stanford commencement speech.",
+    "moments": [
+     "0:02 transcript_supported: today I want to tell you three stories from my life that's it no big deal just three stories the first story is about co",
+     "0:10 transcript_supported: the first story is about connecting the dots"
+    ],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "Connecting the Dots... Steve Jobs' 2005 Stanford Commencement Address - YouTube",
+    "url": "https://www.youtube.com/watch?v=p7vklHhds1w",
+    "creator": "Detox Life",
+    "duration": 905,
+    "language": "en",
+    "relevance": 9,
+    "reason": "Full video of the 2005 Stanford commencement speech featuring Steve Jobs talking about connecting the dots.",
+    "moments": [
+     "0:26 transcript_supported: I'm honored to be with you today for your commencement from one of the finest universities in the world",
+     "0:52 transcript_supported: the first story is about connecting the dots"
+    ],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "Steve Jobs' 2005 Stanford Commencement Address - YouTube",
+    "url": "https://www.youtube.com/watch?v=UF8uR6Z6KLc",
+    "creator": "Stanford",
+    "duration": 905,
+    "language": "en",
+    "relevance": 9,
+    "reason": "Stanford’s full 2005 commencement video directly identifies Jobs, begins the connecting-dots story, and comments quote the requested looking-backward metaphor. Supporting evidence only; exact match unverified.",
+    "moments": [
+     "0:55 transcript_supported: The first story is about connecting the dots."
+    ],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "Connecting the Dots: Respect💯| Ft. Steve Jobs | Motivational Speech at #stanforduniversity #allen - YouTube",
+    "url": "https://www.youtube.com/watch?v=D2NB82EhOoY",
+    "creator": "ALLEN Overseas",
+    "duration": 59,
+    "language": "en",
+    "relevance": 8,
+    "reason": "Short clip from Steve Jobs' Stanford commencement speech focusing specifically on connecting the dots.",
+    "moments": [
+     "0:13 transcript_supported: The first story is about connecting the dots."
+    ],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "Steve Jobs: You Can't Connect The Dots Looking Forward - YouTube",
+    "url": "https://www.youtube.com/watch?v=F9hp2xQ_2ow",
+    "creator": "CareerWatch",
+    "duration": 245,
+    "language": "en",
+    "relevance": 8,
+    "reason": "Clip featuring Steve Jobs discussing connecting the dots at the commencement.",
+    "moments": [
+     "0:00 transcript_supported: i dropped out of reid college after the first six months"
+    ],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "Steve Jobs' 2005 Stanford Commencement Address (with intro by President John Hennessy) - YouTube",
+    "url": "https://www.youtube.com/watch?v=Hd_ptbiPoXM",
+    "creator": "Stanford",
+    "duration": 1330,
+    "language": "en",
+    "relevance": 8,
+    "reason": "Complete Stanford commencement address video covering the requested portion.",
+    "moments": [],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "Discours de Steve Jobs à Stanford en juin 2005 - YouTube",
+    "url": "https://www.youtube.com/watch?v=x1Z9Ggqr84s",
+    "creator": "eagleview",
+    "duration": 884,
+    "language": "en",
+    "relevance": 8,
+    "reason": "This video features the full French-titled upload of the 2005 Stanford commencement speech with comments confirming the opening connecting the dots story.",
+    "moments": [],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   }
+  ]
+ },
+ {
+  "tab": "videos",
+  "q": "the part in Steve Jobs' Stanford commencement speech where he talks about connecting the dots",
+  "run": 2,
+  "tier": "ssj3",
+  "ms": 715,
+  "cost_usd": 0,
+  "by_role": {},
+  "cascade": [],
+  "council": [],
+  "status": "partial",
+  "providers": [
+   {
+    "status": "ok",
+    "message": "Brave discovery completed.",
+    "provider": "brave"
+   },
+   {
+    "status": "ok",
+    "message": "Not needed: Brave answered every search.",
+    "provider": "searxng"
+   },
+   {
+    "status": "ok",
+    "message": "AI planned 4 searches for videos.",
+    "provider": "planner"
+   },
+   {
+    "status": "ok",
+    "message": "Looked for evidence on 2 unmet requirements: 1 targeted searches, 5 pages or videos opened, 0 closed.",
+    "provider": "gap_exploration"
+   },
+   {
+    "status": "ok",
+    "message": "Screened 50 of 50 leads to prioritize evidence checks; final relevance is checked separately.",
+    "provider": "jev_screener"
+   },
+   {
+    "status": "ok",
+    "message": "YouTube details and viewer comments checked.",
+    "provider": "youtube"
+   },
+   {
+    "status": "ok",
+    "message": "Reddit discussions checked.",
+    "provider": "reddit"
+   },
+   {
+    "status": "ok",
+    "message": "13 of 20 result pages were checked, 4 in a browser.",
+    "provider": "pages"
+   },
+   {
+    "status": "ok",
+    "message": "Captions were fetched for 4 of 4 videos during this search to find the moment.",
+    "provider": "captions_now"
+   },
+   {
+    "status": "ok",
+    "message": "Results were checked for relevance by AI.",
+    "provider": "judge"
+   },
+   {
+    "status": "ok",
+    "message": "38 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+    "provider": "relevance_filter"
+   },
+   {
+    "status": "partial",
+    "message": "3 videos queued for scene analysis; these pending analyses are not evidence in this ranking.",
+    "provider": "scene_analysis"
+   }
+  ],
+  "results": [
+   {
+    "title": "Steve Jobs - 2005 Stanford Commencement Address (Enhanced to HD/1080p) - YouTube",
+    "url": "https://www.youtube.com/watch?v=jiHZqamCD8c",
+    "creator": "Steve Jobs Archive",
+    "duration": 886,
+    "language": "en",
+    "relevance": 9,
+    "reason": "High-definition full video of the 2005 Stanford commencement address by Steve Jobs with the connecting dots story. Supporting evidence only; exact match unverified.",
+    "moments": [
+     "0:01 transcript_supported: Thank you. I’m honored to be with you today for your commencement from one of the finest universities in the world.",
+     "0:36 transcript_supported: The first story is about connecting the dots.",
+     "7:45 viewer_timestamp: 7:50"
+    ],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "Steve Jobs Connect the Dots - YouTube",
+    "url": "https://www.youtube.com/watch?v=5BSbOc5VYY8",
+    "creator": "Spark",
+    "duration": 319,
+    "language": "en",
+    "relevance": 9,
+    "reason": "Video clip dedicated to the first part of Steve Jobs' Stanford commencement speech about connecting the dots.",
+    "moments": [
+     "4:44 transcript_supported: thank you i'm honored to be with you today for your commencement from one of the finest universities in the world truth "
+    ],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "​​”Trust that the dots will somehow connect,” Steve Jobs, Stanford commencement address, 2005 - YouTube",
+    "url": "https://www.youtube.com/watch?v=bp4OzXLxEv4",
+    "creator": "Steve Jobs Archive",
+    "duration": 35,
+    "language": "en",
+    "relevance": 9,
+    "reason": "A short video clip explicitly focusing on the 'connecting the dots' portion of Steve Jobs' 2005 Stanford speech.",
+    "moments": [
+     "0:00 transcript_supported: impossible to connect the dots looking forward",
+     "0:09 transcript_supported: you can’t connect the dots looking forward; you can only connect them looking backwards"
+    ],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "\"Stay Hungry Stay Foolish\" - Steve Jobs | Motivational Video | Stanford Commencement Speech - 2025 - YouTube",
+    "url": "https://www.youtube.com/watch?v=Zcwkp-SByFE",
+    "creator": "The Life Motivation",
+    "duration": 239,
+    "language": "en",
+    "relevance": 9,
+    "reason": "Video transcript contains the complete 'connecting the dots' segment from Steve Jobs' 2005 Stanford commencement speech.",
+    "moments": [
+     "0:02 transcript_supported: today I want to tell you three stories from my life that's it no big deal just three stories the first story is about co",
+     "0:10 transcript_supported: the first story is about connecting the dots"
+    ],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "Connecting the Dots... Steve Jobs' 2005 Stanford Commencement Address - YouTube",
+    "url": "https://www.youtube.com/watch?v=p7vklHhds1w",
+    "creator": "Detox Life",
+    "duration": 905,
+    "language": "en",
+    "relevance": 9,
+    "reason": "Full video of the 2005 Stanford commencement speech featuring Steve Jobs talking about connecting the dots.",
+    "moments": [
+     "0:26 transcript_supported: I'm honored to be with you today for your commencement from one of the finest universities in the world",
+     "0:52 transcript_supported: the first story is about connecting the dots"
+    ],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "Steve Jobs' 2005 Stanford Commencement Address - YouTube",
+    "url": "https://www.youtube.com/watch?v=UF8uR6Z6KLc",
+    "creator": "Stanford",
+    "duration": 905,
+    "language": "en",
+    "relevance": 9,
+    "reason": "Stanford’s full 2005 commencement video directly identifies Jobs, begins the connecting-dots story, and comments quote the requested looking-backward metaphor. Supporting evidence only; exact match unverified.",
+    "moments": [
+     "0:55 transcript_supported: The first story is about connecting the dots."
+    ],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "Connecting the Dots: Respect💯| Ft. Steve Jobs | Motivational Speech at #stanforduniversity #allen - YouTube",
+    "url": "https://www.youtube.com/watch?v=D2NB82EhOoY",
+    "creator": "ALLEN Overseas",
+    "duration": 59,
+    "language": "en",
+    "relevance": 8,
+    "reason": "Short clip from Steve Jobs' Stanford commencement speech focusing specifically on connecting the dots.",
+    "moments": [
+     "0:13 transcript_supported: The first story is about connecting the dots."
+    ],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "Steve Jobs: You Can't Connect The Dots Looking Forward - YouTube",
+    "url": "https://www.youtube.com/watch?v=F9hp2xQ_2ow",
+    "creator": "CareerWatch",
+    "duration": 245,
+    "language": "en",
+    "relevance": 8,
+    "reason": "Clip featuring Steve Jobs discussing connecting the dots at the commencement.",
+    "moments": [
+     "0:00 transcript_supported: i dropped out of reid college after the first six months"
+    ],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "Steve Jobs' 2005 Stanford Commencement Address (with intro by President John Hennessy) - YouTube",
+    "url": "https://www.youtube.com/watch?v=Hd_ptbiPoXM",
+    "creator": "Stanford",
+    "duration": 1330,
+    "language": "en",
+    "relevance": 8,
+    "reason": "Complete Stanford commencement address video covering the requested portion.",
+    "moments": [],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "Discours de Steve Jobs à Stanford en juin 2005 - YouTube",
+    "url": "https://www.youtube.com/watch?v=x1Z9Ggqr84s",
+    "creator": "eagleview",
+    "duration": 884,
+    "language": "en",
+    "relevance": 8,
+    "reason": "This video features the full French-titled upload of the 2005 Stanford commencement speech with comments confirming the opening connecting the dots story.",
+    "moments": [],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   }
+  ]
+ },
+ {
+  "tab": "videos",
+  "q": "the part in Steve Jobs' Stanford commencement speech where he talks about connecting the dots",
+  "run": 3,
+  "tier": "ssj3",
+  "ms": 981,
+  "cost_usd": 0,
+  "by_role": {},
+  "cascade": [],
+  "council": [],
+  "status": "partial",
+  "providers": [
+   {
+    "status": "ok",
+    "message": "Brave discovery completed.",
+    "provider": "brave"
+   },
+   {
+    "status": "ok",
+    "message": "Not needed: Brave answered every search.",
+    "provider": "searxng"
+   },
+   {
+    "status": "ok",
+    "message": "AI planned 4 searches for videos.",
+    "provider": "planner"
+   },
+   {
+    "status": "ok",
+    "message": "Looked for evidence on 2 unmet requirements: 1 targeted searches, 5 pages or videos opened, 0 closed.",
+    "provider": "gap_exploration"
+   },
+   {
+    "status": "ok",
+    "message": "Screened 50 of 50 leads to prioritize evidence checks; final relevance is checked separately.",
+    "provider": "jev_screener"
+   },
+   {
+    "status": "ok",
+    "message": "YouTube details and viewer comments checked.",
+    "provider": "youtube"
+   },
+   {
+    "status": "ok",
+    "message": "Reddit discussions checked.",
+    "provider": "reddit"
+   },
+   {
+    "status": "ok",
+    "message": "13 of 20 result pages were checked, 4 in a browser.",
+    "provider": "pages"
+   },
+   {
+    "status": "ok",
+    "message": "Captions were fetched for 4 of 4 videos during this search to find the moment.",
+    "provider": "captions_now"
+   },
+   {
+    "status": "ok",
+    "message": "Results were checked for relevance by AI.",
+    "provider": "judge"
+   },
+   {
+    "status": "ok",
+    "message": "38 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+    "provider": "relevance_filter"
+   },
+   {
+    "status": "partial",
+    "message": "3 videos queued for scene analysis; these pending analyses are not evidence in this ranking.",
+    "provider": "scene_analysis"
+   }
+  ],
+  "results": [
+   {
+    "title": "Steve Jobs - 2005 Stanford Commencement Address (Enhanced to HD/1080p) - YouTube",
+    "url": "https://www.youtube.com/watch?v=jiHZqamCD8c",
+    "creator": "Steve Jobs Archive",
+    "duration": 886,
+    "language": "en",
+    "relevance": 9,
+    "reason": "High-definition full video of the 2005 Stanford commencement address by Steve Jobs with the connecting dots story. Supporting evidence only; exact match unverified.",
+    "moments": [
+     "0:01 transcript_supported: Thank you. I’m honored to be with you today for your commencement from one of the finest universities in the world.",
+     "0:36 transcript_supported: The first story is about connecting the dots.",
+     "7:45 viewer_timestamp: 7:50"
+    ],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "Steve Jobs Connect the Dots - YouTube",
+    "url": "https://www.youtube.com/watch?v=5BSbOc5VYY8",
+    "creator": "Spark",
+    "duration": 319,
+    "language": "en",
+    "relevance": 9,
+    "reason": "Video clip dedicated to the first part of Steve Jobs' Stanford commencement speech about connecting the dots.",
+    "moments": [
+     "4:44 transcript_supported: thank you i'm honored to be with you today for your commencement from one of the finest universities in the world truth "
+    ],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "​​”Trust that the dots will somehow connect,” Steve Jobs, Stanford commencement address, 2005 - YouTube",
+    "url": "https://www.youtube.com/watch?v=bp4OzXLxEv4",
+    "creator": "Steve Jobs Archive",
+    "duration": 35,
+    "language": "en",
+    "relevance": 9,
+    "reason": "A short video clip explicitly focusing on the 'connecting the dots' portion of Steve Jobs' 2005 Stanford speech.",
+    "moments": [
+     "0:00 transcript_supported: impossible to connect the dots looking forward",
+     "0:09 transcript_supported: you can’t connect the dots looking forward; you can only connect them looking backwards"
+    ],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "\"Stay Hungry Stay Foolish\" - Steve Jobs | Motivational Video | Stanford Commencement Speech - 2025 - YouTube",
+    "url": "https://www.youtube.com/watch?v=Zcwkp-SByFE",
+    "creator": "The Life Motivation",
+    "duration": 239,
+    "language": "en",
+    "relevance": 9,
+    "reason": "Video transcript contains the complete 'connecting the dots' segment from Steve Jobs' 2005 Stanford commencement speech.",
+    "moments": [
+     "0:02 transcript_supported: today I want to tell you three stories from my life that's it no big deal just three stories the first story is about co",
+     "0:10 transcript_supported: the first story is about connecting the dots"
+    ],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "Connecting the Dots... Steve Jobs' 2005 Stanford Commencement Address - YouTube",
+    "url": "https://www.youtube.com/watch?v=p7vklHhds1w",
+    "creator": "Detox Life",
+    "duration": 905,
+    "language": "en",
+    "relevance": 9,
+    "reason": "Full video of the 2005 Stanford commencement speech featuring Steve Jobs talking about connecting the dots.",
+    "moments": [
+     "0:26 transcript_supported: I'm honored to be with you today for your commencement from one of the finest universities in the world",
+     "0:52 transcript_supported: the first story is about connecting the dots"
+    ],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "Steve Jobs' 2005 Stanford Commencement Address - YouTube",
+    "url": "https://www.youtube.com/watch?v=UF8uR6Z6KLc",
+    "creator": "Stanford",
+    "duration": 905,
+    "language": "en",
+    "relevance": 9,
+    "reason": "Stanford’s full 2005 commencement video directly identifies Jobs, begins the connecting-dots story, and comments quote the requested looking-backward metaphor. Supporting evidence only; exact match unverified.",
+    "moments": [
+     "0:55 transcript_supported: The first story is about connecting the dots."
+    ],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "Connecting the Dots: Respect💯| Ft. Steve Jobs | Motivational Speech at #stanforduniversity #allen - YouTube",
+    "url": "https://www.youtube.com/watch?v=D2NB82EhOoY",
+    "creator": "ALLEN Overseas",
+    "duration": 59,
+    "language": "en",
+    "relevance": 8,
+    "reason": "Short clip from Steve Jobs' Stanford commencement speech focusing specifically on connecting the dots.",
+    "moments": [
+     "0:13 transcript_supported: The first story is about connecting the dots."
+    ],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "Steve Jobs: You Can't Connect The Dots Looking Forward - YouTube",
+    "url": "https://www.youtube.com/watch?v=F9hp2xQ_2ow",
+    "creator": "CareerWatch",
+    "duration": 245,
+    "language": "en",
+    "relevance": 8,
+    "reason": "Clip featuring Steve Jobs discussing connecting the dots at the commencement.",
+    "moments": [
+     "0:00 transcript_supported: i dropped out of reid college after the first six months"
+    ],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "Steve Jobs' 2005 Stanford Commencement Address (with intro by President John Hennessy) - YouTube",
+    "url": "https://www.youtube.com/watch?v=Hd_ptbiPoXM",
+    "creator": "Stanford",
+    "duration": 1330,
+    "language": "en",
+    "relevance": 8,
+    "reason": "Complete Stanford commencement address video covering the requested portion.",
+    "moments": [],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   },
+   {
+    "title": "Discours de Steve Jobs à Stanford en juin 2005 - YouTube",
+    "url": "https://www.youtube.com/watch?v=x1Z9Ggqr84s",
+    "creator": "eagleview",
+    "duration": 884,
+    "language": "en",
+    "relevance": 8,
+    "reason": "This video features the full French-titled upload of the 2005 Stanford commencement speech with comments confirming the opening connecting the dots story.",
+    "moments": [],
+    "requirements": [
+     "The clip must be from the 2005 Stanford commencement speech.: supported",
+     "The clip must include the 'connecting the dots' metaphor.: supported"
+    ]
+   }
+  ]
+ },
+ {
+  "tab": "videos",
+  "q": "moment in the Falcon Heavy test flight video when both side boosters land at the same time",
+  "run": 1,
+  "tier": "ssj3",
+  "ms": 55916,
+  "cost_usd": 0.21102,
+  "by_role": {
+   "planner_calls": 0.00082,
+   "critic_calls": 0.06011,
+   "judge_calls": 0.05511,
+   "cascade_strong_calls": 0.09498
+  },
+  "cascade": [
+   {
+    "event": "cascade",
+    "tier": "ssj3",
+    "judged": 38,
+    "escalated": 16,
+    "answered": 16,
+    "reasons": {
+     "borderline": 15,
+     "conflicts_with_evidence": 1
+    },
+    "strong": "openai/gpt-5.6-terra",
+    "strong_ms": 17165
+   }
+  ],
+  "council": [],
+  "status": "partial",
+  "providers": [
+   {
+    "status": "ok",
+    "message": "Brave discovery completed.",
+    "provider": "brave"
+   },
+   {
+    "status": "ok",
+    "message": "Not needed: Brave answered every search.",
+    "provider": "searxng"
+   },
+   {
+    "status": "ok",
+    "message": "AI planned 4 searches for videos.",
+    "provider": "planner"
+   },
+   {
+    "status": "ok",
+    "message": "Looked for evidence on 2 unmet requirements: 1 targeted searches, 2 pages or videos opened, 0 closed.",
+    "provider": "gap_exploration"
+   },
+   {
+    "status": "ok",
+    "message": "Screened 38 of 38 leads to prioritize evidence checks; final relevance is checked separately.",
+    "provider": "jev_screener"
+   },
+   {
+    "status": "ok",
+    "message": "YouTube details and viewer comments checked.",
+    "provider": "youtube"
+   },
+   {
+    "status": "ok",
+    "message": "Reddit discussions checked.",
+    "provider": "reddit"
+   },
+   {
+    "status": "ok",
+    "message": "Captions were fetched for 4 of 4 videos during this search to find the moment.",
+    "provider": "captions_now"
+   },
+   {
+    "status": "ok",
+    "message": "Results were checked for relevance by AI.",
+    "provider": "judge"
+   },
+   {
+    "status": "ok",
+    "message": "32 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+    "provider": "relevance_filter"
+   },
+   {
+    "status": "partial",
+    "message": "3 videos queued for scene analysis; these pending analyses are not evidence in this ranking.",
+    "provider": "scene_analysis"
+   },
+   {
+    "status": "partial",
+    "message": "3 videos queued for caption fetching; their transcripts help later searches, not this one.",
+    "provider": "youtube_captions"
+   }
+  ],
+  "results": [
+   {
+    "title": "Falcon Heavy Boosters Nail Dual Landing Back on Earth - YouTube",
+    "url": "https://www.youtube.com/watch?v=uPvXvkEQvnQ",
+    "creator": "New York Post",
+    "duration": 123,
+    "language": "en",
+    "relevance": 9,
+    "reason": "New York Post video captures the Falcon Heavy dual booster landing with unique camera angles.",
+    "moments": [
+     "0:55 transcript_supported: The Falcons have landed. As you saw, we had successful landing of Falcon Heavy side boosters.",
+     "1:27 viewer_timestamp: 1:32 - That last clip was the best of them -- never seen landing from that particular kind of camera angle before."
+    ],
+    "requirements": [
+     "Is a video: supported",
+     "Falcon Heavy test flight: supported",
+     "both side boosters land at the same time: supported"
+    ]
+   },
+   {
+    "title": "SpaceX Lands All 3 Falcon Heavy Boosters for the First Time - YouTube",
+    "url": "https://www.youtube.com/watch?v=sf4qRY3h_eo",
+    "creator": "Galaxy Central",
+    "duration": 882,
+    "language": "en",
+    "relevance": 9,
+    "reason": "Viewers discuss the side-by-side landing of the Falcon Heavy boosters during the ArabSat-6A mission.",
+    "moments": [
+     "7:42 viewer_timestamp: 7:47 is where SpaceX established its fame. Well done Elon and your team."
+    ],
+    "requirements": [
+     "Is a video: supported",
+     "Falcon Heavy test flight: supported",
+     "both side boosters land at the same time: supported"
+    ]
+   },
+   {
+    "title": "Falcon Heavy boosters landing - YouTube",
+    "url": "https://www.youtube.com/watch?v=6YyV-otP3pI",
+    "creator": "SciNews",
+    "duration": 139,
+    "language": "en",
+    "relevance": 8,
+    "reason": "Viewers point to the iconic simultaneous booster landing footage at 0:55 in the Falcon Heavy test flight video. Supporting evidence only; exact match unverified.",
+    "moments": [
+     "0:50 viewer_timestamp: 0:55"
+    ],
+    "requirements": [
+     "Is a video: supported",
+     "Falcon Heavy test flight: supported",
+     "both side boosters land at the same time: supported"
+    ]
+   },
+   {
+    "title": "Falcon Heavy first landing - YouTube",
+    "url": "https://www.youtube.com/watch?v=l5I8jaMsHYk",
+    "creator": "SciNews",
+    "duration": 172,
+    "language": "en",
+    "relevance": 8,
+    "reason": "Viewers note the breathtaking simultaneous booster landing at 1:39 in this Falcon Heavy test flight video. Supporting evidence only; exact match unverified.",
+    "moments": [
+     "1:13 viewer_timestamp: 1:41 seriously breathtaking. Two rockets landing almost simultaneously and smoothly, like it's no big deal. Feels like i"
+    ],
+    "requirements": [
+     "Is a video: supported",
+     "Falcon Heavy test flight: supported",
+     "both side boosters land at the same time: supported"
+    ]
+   },
+   {
+    "title": "Falcon Heavy Test Flight - YouTube",
+    "url": "https://www.youtube.com/watch?v=wbSwFU6tY1c",
+    "creator": "SpaceX",
+    "duration": 2059,
+    "language": "en",
+    "relevance": 8,
+    "reason": "Official SpaceX stream of the Falcon Heavy test flight featuring the iconic dual booster landing. Supporting evidence only; exact match unverified.",
+    "moments": [],
+    "requirements": [
+     "Is a video: supported",
+     "Falcon Heavy test flight: supported",
+     "both side boosters land at the same time: supported"
+    ]
+   },
+   {
+    "title": "SpaceX's Falcon AMAZING Boosters Sync Landing - YouTube",
+    "url": "https://www.youtube.com/watch?v=mLsSZfngARw",
+    "creator": "Bracer Jack",
+    "duration": 160,
+    "language": "en",
+    "relevance": 8,
+    "reason": "Features the iconic side-by-side synchronized landing of Falcon Heavy boosters from the historic test flight. Supporting evidence only; exact match unverified.",
+    "moments": [],
+    "requirements": [
+     "Is a video: supported",
+     "Falcon Heavy test flight: supported",
+     "both side boosters land at the same time: supported"
+    ]
+   }
+  ]
+ },
+ {
+  "tab": "videos",
+  "q": "hindi explainer on how UPI works, under 10 minutes, not from big news channels",
+  "run": 1,
+  "tier": "ssj3",
+  "ms": 100925,
+  "cost_usd": 0.34929,
+  "by_role": {
+   "planner_calls": 0.00061,
+   "critic_calls": 0.06972,
+   "judge_calls": 0.07689,
+   "cascade_strong_calls": 0.20207
+  },
+  "cascade": [
+   {
+    "event": "cascade",
+    "tier": "ssj3",
+    "judged": 60,
+    "escalated": 31,
+    "answered": 31,
+    "reasons": {
+     "borderline": 30,
+     "unbacked": 1
+    },
+    "strong": "openai/gpt-5.6-terra",
+    "strong_ms": 28577
+   }
+  ],
+  "council": [],
+  "status": "partial",
+  "providers": [
+   {
+    "status": "ok",
+    "message": "Brave discovery completed.",
+    "provider": "brave"
+   },
+   {
+    "status": "ok",
+    "message": "Not needed: Brave answered every search.",
+    "provider": "searxng"
+   },
+   {
+    "status": "ok",
+    "message": "AI planned 4 searches for videos.",
+    "provider": "planner"
+   },
+   {
+    "status": "ok",
+    "message": "Looked for evidence on 2 unmet requirements: 1 targeted searches, 5 pages or videos opened, 0 closed.",
+    "provider": "gap_exploration"
+   },
+   {
+    "status": "partial",
+    "message": "66 candidates found; up to 60 candidates were selected for checking after all sources answered.",
+    "provider": "candidate_pool"
+   },
+   {
+    "status": "ok",
+    "message": "Screened 66 of 66 leads to prioritize evidence checks; final relevance is checked separately.",
+    "provider": "jev_screener"
+   },
+   {
+    "status": "ok",
+    "message": "YouTube details and viewer comments checked.",
+    "provider": "youtube"
+   },
+   {
+    "status": "ok",
+    "message": "Reddit discussions checked.",
+    "provider": "reddit"
+   },
+   {
+    "status": "ok",
+    "message": "15 of 19 result pages were checked, 5 in a browser.",
+    "provider": "pages"
+   },
+   {
+    "status": "ok",
+    "message": "Results were checked for relevance by AI.",
+    "provider": "judge"
+   },
+   {
+    "status": "ok",
+    "message": "59 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+    "provider": "relevance_filter"
+   },
+   {
+    "status": "partial",
+    "message": "1 videos queued for scene analysis; these pending analyses are not evidence in this ranking.",
+    "provider": "scene_analysis"
+   }
+  ],
+  "results": [
+   {
+    "title": "How UPI Payment Works? | UPI Payment System Explained in Hindi #upipayments - YouTube",
+    "url": "https://www.youtube.com/watch?v=tWZLpz-Li_A",
+    "creator": "Kotak Neo",
+    "duration": 118,
+    "language": "en",
+    "relevance": 9,
+    "reason": "Hindi transcript directly traces QR scan, VPA, PIN authentication, bank checks, NPCI routing, and confirmation in 1:58.",
+    "moments": [
+     "0:00 transcript_supported: यूपीआई एक्चुअली काम कैसे करता है?",
+     "1:07 transcript_supported: फिर एमपीसीआई ट्रैफिक कंट्रोलर की तरह रिक्वेस्ट राउट करता है।"
+    ],
+    "requirements": [
+     "Video must explain how UPI works in Hindi: supported",
+     "Video duration must be under 10 minutes: supported"
+    ]
+   }
+  ]
+ },
+ {
+  "tab": "docs",
+  "q": "which article of the GDPR covers the right to be forgotten",
+  "run": 1,
+  "tier": "ssj3",
+  "ms": 67372,
+  "cost_usd": 0.17329,
+  "by_role": {
+   "query_rewrite": 0.00031,
+   "judge_calls": 0.03103,
+   "cascade_strong_calls": 0.07667,
+   "critic_calls": 0.06528
+  },
+  "cascade": [
+   {
+    "event": "cascade",
+    "tier": "ssj3",
+    "judged": 27,
+    "escalated": 16,
+    "answered": 16,
+    "reasons": {
+     "borderline": 16
+    },
+    "strong": "openai/gpt-5.6-terra",
+    "strong_ms": 19769
+   }
+  ],
+  "council": [],
+  "rewrite": null,
+  "providers": [
+   {
+    "provider": "doc_hunt",
+    "status": "ok",
+    "message": "6 websites searched, 6 pages checked, 0 documents found inside them."
+   },
+   {
+    "provider": "judge",
+    "status": "ok",
+    "message": "27 documents were checked for relevance; 11 did not match."
+   }
+  ],
+  "results": [
+   {
+    "title": "PricewaterhouseCoopers Legal LLP Article 17 of the General Data Protection",
+    "url": "https://www.pwc.lu/en/general-data-protection/docs/pwc-gdpr-right-to-be-forgotten.pdf",
+    "snippet": "PricewaterhouseCoopers Legal LLP · Article 17 of the General Data Protection",
+    "published": null,
+    "relevance": 9,
+    "reason": "Document explicitly specifies Article 17 of the GDPR covers the right to be forgotten.",
+    "lead": false
+   },
+   {
+    "title": "THE RIGHT TO BE FORGOTTEN UNDER GDPR: LEGAL ...",
+    "url": "https://www.ijfmr.com/papers/2025/4/51772.pdf",
+    "snippet": "The 'Right to Be Forgotten' – Worth Remembering?. Computer Law & Security Review, 28(2), 143–152. ... The General Data Protection Regulation (GDPR), which came into force on May 25, 2018, revolutioniz",
+    "published": null,
+    "relevance": 9,
+    "reason": "Paper discusses the Right to Be Forgotten under GDPR and explicitly identifies it as Article 17.",
+    "lead": false
+   },
+   {
+    "title": "Guidelines 5/2019 on the criteria of the Right to be Forgotten ...",
+    "url": "https://www.edpb.europa.eu/sites/default/files/files/file1/edpb_guidelines_201905_rtbfsearchengines_afterpublicconsultation_en.pdf",
+    "snippet": "light of the provisions of Article 17 GDPR (the “Right to request delisting”). Indeed, the Right to be · Forgotten has been especially enacted under Article 17 GDPR to take into account the Right to r",
+    "published": null,
+    "relevance": 8,
+    "reason": "EDPB guidelines mention Article 17 GDPR regarding the right to be forgotten.",
+    "lead": false
+   },
+   {
+    "title": "Right to be Forgotten in India | PDF | Privacy | Justice - Scribd",
+    "url": "https://www.scribd.com/document/838721231/ssrn-4850700",
+    "snippet": "Protection Regulation. The Right to be forgotten (RTBF) is a statutory right defined under. Article 17 of GDPR. It means the data subject has the right to ...",
+    "published": null,
+    "relevance": 8,
+    "reason": "Identifies Article 17 as defining the right to be forgotten in the GDPR.",
+    "lead": false
+   },
+   {
+    "title": "Right to Erasure Under EU Law | PDF | Privacy - Scribd",
+    "url": "https://www.scribd.com/document/208068819/Right-to-Be-Forgotten",
+    "snippet": "EU: Right to be forgotten now the right to erasure Article 17 now specifically provides for the 'right to erasure',. previously termed the 'right to be ...",
+    "published": null,
+    "relevance": 8,
+    "reason": "Mentions Article 17 providing for the right to erasure/to be forgotten under EU law.",
+    "lead": false
+   },
+   {
+    "title": "GDPR Article 17: Eradicating Personal Identifiable ...",
+    "url": "https://www.researchgate.net/publication/334051640_GDPR_Article_17_Eradicating_Personal_Identifiable_Information_Achieving_Compliance_in_a_Hybrid_Cloud",
+    "snippet": "Jun 27, 2019 · On 25 th May 2018, the GDPR Article 17, the Right to Erasure ('Right to be Forgotten') came into force making it vital for organisations to understand Personally Identifiable Informatio",
+    "published": null,
+    "relevance": 6,
+    "reason": "Search description directly identifies GDPR Article 17 as the Right to Erasure/“Right to be Forgotten,” though the ResearchGate document itself was not inspected.",
+    "lead": true
+   },
+   {
+    "title": "Article 17 Right to erasure ('right to be forgotten') - ResearchGate",
+    "url": "https://www.researchgate.net/publication/350407049_Article_17_Right_to_erasure_'right_to_be_forgotten'",
+    "snippet": "Article 17 Right to erasure ('right to be forgotten') ... To read the full-text of this research, you can request a copy directly from the author.",
+    "published": null,
+    "relevance": 6,
+    "reason": "Its title explicitly identifies Article 17 as the right to erasure/right to be forgotten, but no full document text was inspected.",
+    "lead": true
+   },
+   {
+    "title": "The Right To Be Forgotten in the Google Spain Case (case C ...",
+    "url": "https://www.academia.edu/8076522/The_Right_To_Be_Forgotten_in_the_Google_Spain_Case_case_C_131_12_A_Clear_Victory_for_Data_Protection_or_an_Obstacle_for_the_Internet",
+    "snippet": "The CJEU's Google Spain decision establishes a legal basis for the 'right to be forgotten' under GDPR. Article 17 GDPR outlines conditions under which personal data must be erased by search engines. O",
+    "published": null,
+    "relevance": 6,
+    "reason": "Description specifically says Article 17 GDPR sets erasure conditions, but this is a paper about Google Spain rather than the GDPR text itself.",
+    "lead": true
+   },
+   {
+    "title": "(DOC) The Right to be Forgotten A 21st Century Re ...",
+    "url": "https://www.academia.edu/30411510/The_Right_to_be_Forgotten_A_21st_Century_Re_interpretation_of_the_right_to_privacy",
+    "snippet": "The GDPR's Article 17 codifies the right to erasure, impacting data subjects' control over their information. Significant legal cases highlight the complexities of balancing privacy rights with freedo",
+    "published": null,
+    "relevance": 6,
+    "reason": "Description directly states that GDPR Article 17 codifies the right to erasure, though the underlying document was not inspected.",
+    "lead": true
+   },
+   {
+    "title": "RIGHT TO BE FORGOTTEN",
+    "url": "https://www.ijmr.net.in/current/2025/Jun/EoGOHLPwabfQG5g.pdf",
+    "snippet": "The General Data Protection Regulation (GDPR) is the cornerstone of RTBF in the EU. Article 17 of GDPR · grants individuals the right to request the deletion of personal data when certain conditions a",
+    "published": null,
+    "relevance": 5,
+    "reason": "PDF description directly states that GDPR Article 17 grants deletion rights, identifying the right-to-be-forgotten provision. Match not verified from the evidence.",
+    "lead": true
+   }
+  ]
+ },
+ {
+  "tab": "docs",
+  "q": "the Google paper that introduced MapReduce",
+  "run": 1,
+  "tier": "ssj3",
+  "ms": 57935,
+  "cost_usd": 0.06762,
+  "by_role": {
+   "query_rewrite": 0.00028,
+   "judge_calls": 0.03168,
+   "cascade_strong_calls": 0.03565
+  },
+  "cascade": [
+   {
+    "event": "cascade",
+    "tier": "ssj3",
+    "judged": 31,
+    "escalated": 7,
+    "answered": 7,
+    "reasons": {
+     "unbacked": 1,
+     "borderline": 6
+    },
+    "strong": "openai/gpt-5.6-terra",
+    "strong_ms": 12439
+   },
+   {
+    "event": "cascade",
+    "tier": "ssj3",
+    "judged": 1,
+    "escalated": 1,
+    "answered": 1,
+    "reasons": {
+     "borderline": 1
+    },
+    "strong": "openai/gpt-5.6-terra",
+    "strong_ms": 2612
+   }
+  ],
+  "council": [],
+  "rewrite": null,
+  "providers": [
+   {
+    "provider": "doc_hunt",
+    "status": "ok",
+    "message": "6 websites searched, 7 pages checked, 1 documents found inside them."
+   },
+   {
+    "provider": "judge",
+    "status": "ok",
+    "message": "32 documents were checked for relevance; 23 did not match."
+   }
+  ],
+  "results": [
+   {
+    "title": "Mapreduce Google Paper | PDF - Scribd",
+    "url": "https://www.scribd.com/document/1058196137/Mapreduce-Google-Paper",
+    "snippet": "MapReduce: Simplified Data Processing on Large Clusters Jeffrey Dean and Sanjay Ghemawat jeff@ [Link], sanjay@ [Link] Google, Inc. Abstract given day, etc. Most such computations are conceptu- ally st",
+    "published": null,
+    "relevance": 10,
+    "reason": "Scribd upload containing the exact original Google paper introducing MapReduce.",
+    "lead": false
+   },
+   {
+    "title": "MapReduce - Princeton University",
+    "url": "https://www.cs.princeton.edu/courses/archive/fall15/cos518/studpres/mr.pdf",
+    "snippet": "Unique program, map/reduce we would combinations add a pre-pass 426 MapReduce operation that would collect a sample of the keys and use the distribution of the sampled keys to compute split- Table 1: ",
+    "published": null,
+    "relevance": 9,
+    "reason": "Princeton course slides discussing the original 2004 Google MapReduce paper by Jeffrey Dean and Sanjay Ghemawat.",
+    "lead": false
+   },
+   {
+    "title": "Download",
+    "url": "https://storage.googleapis.com/gweb-research2023-media/pubtools/4449.pdf",
+    "snippet": null,
+    "published": null,
+    "relevance": 9,
+    "reason": "PDF text is the Google-authored MapReduce paper, titled “MapReduce: Simplified Data Processing on Large Clusters.”",
+    "lead": false
+   },
+   {
+    "title": "MapReduce: simplified data processing on large clusters",
+    "url": "https://cse.buffalo.edu/~okennedy/courses/papers/mapreduce.pdf",
+    "snippet": "1 Introduction Prior to our development of MapReduce, the authors and many others at Google implemented hundreds of special-purpose computations that process large amounts of raw data, such as crawled",
+    "published": null,
+    "relevance": 8,
+    "reason": "University course archive copy of the original Google MapReduce paper.",
+    "lead": false
+   },
+   {
+    "title": "MapReduce: Simpliﬁed Data Processing on Large Cluste",
+    "url": "https://www.plus.ac.at/wp-content/uploads/2021/02/MapReduce.pdf",
+    "snippet": "Abstract MapReduce is a programming model and an associ-ated implementation for processing and generating large data sets. Users specify a map function that processes a key/value pair to generate a se",
+    "published": null,
+    "relevance": 8,
+    "reason": "University website hosting a copy of the original MapReduce paper by Jeffrey Dean and Sanjay Ghemawat.",
+    "lead": false
+   },
+   {
+    "title": "MapReduce: Simpliﬁed Data Processing on Large Clusters",
+    "url": "https://research.google.com/archive/mapreduce-osdi04.pdf",
+    "snippet": "MapReduce: Simpliﬁed Data Processing on Large Clusters ... Google, Inc.",
+    "published": null,
+    "relevance": 5,
+    "reason": "Google Research hosts the PDF titled “MapReduce: Simplified Data Processing on Large Clusters,” authored by Google employees. Match not verified from the evidence.",
+    "lead": false
+   },
+   {
+    "title": "MapReduce: Simplied Data Processing on Large Clusters",
+    "url": "https://static.googleusercontent.com/media/research.google.com/en//archive/mapreduce-osdi04.pdf",
+    "snippet": "Abstract MapReduce is a programming model and an associated implementation for processing and generating large data sets. Users specify a map function that processes a key/value pair to generate a set",
+    "published": null,
+    "relevance": 5,
+    "reason": "A Google-hosted PDF of the Dean and Ghemawat MapReduce paper, with its exact title and Google affiliation shown. Match not verified from the evidence.",
+    "lead": false
+   },
+   {
+    "title": "MapReduce: Simplified Data Processing on Large Clusters",
+    "url": "https://www.researchgate.net/publication/220851866_MapReduce_Simplified_Data_Processing_on_Large_Clusters",
+    "snippet": "Jan 1, 2004 · MapReduce is a programming model and an associated implementation for processing and generating large datasets that is amenable to a broad variety of real-world tasks. Users specify the ",
+    "published": null,
+    "relevance": 5,
+    "reason": "Its title and 2004 date match the requested paper, but the ResearchGate viewer provides no inspected document text confirming a complete paper. Match not verified from the evidence.",
+    "lead": true
+   },
+   {
+    "title": "(PDF) MapReduce - Academia.edu",
+    "url": "https://www.academia.edu/71800491/MapReduce",
+    "snippet": "Abstract MapReduce is a programming model and an associated implementation for processing and generating large datasets that is amenable to a broad variety of real-world tasks. Users specify the compu",
+    "published": null,
+    "relevance": 5,
+    "reason": "Its abstract matches the MapReduce paper’s subject, but supplied evidence does not identify Dean, Ghemawat, Google, or its edition/year. Match not verified from the evidence.",
+    "lead": true
+   }
+  ]
+ },
+ {
+  "tab": "docs",
+  "q": "RTI Act 2005 full text in Hindi",
+  "run": 1,
+  "tier": "ssj3",
+  "ms": 75408,
+  "cost_usd": 0.10037,
+  "by_role": {
+   "query_rewrite": 0.00034,
+   "judge_calls": 0.02799,
+   "cascade_strong_calls": 0.07204
+  },
+  "cascade": [
+   {
+    "event": "cascade",
+    "tier": "ssj3",
+    "judged": 27,
+    "escalated": 15,
+    "answered": 15,
+    "reasons": {
+     "borderline": 15
+    },
+    "strong": "openai/gpt-5.6-terra",
+    "strong_ms": 21800
+   }
+  ],
+  "council": [],
+  "rewrite": null,
+  "providers": [
+   {
+    "provider": "doc_hunt",
+    "status": "ok",
+    "message": "6 websites searched, 8 pages checked, 0 documents found inside them."
+   },
+   {
+    "provider": "judge",
+    "status": "ok",
+    "message": "27 documents were checked for relevance; 15 did not match."
+   }
+  ],
+  "results": [
+   {
+    "title": "बायत सयकाय विधध औय न् माम भ्रालारम GOVERNMENT OF INDIA",
+    "url": "https://homeguard.up.gov.in/Downloads/RTI_Act-2005.pdf",
+    "snippet": "सूचना का अधधकाय अधधधनमभ, 2005 का मह स्स् कयण ्विभबाी ूपऩ भ प्रकाधतत ्कमा जा",
+    "published": null,
+    "relevance": 10,
+    "reason": "Official PDF document providing the full text of the RTI Act 2005 in Hindi.",
+    "lead": false
+   },
+   {
+    "title": "सूचना का अिधकार अिधिनयम, 2005",
+    "url": "https://rti.dopt.gov.in/Writereaddata/RTI%20Act%20Version%20Hindi.pdf",
+    "snippet": "Lodge your RTI Request/ Appeal with Central Min./Dept. ... Right to Information Act 2005 mandates timely response to citizen requests for government information.",
+    "published": null,
+    "relevance": 9,
+    "reason": "Jev: R1 — \"सूचना का अिधकार अिधिनयम, 2005 _________ धारा� का �म _________ ध◌ाराएं अ ध् य ाय 1 �ारिम् भ\"",
+    "lead": false
+   },
+   {
+    "title": "RTI-Act_English.pdf",
+    "url": "https://cic.gov.in/sites/default/files/RTI-Act_English.pdf",
+    "snippet": "This edition of the Right to Information Act, 2005 is being published in diglot form. The English text and · the authoritative Hindi text of the Act have been modified up (lithe 1st day of February, 2",
+    "published": null,
+    "relevance": 9,
+    "reason": "Central Information Commission PDF containing the authoritative Hindi text of the RTI Act 2005.",
+    "lead": false
+   },
+   {
+    "title": "(3) w A * w m (I), sm 5 fl awa (I) *m b). m 12,",
+    "url": "https://rtiharyana.gov.in/pdffiles/rti-acthindi.pdf",
+    "snippet": "sm 5 fl awa (I) *m b). m 12, · m'ir m is, m 16, rn 2 4 m 27 *m 28 bi",
+    "published": null,
+    "relevance": 8,
+    "reason": "Official state portal PDF hosting the RTI Act in Hindi.",
+    "lead": false
+   },
+   {
+    "title": "RTI Act 2005: Hindi Version PDF - Scribd",
+    "url": "https://www.scribd.com/document/330656127/Rti-Act-Hindi",
+    "snippet": "Rti Act (Hindi) - Free download as PDF File (.pdf), Text File (.txt) or read online for free. The document is the Right to Information Act of 2005 from the Government of India. It has been modified up",
+    "published": null,
+    "relevance": 8,
+    "reason": "Scribd labels this a Hindi-version PDF and describes the document as the Government of India’s Right to Information Act of 2005.",
+    "lead": false
+   },
+   {
+    "title": "RTI Act Version Hindi - 250306 - 123725 | PDF - Scribd",
+    "url": "https://www.scribd.com/document/907484258/RTI-Act-Version-Hindi-250306-123725",
+    "snippet": "सूचना का अिधकार अिधिनयम, 2005 _________ धारा का म _________ ध ाराएं अध्याय 1 ारिम्भक 1. संिक्षप्त नाम, िवस्तार और ारं भ । 2. प रभाषाएं । अध्याय 2 सूचना का अिधकार और लोक ािधका ...",
+    "published": null,
+    "relevance": 8,
+    "reason": "Scribd document provides the full RTI Act 2005 text in Hindi.",
+    "lead": false
+   },
+   {
+    "title": "सूचना का अधिकार अधिनियम, 2005",
+    "url": "https://cic.gov.in/sites/default/files/rti-actinhindi.pdf",
+    "snippet": "liriff *moil* · alk ITZT •ux 1°14 · GOVERNMENT OF INDIA · MINISTRY OF LAW AND JUSTICE · T1111 ThT 3TffiTh-TR\" aff, 2005 · (2005 5t aReizriT *is. 22) · [I Trot 2011 of 712TTftEPT19] · Right to Informat",
+    "published": null,
+    "relevance": 5,
+    "reason": "Government-hosted PDF title names the Hindi सूचना का अधिकार अधिनियम, 2005; document text shows Act No. 22 and Hindi statutory content. Match not verified from the evidence.",
+    "lead": false
+   },
+   {
+    "title": "RTI-Act-hindi.pdf",
+    "url": "https://phedwater.rajasthan.gov.in/content/dam/doitassets/water/Ground%20Water/Pdf/RTI/RTI-Act-hindi.pdf",
+    "snippet": "The government of Rajasthan is committed to public welfare as well being of its public is the priority of the Government. Jankalyan portal (a Public Welfare Portal) fulfills this ideology of Hon’ble C",
+    "published": null,
+    "relevance": 5,
+    "reason": "The Rajasthan government URL and filename indicate a Hindi RTI Act PDF, but no inspected document text verifies completeness, year, or contents. Match not verified from the evidence.",
+    "lead": true
+   },
+   {
+    "title": "ffi-ffi zsos * rnn e fI s {r} * n-ry{n sr$Eq ,r'dqt #, gkw u.{*qerf{ftryry, t",
+    "url": "https://crpf.gov.in/writereaddata/images/pdf/7740416rti.pdf",
+    "snippet": "ffi-ffi · zsos * rnn e fI · s {r} * n-ry{n sr$Eq · ,r'dqt #, · gkw u.{*qerf{ftryry, · {o$oflo da. wGsrrq, · ffi*€Eq, E$fuffi r · ftGrq :\"- N,T'l &st ?.0t5rLqq{g qr-drptrf*& -vifrrrLd- gffiq gnxs- I · ",
+    "published": null,
+    "relevance": 5,
+    "reason": "The government-hosted PDF URL suggests RTI material, but corrupted title and description do not verify Hindi complete Act text or year. Match not verified from the evidence.",
+    "lead": true
+   },
+   {
+    "title": "Rti Act 2005 Updated-Hindi | PDF - Scribd",
+    "url": "https://www.scribd.com/document/741943450/Rti-Act-2005-Updated-hindi",
+    "snippet": "सूचना का अिधकार अिधिनयम, 2005 _________ धारा का म _________ ध ाराएं अध्याय 1 ारिम्भक 1. संिक्षप्त नाम, िवस्तार और ारं भ । 2. प रभाषाएं । अध्याय 2 सूचना का अिधकार और लोक ािधका ...",
+    "published": null,
+    "relevance": 5,
+    "reason": "The PDF viewer exposes Hindi Act text and a detailed Hindi table of contents covering sections and chapters of सूचना का अधिकार अधिनियम, 2005. Match not verified from the evidence.",
+    "lead": false
+   }
+  ]
+ },
+ {
+  "tab": "web",
+  "q": "current RBI repo rate",
+  "run": 1,
+  "tier": "ssj3",
+  "ms": 38327,
+  "cost_usd": 0.12318,
+  "by_role": {
+   "query_rewrite": 0.00023,
+   "judge_calls": 0.01862,
+   "cascade_strong_calls": 0.10432
+  },
+  "cascade": [
+   {
+    "event": "cascade",
+    "tier": "ssj3",
+    "judged": 28,
+    "escalated": 21,
+    "answered": 21,
+    "reasons": {
+     "jev_reject_unbacked": 10,
+     "borderline": 11
+    },
+    "strong": "openai/gpt-5.6-terra",
+    "strong_ms": 18523
+   }
+  ],
+  "council": [],
+  "rewrite": null,
+  "providers": [
+   {
+    "provider": "judge",
+    "status": "ok",
+    "message": "28 pages were checked for relevance; 5 did not match."
+   }
+  ],
+  "results": [
+   {
+    "title": "DBIE",
+    "url": "https://data.rbi.org.in/",
+    "snippet": "Policy Repo Rate : 5.25% | Reverse Repo Rate : 3.35% | Cash Reserve Ratio : 3.00% | Statutory Liquidity Ratio : 18.00% | Standing Deposit Facility (SDF) Rate : 5.00% | CPI Inflation : 4.82% (Aug-26) |",
+    "published": null,
+    "relevance": 10,
+    "reason": "Official RBI database directly displaying the current policy repo rate.",
+    "lead": false
+   },
+   {
+    "title": "India Interest Rate",
+    "url": "https://tradingeconomics.com/india/interest-rate",
+    "snippet": "India Holds Rates, Revises Down FY26/27 GDP Forecasts · The Reserve Bank of India (RBI) kept its key repo rate unchanged at 5.25% for the third consecutive meeting in June and maintained a neutral sta",
+    "published": "2026-08-04T20:05:03.000Z",
+    "relevance": 9,
+    "reason": "Page provides details on the current RBI repo rate of 5.25%.",
+    "lead": false
+   },
+   {
+    "title": "Repo Rate Today: RBI Current Repo Rate 2026 | Bajaj Finance",
+    "url": "https://www.bajajfinserv.in/repo-rate",
+    "snippet": "The current RBI repo rate in 2026 is 5.25%*, having been kept unchanged by the Monetary Policy Committee (MPC).",
+    "published": null,
+    "relevance": 9,
+    "reason": "Page states the current RBI repo rate is 5.25% as of August 2026.",
+    "lead": false
+   },
+   {
+    "title": "RBI keeps repo rate unchanged; Projects India’s real GDP growth for current fiscal at 6.9% | Akashvani News",
+    "url": "https://newsonair.gov.in/rbi-to-announce-its-first-bi-monthly-monetary-policy-statement-for-financial-year-2026-27-today/",
+    "snippet": "The Reserve Bank of India has kept interest rates unchanged at 5.25 percent. Announcing the first bi-monthly monetary policy for the current fiscal, RBI Governor Sanjay Malhotra today said that the Mo",
+    "published": "2026-09-08T10:55:02.000Z",
+    "relevance": 9,
+    "reason": "Official news source states RBI kept repo rate unchanged at 5.25 percent.",
+    "lead": false
+   },
+   {
+    "title": "RBI keeps repo rate unchanged at 5.25%, Reduces GDP growth projection to 6.6% | Akashvani News",
+    "url": "https://newsonair.gov.in/rbi-keeps-repo-rate-unchanged-at-5-25-retains-neutral-stance/",
+    "snippet": "Announcing the second bi-monthly monetary policy for the current fiscal, RBI Governor Sanjay Malhotra today said that the Monetary Policy Committee (MPC) has unanimously decided to retain the short-te",
+    "published": "2026-06-04T18:30:00.000Z",
+    "relevance": 9,
+    "reason": "Akashvani’s checked news page directly reports the RBI MPC retained the repo rate at 5.25% in the current fiscal policy review.",
+    "lead": false
+   },
+   {
+    "title": "What is Repo Rate? Meaning, Current Rates and Impact",
+    "url": "https://www.bajajhousingfinance.in/repo-rate",
+    "snippet": "What is Repo Rate? Meaning, Current Rates and Impact ... As per the announcement made by the Reserve Bank of India (RBI) on 05 August 2026, the current Repo Rate is 5.25%.",
+    "published": "2026-08-05T18:39:22.000Z",
+    "relevance": 8,
+    "reason": "Financial web page explaining current repo rate details and figures.",
+    "lead": false
+   },
+   {
+    "title": "Check the Current Repo Rate 2026",
+    "url": "https://www.bankbazaar.com/home-loan/repo-rate.html",
+    "snippet": "The Repo Rate is the interest rate at which the RBI lends money to commercial banks in exchange for securities to manage liquidity and control inflation. Currently at 5.25% (following a 25 basis point",
+    "published": "2026-08-06T23:25:05.000Z",
+    "relevance": 8,
+    "reason": "The page directly explains the RBI repo rate and identifies it as currently 5.25%, including the dated December 2025 rate cut.",
+    "lead": false
+   },
+   {
+    "title": "Current Repo Rate in India 2026: Live RBI Policy Updates, Neutral Stance Analysis & EMI Impact",
+    "url": "https://www.smcinsurance.com/finance/articles/repo-rate-india",
+    "snippet": "The current RBI repo rate is 5.25% (April 2026). Understand what the neutral stance means, how it impacts your home loan EMI, and use our step-by-step EMI calculator. Trusted, IRDAI-aware finance guid",
+    "published": "2026-04-23T18:30:00.000Z",
+    "relevance": 8,
+    "reason": "The page directly answers with 5.25% as of April 8, 2026 and identifies the RBI MPC meeting; it cites an RBI policy statement.",
+    "lead": false
+   },
+   {
+    "title": "Repo Rate 2026: Current, Reverse, SDF, Meaning and Monetary Policy",
+    "url": "https://cleartax.in/s/repo-rate",
+    "snippet": "In its latest Monetary Policy Committee (MPC) meeting held in June 2026, the RBI kept the repo rate unchanged at 5.25% and maintained a neutral policy stance while balancing inflation risks and growth",
+    "published": "2026-06-08T07:00:24.000Z",
+    "relevance": 8,
+    "reason": "Cleartax guide detailing the current repo rate and MPC meeting stats.",
+    "lead": false
+   },
+   {
+    "title": "RBI Repo Rate - Charts & Trends | ChartForest",
+    "url": "https://chartforest.com/data/rbi-monetary-policy/rbi-repo-rate/",
+    "snippet": "It is the RBI’s primary monetary policy tool for managing liquidity, controlling inflation, and supporting economic growth. Changes in the repo rate directly influence banks’ borrowing costs, which ev",
+    "published": "2025-03-02T08:01:59.000Z",
+    "relevance": 8,
+    "reason": "The page provides updated charts, trends, and data on the RBI repo rate including the current rate.",
+    "lead": false
+   }
+  ]
+ },
+ {
+  "tab": "web",
+  "q": "how long can cooked rice be safely kept in the fridge",
+  "run": 1,
+  "tier": "ssj3",
+  "ms": 39934,
+  "cost_usd": 0.09607,
+  "by_role": {
+   "query_rewrite": 0.0003,
+   "judge_calls": 0.02763,
+   "cascade_strong_calls": 0.06814
+  },
+  "cascade": [
+   {
+    "event": "cascade",
+    "tier": "ssj3",
+    "judged": 26,
+    "escalated": 14,
+    "answered": 14,
+    "reasons": {
+     "borderline": 12,
+     "jev_reject_unbacked": 1,
+     "conflicts_with_evidence": 1
+    },
+    "strong": "openai/gpt-5.6-terra",
+    "strong_ms": 16487
+   }
+  ],
+  "council": [],
+  "rewrite": null,
+  "providers": [
+   {
+    "provider": "judge",
+    "status": "ok",
+    "message": "26 pages were checked for relevance; 3 did not match."
+   }
+  ],
+  "results": [
+   {
+    "title": "How Long Does Rice Last in the Fridge Before It Goes Bad?",
+    "url": "https://www.tasteofhome.com/article/how-long-does-rice-last/",
+    "snippet": "Since you can’t see or smell B. cereus, assume that rice has gone bad if you haven’t refrigerated it within one to two hours of cooking or if it’s been in the fridge for more than four days.",
+    "published": "2025-07-11T04:12:53.000Z",
+    "relevance": 10,
+    "reason": "The page directly answers the prompt, stating that prepared rice lasts four to six days in the fridge.",
+    "lead": false
+   },
+   {
+    "title": "How Long Does Rice Last in the Fridge? - The New York Times",
+    "url": "https://www.nytimes.com/newsgraphics/card-story/food-rice-safety-how-long-fridge",
+    "snippet": "The U.S. Department of Health and Human Services gives us four to six days to eat cooked rice (and up to four days for most other leftovers), so long as it’s been stored in a fridge that’s 40 degrees ",
+    "published": null,
+    "relevance": 9,
+    "reason": "The page states that cooked rice lasts four to six days in the fridge.",
+    "lead": false
+   },
+   {
+    "title": "How Long Does Cooked Rice Last in the Fridge? | Reencle",
+    "url": "https://reencle.co/blogs/news/how-long-does-cooked-rice-last",
+    "snippet": "Cooked rice lasts 3–4 days in the fridge — but improper storage makes it a foodborne illness risk",
+    "published": "2026-05-12T03:20:50.000Z",
+    "relevance": 9,
+    "reason": "The page explicitly provides the exact fridge storage duration for cooked rice.",
+    "lead": false
+   },
+   {
+    "title": "How long will cooked rice keep in the fridge? The answer might surprise you",
+    "url": "https://www.bhg.com.au/food/tips-how-to/how-long-does-cooked-rice-last-in-the-fridge/",
+    "snippet": "Cooked white rice lasts in the fridge for three to four days. If you store your rice properly, it will have a much longer shelf life. However, don’t entirely rely on this general rule: use your sense ",
+    "published": "2026-06-29T20:00:29.000Z",
+    "relevance": 9,
+    "reason": "The page clearly explains how many days cooked rice keeps in the fridge.",
+    "lead": false
+   },
+   {
+    "title": "How Long Is Rice Good for in the Fridge?",
+    "url": "https://reencle.co/blogs/news/how-long-is-rice-good-for-in-the-fridge",
+    "snippet": "Cooked rice lasts 3–5 days in the fridge. Learn about Bacillus cereus food poisoning risk, how to store rice safely, and how long uncooked rice keeps.",
+    "published": "2026-03-18T21:05:02.000Z",
+    "relevance": 9,
+    "reason": "The page details that cooked rice lasts 3 to 5 days in the fridge.",
+    "lead": false
+   },
+   {
+    "title": "How Long You Can Actually Keep Leftover Rice, According to Food Safety Experts",
+    "url": "https://www.simplyrecipes.com/how-long-does-leftover-rice-keep-expert-11875761",
+    "snippet": "The USDA says you should never eat food that is left out of the fridge for more than two hours. In addition to safety, the taste of leftover rice can suffer if it’s kept around too long.",
+    "published": "2026-01-30T12:00:00.000Z",
+    "relevance": 9,
+    "reason": "The page states how long leftover rice can be stored in the fridge.",
+    "lead": false
+   },
+   {
+    "title": "How Long Can You Store Cooked Rice In The Fridge? - Tasting Table",
+    "url": "https://www.tastingtable.com/878539/how-long-can-you-store-cooked-rice-in-the-fridge/",
+    "snippet": "At first glance, it looks okay — but how long do you have before leftover rice becomes dangerous to eat? Per FoodSafety.gov, leftover rice can be stored in the refrigerator and safely eaten four to si",
+    "published": "2022-05-29T16:55:03.000Z",
+    "relevance": 9,
+    "reason": "The page answers how long cooked rice can be stored in the refrigerator.",
+    "lead": false
+   },
+   {
+    "title": "How Long Does Rice Last in the Fridge? Cooked Rice Storage and Safety",
+    "url": "https://www.midea.com/ca/blog/how-long-does-rice-last-in-the-fridge",
+    "snippet": "Usually no. Cooked rice is best treated as a 3 to 5 day fridge item, even if it still smells normal. Smell is only one check, not proof that the rice is still suitable to eat. The “123 rice rule” is n",
+    "published": "2026-07-07T18:30:00.000Z",
+    "relevance": 9,
+    "reason": "The page provides the timeframe for safely keeping cooked rice in the fridge.",
+    "lead": false
+   },
+   {
+    "title": "Safety of Leftover Rice - Brunswick County Center | N.C. Cooperative Extension",
+    "url": "https://brunswick.ces.ncsu.edu/news/safety-of-leftover-rice/",
+    "snippet": "If kept at or below 41 degrees F leftovers are microbiologically safe for 7 days, but the only way to ensure that is having a fridge thermometer. If you have too much rice to eat within that time, you",
+    "published": "2025-03-17T04:52:55.000Z",
+    "relevance": 9,
+    "reason": "Cooperative Extension directly gives a seven-day refrigeration safety timeframe for leftover rice and explains safe handling.",
+    "lead": false
+   },
+   {
+    "title": "How Long Does Cooked Rice Last and How Long Can You Keep It?",
+    "url": "https://www.finedininglovers.com/explore/articles/how-long-does-cooked-rice-last-and-how-long-can-you-keep-it",
+    "snippet": "Rice is best eaten as soon after ... rice leftovers for set periods: In the fridge, cooked rice leftovers may be stored for 3 to 5 days....",
+    "published": "2021-05-22T02:23:18.000Z",
+    "relevance": 9,
+    "reason": "The page explicitly provides the timeframe, stating that cooked rice lasts 3 to 5 days in the fridge.",
+    "lead": false
+   }
+  ]
+ },
+ {
+  "tab": "web",
+  "q": "postgres vs mysql for write-heavy workloads from engineers who ran both, not vendor blogs",
+  "run": 1,
+  "tier": "ssj3",
+  "ms": 47135,
+  "cost_usd": 0.15334,
+  "by_role": {
+   "query_rewrite": 0.00033,
+   "judge_calls": 0.01586,
+   "cascade_strong_calls": 0.13715
+  },
+  "cascade": [
+   {
+    "event": "cascade",
+    "tier": "ssj3",
+    "judged": 31,
+    "escalated": 25,
+    "answered": 25,
+    "reasons": {
+     "borderline": 7,
+     "jev_reject_unbacked": 18
+    },
+    "strong": "openai/gpt-5.6-terra",
+    "strong_ms": 24824
+   }
+  ],
+  "council": [],
+  "rewrite": null,
+  "providers": [
+   {
+    "provider": "judge",
+    "status": "ok",
+    "message": "31 pages were checked for relevance; 22 did not match."
+   }
+  ],
+  "results": [
+   {
+    "title": "MySQL vs PostgreSQL Performance: throughput & latency, reads & writes",
+    "url": "https://binaryigor.com/mysql-vs-postgresql-performance.html",
+    "snippet": "Since DBs have 8 CPUs available, connection pool sizes are: 8 * 16 = 128 for MySQL and 8 * 8 = 64 for Postgres. Empirically, MySQL benefits from having more connections, yielding better results; espec",
+    "published": "2026-01-04T18:30:00.000Z",
+    "relevance": 8,
+    "reason": "Direct benchmark article compares both databases across 17 workload tests, including reads and writes; author’s engineering background is not explicitly stated.",
+    "lead": false
+   },
+   {
+    "title": "PostgreSQL vs MySQL Architecture: Deep Engine & Workload Analysis - DEV Community",
+    "url": "https://dev.to/wantsvibes/postgresql-vs-mysql-architecture-deep-engine-workload-analysis-4j94",
+    "snippet": "When evaluating database index overhead write amplification, cache pressure, and maintenance costs, engineers must recognize that write-heavy systems place severe demands on append-only logs and backg",
+    "published": "2026-09-19T00:22:04.000Z",
+    "relevance": 5,
+    "reason": "Substantive production-workload comparison covers write amplification and both engines, but no evidence shows its author personally ran both. Match not verified from the evidence.",
+    "lead": false
+   },
+   {
+    "title": "PostgreSQL vs MySQL in 2026: Definitive Comparison | TECHSY",
+    "url": "https://techsy.io/en/blog/postgresql-vs-mysql",
+    "snippet": "MySQL wins here, and it is not close for simple queries. Sysbench OLTP benchmarks show MySQL achieving approximately 21% higher peak transactions per second than PostgreSQL on simple read-heavy worklo",
+    "published": "2026-02-10T18:30:00.000Z",
+    "relevance": 5,
+    "reason": "It claims production experience with both databases, but supplied text does not establish a write-heavy comparison or a non-vendor engineering source. Match not verified from the evidence.",
+    "lead": false
+   },
+   {
+    "title": "PostgreSQL vs MySQL: 5 Benchmarks Reveal the Winner [2026]",
+    "url": "https://tech-insider.org/postgresql-vs-mysql-2026/",
+    "snippet": "Write-intensive benchmarks favor MySQL by roughly 30 percent in raw throughput on single-node configurations, primarily because MySQL’s redo log architecture handles high-concurrency writes with less ",
+    "published": "2026-09-20T19:34:10.000Z",
+    "relevance": 5,
+    "reason": "It specifically reports write-intensive benchmarks and says “We tested” both databases, but author engineering credentials and non-vendor status are unverified. Match not verified from the evidence.",
+    "lead": false
+   },
+   {
+    "title": "PostgreSQL vs MySQL: Feature Comparison, Pros/Cons, and Verdict",
+    "url": "https://devops-daily.com/comparisons/postgresql-vs-mysql",
+    "snippet": "Write-heavy workloads can hit WAL bottlenecks without careful tuning · Upgrade process between major versions historically requires more effort than MySQL ... Limited support for advanced SQL features",
+    "published": "2026-06-30T04:30:00.000Z",
+    "relevance": 5,
+    "reason": "It compares both databases and mentions write-heavy WAL bottlenecks, but provides no evidence of engineers who operated both or non-vendor authorship. Match not verified from the evidence.",
+    "lead": false
+   },
+   {
+    "title": "r/programming on Reddit: MySQL vs PostgreSQL Performance: throughput & latency, reads & writes",
+    "url": "https://www.reddit.com/r/programming/comments/1q5fqbp/mysql_vs_postgresql_performance_throughput/",
+    "snippet": "Empirically, MySQL benefits from having more connections, yielding better results; especially for write-heavy workloads. ... PostgreSQL 18 still assumes storage on HDD instead of SSD.",
+    "published": "2026-01-06T05:37:31.000Z",
+    "relevance": 5,
+    "reason": "A Reddit programming discussion explicitly concerns MySQL/PostgreSQL throughput and writes, but supplied evidence does not establish that contributors personally operated both systems. Match not verified from the evidence.",
+    "lead": true
+   },
+   {
+    "title": "MySQL Vs PostgreSQL: A Workload-Based Comparison Guide",
+    "url": "https://acecloud.ai/blog/mysql-vs-postgresql-comparison-guide/",
+    "snippet": "Choose PostgreSQL when your workload is complex, write-heavy, JSON-heavy, geospatial, analytics-oriented, AI-adjacent, or built around extensible application architecture. Use both when your platform ",
+    "published": "2026-07-02T06:32:36.000Z",
+    "relevance": 5,
+    "reason": "The page covers PostgreSQL versus MySQL and explicitly addresses write-heavy workloads, but offers no evidence its author is an engineer who ran both databases. Match not verified from the evidence.",
+    "lead": false
+   },
+   {
+    "title": "2026 PostgreSQL vs MySQL: Benchmarks, JSON, Vectors",
+    "url": "https://www.kunalganglani.com/blog/postgresql-vs-mysql-2026",
+    "snippet": "As AWS documentation states, PostgreSQL is fully ACID compliant in all configurations, while MySQL guarantees full ACID compliance only with the InnoDB storage engine. For high-concurrency write workl",
+    "published": "2026-08-23T18:30:00.000Z",
+    "relevance": 5,
+    "reason": "A personal comparison page mentions high-concurrency write workloads, but its supplied text does not show that its author operated both databases in production. Match not verified from the evidence.",
+    "lead": false
+   },
+   {
+    "title": "PostgreSQL vs MySQL in 2026: Performance, Features and When to Use Each - DEV Community",
+    "url": "https://dev.to/philip_mcclarence_2ef9475/postgresql-vs-mysql-in-2026-performance-features-and-when-to-use-each-3g7e",
+    "snippet": "PostgreSQL's model gives it simpler, faster reads at the cost of vacuum maintenance. MySQL's model avoids bloat at the cost of undo log traversal for certain workloads. Both databases use WAL (write-a",
+    "published": "2026-03-01T17:27:13.000Z",
+    "relevance": 5,
+    "reason": "First-person migration shows use of both databases, but supplied text does not establish conclusions for write-heavy workloads. Match not verified from the evidence.",
+    "lead": false
+   }
+  ]
+ },
+ {
+  "tab": "images",
+  "q": "red vintage bicycle leaning against a blue wall",
+  "run": 1,
+  "tier": "ssj3",
+  "ms": 2080,
+  "cost_usd": 0,
+  "by_role": {},
+  "cascade": [],
+  "council": [],
+  "providers": [
+   {
+    "provider": "searxng",
+    "status": "ok",
+    "message": "Discovery completed."
+   }
+  ],
+  "results": [
+   {
+    "title": "Old Red Bicycle Against A Typical Blue Wall Jodhpur India Stock Photo ...",
+    "page_url": "https://www.istockphoto.com/photo/old-red-bicycle-against-a-typical-blue-wall-jodhpur-india-gm1199157718-342969839",
+    "source": "istockphoto.com",
+    "engine": "bing images"
+   },
+   {
+    "title": "alamy.com",
+    "page_url": "https://www.alamy.com/a-rusty-red-bicycle-leaning-on-blue-weathered-building-wall-and-metal-gate-image475652819.html",
+    "source": "alamy.com",
+    "engine": "bing images"
+   },
+   {
+    "title": "Premium Photo | Red bicycle is leaning against a blue wall",
+    "page_url": "https://www.freepik.com/premium-ai-image/red-bicycle-is-leaning-against-blue-wall_160236855.htm",
+    "source": "freepik.com",
+    "engine": "bing images"
+   },
+   {
+    "title": "unsplash.com",
+    "page_url": "https://unsplash.com/photos/red-vintage-bicycle-leaning-against-a-blue-wall-lQh76MKnY6g",
+    "source": "unsplash.com",
+    "engine": "google images"
+   },
+   {
+    "title": "Detail of a red vintage bicycle leaning against a wall",
+    "page_url": "https://123rf.com/stock-photo/vintage_bike.html",
+    "source": "123rf.com",
+    "engine": "brave.images"
+   },
+   {
+    "title": "Old Red Bicycle Leaning Against A Photograph by Carl Larson Photography ...",
+    "page_url": "https://fineartamerica.com/featured/old-red-bicycle-leaning-against-a-carl-larson-photography.html",
+    "source": "fineartamerica.com",
+    "engine": "bing images"
+   },
+   {
+    "title": "Blue Vintage Bicycle Leaning Against Red Brick Wall Stock Photos - Free ...",
+    "page_url": "https://www.dreamstime.com/photos-images/blue-vintage-bicycle-leaning-against-red-brick-wall.html",
+    "source": "dreamstime.com",
+    "engine": "bing images"
+   },
+   {
+    "title": "vintage retro red painted old fashioned bicycle leaning against a wall ...",
+    "page_url": "https://www.alamy.com/vintage-retro-red-painted-old-fashioned-bicycle-leaning-against-a-wall-image656370391.html",
+    "source": "alamy.com",
+    "engine": "bing images"
+   },
+   {
+    "title": "vecteezy.com",
+    "page_url": "https://www.vecteezy.com/photo/65801227-red-vintage-bicycle-leaning-against-blue-wooden-wall-amidst-white-and-yellow-flowers",
+    "source": "vecteezy.com",
+    "engine": "google images"
+   },
+   {
+    "title": "Free A classic red bicycle with a vintage feel, resting against an urban wall. Stock Photo",
+    "page_url": "https://www.pexels.com/search/vintage%20bike/",
+    "source": "pexels.com",
+    "engine": "brave.images"
+   },
+   {
+    "title": "Classic Vintage Red Bicycle Leaning Against Wall - Stock Image - Everypixel",
+    "page_url": "https://www.everypixel.com/image-3933288933229096092",
+    "source": "everypixel.com",
+    "engine": "bing images"
+   },
+   {
+    "title": "A vintage bicycle leaning against a blue painted rustic brick wall ...",
+    "page_url": "https://www.freepik.com/premium-ai-image/vintage-bicycle-leaning-against-blue-painted-rustic-brick-wall_187403948.htm",
+    "source": "freepik.com",
+    "engine": "bing images"
+   }
+  ]
+ },
+ {
+  "tab": "images",
+  "q": "free to use photo of mount everest with license and attribution",
+  "run": 1,
+  "tier": "ssj3",
+  "ms": 1325,
+  "cost_usd": 0,
+  "by_role": {},
+  "cascade": [],
+  "council": [],
+  "providers": [
+   {
+    "provider": "searxng",
+    "status": "ok",
+    "message": "3 of 4 search engines answered; Duckduckgo Images (did not answer) did not."
+   }
+  ],
+  "results": [
+   {
+    "title": "Mount Everest landscape mountain outdoors. | Free P…",
+    "page_url": "https://www.rawpixel.com/image/12920184/mount-everest-landscape-mountain-outdoors-generated-image-rawpixel",
+    "source": "rawpixel.com",
+    "engine": "bing images"
+   },
+   {
+    "title": "commons.wikimedia.org",
+    "page_url": "https://commons.wikimedia.org/wiki/File:Mount_Everest_as_seen_from_Drukair2.jpg",
+    "source": "commons.wikimedia.org",
+    "engine": "google images"
+   },
+   {
+    "title": "Mount Everest Photo License Plate",
+    "page_url": "https://www.amazon.com/Mount-Everest-Photo-License-Plate/dp/B0755SFP2R",
+    "source": "amazon.com",
+    "engine": "brave.images"
+   },
+   {
+    "title": "Everest Base Camp under snow in Nepal image - Fre…",
+    "page_url": "https://www.goodfreephotos.com/nepal/other/everest-base-camp-under-snow-nepal.jpg.php",
+    "source": "goodfreephotos.com",
+    "engine": "bing images"
+   },
+   {
+    "title": "commons.wikimedia.org",
+    "page_url": "https://commons.wikimedia.org/wiki/File:Everest,_Himalayas.jpg",
+    "source": "commons.wikimedia.org",
+    "engine": "google images"
+   },
+   {
+    "title": "en.wikipedia.org",
+    "page_url": "https://en.wikipedia.org/wiki/File:Mount-Everest.jpg",
+    "source": "en.wikipedia.org",
+    "engine": "brave.images"
+   },
+   {
+    "title": "200+ Free Everest & Mount Everest Images - Pixabay",
+    "page_url": "https://pixabay.com/images/search/%20everest/",
+    "source": "pixabay.com",
+    "engine": "bing images"
+   },
+   {
+    "title": "commons.wikimedia.org",
+    "page_url": "https://commons.wikimedia.org/wiki/File:Mount-Everest.jpg",
+    "source": "commons.wikimedia.org",
+    "engine": "google images"
+   },
+   {
+    "title": "Free Tibet Mount Everest photo and picture",
+    "page_url": "https://pixabay.com/images/search/mount%20everest/",
+    "source": "pixabay.com",
+    "engine": "brave.images"
+   },
+   {
+    "title": "3,000+ Free Mount Everest. & Everest Images - Pixabay",
+    "page_url": "https://pixabay.com/images/search/mount%20everest./",
+    "source": "pixabay.com",
+    "engine": "bing images"
+   },
+   {
+    "title": "commons.wikimedia.org",
+    "page_url": "https://commons.wikimedia.org/wiki/File:Mt.Everest.jpg",
+    "source": "commons.wikimedia.org",
+    "engine": "google images"
+   },
+   {
+    "title": "A snow covered mountain with clouds in the sky",
+    "page_url": "https://unsplash.com/s/photos/mount-everest",
+    "source": "unsplash.com",
+    "engine": "brave.images"
+   }
+  ]
+ },
+ {
+  "tab": "images",
+  "q": "infographic showing india's population by state, not AI-generated",
+  "run": 1,
+  "tier": "ssj3",
+  "ms": 1250,
+  "cost_usd": 0,
+  "by_role": {},
+  "cascade": [],
+  "council": [],
+  "providers": [
+   {
+    "provider": "searxng",
+    "status": "ok",
+    "message": "3 of 4 search engines answered; Duckduckgo Images (did not answer) did not."
+   }
+  ],
+  "results": [
+   {
+    "title": "India's Population Distribution by State i…",
+    "page_url": "https://indiadatamap.com/2025/08/14/state-wise-population-of-india-in-2025/",
+    "source": "indiadatamap.com",
+    "engine": "bing images"
+   },
+   {
+    "title": "visualcapitalist.com",
+    "page_url": "https://www.visualcapitalist.com/population-of-india-compared-with-countries/",
+    "source": "visualcapitalist.com",
+    "engine": "google images"
+   },
+   {
+    "title": "Bar chart ranking countries by visits to AI tool websites in 2025, led by the United States, India, and Brazil.",
+    "page_url": "https://www.visualcapitalist.com/population-of-india-compared-with-countries/",
+    "source": "visualcapitalist.com",
+    "engine": "brave.images"
+   },
+   {
+    "title": "State-wise Population of India: A Comprehensiv…",
+    "page_url": "https://uk.pinterest.com/pin/statewise-population-of-india-a-comprehensive-breakdown--1101763496333431804/",
+    "source": "uk.pinterest.com",
+    "engine": "bing images"
+   },
+   {
+    "title": "www.instagram.com",
+    "page_url": "https://www.instagram.com/p/DV0x65sk5m9/",
+    "source": "instagram.com",
+    "engine": "google images"
+   },
+   {
+    "title": "Bar chart ranking countries by visits to AI tool websites in 2025, led by the United States, India, and Brazil.",
+    "page_url": "https://www.visualcapitalist.com/population-of-india-compared-with-countries/",
+    "source": "visualcapitalist.com",
+    "engine": "brave.images"
+   },
+   {
+    "title": "Massive population size by Indian states 2023 - Data Player",
+    "page_url": "https://data-player.com/massive-population-size-by-indian-states-2023/",
+    "source": "data-player.com",
+    "engine": "bing images"
+   },
+   {
+    "title": "visualcapitalist.com",
+    "page_url": "https://www.visualcapitalist.com/population-of-india-compared-with-countries/",
+    "source": "visualcapitalist.com",
+    "engine": "google images"
+   },
+   {
+    "title": "Education Parametric Graph Showing Enrollment, Graduation, and Literacy Rates Over Years",
+    "page_url": "https://easy-peasy.ai/ai-image-generator/images/population-growth-india-statistical-line-graph-1950-present",
+    "source": "easy-peasy.ai",
+    "engine": "brave.images"
+   },
+   {
+    "title": "Population Map of India 2021 - India …",
+    "page_url": "https://www.indiaonlinepages.com/population/population-map-of-india.html",
+    "source": "indiaonlinepages.com",
+    "engine": "bing images"
+   },
+   {
+    "title": "magnific.com",
+    "page_url": "https://www.magnific.com/free-photos-vectors/india-states-map-demographics/2",
+    "source": "magnific.com",
+    "engine": "google images"
+   },
+   {
+    "title": "Population Growth in Indonesia: Data Visualization and Statistics",
+    "page_url": "https://easy-peasy.ai/ai-image-generator/images/population-growth-india-statistical-line-graph-1950-present",
+    "source": "easy-peasy.ai",
+    "engine": "brave.images"
+   }
+  ]
+ }
+]

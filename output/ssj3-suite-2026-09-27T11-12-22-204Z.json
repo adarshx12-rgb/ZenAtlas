@@ -1,0 +1,1752 @@
+[
+ {
+  "tab": "videos",
+  "q": "the part in Steve Jobs' Stanford commencement speech where he talks about connecting the dots",
+  "run": 1,
+  "tier": "ssj3",
+  "ms": 93602,
+  "cost_usd": 0.2956,
+  "by_role": {
+   "planner_calls": 0.00081,
+   "judge_calls": 0.07897,
+   "cascade_strong_calls": 0.21581
+  },
+  "cascade": [
+   {
+    "event": "cascade",
+    "tier": "ssj3",
+    "judged": 60,
+    "escalated": 38,
+    "answered": 38,
+    "reasons": {
+     "borderline": 38
+    },
+    "strong": "openai/gpt-5.6-terra",
+    "strong_ms": 29186
+   }
+  ],
+  "council": [],
+  "status": "partial",
+  "providers": [
+   {
+    "status": "ok",
+    "message": "Brave discovery completed.",
+    "provider": "brave"
+   },
+   {
+    "status": "ok",
+    "message": "Discovery completed. Filled in for 1 of 5 searches where Brave failed or found too little.",
+    "provider": "searxng"
+   },
+   {
+    "status": "ok",
+    "message": "AI planned 4 searches for videos.",
+    "provider": "planner"
+   },
+   {
+    "status": "ok",
+    "message": "Looked for evidence on 2 unmet requirements: 1 targeted searches, 1 pages or videos opened, 0 closed.",
+    "provider": "gap_exploration"
+   },
+   {
+    "status": "partial",
+    "message": "153 candidates found; up to 60 candidates were selected for checking after all sources answered.",
+    "provider": "candidate_pool"
+   },
+   {
+    "status": "ok",
+    "message": "Screened 120 of 153 leads to prioritize evidence checks; final relevance is checked separately.",
+    "provider": "jev_screener"
+   },
+   {
+    "status": "ok",
+    "message": "YouTube details and viewer comments checked.",
+    "provider": "youtube"
+   },
+   {
+    "status": "ok",
+    "message": "Reddit discussions checked.",
+    "provider": "reddit"
+   },
+   {
+    "status": "ok",
+    "message": "11 of 20 result pages were checked, 5 in a browser.",
+    "provider": "pages"
+   },
+   {
+    "status": "ok",
+    "message": "Captions were fetched for 4 of 4 videos during this search to find the moment.",
+    "provider": "captions_now"
+   },
+   {
+    "status": "ok",
+    "message": "Results were checked for relevance by AI.",
+    "provider": "judge"
+   },
+   {
+    "status": "ok",
+    "message": "46 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+    "provider": "relevance_filter"
+   }
+  ],
+  "results": [
+   {
+    "title": "​​”Trust that the dots will somehow connect,” Steve Jobs, Stanford commencement address, 2005 - YouTube",
+    "url": "https://www.youtube.com/watch?v=bp4OzXLxEv4",
+    "creator": "Steve Jobs Archive",
+    "duration": 35,
+    "language": "en",
+    "relevance": 10,
+    "reason": "Video specifically covers the requested 'connecting the dots' portion of Steve Jobs' Stanford commencement speech.",
+    "moments": [
+     "0:00 video_analysed: Steve Jobs stands at a wooden podium outdoors in academic graduation robes and glasses, delivering a commencement speech",
+     "0:00 transcript_supported: Of course, it was impossible to connect the dots looking forward when I was in college",
+     "0:09 transcript_supported: Again, you can’t connect the dots looking forward; you can only connect them looking backwards, so you have to trust tha"
+    ],
+    "requirements": [
+     "part in Steve Jobs' Stanford commencement speech: supported",
+     "talks about connecting the dots: supported"
+    ]
+   },
+   {
+    "title": "Steve Jobs - 2005 Stanford Commencement Address (Enhanced to HD/1080p) - YouTube",
+    "url": "https://www.youtube.com/watch?v=jiHZqamCD8c",
+    "creator": "Steve Jobs Archive",
+    "duration": 886,
+    "language": "en",
+    "relevance": 10,
+    "reason": "Complete YouTube video of the Stanford commencement address with transcript and scenes explicitly covering the 'connecting the dots' story.",
+    "moments": [
+     "0:00 video_analysed: Steve Jobs walks up to the podium in academic regalia at Stanford University's commencement ceremony. An on-screen lower",
+     "4:48 transcript_supported: STEVE JOBS: Thank you. I’m honored to be with you today for your commencement from one of the finest universities in the",
+     "0:36 video_analysed: Steve Jobs shares his first story about 'connecting the dots.' He describes his adoption, dropping out of Reed College, "
+    ],
+    "requirements": [
+     "part in Steve Jobs' Stanford commencement speech: supported",
+     "talks about connecting the dots: supported"
+    ]
+   },
+   {
+    "title": "Steve Jobs Connect the Dots - YouTube",
+    "url": "https://www.youtube.com/watch?v=5BSbOc5VYY8",
+    "creator": "Spark",
+    "duration": 319,
+    "language": "en",
+    "relevance": 9,
+    "reason": "Video features Steve Jobs delivering the connecting the dots section of his 2005 Stanford commencement address.",
+    "moments": [
+     "0:00 video_analysed: Steve Jobs approaches a wooden podium bearing the Stanford University seal outdoors, while attendees in academic regalia",
+     "0:06 video_analysed: Steve Jobs begins speaking at the podium in academic dress. A red lower-third graphic displays 'Steve Jobs / CEO, Apple ",
+     "4:44 transcript_supported: thank you i'm honored to be with you today for your commencement from one of the finest universities in the world truth "
+    ],
+    "requirements": [
+     "part in Steve Jobs' Stanford commencement speech: supported",
+     "talks about connecting the dots: supported"
+    ]
+   },
+   {
+    "title": "Steve Jobs Stanford Commencement Speech (2005) - YouTube",
+    "url": "https://www.youtube.com/watch?v=3FM1f_bjhpU",
+    "creator": "PodiumVC",
+    "duration": 852,
+    "language": "en",
+    "relevance": 9,
+    "reason": "Full Stanford commencement speech containing the verbatim transcript where Steve Jobs introduces and details connecting the dots.",
+    "moments": [
+     "4:34 transcript_supported: I'm uh honored to be with you today for your commencement from one of the finest universities in the world. Truth be tol"
+    ],
+    "requirements": [
+     "part in Steve Jobs' Stanford commencement speech: supported",
+     "talks about connecting the dots: supported"
+    ]
+   },
+   {
+    "title": "Connecting the dots with English Subtitles | Steve Jobs' Speech at Stanford | (2005)",
+    "url": "https://www.youtube.com/watch?v=yzPHFItCr6Q",
+    "creator": "taeyong park",
+    "duration": 327,
+    "language": "ko",
+    "relevance": 9,
+    "reason": "Video specifically features Steve Jobs' Stanford speech and discusses connecting the dots in the transcript.",
+    "moments": [
+     "0:44 transcript_supported: The first story is about connecting the dots."
+    ],
+    "requirements": [
+     "part in Steve Jobs' Stanford commencement speech: supported",
+     "talks about connecting the dots: supported"
+    ]
+   },
+   {
+    "title": "Steve Jobs - Connecting The Dots - Motivational Video - YouTube",
+    "url": "https://www.youtube.com/watch?v=wz0j7z38LIg",
+    "creator": "Fearless Soul",
+    "duration": 390,
+    "language": "en",
+    "relevance": 8,
+    "reason": "Video features Steve Jobs' Stanford speech with the transcript highlighting the connecting the dots section, but includes added music and editing.",
+    "moments": [
+     "0:09 transcript_supported: The first story is about connecting the dots."
+    ],
+    "requirements": [
+     "part in Steve Jobs' Stanford commencement speech: supported",
+     "talks about connecting the dots: supported"
+    ]
+   },
+   {
+    "title": "Connecting the Dots... Steve Jobs' 2005 Stanford Commencement Address - YouTube",
+    "url": "https://www.youtube.com/watch?v=p7vklHhds1w",
+    "creator": "Detox Life",
+    "duration": 905,
+    "language": "en",
+    "relevance": 8,
+    "reason": "Video contains the entire Stanford commencement speech, including the opening connecting the dots section.",
+    "moments": [
+     "0:56 transcript_supported: this program is brought to you by Stanford University please visit us at stanford.edu thank you I'm honored to be with y"
+    ],
+    "requirements": [
+     "part in Steve Jobs' Stanford commencement speech: supported",
+     "talks about connecting the dots: supported"
+    ]
+   },
+   {
+    "title": "Connecting the dots - Steve Jobs Stanford Commencement speech (English subtitles) [Motivator] - YouTube",
+    "url": "https://www.youtube.com/watch?v=vE87TeU3qxQ",
+    "creator": "Motivator",
+    "duration": 277,
+    "language": "en",
+    "relevance": 8,
+    "reason": "Direct video excerpt of Jobs’ Stanford 2005 “connecting the dots” story; transcript begins with the requested section.",
+    "moments": [
+     "0:00 transcript_supported: the first story is about connecting the dots"
+    ],
+    "requirements": [
+     "part in Steve Jobs' Stanford commencement speech: supported",
+     "talks about connecting the dots: supported"
+    ]
+   },
+   {
+    "title": "\"Stay Hungry Stay Foolish\" - Steve Jobs | Motivational Video | Stanford Commencement Speech - 2025 - YouTube",
+    "url": "https://www.youtube.com/watch?v=Zcwkp-SByFE",
+    "creator": "The Life Motivation",
+    "duration": 239,
+    "language": "en",
+    "relevance": 8,
+    "reason": "Video highlights the beginning of the speech and the connecting the dots story.",
+    "moments": [
+     "0:10 transcript_supported: the first story is about connecting the dots"
+    ],
+    "requirements": [
+     "part in Steve Jobs' Stanford commencement speech: supported",
+     "talks about connecting the dots: supported"
+    ]
+   },
+   {
+    "title": "Life Lessons from #stevejobs - Trust your #instincts #stanford #connectthedots #inspiration",
+    "url": "https://www.youtube.com/watch?v=gkOUxbVFu8Y",
+    "creator": "Sage Sphere",
+    "duration": 21,
+    "language": "en",
+    "relevance": 8,
+    "reason": "Video transcript directly covers Steve Jobs' 2005 commencement remarks about not being able to connect the dots looking forward.",
+    "moments": [
+     "0:04 transcript_supported: You can't connect the dots looking forward. You can only connect them looking backwards."
+    ],
+    "requirements": [
+     "part in Steve Jobs' Stanford commencement speech: supported",
+     "talks about connecting the dots: supported"
+    ]
+   }
+  ]
+ },
+ {
+  "tab": "videos",
+  "q": "moment in the Falcon Heavy test flight video when both side boosters land at the same time",
+  "run": 1,
+  "tier": "ssj3",
+  "ms": 62517,
+  "cost_usd": 0.23984,
+  "by_role": {
+   "planner_calls": 0.00076,
+   "critic_calls": 0.06629,
+   "judge_calls": 0.05434,
+   "cascade_strong_calls": 0.11845
+  },
+  "cascade": [
+   {
+    "event": "cascade",
+    "tier": "ssj3",
+    "judged": 36,
+    "escalated": 16,
+    "answered": 16,
+    "reasons": {
+     "borderline": 15,
+     "conflicts_with_evidence": 2
+    },
+    "strong": "openai/gpt-5.6-terra",
+    "strong_ms": 23646
+   }
+  ],
+  "council": [],
+  "status": "partial",
+  "providers": [
+   {
+    "status": "ok",
+    "message": "Brave discovery completed.",
+    "provider": "brave"
+   },
+   {
+    "status": "ok",
+    "message": "Not needed: Brave answered every search.",
+    "provider": "searxng"
+   },
+   {
+    "status": "ok",
+    "message": "AI planned 4 searches for videos.",
+    "provider": "planner"
+   },
+   {
+    "status": "ok",
+    "message": "Looked for evidence on 2 unmet requirements: 1 targeted searches, 1 pages or videos opened, 0 closed.",
+    "provider": "gap_exploration"
+   },
+   {
+    "status": "ok",
+    "message": "Screened 36 of 36 leads to prioritize evidence checks; final relevance is checked separately.",
+    "provider": "jev_screener"
+   },
+   {
+    "status": "ok",
+    "message": "YouTube details and viewer comments checked.",
+    "provider": "youtube"
+   },
+   {
+    "status": "ok",
+    "message": "Reddit discussions checked.",
+    "provider": "reddit"
+   },
+   {
+    "status": "ok",
+    "message": "Captions were fetched for 2 of 4 videos during this search to find the moment.",
+    "provider": "captions_now"
+   },
+   {
+    "status": "ok",
+    "message": "Results were checked for relevance by AI.",
+    "provider": "judge"
+   },
+   {
+    "status": "ok",
+    "message": "32 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+    "provider": "relevance_filter"
+   },
+   {
+    "status": "partial",
+    "message": "1 videos queued for scene analysis; these pending analyses are not evidence in this ranking.",
+    "provider": "scene_analysis"
+   },
+   {
+    "status": "partial",
+    "message": "2 videos queued for caption fetching; their transcripts help later searches, not this one.",
+    "provider": "youtube_captions"
+   }
+  ],
+  "results": [
+   {
+    "title": "Falcon Heavy Boosters Nail Dual Landing Back on Earth - YouTube",
+    "url": "https://www.youtube.com/watch?v=uPvXvkEQvnQ",
+    "creator": "New York Post",
+    "duration": 123,
+    "language": "en",
+    "relevance": 10,
+    "reason": "Viewers note the dual landing angle at 1:32, and scenes confirm simultaneous side booster touchdowns.",
+    "moments": [
+     "0:00 video_analysed: Onboard rocket cameras capture the separation of Falcon Heavy's side boosters high above Earth, displaying speed, altitu",
+     "1:00 transcript_supported: Side booster separation confirmed. >> >> Payload deploy confirmed. And we have incredible views of the payload deploy wi",
+     "0:36 video_analysed: Multi-camera split-screen display showing dual onboard and ground angles of both Falcon Heavy side boosters igniting the"
+    ],
+    "requirements": [
+     "Is a video: supported",
+     "moment in the Falcon Heavy test flight video: supported",
+     "both side boosters land at the same time: supported"
+    ]
+   },
+   {
+    "title": "Falcon Heavy boosters landing - YouTube",
+    "url": "https://www.youtube.com/watch?v=6YyV-otP3pI",
+    "creator": "SciNews",
+    "duration": 139,
+    "language": "en",
+    "relevance": 8,
+    "reason": "Transcript confirms booster landing burn and landing legs deployed for Arabsat-6A launch.",
+    "moments": [
+     "0:50 viewer_timestamp: 0:55",
+     "1:01 transcript_supported: so booster landing legs have deployed landing zone side boosters have landed"
+    ],
+    "requirements": [
+     "Is a video: supported",
+     "moment in the Falcon Heavy test flight video: supported",
+     "both side boosters land at the same time: supported"
+    ]
+   },
+   {
+    "title": "See SpaceX's Falcon Heavy rocket land all 3 boosters for the first time - YouTube",
+    "url": "https://www.youtube.com/watch?v=HVqWEoyiaBA",
+    "creator": "CNN",
+    "duration": 182,
+    "language": "en",
+    "relevance": 8,
+    "reason": "Shows Falcon Heavy boosters landing for the first time with viewer comments noting the smooth landing.",
+    "moments": [
+     "2:15 viewer_timestamp: 2:20 the landing is so smooth af."
+    ],
+    "requirements": [
+     "Is a video: supported",
+     "moment in the Falcon Heavy test flight video: supported",
+     "both side boosters land at the same time: supported"
+    ]
+   },
+   {
+    "title": "Falcon Heavy first landing - YouTube",
+    "url": "https://www.youtube.com/watch?v=l5I8jaMsHYk",
+    "creator": "SciNews",
+    "duration": 172,
+    "language": "en",
+    "relevance": 8,
+    "reason": "Viewers note the breathtaking moment at 1:39 when the side boosters land simultaneously during the first Falcon Heavy test flight. Supporting evidence only; exact match unverified.",
+    "moments": [
+     "1:13 viewer_timestamp: 1:41 seriously breathtaking. Two rockets landing almost simultaneously and smoothly, like it's no big deal. Feels like i"
+    ],
+    "requirements": [
+     "Is a video: supported",
+     "moment in the Falcon Heavy test flight video: supported",
+     "both side boosters land at the same time: supported"
+    ]
+   }
+  ]
+ },
+ {
+  "tab": "videos",
+  "q": "hindi explainer on how UPI works, under 10 minutes, not from big news channels",
+  "run": 1,
+  "tier": "ssj3",
+  "ms": 85391,
+  "cost_usd": 0.29804,
+  "by_role": {
+   "planner_calls": 0.00072,
+   "critic_calls": 0.06399,
+   "judge_calls": 0.0828,
+   "cascade_strong_calls": 0.15054
+  },
+  "cascade": [
+   {
+    "event": "cascade",
+    "tier": "ssj3",
+    "judged": 55,
+    "escalated": 22,
+    "answered": 22,
+    "reasons": {
+     "borderline": 16,
+     "unbacked": 6,
+     "conflicts_with_evidence": 1
+    },
+    "strong": "openai/gpt-5.6-terra",
+    "strong_ms": 18056
+   }
+  ],
+  "council": [],
+  "status": "partial",
+  "providers": [
+   {
+    "status": "ok",
+    "message": "Brave discovery completed.",
+    "provider": "brave"
+   },
+   {
+    "status": "ok",
+    "message": "Not needed: Brave answered every search.",
+    "provider": "searxng"
+   },
+   {
+    "status": "ok",
+    "message": "AI planned 4 searches for videos.",
+    "provider": "planner"
+   },
+   {
+    "status": "ok",
+    "message": "Looked for evidence on 3 unmet requirements: 1 targeted searches, 0 pages or videos opened, 0 closed.",
+    "provider": "gap_exploration"
+   },
+   {
+    "status": "ok",
+    "message": "Screened 56 of 56 leads to prioritize evidence checks; final relevance is checked separately.",
+    "provider": "jev_screener"
+   },
+   {
+    "status": "ok",
+    "message": "YouTube details and viewer comments checked.",
+    "provider": "youtube"
+   },
+   {
+    "status": "ok",
+    "message": "Reddit discussions checked.",
+    "provider": "reddit"
+   },
+   {
+    "status": "ok",
+    "message": "15 of 19 result pages were checked, 6 in a browser.",
+    "provider": "pages"
+   },
+   {
+    "status": "ok",
+    "message": "Results were checked for relevance by AI.",
+    "provider": "judge"
+   },
+   {
+    "status": "ok",
+    "message": "54 weak, uncertain or unchecked candidates were excluded. Fewer results may be shown.",
+    "provider": "relevance_filter"
+   },
+   {
+    "status": "partial",
+    "message": "1 videos queued for scene analysis; these pending analyses are not evidence in this ranking.",
+    "provider": "scene_analysis"
+   }
+  ],
+  "results": [
+   {
+    "title": "UPI क्या है? | Unified Payments Interface पूरी जानकारी हिंदी में - YouTube",
+    "url": "https://www.youtube.com/watch?v=kSX7to1oJro",
+    "creator": "Infomax Computer Academy",
+    "duration": 315,
+    "language": "hi",
+    "relevance": 9,
+    "reason": "A 5:15 Hindi academy explainer explicitly covers how UPI works, setup, sending, receiving, benefits, limits, and security.",
+    "moments": [
+     "1:55 transcript_supported: अब आते हैं दूसरे हिस्से पर कि आखिर यह पैसा इतनी जल्दी पहुंचता कैसे है?"
+    ],
+    "requirements": [
+     "Duration under 10 minutes: supported",
+     "hindi explainer: supported",
+     "how UPI works: supported",
+     "not from big news channels: waived"
+    ]
+   }
+  ]
+ },
+ {
+  "tab": "docs",
+  "q": "which article of the GDPR covers the right to be forgotten",
+  "run": 1,
+  "tier": "ssj3",
+  "ms": 66323,
+  "cost_usd": 0.19304,
+  "by_role": {
+   "query_rewrite": 0.00027,
+   "judge_calls": 0.03576,
+   "cascade_strong_calls": 0.08956,
+   "critic_calls": 0.06747
+  },
+  "cascade": [
+   {
+    "event": "cascade",
+    "tier": "ssj3",
+    "judged": 32,
+    "escalated": 20,
+    "answered": 20,
+    "reasons": {
+     "borderline": 20
+    },
+    "strong": "openai/gpt-5.6-terra",
+    "strong_ms": 13658
+   }
+  ],
+  "council": [],
+  "rewrite": null,
+  "providers": [
+   {
+    "provider": "doc_hunt",
+    "status": "ok",
+    "message": "6 websites searched, 8 pages checked, 0 documents found inside them."
+   },
+   {
+    "provider": "judge",
+    "status": "ok",
+    "message": "32 documents were checked for relevance; 14 did not match."
+   }
+  ],
+  "results": [
+   {
+    "title": "THE RIGHT TO BE FORGOTTEN UNDER GDPR: LEGAL ...",
+    "url": "https://www.ijfmr.com/papers/2025/4/51772.pdf",
+    "snippet": "The evolution of the Right to Be Forgotten from a philosophical notion to a legally enforceable right under · GDPR marks a significant development in the field of data protection.",
+    "published": null,
+    "relevance": 9,
+    "reason": "The document discusses the right to be forgotten under Article 17 of the GDPR.",
+    "lead": false
+   },
+   {
+    "title": "PricewaterhouseCoopers Legal LLP Article 17 of the General Data Protection",
+    "url": "https://www.pwc.lu/en/general-data-protection/docs/pwc-gdpr-right-to-be-forgotten.pdf",
+    "snippet": "PricewaterhouseCoopers Legal LLP · Article 17 of the General Data Protection",
+    "published": null,
+    "relevance": 9,
+    "reason": "Document explicitly cites Article 17 of the GDPR as covering the right to erasure and right to be forgotten.",
+    "lead": false
+   },
+   {
+    "title": "Guidelines 5/2019 on the criteria of the Right to be Forgotten ...",
+    "url": "https://www.edpb.europa.eu/sites/default/files/files/file1/edpb_guidelines_201905_rtbfsearchengines_afterpublicconsultation_en.pdf",
+    "snippet": "light of the provisions of Article 17 GDPR (the “Right to request delisting”). Indeed, the Right to be · Forgotten has been especially enacted under Article 17 GDPR to take into account the Right to r",
+    "published": null,
+    "relevance": 8,
+    "reason": "Guidelines addressing the right to be forgotten in light of Article 17 GDPR.",
+    "lead": false
+   },
+   {
+    "title": "Artificial Intelligence and the Right to be Forgotten - ijrpr",
+    "url": "https://ijrpr.com/uploads/V5ISSUE8/IJRPR32615.pdf",
+    "snippet": "The right to be forgotten was first established in the Google Spain case and later codified under Article 17 of the GDPR.",
+    "published": null,
+    "relevance": 8,
+    "reason": "Inspected PDF explicitly states that the right to be forgotten was codified under GDPR Article 17.",
+    "lead": false
+   },
+   {
+    "title": "PRASHANT MALI PRIVACY LAW: RIGHT TO BE FORGOTTEN IN INDIA 1",
+    "url": "https://nliulawreview.nliu.ac.in/wp-content/uploads/2022/01/Volume-VII-17-33.pdf",
+    "snippet": "international business. According to Article 17 of GDPR, the right to",
+    "published": null,
+    "relevance": 8,
+    "reason": "PDF directly states: “According to Article 17 of GDPR, the right to” in an article about the right to be forgotten.",
+    "lead": false
+   },
+   {
+    "title": "Data privacy and the right to be forgotten",
+    "url": "https://wjarr.com/sites/default/files/fulltext_pdf/WJARR-2022-1079.pdf",
+    "snippet": "The General Data Protection Regulation (GDPR), introduced by the European Union (EU) in 2018, established one of the · most comprehensive legal frameworks for data protection, with the Right to Be For",
+    "published": null,
+    "relevance": 7,
+    "reason": "The PDF is specifically about the right to be forgotten, and its description identifies GDPR Article 17 as its codification.",
+    "lead": false
+   },
+   {
+    "title": "RIGHT TO BE FORGOTTEN",
+    "url": "https://www.ijmr.net.in/current/2025/Jun/EoGOHLPwabfQG5g.pdf",
+    "snippet": "The General Data Protection Regulation (GDPR) is the cornerstone of RTBF in the EU. Article 17 of GDPR · grants individuals the right to request the deletion of personal data when certain conditions a",
+    "published": null,
+    "relevance": 6,
+    "reason": "PDF description directly says GDPR Article 17 grants deletion rights, but no inspected document text confirms the context.",
+    "lead": true
+   },
+   {
+    "title": "The Right to Be Forgotten - ResearchGate",
+    "url": "https://www.researchgate.net/publication/363352781_The_Right_to_Be_Forgotten",
+    "snippet": "Jul 22, 2021 · Chapter 6 explores the theoretical, normative, and practical aspects of the right to be forgotten (erasure) as set out in Article 17 of the GDPR along with some related mechanisms that ",
+    "published": null,
+    "relevance": 6,
+    "reason": "The description explicitly identifies Article 17 GDPR as setting out the right to be forgotten (erasure), though it is a ResearchGate viewer page. Metadata only; contents unverified.",
+    "lead": true
+   },
+   {
+    "title": "GDPR Article 17: Eradicating Personal Identifiable ...",
+    "url": "https://www.researchgate.net/publication/334051640_GDPR_Article_17_Eradicating_Personal_Identifiable_Information_Achieving_Compliance_in_a_Hybrid_Cloud",
+    "snippet": "Jun 27, 2019 · On 25 th May 2018, the GDPR Article 17, the Right to Erasure ('Right to be Forgotten') came into force making it vital for organisations to understand Personally Identifiable Informatio",
+    "published": null,
+    "relevance": 6,
+    "reason": "Its title and description explicitly identify GDPR Article 17 as the Right to Erasure/right to be forgotten. Metadata only; contents unverified.",
+    "lead": true
+   },
+   {
+    "title": "Article 17 Right to erasure ('right to be forgotten') - ResearchGate",
+    "url": "https://www.researchgate.net/publication/350407049_Article_17_Right_to_erasure_'right_to_be_forgotten'",
+    "snippet": "The paper examines the requirements and obstacles relating to global delisting orders based on the “right to be forgotten” in the context of global digital ...",
+    "published": null,
+    "relevance": 6,
+    "reason": "The page title directly identifies Article 17 as the right to erasure/right to be forgotten, though the description focuses on global delisting orders. Metadata only; contents unverified.",
+    "lead": true
+   }
+  ]
+ },
+ {
+  "tab": "docs",
+  "q": "the Google paper that introduced MapReduce",
+  "run": 1,
+  "tier": "ssj3",
+  "ms": 64353,
+  "cost_usd": 0.08107,
+  "by_role": {
+   "query_rewrite": 0.00024,
+   "judge_calls": 0.03102,
+   "cascade_strong_calls": 0.04982
+  },
+  "cascade": [
+   {
+    "event": "cascade",
+    "tier": "ssj3",
+    "judged": 30,
+    "escalated": 10,
+    "answered": 10,
+    "reasons": {
+     "borderline": 10
+    },
+    "strong": "openai/gpt-5.6-terra",
+    "strong_ms": 19928
+   },
+   {
+    "event": "cascade",
+    "tier": "ssj3",
+    "judged": 1,
+    "escalated": 0,
+    "answered": 0,
+    "reasons": {},
+    "strong": null,
+    "strong_ms": 0
+   }
+  ],
+  "council": [],
+  "rewrite": null,
+  "providers": [
+   {
+    "provider": "doc_hunt",
+    "status": "ok",
+    "message": "6 websites searched, 7 pages checked, 1 documents found inside them."
+   },
+   {
+    "provider": "judge",
+    "status": "ok",
+    "message": "31 documents were checked for relevance; 22 did not match."
+   }
+  ],
+  "results": [
+   {
+    "title": "MapReduce: Simpliﬁed Data Processing on Large Clusters",
+    "url": "https://research.google.com/archive/mapreduce-osdi04.pdf",
+    "snippet": "MapReduce: Simpliﬁed Data Processing on Large Clusters ... Google, Inc.",
+    "published": null,
+    "relevance": 10,
+    "reason": "Google Research hosts the PDF whose title and abstract identify the original MapReduce paper by Dean and Ghemawat.",
+    "lead": false
+   },
+   {
+    "title": "MapReduce: simplified data processing on large clusters",
+    "url": "https://cse.buffalo.edu/~okennedy/courses/papers/mapreduce.pdf",
+    "snippet": "1 Introduction Prior to our development of MapReduce, the authors and many others at Google implemented hundreds of special-purpose computations that process large amounts of raw data, such as crawled",
+    "published": null,
+    "relevance": 10,
+    "reason": "The document is the original Google paper introducing MapReduce by Jeffrey Dean and Sanjay Ghemawat.",
+    "lead": false
+   },
+   {
+    "title": "Simpliﬁed Data Processing on Large Cluste - Semantic Scholar",
+    "url": "https://pdfs.semanticscholar.org/840f/ffba1a678b650fca06712b731b84f24e52e1.pdf",
+    "snippet": "Many different implementations of the MapReduce interface are possible • The implementation targeted to the computing environment in wide use at Google: large clusters of commodity PCs connected toget",
+    "published": null,
+    "relevance": 10,
+    "reason": "Semantic Scholar PDF of the original MapReduce paper by Jeffrey Dean and Sanjay Ghemawat.",
+    "lead": false
+   },
+   {
+    "title": "MapReduce: Simplied Data Processing on Large Clusters",
+    "url": "https://static.googleusercontent.com/media/research.google.com/en//archive/mapreduce-osdi04.pdf",
+    "snippet": "Abstract MapReduce is a programming model and an associated implementation for processing and generating large data sets. Users specify a map function that processes a key/value pair to generate a set",
+    "published": null,
+    "relevance": 9,
+    "reason": "Direct PDF copy hosted on Google's own research archive storage URL.",
+    "lead": false
+   },
+   {
+    "title": "MapReduce: Simpliﬁed Data Processing on Large Cluste",
+    "url": "https://www.plus.ac.at/wp-content/uploads/2021/02/MapReduce.pdf",
+    "snippet": "Abstract MapReduce is a programming model and an associ-ated implementation for processing and generating large data sets. Users specify a map function that processes a key/value pair to generate a se",
+    "published": null,
+    "relevance": 9,
+    "reason": "Direct PDF copy of the original MapReduce paper by Jeffrey Dean and Sanjay Ghemawat from Google, Inc.",
+    "lead": false
+   },
+   {
+    "title": "Mapreduce Google Paper | PDF - Scribd",
+    "url": "https://www.scribd.com/document/1058196137/Mapreduce-Google-Paper",
+    "snippet": "MapReduce: Simplified Data Processing on Large Clusters Jeffrey Dean and Sanjay Ghemawat jeff@ [Link], sanjay@ [Link] Google, Inc. Abstract given day, etc. Most such computations are conceptu- ally st",
+    "published": null,
+    "relevance": 9,
+    "reason": "The Scribd PDF text identifies the exact Dean and Ghemawat Google paper and begins with its original abstract.",
+    "lead": false
+   },
+   {
+    "title": "Download",
+    "url": "https://storage.googleapis.com/gweb-research2023-media/pubtools/4449.pdf",
+    "snippet": null,
+    "published": null,
+    "relevance": 9,
+    "reason": "Jev: R1 — \"MapReduce: Simpli\u0002ed Data Processing on Large Clusters Jeffrey Dean and Sanjay Ghemawat je\"",
+    "lead": false
+   },
+   {
+    "title": "MapReduce: Simplified Data Processing on Large Clusters",
+    "url": "https://www.researchgate.net/publication/220851866_MapReduce_Simplified_Data_Processing_on_Large_Clusters",
+    "snippet": "Jan 1, 2004 · MapReduce is a programming model and an associated implementation for processing and generating large datasets that is amenable to a broad variety of real-world tasks. Users specify the ",
+    "published": null,
+    "relevance": 5,
+    "reason": "Title exactly matches the 2004 Dean–Ghemawat MapReduce paper, but only a ResearchGate viewer and search description are inspected. Match not verified from the evidence.",
+    "lead": true
+   },
+   {
+    "title": "(PDF) MapReduce - Academia.edu",
+    "url": "https://www.academia.edu/71800491/MapReduce",
+    "snippet": "Abstract MapReduce is a programming model and an associated implementation for processing and generating large datasets that is amenable to a broad variety of real-world tasks. Users specify the compu",
+    "published": null,
+    "relevance": 5,
+    "reason": "Its abstract matches MapReduce’s description, but the evidence does not identify the exact Dean–Ghemawat Google paper or its year. Match not verified from the evidence.",
+    "lead": true
+   }
+  ]
+ },
+ {
+  "tab": "docs",
+  "q": "RTI Act 2005 full text in Hindi",
+  "run": 1,
+  "tier": "ssj3",
+  "ms": 69849,
+  "cost_usd": 0.0946,
+  "by_role": {
+   "query_rewrite": 0.00034,
+   "judge_calls": 0.03018,
+   "cascade_strong_calls": 0.06407
+  },
+  "cascade": [
+   {
+    "event": "cascade",
+    "tier": "ssj3",
+    "judged": 26,
+    "escalated": 13,
+    "answered": 13,
+    "reasons": {
+     "borderline": 13
+    },
+    "strong": "openai/gpt-5.6-terra",
+    "strong_ms": 16248
+   }
+  ],
+  "council": [],
+  "rewrite": null,
+  "providers": [
+   {
+    "provider": "doc_hunt",
+    "status": "ok",
+    "message": "6 websites searched, 11 pages checked, 0 documents found inside them."
+   },
+   {
+    "provider": "judge",
+    "status": "ok",
+    "message": "26 documents were checked for relevance; 14 did not match."
+   }
+  ],
+  "results": [
+   {
+    "title": "बायत सयकाय विधध औय न् माम भ्रालारम GOVERNMENT OF INDIA",
+    "url": "https://homeguard.up.gov.in/Downloads/RTI_Act-2005.pdf",
+    "snippet": "सूचना का अधधकाय अधधधनमभ, 2005 का मह स्स् कयण ्विभबाी ूपऩ भ प्रकाधतत ्कमा जा",
+    "published": null,
+    "relevance": 10,
+    "reason": "The document provides the full text of the Right to Information Act, 2005 in Hindi.",
+    "lead": false
+   },
+   {
+    "title": "Right to Information Act 2005 RTI Hindi | PDF - Scribd",
+    "url": "https://www.scribd.com/document/1048835152/Right-to-Information-Act-2005-RTI-Hindi",
+    "snippet": "Right to Information Act 2005 RTI Hindi - Free download as PDF File (.pdf), Text File (.txt) or read online for free. The Right to Information Act, 2005 (RTI) establishes the framework for citizens to",
+    "published": null,
+    "relevance": 10,
+    "reason": "The document contains the full text of the Right to Information Act 2005 in Hindi.",
+    "lead": false
+   },
+   {
+    "title": "सूचना का अधिकार अधिनियम, 2005",
+    "url": "https://cic.gov.in/sites/default/files/rti-actinhindi.pdf",
+    "snippet": "liriff *moil* · alk ITZT •ux 1°14 · GOVERNMENT OF INDIA · MINISTRY OF LAW AND JUSTICE · T1111 ThT 3TffiTh-TR\" aff, 2005 · (2005 5t aReizriT *is. 22) · [I Trot 2011 of 712TTftEPT19] · Right to Informat",
+    "published": null,
+    "relevance": 9,
+    "reason": "Government-hosted PDF is titled “सूचना का अधिकार अधिनियम, 2005”; its text identifies the Right to Information Act, 2005 in Hindi.",
+    "lead": false
+   },
+   {
+    "title": "सूचना का अिधकार अिधिनयम, 2005",
+    "url": "https://rti.dopt.gov.in/Writereaddata/RTI%20Act%20Version%20Hindi.pdf",
+    "snippet": "Lodge your RTI Request/ Appeal with Central Min./Dept. ... Right to Information Act 2005 mandates timely response to citizen requests for government information.",
+    "published": null,
+    "relevance": 9,
+    "reason": "Jev: R1 — \"सूचना का अिधकार अिधिनयम, 2005 _________ धारा� का �म _________ ध◌ाराएं अ ध् य ाय 1 �ारिम् भ\"",
+    "lead": false
+   },
+   {
+    "title": "RTI-Act_English.pdf",
+    "url": "https://cic.gov.in/sites/default/files/RTI-Act_English.pdf",
+    "snippet": "This edition of the Right to Information Act, 2005 is being published in diglot form. The English text and · the authoritative Hindi text of the Act have been modified up (lithe 1st day of February, 2",
+    "published": null,
+    "relevance": 8,
+    "reason": "PDF is a diglot edition of the RTI Act 2005 and explicitly includes the authoritative Hindi text, though it is not Hindi-only.",
+    "lead": false
+   },
+   {
+    "title": "RTI Act 2005: Hindi Version PDF - Scribd",
+    "url": "https://www.scribd.com/document/330656127/Rti-Act-Hindi",
+    "snippet": "Rti Act (Hindi) - Free download as PDF File (.pdf), Text File (.txt) or read online for free. The document is the Right to Information Act of 2005 from the Government of India. It has been modified up",
+    "published": null,
+    "relevance": 8,
+    "reason": "Scribd document hosts the full text of the RTI Act 2005 in Hindi.",
+    "lead": false
+   },
+   {
+    "title": "Rti Act 2005 Updated-Hindi | PDF - Scribd",
+    "url": "https://www.scribd.com/document/741943450/Rti-Act-2005-Updated-hindi",
+    "snippet": "सूचना का अिधकार अिधिनयम, 2005 _________ धारा का म _________ ध ाराएं अध्याय 1 ारिम्भक 1. संिक्षप्त नाम, िवस्तार और ारं भ । 2. प रभाषाएं । अध्याय 2 सूचना का अिधकार और लोक ािधका ...",
+    "published": null,
+    "relevance": 8,
+    "reason": "Scribd document provides the full text of the RTI Act 2005 in Hindi.",
+    "lead": false
+   },
+   {
+    "title": "RTI Act Version Hindi - 250306 - 123725 | PDF - Scribd",
+    "url": "https://www.scribd.com/document/907484258/RTI-Act-Version-Hindi-250306-123725",
+    "snippet": "सूचना का अिधकार अिधिनयम, 2005 _________ धारा का म _________ ध ाराएं अध्याय 1 ारिम्भक 1. संिक्षप्त नाम, िवस्तार और ारं भ । 2. प रभाषाएं । अध्याय 2 सूचना का अिधकार और लोक ािधका ...",
+    "published": null,
+    "relevance": 8,
+    "reason": "The Scribd document is a 21-page Hindi RTI Act text with chapter and section listings, including “सूचना का अिधकार अिधिनयम, 2005.”",
+    "lead": false
+   },
+   {
+    "title": "RTI-Act-hindi.pdf",
+    "url": "https://phedwater.rajasthan.gov.in/content/dam/doitassets/water/Ground%20Water/Pdf/RTI/RTI-Act-hindi.pdf",
+    "snippet": "The government of Rajasthan is committed to public welfare as well being of its public is the priority of the Government. Jankalyan portal (a Public Welfare Portal) fulfills this ideology of Hon’ble C",
+    "published": null,
+    "relevance": 5,
+    "reason": "A government PDF named “RTI-Act-hindi.pdf”; inspected text identifies the 2005 Act, but visible extracted text is English and Hindi full text is unverified. Match not verified from the evidence.",
+    "lead": false
+   },
+   {
+    "title": "(3) w A * w m (I), sm 5 fl awa (I) *m b). m 12,",
+    "url": "https://rtiharyana.gov.in/pdffiles/rti-acthindi.pdf",
+    "snippet": "sm 5 fl awa (I) *m b). m 12, · m'ir m is, m 16, rn 2 4 m 27 *m 28 bi",
+    "published": null,
+    "relevance": 5,
+    "reason": "Government-hosted PDF filename suggests a Hindi RTI Act, but its title and extracted text are too garbled to verify the Act’s year or completeness. Match not verified from the evidence.",
+    "lead": false
+   }
+  ]
+ },
+ {
+  "tab": "web",
+  "q": "current RBI repo rate",
+  "run": 1,
+  "tier": "ssj3",
+  "ms": 33978,
+  "cost_usd": 0.11491,
+  "by_role": {
+   "query_rewrite": 0.00028,
+   "judge_calls": 0.02285,
+   "cascade_strong_calls": 0.09089,
+   "refill_calls": 0.00088
+  },
+  "cascade": [
+   {
+    "event": "cascade",
+    "tier": "ssj3",
+    "judged": 29,
+    "escalated": 20,
+    "answered": 20,
+    "reasons": {
+     "jev_reject_unbacked": 10,
+     "borderline": 10
+    },
+    "strong": "openai/gpt-5.6-terra",
+    "strong_ms": 13400
+   }
+  ],
+  "council": [],
+  "rewrite": null,
+  "providers": [
+   {
+    "provider": "judge",
+    "status": "ok",
+    "message": "29 pages were checked for relevance; 7 did not match."
+   }
+  ],
+  "results": [
+   {
+    "title": "DBIE",
+    "url": "https://data.rbi.org.in/",
+    "snippet": "Policy Repo Rate : 5.25% | Reverse Repo Rate : 3.35% | Cash Reserve Ratio : 3.00% | Statutory Liquidity Ratio : 18.00% | Standing Deposit Facility (SDF) Rate : 5.00% | CPI Inflation : 4.82% (Aug-26) |",
+    "published": null,
+    "relevance": 9,
+    "reason": "Official RBI data portal listing the current policy repo rate as 5.25 percent.",
+    "lead": false
+   },
+   {
+    "title": "RBI keeps repo rate unchanged at 5.25%, Reduces GDP growth projection to 6.6% | Akashvani News",
+    "url": "https://newsonair.gov.in/rbi-keeps-repo-rate-unchanged-at-5-25-retains-neutral-stance/",
+    "snippet": "Announcing the second bi-monthly monetary policy for the current fiscal, RBI Governor Sanjay Malhotra today said that the Monetary Policy Committee (MPC) has unanimously decided to retain the short-te",
+    "published": "2026-06-04T18:30:00.000Z",
+    "relevance": 9,
+    "reason": "Akashvani directly reports RBI’s current-fiscal MPC decision to retain the repo rate at 5.25%.",
+    "lead": false
+   },
+   {
+    "title": "RBI keeps repo rate unchanged; Projects India’s real GDP growth for current fiscal at 6.9% | Akashvani News",
+    "url": "https://newsonair.gov.in/rbi-to-announce-its-first-bi-monthly-monetary-policy-statement-for-financial-year-2026-27-today/",
+    "snippet": "The Reserve Bank of India has kept interest rates unchanged at 5.25 percent. Announcing the first bi-monthly monetary policy for the current fiscal, RBI Governor Sanjay Malhotra today said that the Mo",
+    "published": "2026-09-08T10:55:02.000Z",
+    "relevance": 8,
+    "reason": "News page confirms the RBI keeps the repo rate unchanged at 5.25 percent.",
+    "lead": false
+   },
+   {
+    "title": "Check the Current Repo Rate 2026",
+    "url": "https://www.bankbazaar.com/home-loan/repo-rate.html",
+    "snippet": "The Repo Rate is the interest rate at which the RBI lends money to commercial banks in exchange for securities to manage liquidity and control inflation. Currently at 5.25% (following a 25 basis point",
+    "published": "2026-08-06T23:25:05.000Z",
+    "relevance": 9,
+    "reason": "The page provides the current repo rate explicitly as 5.25%.",
+    "lead": false
+   },
+   {
+    "title": "Current Repo Rate in India 2026: Live RBI Policy Updates, Neutral Stance Analysis & EMI Impact",
+    "url": "https://www.smcinsurance.com/finance/articles/repo-rate-india",
+    "snippet": "The current RBI repo rate is 5.25% (April 2026). Understand what the neutral stance means, how it impacts your home loan EMI, and use our step-by-step EMI calculator. Trusted, IRDAI-aware finance guid",
+    "published": "2026-04-23T18:30:00.000Z",
+    "relevance": 9,
+    "reason": "Web page states the current RBI repo rate is 5.25% as of April 2026.",
+    "lead": false
+   },
+   {
+    "title": "Repo Rate 2026: Current, Reverse, SDF, Meaning and Monetary Policy",
+    "url": "https://cleartax.in/s/repo-rate",
+    "snippet": "In its latest Monetary Policy Committee (MPC) meeting held in June 2026, the RBI kept the repo rate unchanged at 5.25% and maintained a neutral policy stance while balancing inflation risks and growth",
+    "published": "2026-06-08T07:00:24.000Z",
+    "relevance": 9,
+    "reason": "The page details current policy rates including the repo rate at 5.25%.",
+    "lead": false
+   },
+   {
+    "title": "RBI Repo Rate History from 2000 to 2025 (5th December 2025)",
+    "url": "https://www.basunivesh.com/rbi-repo-rate-history-from-2000/",
+    "snippet": "Latest RBI Repo Rate Updates – On 8th April 2026, RBI left the repo rate unchanged. Hence, the current repo rate is 5.25%.",
+    "published": "2026-04-09T02:23:53.000Z",
+    "relevance": 9,
+    "reason": "Web page explicitly states the current repo rate is 5.25%.",
+    "lead": false
+   },
+   {
+    "title": "What is Repo Rate? Meaning, Current Rates and Impact",
+    "url": "https://www.bajajhousingfinance.in/repo-rate",
+    "snippet": "What is Repo Rate? Meaning, Current Rates and Impact ... As per the announcement made by the Reserve Bank of India (RBI) on 05 August 2026, the current Repo Rate is 5.25%.",
+    "published": "2026-08-05T18:39:22.000Z",
+    "relevance": 8,
+    "reason": "Bajaj Housing Finance page provides the current RBI repo rate of 5.25% as of August 2026.",
+    "lead": false
+   },
+   {
+    "title": "India Interest Rate",
+    "url": "https://tradingeconomics.com/india/interest-rate",
+    "snippet": "India Holds Rates, Revises Down FY26/27 GDP Forecasts · The Reserve Bank of India (RBI) kept its key repo rate unchanged at 5.25% for the third consecutive meeting in June and maintained a neutral sta",
+    "published": "2026-08-04T20:05:03.000Z",
+    "relevance": 8,
+    "reason": "Trading Economics page provides India's interest rate data showing the RBI repo rate at 5.25%.",
+    "lead": false
+   },
+   {
+    "title": "Repo Rate Today: RBI Current Repo Rate 2026 | Bajaj Finance",
+    "url": "https://www.bajajfinserv.in/repo-rate",
+    "snippet": "The current RBI repo rate in 2026 is 5.25%*, having been kept unchanged by the Monetary Policy Committee (MPC).",
+    "published": null,
+    "relevance": 8,
+    "reason": "Bajaj Finserv page details the RBI repo rate for 2026 as 5.25% following the MPC meeting.",
+    "lead": false
+   }
+  ]
+ },
+ {
+  "tab": "web",
+  "q": "how long can cooked rice be safely kept in the fridge",
+  "run": 1,
+  "tier": "ssj3",
+  "ms": 66858,
+  "cost_usd": 0.17461,
+  "by_role": {
+   "query_rewrite": 0.0003,
+   "judge_calls": 0.03471,
+   "cascade_strong_calls": 0.13947,
+   "refill_calls": 0.00013
+  },
+  "cascade": [
+   {
+    "event": "cascade",
+    "tier": "ssj3",
+    "judged": 28,
+    "escalated": 18,
+    "answered": 18,
+    "reasons": {
+     "borderline": 17,
+     "jev_reject_unbacked": 1
+    },
+    "strong": "openai/gpt-5.6-terra",
+    "strong_ms": 14440
+   },
+   {
+    "event": "cascade",
+    "tier": "ssj3",
+    "judged": 20,
+    "escalated": 15,
+    "answered": 15,
+    "reasons": {
+     "borderline": 3,
+     "jev_reject_unbacked": 12
+    },
+    "strong": "openai/gpt-5.6-terra",
+    "strong_ms": 16096
+   }
+  ],
+  "council": [],
+  "rewrite": null,
+  "providers": [
+   {
+    "provider": "judge",
+    "status": "ok",
+    "message": "28 pages were checked for relevance; 1 did not match."
+   },
+   {
+    "provider": "refill",
+    "status": "ok",
+    "message": "Looked again for what was missing (authoritative primary source (USDA/FDA) for food safety guidelines): 2 searches, 4 more pages kept."
+   }
+  ],
+  "results": [
+   {
+    "title": "How Long Is Rice Good for in the Fridge?",
+    "url": "https://reencle.co/blogs/news/how-long-is-rice-good-for-in-the-fridge",
+    "snippet": "Cooked rice lasts 3–5 days in the fridge. Learn about Bacillus cereus food poisoning risk, how to store rice safely, and how long uncooked rice keeps.",
+    "published": "2026-03-18T21:05:02.000Z",
+    "relevance": 10,
+    "reason": "The page directly answers how long cooked rice lasts in the fridge with 3 to 5 days.",
+    "lead": false
+   },
+   {
+    "title": "Cooked Rice Fridge Life: Exact Days & Safety Tips - Spices",
+    "url": "https://spice.alibaba.com/spice-basics/cooked-rice-fridge-life--exact-days---safety-tips",
+    "snippet": "Cooked rice stays safe in the fridge for 3–4 days when stored below 40°F (4°C). USDA guidelines confirm this timeline—any longer risks Bacillus cereus bacteria growth, causing food poisoning.",
+    "published": "2025-12-17T16:55:10.000Z",
+    "relevance": 10,
+    "reason": "Provides exact USDA-backed timelines and safety guidelines for storing cooked rice in the fridge.",
+    "lead": false
+   },
+   {
+    "title": "How Long You Can Actually Keep Leftover Rice, According to Food Safety Experts",
+    "url": "https://www.simplyrecipes.com/how-long-does-leftover-rice-keep-expert-11875761",
+    "snippet": "The USDA says you should never eat food that is left out of the fridge for more than two hours. In addition to safety, the taste of leftover rice can suffer if it’s kept around too long.",
+    "published": "2026-01-30T12:00:00.000Z",
+    "relevance": 10,
+    "reason": "Directly answers how long cooked rice can be safely kept in the fridge with expert food safety advice.",
+    "lead": false
+   },
+   {
+    "title": "How Long Does Rice Last in the Fridge? - The New York Times",
+    "url": "https://www.nytimes.com/newsgraphics/card-story/food-rice-safety-how-long-fridge",
+    "snippet": "The U.S. Department of Health and Human Services gives us four to six days to eat cooked rice (and up to four days for most other leftovers), so long as it’s been stored in a fridge that’s 40 degrees ",
+    "published": null,
+    "relevance": 9,
+    "reason": "The article explicitly covers how long cooked rice lasts in the fridge.",
+    "lead": false
+   },
+   {
+    "title": "How long will cooked rice keep in the fridge? The answer might surprise you",
+    "url": "https://www.bhg.com.au/food/tips-how-to/how-long-does-cooked-rice-last-in-the-fridge/",
+    "snippet": "Cooked white rice lasts in the fridge for three to four days. If you store your rice properly, it will have a much longer shelf life. However, don’t entirely rely on this general rule: use your sense ",
+    "published": "2026-06-29T20:00:29.000Z",
+    "relevance": 9,
+    "reason": "Provides a clear answer specifying white and wild rice storage duration in the fridge.",
+    "lead": false
+   },
+   {
+    "title": "How Long Does Cooked Rice Last in the Fridge? Safe Storage Guide - TheLivingLook",
+    "url": "https://thelivinglook.com/kitchen-hacks/how-long-does-cooked-rice-last-in-the-fridge",
+    "snippet": "Learn how to store cooked rice safely: fridge lifespan (3–5 days), freezer options, reheating best practices, and signs of spoilage — all backed by food safety science.",
+    "published": "2026-05-21T18:30:00.000Z",
+    "relevance": 9,
+    "reason": "The Living Look provides a clear science-based guide on how long cooked rice lasts in the fridge.",
+    "lead": false
+   },
+   {
+    "title": "How Long Does Rice Last in the Fridge Before It Goes Bad?",
+    "url": "https://www.tasteofhome.com/article/how-long-does-rice-last/",
+    "snippet": "Since you can’t see or smell B. cereus, assume that rice has gone bad if you haven’t refrigerated it within one to two hours of cooking or if it’s been in the fridge for more than four days.",
+    "published": "2025-07-11T04:12:53.000Z",
+    "relevance": 9,
+    "reason": "Directly answers cooked-rice fridge life, gives a four-day recommendation, and cites FoodSafety.gov’s FoodKeeper App for a 4–6-day range.",
+    "lead": false
+   },
+   {
+    "title": "How Long Does Rice Last in the Fridge? Cooked Rice Storage and Safety",
+    "url": "https://www.midea.com/ca/blog/how-long-does-rice-last-in-the-fridge",
+    "snippet": "Usually no. Cooked rice is best treated as a 3 to 5 day fridge item, even if it still smells normal. Smell is only one check, not proof that the rice is still suitable to eat. The “123 rice rule” is n",
+    "published": "2026-07-07T18:30:00.000Z",
+    "relevance": 9,
+    "reason": "Midea details cooked rice storage timelines and safety precautions in the fridge.",
+    "lead": false
+   },
+   {
+    "title": "How Long Can You Store Cooked Rice In The Fridge? - Tasting Table",
+    "url": "https://www.tastingtable.com/878539/how-long-can-you-store-cooked-rice-in-the-fridge/",
+    "snippet": "At first glance, it looks okay — but how long do you have before leftover rice becomes dangerous to eat? Per FoodSafety.gov, leftover rice can be stored in the refrigerator and safely eaten four to si",
+    "published": "2022-05-29T16:55:03.000Z",
+    "relevance": 9,
+    "reason": "Tasting Table article directly answers how long cooked rice can be stored in the fridge.",
+    "lead": false
+   },
+   {
+    "title": "Safety of Leftover Rice - Brunswick County Center | N.C. Cooperative Extension",
+    "url": "https://brunswick.ces.ncsu.edu/news/safety-of-leftover-rice/",
+    "snippet": "If kept at or below 41 degrees F leftovers are microbiologically safe for 7 days, but the only way to ensure that is having a fridge thermometer. If you have too much rice to eat within that time, you",
+    "published": "2025-03-17T04:52:55.000Z",
+    "relevance": 9,
+    "reason": "N.C. Cooperative Extension page directly addresses leftover rice and states refrigerated leftovers at or below 41°F are safe for seven days.",
+    "lead": false
+   }
+  ]
+ },
+ {
+  "tab": "web",
+  "q": "postgres vs mysql for write-heavy workloads from engineers who ran both, not vendor blogs",
+  "run": 1,
+  "tier": "ssj3",
+  "ms": 75103,
+  "cost_usd": 0.23783,
+  "by_role": {
+   "query_rewrite": 0.00033,
+   "judge_calls": 0.02699,
+   "cascade_strong_calls": 0.21041,
+   "refill_calls": 0.00011
+  },
+  "cascade": [
+   {
+    "event": "cascade",
+    "tier": "ssj3",
+    "judged": 30,
+    "escalated": 29,
+    "answered": 29,
+    "reasons": {
+     "borderline": 9,
+     "jev_reject_unbacked": 19,
+     "unbacked": 1
+    },
+    "strong": "openai/gpt-5.6-terra",
+    "strong_ms": 23758
+   },
+   {
+    "event": "cascade",
+    "tier": "ssj3",
+    "judged": 20,
+    "escalated": 11,
+    "answered": 11,
+    "reasons": {
+     "borderline": 11
+    },
+    "strong": "openai/gpt-5.6-terra",
+    "strong_ms": 14904
+   }
+  ],
+  "council": [],
+  "rewrite": null,
+  "providers": [
+   {
+    "provider": "judge",
+    "status": "ok",
+    "message": "30 pages were checked for relevance; 18 did not match."
+   },
+   {
+    "provider": "refill",
+    "status": "ok",
+    "message": "Looked again for what was missing (first-hand engineering experiences/discussions from non-vendors specifically regarding write-heavy workloads): 2 searches, 2 more pages kept."
+   }
+  ],
+  "results": [
+   {
+    "title": "MySQL vs PostgreSQL Performance: throughput & latency, reads & writes",
+    "url": "https://binaryigor.com/mysql-vs-postgresql-performance.html",
+    "snippet": "Since DBs have 8 CPUs available, connection pool sizes are: 8 * 16 = 128 for MySQL and 8 * 8 = 64 for Postgres. Empirically, MySQL benefits from having more connections, yielding better results; espec",
+    "published": "2026-01-04T18:30:00.000Z",
+    "relevance": 7,
+    "reason": "Own 17-test performance comparison explicitly includes write-heavy workloads, but author credentials and non-vendor status are not established.",
+    "lead": false
+   },
+   {
+    "title": "PostgreSQL vs MySQL Architecture: Deep Engine & Workload Analysis - DEV Community",
+    "url": "https://dev.to/wantsvibes/postgresql-vs-mysql-architecture-deep-engine-workload-analysis-4j94",
+    "snippet": "When evaluating database index overhead write amplification, cache pressure, and maintenance costs, engineers must recognize that write-heavy systems place severe demands on append-only logs and backg",
+    "published": "2026-09-19T00:22:04.000Z",
+    "relevance": 5,
+    "reason": "A community post discusses both engines and write-heavy production mechanics, but evidence does not establish that its author personally operated both systems. Match not verified from the evidence.",
+    "lead": false
+   },
+   {
+    "title": "PostgreSQL vs MySQL: 5 Benchmarks Reveal the Winner [2026]",
+    "url": "https://tech-insider.org/postgresql-vs-mysql-2026/",
+    "snippet": "Write-intensive benchmarks favor MySQL by roughly 30 percent in raw throughput on single-node configurations, primarily because MySQL’s redo log architecture handles high-concurrency writes with less ",
+    "published": "2026-09-20T19:34:10.000Z",
+    "relevance": 5,
+    "reason": "Claims benchmarks of both databases including write-intensive tests, but the source and author credentials do not establish engineers who ran both in production. Match not verified from the evidence.",
+    "lead": false
+   },
+   {
+    "title": "PostgreSQL vs MySQL in 2026: Definitive Comparison | TECHSY",
+    "url": "https://techsy.io/en/blog/postgresql-vs-mysql",
+    "snippet": "MySQL wins here, and it is not close for simple queries. Sysbench OLTP benchmarks show MySQL achieving approximately 21% higher peak transactions per second than PostgreSQL on simple read-heavy worklo",
+    "published": "2026-02-10T18:30:00.000Z",
+    "relevance": 5,
+    "reason": "The page says its authors built production backends with both, but supplied evidence does not connect that experience to write-heavy workloads. Match not verified from the evidence.",
+    "lead": false
+   },
+   {
+    "title": "MySQL vs PostgreSQL in 2026: A Practical Decision Framework - Basevolt Blog",
+    "url": "https://basevolt.app/blog/mysql-vs-postgresql-2026",
+    "snippet": "MySQL and PostgreSQL are both excellent, both mature, and both capable of running serious production systems in 2026. The differences that matter are narrower than the argument suggests, and the argum",
+    "published": "2026-09-23T18:30:00.000Z",
+    "relevance": 5,
+    "reason": "A firsthand-sounding practical comparison from someone familiar with both camps, but supplied text does not establish write-heavy workload analysis. Match not verified from the evidence.",
+    "lead": false
+   },
+   {
+    "title": "r/programming on Reddit: MySQL vs PostgreSQL Performance: throughput & latency, reads & writes",
+    "url": "https://www.reddit.com/r/programming/comments/1q5fqbp/mysql_vs_postgresql_performance_throughput/",
+    "snippet": "Empirically, MySQL benefits from having more connections, yielding better results; especially for write-heavy workloads. ... PostgreSQL 18 still assumes storage on HDD instead of SSD.",
+    "published": "2026-01-06T05:37:31.000Z",
+    "relevance": 5,
+    "reason": "Reddit discussion title directly concerns MySQL/PostgreSQL throughput, reads, and writes, but supplied evidence does not show contributors personally ran both databases. Match not verified from the evidence.",
+    "lead": true
+   },
+   {
+    "title": "PostgreSQL vs MySQL: Which One Handles High-Concurrency Continuous Authentication Systems Better? - DEV Community",
+    "url": "https://dev.to/xinjie_zou_d67d2805538130/postgresql-vs-mysql-which-one-handles-high-concurrency-continuous-authentication-systems-better-1nab",
+    "snippet": "PostgreSQL consistently outperforms MySQL in read-heavy and mixed workloads, especially under high concurrency. Insert performance is similar, but PostgreSQL shows better stability during simultaneous",
+    "published": "2025-09-01T21:38:34.000Z",
+    "relevance": 5,
+    "reason": "An individual DEV post addresses frequent inserts and simultaneous writes, but it cites academic experiments rather than demonstrating an engineer personally ran both systems. Match not verified from the evidence.",
+    "lead": false
+   },
+   {
+    "title": "PostgreSQL vs MySQL: Choosing a Database for Your Stack | Markaicode",
+    "url": "https://markaicode.com/vs/postgresql-vs-mysql/",
+    "snippet": "Your workload is dominated by simple, well-indexed CRUD queries where InnoDB's storage engine is a good match. You're on MySQL 8.0 today — the move to make is to 8.4 LTS or 9.7, not necessarily to Pos",
+    "published": "2026-05-20T18:30:00.000Z",
+    "relevance": 5,
+    "reason": "It compares both databases and says it tested batch inserts, but does not establish firsthand engineering experience or a write-heavy focus. Match not verified from the evidence.",
+    "lead": false
+   },
+   {
+    "title": "PostgreSQL vs MySQL in 2026: Performance, Features and When to Use Each - DEV Community",
+    "url": "https://dev.to/philip_mcclarence_2ef9475/postgresql-vs-mysql-in-2026-performance-features-and-when-to-use-each-3g7e",
+    "snippet": "PostgreSQL's model gives it simpler, faster reads at the cost of vacuum maintenance. MySQL's model avoids bloat at the cost of undo log traversal for certain workloads. Both databases use WAL (write-a",
+    "published": "2026-03-01T17:27:13.000Z",
+    "relevance": 5,
+    "reason": "Author reports migrating a SaaS app from MySQL to PostgreSQL, but the evidence centers on reporting-query reads rather than write-heavy workloads. Match not verified from the evidence.",
+    "lead": false
+   },
+   {
+    "title": "Postgresql vs mysql",
+    "url": "https://www.sumologic.com/blog/postgresql-vs-mysql",
+    "snippet": "On the other hand, MySQL tries to achieve concurrency with the use of write locks. This essentially reduces the number of concurrent operations per process. In order for MySQL to scale in production e",
+    "published": "2025-05-08T21:42:05.000Z",
+    "relevance": 5,
+    "reason": "It compares the databases and discusses concurrent writes, but provides no evidence that engineers personally ran both or that it is non-vendor. Match not verified from the evidence.",
+    "lead": false
+   }
+  ]
+ },
+ {
+  "tab": "images",
+  "q": "red vintage bicycle leaning against a blue wall",
+  "run": 1,
+  "tier": "ssj3",
+  "ms": 35880,
+  "cost_usd": 0.09889,
+  "by_role": {
+   "query_rewrite": 0.00023,
+   "judge_calls": 0.0281,
+   "cascade_strong_calls": 0.07056
+  },
+  "cascade": [
+   {
+    "event": "cascade",
+    "tier": "ssj3",
+    "judged": 24,
+    "escalated": 13,
+    "answered": 13,
+    "reasons": {
+     "borderline": 13
+    },
+    "strong": "openai/gpt-5.6-terra",
+    "strong_ms": 24703
+   }
+  ],
+  "council": [],
+  "providers": [
+   {
+    "provider": "judge",
+    "status": "ok",
+    "message": "24 images were checked by looking at them (24 seen); 22 did not match."
+   }
+  ],
+  "removed": 22,
+  "results": [
+   {
+    "title": "unsplash.com",
+    "page_url": "https://unsplash.com/photos/a-red-bicycle-leans-against-a-wall-7LcmDtdyEpU",
+    "source": "unsplash.com",
+    "engine": "google images",
+    "license": null,
+    "ai": false,
+    "relevance": 5,
+    "unseen": false,
+    "reason": "The image shows a red bicycle beside a pale blue-green wall, but its vintage character and whether it is actually leaning against the wall are unclear. Match not verified from the evidence."
+   },
+   {
+    "title": "istockphoto.com",
+    "page_url": "https://www.istockphoto.com/photos/old-blue-bike-leaning-against-wall",
+    "source": "istockphoto.com",
+    "engine": "google images",
+    "license": null,
+    "ai": false,
+    "relevance": 5,
+    "unseen": false,
+    "reason": "Screenshot shows a red old-style bicycle before a blue wall, but it is not clearly leaning; title’s “blue bike” conflicts with the visible bicycle. Match not verified from the evidence."
+   }
+  ]
+ },
+ {
+  "tab": "images",
+  "q": "free to use photo of mount everest with license and attribution",
+  "run": 1,
+  "tier": "ssj3",
+  "ms": 34763,
+  "cost_usd": 0.09855,
+  "by_role": {
+   "query_rewrite": 0.0003,
+   "judge_calls": 0.0222,
+   "cascade_strong_calls": 0.07603
+  },
+  "cascade": [
+   {
+    "event": "cascade",
+    "tier": "ssj3",
+    "judged": 24,
+    "escalated": 24,
+    "answered": 24,
+    "reasons": {
+     "borderline": 24
+    },
+    "strong": "openai/gpt-5.6-terra",
+    "strong_ms": 18966
+   }
+  ],
+  "council": [],
+  "providers": [
+   {
+    "provider": "judge",
+    "status": "ok",
+    "message": "24 images were checked by looking at them (4 seen); 3 did not match."
+   }
+  ],
+  "removed": 3,
+  "results": [
+   {
+    "title": "Mount Everest",
+    "page_url": "https://www.flickr.com/photos/50737459@N00/120786914",
+    "source": "flickr.com",
+    "engine": "openverse",
+    "license": "CC BY-NC-ND 2.0",
+    "ai": false,
+    "relevance": 5,
+    "unseen": true,
+    "reason": "Flickr listing names Mount Everest and provides CC BY-NC-ND 2.0 attribution, but no screenshot verifies the visible image content. Match not verified from the evidence."
+   },
+   {
+    "title": "Mount Everest from base camp one",
+    "page_url": "https://www.flickr.com/photos/121483302@N02/14372766712",
+    "source": "flickr.com",
+    "engine": "openverse",
+    "license": "CC BY-SA 2.0",
+    "ai": false,
+    "relevance": 5,
+    "unseen": true,
+    "reason": "The Flickr page provides a CC BY-SA license and creator attribution; title suggests Everest, but the actual image is not shown. Match not verified from the evidence."
+   },
+   {
+    "title": "Mount Everest",
+    "page_url": "https://www.flickr.com/photos/8349201@N04/503035872",
+    "source": "flickr.com",
+    "engine": "openverse",
+    "license": "CC BY-NC 2.0",
+    "ai": false,
+    "relevance": 5,
+    "unseen": true,
+    "reason": "It supplies a CC BY-NC license with photographer attribution and is titled Mount Everest, but no image evidence confirms visible Everest content. Match not verified from the evidence."
+   },
+   {
+    "title": "Mount Everest",
+    "page_url": "https://www.flickr.com/photos/51035727839@N01/300797293",
+    "source": "flickr.com",
+    "engine": "openverse",
+    "license": "CC BY-SA 2.0",
+    "ai": false,
+    "relevance": 5,
+    "unseen": true,
+    "reason": "The page offers a CC BY-SA 2.0 license and named attribution; its title is promising, but supplied evidence does not show the photo itself. Match not verified from the evidence."
+   },
+   {
+    "title": "Mount Everest",
+    "page_url": "https://www.flickr.com/photos/7741046@N06/1195682268",
+    "source": "flickr.com",
+    "engine": "openverse",
+    "license": "CC BY 2.0",
+    "ai": false,
+    "relevance": 5,
+    "unseen": true,
+    "reason": "This is the clearest reuse license, CC BY 2.0 with attribution, but absent screenshot evidence leaves the claimed Everest photo content unverified. Match not verified from the evidence."
+   },
+   {
+    "title": "Tibet - Mount Everest",
+    "page_url": "https://www.flickr.com/photos/40977627@N02/6453848769",
+    "source": "flickr.com",
+    "engine": "openverse",
+    "license": "CC BY 2.0",
+    "ai": false,
+    "relevance": 5,
+    "unseen": true,
+    "reason": "CC BY 2.0 licence and photographer attribution are supplied, but no screenshot verifies that the image visibly depicts Mount Everest. Match not verified from the evidence."
+   },
+   {
+    "title": "Mount Everest",
+    "page_url": "https://www.flickr.com/photos/94056408@N00/2385042288",
+    "source": "flickr.com",
+    "engine": "openverse",
+    "license": "CC BY 2.0",
+    "ai": false,
+    "relevance": 5,
+    "unseen": true,
+    "reason": "The page supplies CC BY 2.0 and a named creator, but the available evidence does not visually verify the requested mountain photograph. Match not verified from the evidence."
+   },
+   {
+    "title": "Mount Everest on the way to base camp 2",
+    "page_url": "https://www.flickr.com/photos/38154080@N00/534644384",
+    "source": "flickr.com",
+    "engine": "openverse",
+    "license": "CC BY 2.0",
+    "ai": false,
+    "relevance": 5,
+    "unseen": true,
+    "reason": "It provides a CC BY 2.0 licence and attribution, but no screenshot or page evidence verifies visible Mount Everest content. Match not verified from the evidence."
+   },
+   {
+    "title": "Mount Everest, Nepal, Himalayas",
+    "page_url": "https://commons.wikimedia.org/w/index.php?curid=125747468",
+    "source": "commons.wikimedia.org",
+    "engine": "openverse",
+    "license": "CC BY 4.0",
+    "ai": false,
+    "relevance": 5,
+    "unseen": true,
+    "reason": "Wikimedia page gives CC BY 4.0 and named attribution, but without an image screenshot the visible Everest content remains unverified. Match not verified from the evidence."
+   },
+   {
+    "title": "Mount Everest",
+    "page_url": "https://www.flickr.com/photos/7741046@N06/1195627068",
+    "source": "flickr.com",
+    "engine": "openverse",
+    "license": "CC BY 2.0",
+    "ai": false,
+    "relevance": 5,
+    "unseen": true,
+    "reason": "The candidate lists CC BY 2.0 with a creator name, but there is no visual evidence that the image itself shows Mount Everest. Match not verified from the evidence."
+   },
+   {
+    "title": "Mount Everest",
+    "page_url": "https://www.flickr.com/photos/51035727839@N01/300797292",
+    "source": "flickr.com",
+    "engine": "openverse",
+    "license": "CC BY-SA 2.0",
+    "ai": false,
+    "relevance": 5,
+    "unseen": true,
+    "reason": "Flickr metadata gives CC BY-SA 2.0 and creator thomaswanhoff, but no screenshot verifies the image visibly depicts Mount Everest. Match not verified from the evidence."
+   },
+   {
+    "title": "Tibet - Mount Everest",
+    "page_url": "https://www.flickr.com/photos/40977627@N02/6477880613",
+    "source": "flickr.com",
+    "engine": "openverse",
+    "license": "CC BY 2.0",
+    "ai": false,
+    "relevance": 5,
+    "unseen": true,
+    "reason": "CC BY 2.0 and photographer attribution are supplied, but the title alone cannot verify visible Mount Everest content. Match not verified from the evidence."
+   }
+  ]
+ },
+ {
+  "tab": "images",
+  "q": "infographic showing india's population by state, not AI-generated",
+  "run": 1,
+  "tier": "ssj3",
+  "ms": 28143,
+  "cost_usd": 0.08006,
+  "by_role": {
+   "query_rewrite": 0.00031,
+   "judge_calls": 0.02716,
+   "cascade_strong_calls": 0.0526
+  },
+  "cascade": [
+   {
+    "event": "cascade",
+    "tier": "ssj3",
+    "judged": 24,
+    "escalated": 15,
+    "answered": 15,
+    "reasons": {
+     "borderline": 15
+    },
+    "strong": "openai/gpt-5.6-terra",
+    "strong_ms": 14543
+   }
+  ],
+  "council": [],
+  "providers": [
+   {
+    "provider": "judge",
+    "status": "ok",
+    "message": "24 images were checked by looking at them (24 seen); 13 did not match."
+   }
+  ],
+  "removed": 13,
+  "results": [
+   {
+    "title": "Population Map of India 2021 - India …",
+    "page_url": "https://www.indiaonlinepages.com/population/population-map-of-india.html",
+    "source": "indiaonlinepages.com",
+    "engine": "bing images",
+    "license": null,
+    "ai": false,
+    "relevance": 10,
+    "unseen": false,
+    "reason": "Infographic clearly showing population map of India by state."
+   },
+   {
+    "title": "www.instagram.com",
+    "page_url": "https://www.instagram.com/p/DYtuYEPD5jw/",
+    "source": "instagram.com",
+    "engine": "google images",
+    "license": null,
+    "ai": false,
+    "relevance": 9,
+    "unseen": false,
+    "reason": "Infographic showing state-wise population of India."
+   },
+   {
+    "title": "Massive population size by Indian states 2023 …",
+    "page_url": "https://data-player.com/massive-population-size-by-indian-states-2023/",
+    "source": "data-player.com",
+    "engine": "bing images",
+    "license": null,
+    "ai": false,
+    "relevance": 9,
+    "unseen": false,
+    "reason": "Infographic and charts showing massive population size by Indian states."
+   },
+   {
+    "title": "visualcapitalist.com",
+    "page_url": "https://www.visualcapitalist.com/population-of-india-compared-with-countries/",
+    "source": "visualcapitalist.com",
+    "engine": "google images",
+    "license": null,
+    "ai": false,
+    "relevance": 5,
+    "unseen": false,
+    "reason": "Visible India map compares individual states with labeled population figures, but it is framed as state-to-country comparisons rather than a state population distribution chart. Match not verified from the evidence."
+   },
+   {
+    "title": "India's Population Distribution by State i…",
+    "page_url": "https://indiadatamap.com/2025/08/14/state-wise-population-of-india-in-2025/",
+    "source": "indiadatamap.com",
+    "engine": "bing images",
+    "license": null,
+    "ai": false,
+    "relevance": 5,
+    "unseen": false,
+    "reason": "Screenshot directly shows a labeled India choropleth infographic with population totals for states and union territories; no AI-generation indicators are visible. Match not verified from the evidence."
+   },
+   {
+    "title": "visualcapitalist.com",
+    "page_url": "https://www.visualcapitalist.com/population-of-india-compared-with-countries/",
+    "source": "visualcapitalist.com",
+    "engine": "google images",
+    "license": null,
+    "ai": false,
+    "relevance": 5,
+    "unseen": false,
+    "reason": "Visible map appears to compare Indian state populations with countries, but the cropped screenshot does not clearly establish a full state-wise population infographic. Match not verified from the evidence."
+   },
+   {
+    "title": "Massive population size by Indian states 2023 - Data Player",
+    "page_url": "https://data-player.com/massive-population-size-by-indian-states-2023/",
+    "source": "data-player.com",
+    "engine": "bing images",
+    "license": null,
+    "ai": false,
+    "relevance": 5,
+    "unseen": false,
+    "reason": "Visible chart and India map explicitly present 2023 populations for Indian states and union territories. No AI-generation indicators are visible. Match not verified from the evidence."
+   },
+   {
+    "title": "data-player.com",
+    "page_url": "https://data-player.com/massive-population-size-by-indian-states-2023/",
+    "source": "data-player.com",
+    "engine": "google images",
+    "license": null,
+    "ai": false,
+    "relevance": 5,
+    "unseen": false,
+    "reason": "Screenshot visibly charts population of Indian states and includes a state map, but labels are largely unreadable and non-AI status is unverified. Match not verified from the evidence."
+   },
+   {
+    "title": "Most Populated State in India, 2025: Full Li…",
+    "page_url": "https://mumble.nationalgeographic.com/indian-states-by-population/most-populated-state-in-india-2025-full-list-and-rankings-factodata",
+    "source": "mumble.nationalgeographic.com",
+    "engine": "bing images",
+    "license": null,
+    "ai": false,
+    "relevance": 5,
+    "unseen": false,
+    "reason": "Screenshot directly shows a labelled India map titled “States By Population,” but it provides no evidence that the graphic is not AI-generated. Match not verified from the evidence."
+   },
+   {
+    "title": "www.instagram.com",
+    "page_url": "https://www.instagram.com/p/DR7AXVxE03h/",
+    "source": "instagram.com",
+    "engine": "google images",
+    "license": null,
+    "ai": false,
+    "relevance": 5,
+    "unseen": false,
+    "reason": "Screenshot directly shows a labeled India map, “Population % of Every Indian State,” with state names and percentages. No AI-generation evidence is shown. Match not verified from the evidence."
+   },
+   {
+    "title": "State wise population of India | Flourish",
+    "page_url": "https://public.flourish.studio/visualisation/19159819/",
+    "source": "public.flourish.studio",
+    "engine": "bing images",
+    "license": null,
+    "ai": false,
+    "relevance": 5,
+    "unseen": false,
+    "reason": "Screenshot directly presents a state-wise India population pie chart with readable state labels, figures, and a Ministry source attribution. Match not verified from the evidence."
+   }
+  ]
+ }
+]
