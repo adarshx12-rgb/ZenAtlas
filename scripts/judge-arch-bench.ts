@@ -6,8 +6,10 @@
 // Usage: node --env-file-if-exists=.env --import tsx scripts/judge-arch-bench.ts [runs]
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { configSchema } from '../src/config.js';
-import { ModelJudge, groundedQuote, TANGENTIAL, type Judge, type JudgeCandidate, type JudgeContext, type Verdict } from '../src/judge.js';
-import { JevJudge, snippetsOf, type JevRecord } from '../src/jev-judge.js';
+import { ModelJudge, TANGENTIAL, type JudgeCandidate, type JudgeContext } from '../src/judge.js';
+import { JevJudge, type JevRecord } from '../src/jev-judge.js';
+import { cascadeReview, cascadeOptions } from '../src/cascade.js';
+import { createHash } from 'node:crypto';
 import { councilReview } from '../src/council.js';
 import { OpenAICompatibleClient } from '../src/openai-compatible.js';
 import { fetchJSON } from '../src/http.js';
@@ -22,25 +24,23 @@ const runs = Number(process.argv[2]) || 3;
 const SCORER = 'google/gemini-3.5-flash-lite', CHECKER = 'openai/gpt-5.6-terra', CHAIR = 'anthropic/claude-sonnet-5', STRONG = 'openai/gpt-5.6-terra';
 // BENCH_ARCHS=cascade runs one architecture; CASCADE_SCORER / CASCADE_STRONG swap the cascade's two judges.
 // CASCADE_BORDER=4-7: the Scorer relevance range the Strong judge re-checks.
-const AUDIT_RATE = 0.1, BORDER = (process.env.CASCADE_BORDER ?? '4-6').split('-').map(Number) as [number, number];
+const BORDER = (process.env.CASCADE_BORDER ?? `${config.CASCADE_BORDER_LOW}-${config.CASCADE_BORDER_HIGH}`).split('-').map(Number) as [number, number];
 const ARCHS = (process.env.BENCH_ARCHS ?? 'council,cascade').split(','), CASCADE_SCORER = process.env.CASCADE_SCORER ?? SCORER,
  CASCADE_STRONG = process.env.CASCADE_STRONG ?? STRONG;
 
-type Spend = Record<string, {calls: number; cost: number; ms: number}>;
+type Spend = Record<string, {calls: number; cost: number; ms: number; unpriced: number; failed: number}>;
 // Counts every model call and its reported cost under the role that made it.
 const meter = (spend: Spend, role: string) => (async (url: string, options: Parameters<typeof fetchJSON>[1]) => {
- const t = Date.now(), raw = await fetchJSON(url, options);
- const s = spend[role] ??= {calls: 0, cost: 0, ms: 0}; s.calls++; s.cost += raw?.usage?.cost ?? 0; s.ms += Date.now() - t;
- return raw;
+ const t = Date.now(), s = spend[role] ??= {calls: 0, cost: 0, ms: 0, unpriced: 0, failed: 0}; s.calls++;
+ try {
+   const raw = await fetchJSON(url, options);
+   if (typeof raw?.usage?.cost === 'number') s.cost += raw.usage.cost; else s.unpriced++;
+   return raw;
+ } catch (error) { s.failed++; s.unpriced++; throw error; }
+ finally { s.ms += Date.now() - t; }
 }) as typeof fetchJSON;
 const seat = (spend: Spend, role: string, model: string, timeout: number, maxTokens = 8192) =>
  new ModelJudge(new OpenAICompatibleClient(db, {...config, JUDGE_TIMEOUT_MS: timeout}, [model], meter(spend, role), maxTokens), config, role);
-async function inBatches(judge: Judge, query: string, list: JudgeCandidate[], size: number, context: JudgeContext) {
- const out = new Map<string, Verdict>();
- const done = await Promise.allSettled(Array.from({length: Math.ceil(list.length / size)}, (_, i) => judge.judge(query, list.slice(i * size, (i + 1) * size), context)));
- for (const d of done) if (d.status === 'fulfilled') for (const [k, v] of d.value.verdicts) out.set(k, v);
- return out;
-}
 
 async function council(c: Case, spend: Spend) {
  const candidates = c.candidates.map(({label: _l, ...rest}) => rest as JudgeCandidate);
@@ -53,44 +53,18 @@ async function council(c: Case, spend: Spend) {
  return {verdicts: reviewed.verdicts, jev: first.jev as Map<string, JevRecord>|undefined, stages: {checked: reviewed.records.size, disputed}};
 }
 
-// Why a Scorer verdict goes to the Strong judge; none means it stands.
-function flags(c: JudgeCandidate, v: Verdict, r: JevRecord|undefined, required: number): string[] {
- const out: string[] = [], thr = config.JEV_JUDGE_CONFIDENCE, answers = Object.values(r?.requirements ?? {});
- if (v.relevance >= BORDER[0] && v.relevance <= BORDER[1]) out.push('borderline');
- const jevMismatch = answers.some(a => a.choice === 'mismatch' && a.confidence >= thr);
- const jevBacked = answers.length === required && required > 0 && answers.every(a => a.choice.startsWith('s') && a.confidence >= thr);
- if ((jevMismatch && v.relevance > TANGENTIAL) || (jevBacked && v.relevance <= TANGENTIAL)) out.push('conflicts_with_evidence');
- const grounded = (v.requirementChecks ?? []).filter(ch => ch.status === 'supported' && groundedQuote(c, ch)).length;
- if (v.relevance >= 7 && required > 0 && grounded < required && snippetsOf(c).length) out.push('unbacked');
- return out;
-}
-
 async function cascade(c: Case, spend: Spend) {
  const candidates = c.candidates.map(({label: _l, ...rest}) => rest as JudgeCandidate);
- const required = c.context.requirements?.length ?? 0;
- // Stage 1: Jev alone (no inner judge) settles or rejects on snippets and returns everything else unjudged.
- const jev = await new JevJudge(db, {...config, JEV_JUDGE_REJECT: true}, undefined, meter(spend, 'jev'), {settle: true}).judge(c.query, candidates, c.context);
- const records = (jev.jev ?? new Map()) as Map<string, JevRecord>;
- // Only snippet-backed decisions stand: a rejection from Jev's low score and confidence alone, with no confident
- // mismatch snippet, goes to the Scorer like any undecided candidate.
- const backedReject = (r?: JevRecord) => Object.values(r?.requirements ?? {}).some(a => a.choice === 'mismatch' && a.confidence >= config.JEV_JUDGE_CONFIDENCE);
- const decided = new Map([...jev.verdicts].filter(([k]) => records.get(k)?.outcome === 'settled' || backedReject(records.get(k))));
- const verdicts = new Map(decided);
- const audited = candidates.filter(x => records.get(x.key)?.outcome === 'settled' && Math.random() < AUDIT_RATE);
- // Stage 2: the Scorer on everything Jev did not decide, plus the audited sample of settled ones.
- const toScore = candidates.filter(x => !verdicts.has(x.key) || audited.includes(x));
- const scored = await inBatches(seat(spend, 'scorer', CASCADE_SCORER, config.JUDGE_TIMEOUT_MS), c.query, toScore, 6, c.context);
- for (const [k, v] of scored) verdicts.set(k, v);
- // Stage 3: flags. Stage 4: the Strong judge re-judges flagged verdicts only, and its verdict is final.
- const flagged = candidates.flatMap(x => { const v = verdicts.get(x.key); const f = v && (!decided.has(x.key) || audited.includes(x)) ? flags(x, v, records.get(x.key), required) : [];
-   return f.length ? [{x, f}] : []; });
- const note = 'A faster judge scored these candidates and each was flagged as uncertain (borderline, in conflict with quoted evidence, or confident without quoted support). Judge each from its evidence yourself.';
- const strong = flagged.length ? await inBatches(seat(spend, 'strong', CASCADE_STRONG, config.COUNCIL_CHECKER_TIMEOUT_MS), c.query, flagged.map(f => f.x), 5,
-   {...c.context, criteria: [...c.context.criteria, note]}) : new Map<string, Verdict>();
- for (const [k, v] of strong) verdicts.set(k, v);
- const reasons: Record<string, number> = {};
- for (const f of flagged) for (const r of f.f) reasons[r] = (reasons[r] ?? 0) + 1;
- return {verdicts, jev: records, stages: {decided_by_jev: decided.size, audited: audited.length, scored: toScore.length, escalated: flagged.length, reasons}};
+ const first = await new JevJudge(db, {...config, JEV_JUDGE_REJECT: true},
+   seat(spend, 'scorer', CASCADE_SCORER, config.JUDGE_TIMEOUT_MS), meter(spend, 'jev'),
+   {settle: c.context.kind === 'videos' ? true : config.WEB_JEV_SETTLE}).judge(c.query, candidates, c.context);
+ // Frozen-evidence benchmark: use the production router; external inspections are deliberately disabled.
+ let stages: Record<string, unknown> = {};
+ let seed = createHash('sha256').update(c.id).digest().readUInt32LE(0);
+ const reviewed = await cascadeReview(c.query, candidates, first.verdicts, first.jev, c.context, undefined,
+   seat(spend, 'strong', CASCADE_STRONG, config.CASCADE_STRONG_TIMEOUT_MS), {...cascadeOptions(config), border: BORDER, inspectionLimit: 0,
+     random: () => ((seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296), log: line => { stages = line; }});
+ return {verdicts: reviewed.verdicts, jev: first.jev as Map<string, JevRecord>|undefined, stages};
 }
 
 const report: Record<string, unknown> = {};
@@ -112,14 +86,20 @@ for (const [name, run] of ([['council', council], ['cascade', cascade]] as const
    for (const [a, b] of c.prefer) { pairs++; const sa = row.scores[a], sb = row.scores[b]; if (sa != null && sb != null && sa > sb) pairsRight++; }
  }
  const roles: Spend = {};
- for (const row of rows) for (const [k, v] of Object.entries(row.spend)) { const s = roles[k] ??= {calls: 0, cost: 0, ms: 0}; s.calls += v.calls; s.cost += v.cost; s.ms += v.ms; }
+ for (const row of rows) for (const [k, v] of Object.entries(row.spend)) { const s = roles[k] ??= {calls: 0, cost: 0, ms: 0, unpriced: 0, failed: 0}; s.calls += v.calls; s.cost += v.cost; s.ms += v.ms; s.unpriced += v.unpriced; s.failed += v.failed; }
  const ms = rows.filter(x => !x.error).map(x => x.ms).sort((a, b) => a - b);
  const summary = {case_runs: rows.length, failures: rows.filter(x => x.error).map(x => `${x.case}#${x.run}: ${x.error}`), missing_verdicts: missing,
    label_accuracy: +(right / labels).toFixed(3), pair_accuracy: +(pairsRight / pairs).toFixed(3),
-   cost_per_case: +(Object.values(roles).reduce((a, s) => a + s.cost, 0) / rows.length).toFixed(5),
+   cost_per_case: Object.values(roles).some(s => s.unpriced) ? null : +(Object.values(roles).reduce((a, s) => a + s.cost, 0) / rows.length).toFixed(5),
+   reported_cost_per_case: +(Object.values(roles).reduce((a, s) => a + s.cost, 0) / rows.length).toFixed(5),
+   unpriced_calls: Object.values(roles).reduce((a, s) => a + s.unpriced, 0),
    median_ms: ms[Math.floor(ms.length / 2)] ?? null, p90_ms: ms[Math.floor(ms.length * 0.9)] ?? null,
-   per_role: Object.fromEntries(Object.entries(roles).map(([k, s]) => [k, {calls_per_case: +(s.calls / rows.length).toFixed(2), cost_per_case: +(s.cost / rows.length).toFixed(5), ms_per_call: Math.round(s.ms / Math.max(1, s.calls))}]))};
- report[name] = {border: BORDER, scorer: name === 'cascade' ? CASCADE_SCORER : SCORER, strong: name === 'cascade' ? CASCADE_STRONG : null, summary, rows};
+   per_role: Object.fromEntries(Object.entries(roles).map(([k, s]) => [k, {calls_per_case: +(s.calls / rows.length).toFixed(2), cost_per_case: s.unpriced ? null : +(s.cost / rows.length).toFixed(5),
+     reported_cost_per_case: +(s.cost / rows.length).toFixed(5), unpriced_calls: s.unpriced, failed_calls: s.failed, ms_per_call: Math.round(s.ms / Math.max(1, s.calls))}]))};
+ report[name] = {architecture_version: 'evidence-v2', production_router: name === 'cascade', frozen_evidence: true,
+   source_hash: ['src/cascade.ts', 'src/judge.ts', 'src/jev-judge.ts', 'src/search-contract.ts', 'src/requirements.ts', 'src/config.ts']
+     .reduce((hash, file) => hash.update(file).update(readFileSync(file)), createHash('sha256')).digest('hex'),
+   web_settle: config.WEB_JEV_SETTLE, border: BORDER, scorer: name === 'cascade' ? CASCADE_SCORER : SCORER, strong: name === 'cascade' ? CASCADE_STRONG : null, summary, rows};
  console.log(name.padEnd(8), JSON.stringify(summary));
 }
 mkdirSync('output/judge-arch-bench', {recursive: true});

@@ -2,7 +2,8 @@ import type { DB } from './db.js';
 import type { Config } from './config.js';
 import type { Judgement } from './review.js';
 import { OpenAICompatibleClient } from './openai-compatible.js';
-import { rankBoost, sourceKind } from './canonical.js';
+import { rankBoost, sourceKind, groupCopies } from './canonical.js';
+import { hardEach, type RequirementsContract } from './requirements.js';
 
 // The refill round (docs/superpowers/specs/2026-09-27-candidate-quality-design.md): after the first review, the planner
 // looks at what was kept (titles, hosts, scores, reasons; never page text) and says what the request still lacks. Its
@@ -10,9 +11,9 @@ import { rankBoost, sourceKind } from './canonical.js';
 // fetched; on 2026-09-27 Brave's top 40 for a food-safety question held no food-safety authority at all, so new searches
 // are what bring better candidates in.
 
-export interface RefillItem { title: string; host: string; relevance: number|null; reason: string|null }
+export interface RefillItem { title: string; host: string; relevance: number|null; reason: string|null; missing?: string[] }
 export interface RefillDecision { complete: boolean; missing: string; searches: string[] }
-export type RefillPlanner = (query: string, kept: RefillItem[], ran: string[]) => Promise<RefillDecision>;
+export type RefillPlanner = (query: string, kept: RefillItem[], ran: string[], contract?: RequirementsContract) => Promise<RefillDecision>;
 
 const SCHEMA = {type: 'object', properties: {complete: {type: 'boolean'}, missing: {type: 'string'},
  searches: {type: 'array', items: {type: 'string'}}}, required: ['complete', 'missing', 'searches']};
@@ -39,17 +40,18 @@ export function makeRefillPlanner(db: DB, config: Config): RefillPlanner|undefin
  const models = config.PLANNER_MODELS.split(',').map(m => m.trim()).filter(Boolean);
  if (!config.REFILL_ENABLED || !config.OPENROUTER_API_KEY || !models.length) return undefined;
  const client = new OpenAICompatibleClient(db, {...config, JUDGE_DAILY_BUDGET: config.REFILL_DAILY_BUDGET, JUDGE_TIMEOUT_MS: config.REFILL_TIMEOUT_MS}, models, undefined, 1024);
- return async (query, kept, ran) => {
+ return async (query, kept, ran, contract) => {
    const text = JSON.stringify({request: query, searches_already_run: ran,
-     results: kept.map(k => ({title: k.title.slice(0, 150), host: k.host, relevance: k.relevance, reason: k.reason?.slice(0, 160) ?? null}))});
+     requirements: contract ? hardEach(contract) : undefined, search_date: contract?.search_date,
+     results: kept.map(k => ({title: k.title.slice(0, 150), host: k.host, relevance: k.relevance, reason: k.reason?.slice(0, 160) ?? null, missing: k.missing}))});
    return cleanDecision((await client.json('refill_calls', SYSTEM, text, SCHEMA)).value, ran, config.REFILL_MAX_SEARCHES);
  };
 }
 
-type Reviewed = {url: string; judgement?: Judgement};
+type Reviewed = {url: string; judgement?: Judgement; verification?: string; content_hash?: string};
 // First and refill results together: judged ones by relevance (canonical boost included), then unjudged ones.
 export function mergeReviewed<T extends Reviewed>(query: string, first: T[], more: T[]): T[] {
- const all = [...first, ...more], judged = all.filter(r => r.judgement), unjudged = all.filter(r => !r.judgement);
+ const all = groupCopies([...first, ...more], query), judged = all.filter(r => r.judgement), unjudged = all.filter(r => !r.judgement);
  const rank = (r: T) => r.judgement!.relevance + rankBoost(sourceKind(r.url, query));
- return [...judged.map((r, i) => ({r, i})).sort((a, b) => rank(b.r) - rank(a.r) || a.i - b.i).map(x => x.r), ...unjudged];
+ return [...judged.map((r, i) => ({r, i})).sort((a, b) => Number(b.r.verification === 'verified') - Number(a.r.verification === 'verified') || rank(b.r) - rank(a.r) || a.i - b.i).map(x => x.r), ...unjudged];
 }

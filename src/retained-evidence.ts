@@ -5,7 +5,7 @@ import {activeScene,sceneSelect,sceneMoment} from './scenes.js';
 import {youtubeId} from './youtube.js';
 import {takeBudget} from './budgets.js';
 import {captionWeight} from './moments.js';
-import {chooseSceneWindow,covered,type SceneWindow} from './scene-window.js';
+import {chooseSceneWindow,chooseSceneWindows,covered,type SceneWindow,type SceneInterval} from './scene-window.js';
 
 export async function retainedEvidence(db:DB,ids:string[],query:string) {
  const rows=(await db.query(`SELECT c.id,x.* FROM content c JOIN sources s ON s.id=c.source_id
@@ -61,13 +61,24 @@ export async function quoteMoments(db: DB, quotes: Map<string, string[]>): Promi
 // window: picks the stretch of a long video its transcript ties to the query (src/scene-window.ts); null analyses it whole.
 export async function queueSceneShortlist(db:DB,config:Config,results:Result[],query:string,minRelevance=6,
  window:(query:string,segments:{start:number;end:number;text:string}[],duration:number)=>Promise<SceneWindow|null>=(q,s,d)=>chooseSceneWindow(db,config,q,s,d)) {
- if(!config.SCENE_AUTO_QUEUE || !config.GEMINI_API_KEY) return 0;
- let queued=0;
- for(const result of results.filter(r=>(r.judgement?.relevance??0)>=minRelevance).slice(0,config.SCENE_SHORTLIST)) {
+ return (await requestSceneAnalysis(db,config,results,query,{minRelevance,window})).filter(j=>j.created).length;
+}
+
+export interface SceneRequest {content_id:string;job_id:string;created:boolean}
+export async function requestSceneAnalysis(db:DB,config:Config,results:Result[],query:string,options:{
+ minRelevance?:number;interactive?:boolean;requirements?:{id:string;text:string}[];deadline?:string;
+ window?:(query:string,segments:{start:number;end:number;text:string}[],duration:number)=>Promise<SceneWindow|null>
+} = {}):Promise<SceneRequest[]> {
+ if(!config.SCENE_AUTO_QUEUE || !config.GEMINI_API_KEY) return [];
+ const requests:SceneRequest[]=[];
+ await Promise.all(results.filter(r=>(r.judgement?.relevance??0)>=(options.minRelevance??3))
+   .slice(0,options.interactive?config.SCENE_SEARCH_LIMIT:config.SCENE_SHORTLIST).map(async result=>{
    // Chosen before the transaction: Jev takes a few seconds, and nothing here needs the row locks.
-   const segments=(result.duration??0)>=config.SCENE_WINDOW_MIN_SECONDS?(await db.query(`SELECT start_seconds AS start,end_seconds AS "end",text
+   const segments=(result.duration??0)>90?(await db.query(`SELECT id::text AS id,start_seconds AS start,end_seconds AS "end",text
      FROM transcript_segments WHERE content_id=$1 ORDER BY start_seconds LIMIT 3000`,[result.id])).rows:[];
-   const chosen=segments.length?await window(query,segments,result.duration!).catch(()=>null):null;
+   const old=options.window&&segments.length?await options.window(query,segments,result.duration!).catch(()=>null):null;
+   const windows:SceneInterval[]=options.window?(old?[{...old,requirement_ids:[],cue_ids:[]}]:[]):
+     await chooseSceneWindows(db,config,query,segments,result.duration??0,options.requirements);
    await db.transaction(async tx=>{
      const row=(await tx.query(`SELECT c.*,s.policy FROM content c JOIN sources s ON s.id=c.source_id
        WHERE c.id=$1 AND s.status='active' AND s.health_status<>'down' AND c.expires_at>now()
@@ -84,19 +95,30 @@ export async function queueSceneShortlist(db:DB,config:Config,results:Result[],q
      }
      if(!version) return;
      // An analysed video is queued again only for a window no earlier analysis inspected.
-     if(version.analysis_status!=='pending'){
-       if(!chosen) return;
+     if(version.analysis_status==='complete'){
        const inspected=(await tx.query('SELECT inspected_ranges FROM scene_analyses WHERE media_version_id=$1',[version.id])).rows.map(r=>r.inspected_ranges);
-       if(covered(chosen,inspected)) return;
+       if((windows.length?windows:[{start:Math.max(0,version.timeline_offset_seconds),end:version.duration_seconds+version.timeline_offset_seconds}]).every(w=>covered(w,inspected))) return;
      }
-     if((await tx.query("SELECT 1 FROM jobs WHERE kind='scene_analysis' AND payload->>'media_version_id'=$1 AND status IN ('queued','running')",[version.id])).rows.length) return;
-     if(!await takeBudget(tx,'scene_auto_jobs',20)) return;
-     const span=chosen?{window:{start:Math.round(chosen.start),end:Math.round(chosen.end)}}:{};
-     const job=await tx.query(`INSERT INTO jobs(kind,dedupe_key,payload) VALUES('scene_analysis',$1,$2)
-       ON CONFLICT DO NOTHING RETURNING id`,[`scene:${version.id}:${config.GEMINI_MODEL}:gemini-scenes-v2${chosen?`:w${span.window!.start}-${span.window!.end}`:''}`,
-       JSON.stringify({media_version_id:version.id,model:config.GEMINI_MODEL,query:query.slice(0,500),...span})]);
-     queued+=job.rows.length;
+     const active=(await tx.query("SELECT id FROM jobs WHERE kind='scene_analysis' AND payload->>'media_version_id'=$1 AND status IN ('queued','running')",[version.id])).rows[0];
+     if(active){
+       if(options.interactive) {
+         await tx.query("UPDATE jobs SET priority=10,payload=payload||$2::jsonb WHERE id=$1",[active.id,JSON.stringify({interactive_until:options.deadline})]);
+         await tx.query("SELECT pg_notify('scene_jobs','ready')");
+       }
+       requests.push({content_id:result.id,job_id:active.id,created:false});return;
+     }
+     const key=`scene:${version.id}:${config.GEMINI_MODEL}:gemini-scenes-v3:${windows.map(w=>`${Math.round(w.start)}-${Math.round(w.end)}`).join(',')||'whole'}`;
+     if((await tx.query('SELECT 1 FROM jobs WHERE dedupe_key=$1',[key])).rows.length) return;
+     if(!await takeBudget(tx,'scene_auto_jobs',config.SCENE_AUTO_DAILY_JOBS)) return;
+     // Transcript locations use content time; registered local excerpts can start later on that timeline.
+     const mediaWindows=windows.map(w=>({...w,start:Math.max(0,Math.round(w.start-version.timeline_offset_seconds)),
+       end:Math.min(version.duration_seconds,Math.round(w.end-version.timeline_offset_seconds))})).filter(w=>w.end>w.start);
+     const job=await tx.query(`INSERT INTO jobs(kind,dedupe_key,payload,priority) VALUES('scene_analysis',$1,$2,$3)
+       ON CONFLICT DO NOTHING RETURNING id`,[key,JSON.stringify({media_version_id:version.id,model:config.GEMINI_MODEL,query:query.slice(0,500),
+         windows:mediaWindows,requirements:options.requirements??[],
+         ...(options.interactive?{interactive_until:options.deadline}:{})}),options.interactive?10:0]);
+     if(job.rows[0]) {requests.push({content_id:result.id,job_id:job.rows[0].id,created:true});await tx.query("SELECT pg_notify('scene_jobs','ready')");}
    });
- }
- return queued;
+ }));
+ return requests;
 }

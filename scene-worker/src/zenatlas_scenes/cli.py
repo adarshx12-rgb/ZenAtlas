@@ -8,6 +8,7 @@ import re
 import signal
 import sys
 import threading
+import socket
 import time
 import uuid
 from collections.abc import Sequence
@@ -156,37 +157,65 @@ def work(args: argparse.Namespace, settings: Settings) -> int:
         signal.signal(getattr(signal, name), lambda *_: stopping.set())
     log("scene_worker_started", default_model=settings.gemini_model,
         fallback_models=[m for m in settings.gemini_fallback_models if "/" not in m or openrouter is not None])
+    def consume(slot: int) -> int:
+        while not stopping.is_set():
+            try:
+                with store.connect(settings.database_url) as conn:
+                    conn.execute("LISTEN scene_jobs")
+                    pipeline = ScenePipeline(conn, settings, model)
+                    while not stopping.is_set():
+                        job = store.claim(conn, settings.lease_seconds, settings.concurrency, slot > 0)
+                        if job is None:
+                            if args.once:
+                                return 0
+                            # Notification is only a wake-up hint; regular checks recover a missed notification.
+                            list(conn.notifies(timeout=min(1, settings.poll_seconds), stop_after=1))
+                            continue
+                        started = time.monotonic()
+                        log("scene_job_started", job_id=job["id"], slot=slot)
+                        try:
+                            outcome = pipeline.run(job)
+                            log("scene_job_finished", job_id=job["id"], status=outcome.status, code=outcome.code,
+                                scenes=outcome.scenes, seconds=round(time.monotonic() - started, 1))
+                        except psycopg.OperationalError:
+                            raise
+                        except Exception as error:
+                            log("scene_job_crashed", job_id=job["id"], error=type(error).__name__)
+                            try:
+                                store.retry(conn, job, None, "processing_failed")
+                            except store.LeaseLost:
+                                pass
+                        if args.once:
+                            return 0
+            except psycopg.OperationalError:
+                log("scene_worker_database_unavailable")
+                if args.once:
+                    return 1
+                stopping.wait(5)
+        return 0
+
+    if args.once:
+        return consume(0)
+    threads = [threading.Thread(target=consume, args=(slot,), name=f"scene-slot-{slot}") for slot in range(settings.concurrency)]
+    for thread in threads:
+        thread.start()
+    started_at = datetime.now(UTC)
     while not stopping.is_set():
         try:
             with store.connect(settings.database_url) as conn:
-                pipeline = ScenePipeline(conn, settings, model)
-                while not stopping.is_set():
-                    job = store.claim(conn, settings.lease_seconds)
-                    if job is None:
-                        if args.once:
-                            return 0
-                        stopping.wait(settings.poll_seconds)
-                        continue
-                    started = time.monotonic()
-                    try:
-                        outcome = pipeline.run(job)
-                        log("scene_job_finished", job_id=job["id"], status=outcome.status, code=outcome.code,
-                            scenes=outcome.scenes, seconds=round(time.monotonic() - started, 1))
-                    except psycopg.OperationalError:
-                        raise
-                    except Exception as error:
-                        log("scene_job_crashed", job_id=job["id"], error=type(error).__name__)
-                        try:
-                            store.retry(conn, job, None, "processing_failed")
-                        except store.LeaseLost:
-                            pass
-                    if args.once:
-                        return 0
-        except psycopg.OperationalError:
-            log("scene_worker_database_unavailable")
-            if args.once:
-                return 1
-            stopping.wait(5)
+                conn.execute("""INSERT INTO service_heartbeats(service,pid,host,started_at,details)
+                    VALUES('scene-worker',%s,%s,%s,%s) ON CONFLICT(service) DO UPDATE SET pid=excluded.pid,
+                    host=excluded.host,started_at=excluded.started_at,beat_at=now(),details=excluded.details""",
+                    (os.getpid(), socket.gethostname()[:200], started_at,
+                     psycopg.types.json.Jsonb({"slots": settings.concurrency, "alive": sum(t.is_alive() for t in threads)})))
+        except psycopg.Error:
+            log("scene_heartbeat_failed")
+        if not all(thread.is_alive() for thread in threads):
+            stopping.set()
+            log("scene_worker_slot_failed")
+        stopping.wait(10)
+    for thread in threads:
+        thread.join()
     return 0
 
 

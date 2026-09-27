@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+
 // Canonical sources (docs/superpowers/specs/2026-09-27-candidate-quality-design.md): the original or official publication
 // of something ranks above copies of it. On 2026-09-27 a Scribd re-upload of the MapReduce paper (read, scored 10) ranked
 // above Google's own PDF, which sat outside the documents read and was capped as unverified.
@@ -34,3 +36,24 @@ export function sourceKind(url: string, query: string): SourceKind {
 // point of it, never a result two points better; a mirror loses ties. The judge scores relevance alone (a copy of the
 // requested document is still the requested document); preferring the original is ranking's job.
 export const rankBoost = (kind: SourceKind) => kind === 'canonical' ? 1.5 : kind === 'mirror' ? -0.5 : 0;
+
+export function contentHash(text: string|null|undefined): string|undefined {
+ const normalized = text?.normalize('NFKC').replace(/\s+/g, ' ').trim();
+ return normalized && normalized.length >= 200 ? createHash('sha256').update(normalized).digest('hex') : undefined;
+}
+
+// Group only identical inspected content, not similar titles or different editions. Keep other copies accessible.
+export function groupCopies<T extends {url: string; title?: string; content_hash?: string; verification?: string; alternatives?: {url: string; title: string}[]}>(items: T[], query: string): T[] {
+ const groups = new Map<string, T[]>();
+ for (const item of items) {
+   const key = item.content_hash ?? item.url;
+   const group = groups.get(key) ?? []; group.push(item); groups.set(key, group);
+ }
+ return [...groups.values()].map(group => {
+   const sorted = [...group].sort((a, b) => Number(b.verification === 'verified') - Number(a.verification === 'verified') || rankBoost(sourceKind(b.url, query)) - rankBoost(sourceKind(a.url, query)));
+   const first = sorted[0];
+   const alternatives = [...new Map(sorted.flatMap((r, i) => [...(i && r.url !== first.url ? [{url:r.url,title:r.title ?? r.url}] : []), ...(r.alternatives ?? [])])
+     .filter(r => r.url !== first.url).map(r => [r.url, r])).values()];
+   return alternatives.length ? {...first, alternatives} : first;
+ });
+}

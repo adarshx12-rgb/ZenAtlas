@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { DB } from './db.js';
 
-export type JobKind = 'discovery'|'collect'|'enrich'|'source_health'|'source_discovery'|'audit'|'critic_review'|'youtube_captions';
+export type JobKind = 'discovery'|'collect'|'enrich'|'source_health'|'source_discovery'|'audit'|'critic_review'|'youtube_captions'|'scene_review';
 export async function enqueue(db: DB, kind: JobKind, key: string, payload: unknown) {
  return (await db.query(`INSERT INTO jobs(kind,dedupe_key,payload) VALUES($1,$2,$3)
  ON CONFLICT(dedupe_key) DO UPDATE SET dedupe_key=excluded.dedupe_key RETURNING *`,[kind,key,JSON.stringify(payload)])).rows[0];
@@ -10,8 +10,8 @@ export async function enqueue(db: DB, kind: JobKind, key: string, payload: unkno
 // Discovery jobs go first: a person is waiting on them, while health checks and collection can run later.
 // Critic work (audits and their weekly review) has its own lane, so a long model call never delays a search.
 const CRITIC_KINDS = `('audit','critic_review')`;
-export async function claim(db: DB, lane: 'main'|'critic' = 'main') {
- const kinds = lane === 'critic' ? `kind IN ${CRITIC_KINDS}` : `kind<>'scene_analysis' AND kind NOT IN ${CRITIC_KINDS}`;
+export async function claim(db: DB, lane: 'main'|'critic'|'scenes' = 'main') {
+ const kinds = lane === 'scenes' ? "kind='scene_review'" : lane === 'critic' ? `kind IN ${CRITIC_KINDS}` : `kind NOT IN ('scene_analysis','scene_review') AND kind NOT IN ${CRITIC_KINDS}`;
  await db.query(`UPDATE jobs SET status='failed',error_code='retry_exhausted',lease_until=NULL,updated_at=now()
    WHERE kind<>'scene_analysis' AND attempts>=3 AND ((status='running' AND lease_until<now()) OR status='queued')`);
  return (await db.query(`UPDATE jobs SET status='running',attempts=attempts+1,lease_token=$1,

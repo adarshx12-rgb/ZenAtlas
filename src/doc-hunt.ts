@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { groupCopies, rankBoost, sourceKind } from './canonical.js';
 import { z } from 'zod';
 import type { QueryRewrite } from './query-rewrite.js';
 import type { DB } from './db.js';
@@ -176,8 +177,10 @@ export async function runHunt(db: DB, config: Config, state: HuntState, explore:
  const hunted = state.docs.filter(d => d.state === 'pending' && !searched.includes(d));
  if (hunted.length) reviews.push(await review(db, config, state, hunted, deps));
  // One order across both reviews: kept documents by relevance, the search's before the hunt's on a tie.
- const rank = (d: HuntDoc) => d.state === 'kept' ? d.judgement?.relevance ?? 0 : -1;
- state.docs.sort((a, b) => rank(b) - rank(a));
+ const rank = (d: HuntDoc) => d.state === 'kept' ? (d.judgement?.relevance ?? 0) + rankBoost(sourceKind(d.url, state.query)) : -1;
+ const kept = groupCopies(state.docs.filter(d => d.state === 'kept'), state.query);
+ state.docs = [...kept, ...state.docs.filter(d => d.state !== 'kept')].sort((a, b) =>
+   Number(b.verification === 'verified') - Number(a.verification === 'verified') || rank(b) - rank(a));
  const checked = reviews.reduce((n, r) => n + r.checked, 0);
  state.removed = reviews.reduce((n, r) => n + r.removed, 0);
  const notes = reviews.flatMap(r => r.providers);
@@ -258,7 +261,7 @@ async function review(db: DB, config: Config, state: HuntState, docs: HuntDoc[],
  const kept = new Map(out.results.map(r => [r.url, r]));
  for (const d of docs) {
    const k = kept.get(d.url);
-   if (k) Object.assign(d, {state: 'kept', judgement: k.judgement, ...(k.lead ? {lead: true} : {})});
+   if (k) Object.assign(d, k, {state: 'kept'});
    else d.state = 'removed';
  }
  return {checked: docs.length, removed: docs.length - out.results.length, providers: out.providers};

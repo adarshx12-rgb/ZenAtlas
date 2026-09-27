@@ -11,6 +11,8 @@ export type Format = typeof FORMATS[number];
 const format = z.enum(FORMATS);
 const requirement = z.object({
  id: z.string().regex(/^R\d{1,2}$/), text: z.string().min(1).max(200),
+ source_quote: z.string().max(500).optional(),
+ evidence_kind: z.enum(['content', 'visual', 'provenance']).optional(),
  kind: z.enum(['subject', 'format', 'date', 'duration', 'authority', 'completeness', 'property']),
  hardness: z.enum(['hard', 'preferred']), scope: z.enum(['each', 'set']), evidence: z.string().max(300),
  date_range: z.object({from: z.string(), to: z.string()}).optional(),
@@ -40,6 +42,7 @@ export const contractDraft = z.object({
  official_domains: z.array(z.string().max(100)).max(6).optional(),
  requirements: z.array(z.object({
    text: z.string().min(1).max(200), kind: z.enum(['subject', 'format', 'date', 'authority', 'completeness', 'property']),
+   source_quote: z.string().max(500).optional(),
    hardness: z.enum(['hard', 'preferred']).default('preferred'), scope: z.enum(['each', 'set']).default('each'),
    evidence: z.string().max(300).default(''), set_items: z.array(z.string().max(80)).max(12).optional(),
  })).max(8).optional(),
@@ -56,9 +59,10 @@ export const DRAFT_SCHEMA = {
    kind: {type: 'string', enum: ['organisation', 'person', 'work', 'event', 'product', 'place', 'other']}}, required: ['name', 'kind']}},
  official_domains: {type: 'array', items: {type: 'string'}},
  requirements: {type: 'array', items: {type: 'object', properties: {text: {type: 'string'},
+   source_quote: {type: 'string', description: 'Exact words from the original request that require this property.'},
    kind: {type: 'string', enum: ['subject', 'format', 'date', 'authority', 'completeness', 'property']},
    hardness: {type: 'string', enum: ['hard', 'preferred']}, scope: {type: 'string', enum: ['each', 'set']},
-   evidence: {type: 'string'}, set_items: {type: 'array', items: {type: 'string'}}}, required: ['text', 'kind', 'hardness', 'scope', 'evidence', 'set_items']}},
+   evidence: {type: 'string'}, set_items: {type: 'array', items: {type: 'string'}}}, required: ['text', 'source_quote', 'kind', 'hardness', 'scope', 'evidence', 'set_items']}},
  ambiguities: {type: 'array', items: {type: 'string'}},
  assumptions: {type: 'array', items: {type: 'string'}},
 };
@@ -181,6 +185,7 @@ export function rulesContract(query: string, searchDate: string, draft: Contract
    // The rules check a stated duration against the platform's figure; the model's restatement would need a quote.
    if (duration && DURATION_WORDS.test(r.text)) continue;
    out.push({text: r.text, kind: r.kind, hardness: r.hardness, scope: r.scope, evidence: r.evidence || 'Stated in the inspected content.',
+     ...(r.source_quote && query.includes(r.source_quote) ? {source_quote: r.source_quote} : {}),
      ...(r.scope === 'set' && r.set_items?.length ? {set_items: r.set_items.slice(0, 12)} : {})});
  }
  const exclusions = [...new Set([...query.matchAll(/(?:^|\s)-(\w[\w'-]*)/g)].map(m => m[1].toLowerCase()))];

@@ -1,9 +1,11 @@
 import { z } from 'zod';
+import { createHash } from 'node:crypto';
 import type { DB } from './db.js';
 import type { Config } from './config.js';
 import { fetchJSON, UpstreamError } from './http.js';
 import { GeminiClient } from './gemini.js';
-import type { ModelClient } from './model-client.js';
+import type { ModelClient, ImageMime } from './model-client.js';
+import { requirementNeeds } from './search-contract.js';
 import { OpenAICompatibleClient } from './openai-compatible.js';
 import { animeSummary, type AnimeMatch } from './anilist.js';
 
@@ -21,6 +23,10 @@ export interface JudgeCandidate {
  inspected?: {format: string|null; published: string|null; publisher: string|null; access: string|null};
  // Where description came from: the platform's API (inspected) or the search result (a snippet).
  description_source?: 'api'|'search';
+ visual?: {id: string; mimeType: ImageMime};
+ provenance?: string;
+ facts?: RequirementVerdict[];
+ review_focus?: {flags: string[]; requirements: string[]};
  // Web only: Jev's first reading (relevance 0-4, accuracy 0-1), advisory for the LLM judge.
  jev_check?: {relevance: number; accuracy: number|null};
  // Chair only: the two council judges' verdicts it is asked to settle.
@@ -28,14 +34,15 @@ export interface JudgeCandidate {
 }
 // anime: a confidently matched anime from AniList, for recognising fan-subbed, dubbed or renamed uploads of it.
 // requirements: the shared contract's hard per-result requirements, checked one by one.
-export interface JudgeContext { kind: 'videos'|'websites'|'mixed'; criteria: string[]; anime?: AnimeMatch|null;
- requirements?: {id: string; text: string; evidence: string}[] }
-export interface RequirementVerdict { id: string; status: 'supported'|'unknown'|'mismatch'; field: string; quote: string }
+export interface JudgeContext { kind: 'videos'|'websites'|'mixed'; criteria: string[]; anime?: AnimeMatch|null; search_date?: string;
+ requirements?: {id: string; text: string; evidence: string; kind?: string; evidence_kind?: 'content'|'visual'|'provenance'; source_quote?: string}[] }
+export interface RequirementVerdict { id: string; status: 'supported'|'unknown'|'mismatch'; field: string; quote: string; evidence_id?: string;
+ next_action?: 'none'|'inspect'|'reason' }
 export interface Verdict { key: string; relevance: number; reason: string; momentKeys: string[]; lesserKnown?: boolean; intentChecks?:IntentCheck[];
  requirementChecks?: RequirementVerdict[] }
 // jev: the Jev pre-judge's record per candidate key, when it ran (see jev-judge.ts).
 export interface JudgeResult { model: string; verdicts: Map<string,Verdict>; jev?: Map<string,unknown> }
-// screenshots: JPEG first-screen captures by candidate key, for candidates whose page.screenshot is true.
+// screenshots: supplied image bytes by candidate key; visual.mimeType identifies the format, defaulting to JPEG captures.
 export interface Judge { judge(query: string, candidates: JudgeCandidate[], context?: JudgeContext, screenshots?: Map<string,Buffer>): Promise<JudgeResult> }
 
 export function evidenceCeiling(candidate:JudgeCandidate):number {
@@ -46,10 +53,10 @@ export function evidenceCeiling(candidate:JudgeCandidate):number {
  return 6;
 }
 
-const evidenceField=z.enum(['title','url','description','comments','moments','transcripts','scenes','page']);
+const evidenceField=z.enum(['title','url','description','comments','moments','transcripts','scenes','page','visual','provenance','facts']);
 const intentDimensions = ['subject','intent','relationship','format'] as const;
 const intentCheck=z.object({dimension:z.enum(intentDimensions),status:z.enum(['supported','unknown','mismatch']),
- field:evidenceField,quote:z.string().max(500)});
+ field:evidenceField,quote:z.string().max(500),evidence_id:z.string().max(100).optional()});
 type IntentCheck=z.infer<typeof intentCheck>;
 const normaliseQuote=(text:string)=>text.normalize('NFKC').replace(/\s+/g,' ').trim().toLowerCase();
 // Preserve order and negation: word overlap can turn a reversed relationship into apparently valid evidence.
@@ -62,16 +69,53 @@ export function groundedIntent(candidate:JudgeCandidate,checks:IntentCheck[]|und
  return checks.every(check=>groundedQuote(candidate,check));
 }
 // A supported check counts only when its quote appears in the named field of this candidate's own evidence.
-export function groundedQuote(candidate:JudgeCandidate,check:{status:string;field:string;quote:string}):boolean {
+export function groundedCheck(candidate:JudgeCandidate,check:{status:string;field:string;quote:string;evidence_id?:string}):boolean {
+ if (check.status !== 'supported' && check.status !== 'mismatch') return false;
+ if (check.field === 'visual') return !!candidate.visual && check.evidence_id === candidate.visual.id && check.quote.trim().length >= 8;
  const fields:Record<z.infer<typeof evidenceField>,string[]>={
    title:[candidate.title],url:[candidate.url??''],description:[candidate.description??''],comments:candidate.comments,
    moments:candidate.moments.flatMap(m=>m.viewers_said),transcripts:(candidate.transcripts??[]).map(t=>t.text),
    scenes:(candidate.scenes??[]).map(s=>s.description),
    page:candidate.page?.status==='checked'?[candidate.page.title??'',candidate.page.description??'',candidate.page.text??'']:[],
+   visual:[], provenance:[candidate.provenance ?? ''], facts:(candidate.facts ?? []).filter(f => f.status === check.status).map(f => f.quote),
  };
  const field=evidenceField.safeParse(check.field);
- return field.success && check.status==='supported' && normaliseQuote(check.quote).length>=2 &&
+ return field.success && normaliseQuote(check.quote).length>=2 &&
    fields[field.data].some(text=>quoted(check.quote,text));
+}
+
+export const groundedQuote = (candidate: JudgeCandidate, check: {status:string;field:string;quote:string;evidence_id?:string}) =>
+ check.status === 'supported' && groundedCheck(candidate, check);
+export const visualReference = (data: Buffer, mimeType: ImageMime = 'image/jpeg') =>
+ ({id: `image:${createHash('sha256').update(data).digest('hex')}`, mimeType});
+
+export function eligibleCheck(c: JudgeCandidate, check: RequirementVerdict, requirement?: NonNullable<JudgeContext['requirements']>[number]): boolean {
+ if (!groundedCheck(c, check)) return false;
+ if (check.field === 'facts') return !!c.facts?.some(f => f.id === check.id && f.status === check.status && f.quote === check.quote);
+ if (!requirement) return true;
+ if (['format','date','duration','authority','completeness'].includes(requirement.kind ?? '') && c.facts?.some(f => f.id === requirement.id)) return false;
+ const need = requirementNeeds(requirement);
+ if (need === 'visual') return check.field === 'visual' || check.field === 'scenes';
+ if (need === 'provenance') return check.field === 'provenance' || check.field === 'page' && !!c.page?.text && quoted(check.quote, c.page.text);
+ if (check.field === 'title' || check.field === 'url') return false;
+ if (check.field === 'description' && c.description_source !== 'api') return false;
+ if (check.field === 'page' && (!c.page?.text || !quoted(check.quote, c.page.text))) return false;
+ return true;
+}
+
+// Unknown remains a possible lead. Every hard requirement must have eligible support before a high score is retained.
+export function enforceRequirements(c: JudgeCandidate, v: Verdict, requirements: JudgeContext['requirements']): Verdict {
+ if (!requirements?.length) return v;
+ const checks = requirements.map(r => {
+   const fact = c.facts?.find(f => f.id === r.id && f.status !== 'unknown');
+   const answer = fact ?? v.requirementChecks?.find(ch => ch.id === r.id);
+   const check: RequirementVerdict = answer ?? {id: r.id, status: 'unknown', field: '', quote: ''};
+   return check.status !== 'unknown' && !eligibleCheck(c, check, r) ? {...check, status: 'unknown' as const} : check;
+ });
+ const contradicted = checks.some(ch => ch.status === 'mismatch') || v.intentChecks?.some(ch => ch.status === 'mismatch' && groundedCheck(c, ch));
+ const ceiling = contradicted ? 4 : checks.some(ch => ch.status === 'unknown') ? 5 : 10;
+ return {...v, relevance: ceiling === 5 ? 5 : Math.min(v.relevance, ceiling), requirementChecks: checks,
+   reason: v.reason + (v.relevance > ceiling ? ceiling === 4 ? ' Contradicts a required property.' : ' Required evidence is missing.' : '')};
 }
 
 // Scores at or below this are dropped: 3-4 is "only tangential" on the rubric.
@@ -80,7 +124,7 @@ export const TANGENTIAL=4;
 const UNVERIFIED=5;
 // No supported dimension can compensate for a mismatch in another, including the requested relationship.
 export function verdictCeiling(candidate:JudgeCandidate,checks:IntentCheck[]|undefined):number {
- if(checks?.some(c=>c.status==='mismatch')) return TANGENTIAL;
+ if(checks?.some(c=>c.status==='mismatch' && groundedCheck(candidate,c))) return TANGENTIAL;
  return groundedIntent(candidate,checks)?evidenceCeiling(candidate):UNVERIFIED;
 }
 
@@ -92,7 +136,7 @@ Format: "Wanted" is a planner's guess, not a restriction. This engine serves vid
 Respect the tone and genre the request implies: a request for scary, serious or dramatic material is not satisfied by comedy, pranks or parody unless those are requested. Do not assert that footage presented as real is authentic. A title, hashtag or thumbnail claim alone does not establish a specific property such as a twist, a reveal or a reaction; look for supporting description, comments or other evidence.
 Videos: use site, title, channel, duration, live status, description, top viewer comments, moments that viewers pointed to with timestamps, and titles of Reddit threads that appear to discuss it. Prefer videos whose comments confirm the requested content, such as viewers reacting to a story, a twist or a scene. Score lower for clickbait whose comments contradict the title, unrelated compilations, and uploads that look like unofficial full copies of commercial films or TV episodes.
 Official or canonical copies: when a candidate is a copy of one specific work (an opening, trailer, scene, speech, lecture, paper, report or article), prefer its official or canonical source: the rights holder's, publisher's or author's own channel or site, or the original venue (the studio's or distributor's channel, the university that hosted the speech, the author's institution, the journal or conference). A re-upload, mirror, excerpt, compilation or re-edit of the same work scores at most 7 unless the request asks for such a version; a candidate marked official, or whose inspected publisher is the rights holder, may score 8-10 when its evidence supports it. Judge officialness only from the channel, publisher, site or official flag given, never from a title's claim.
-Exclusions ("not X", "no talking", "without background music", "not from big channels") are checked against evidence like any other requirement: mark mismatch when the evidence shows the excluded thing, such as a major news broadcaster as the channel; otherwise it is unknown, and an unknown exclusion must not lower the score.
+Exclusions ("not X", "no talking", "without background music", "not from big channels") are checked against evidence like any other requirement: mark mismatch with grounded evidence of the excluded thing. If neither absence nor presence is established, mark unknown. An unknown hard exclusion remains a possible match, capped at 5; it is not a verified match or a proven mismatch.
 Websites: use the page check when present: page title, description, main text and front-end libraries found in the page source or seen running in a browser (for example three.js, WebGL or Spline for 3D; GSAP, Lottie or Rive for motion). A library found is evidence; a library not found proves nothing, because many sites bundle their code. When page.screenshot is true, a screenshot of that candidate's first screen after loading follows the candidates, labelled with its key: use it as visual evidence of the design, such as a 3D scene or a bold animated hero, remembering that one still frame cannot show motion. Showcase or gallery pages that collect many matching sites are relevant when the user asks to find such websites. Articles that merely discuss the topic are less relevant than examples of it unless the request asks for articles.
 Retained transcripts quote spoken or captioned text with publisher timing; they do not prove visible action. Retained scenes describe sampled video observations only within inspected_ranges. Use them as direct evidence for the details they actually establish. Comment/caption status empty, unavailable, unsupported or not_permitted means unknown, never evidence against relevance. A correction in a comment is a claim to investigate, not a verified fact.
 Score relevance from 0 (unrelated) to 10 (exactly what was asked).
@@ -109,8 +153,8 @@ const RESPONSE_SCHEMA = {
    key: {type: 'string'}, relevance: {type: 'integer', minimum: 0, maximum: 10},
    reason: {type: 'string'}, moment_keys: {type: 'array', items: {type: 'string'}}, lesser_known: {type: 'boolean'},
    intent_checks:{type:'array',minItems:4,maxItems:4,items:{type:'object',properties:{dimension:{type:'string',enum:intentDimensions},
-     status:{type:'string',enum:['supported','unknown','mismatch']},field:{type:'string',enum:evidenceField.options},quote:{type:'string'}},
-     required:['dimension','status','field','quote']}}},
+     status:{type:'string',enum:['supported','unknown','mismatch']},field:{type:'string',enum:evidenceField.options},quote:{type:'string'},evidence_id:{type:'string'}},
+     required:['dimension','status','field','quote','evidence_id']}}},
    required: ['key', 'relevance', 'reason', 'moment_keys', 'lesser_known','intent_checks']}}},
  required: ['verdicts'],
 };
@@ -118,14 +162,14 @@ const verdicts = z.object({verdicts: z.array(z.object({
  key: z.string(), relevance: z.number().int().min(0).max(10), reason: z.string(), moment_keys: z.array(z.string()).default([]),
  lesser_known: z.boolean().default(false),
  intent_checks:z.array(intentCheck).max(4).optional(),
- requirement_checks:z.array(z.object({id:z.string(),status:z.enum(['supported','unknown','mismatch']),field:z.string(),quote:z.string().max(500)})).max(12).optional(),
+ requirement_checks:z.array(z.object({id:z.string(),status:z.enum(['supported','unknown','mismatch']),field:z.string(),quote:z.string().max(500),evidence_id:z.string().max(100).optional(),next_action:z.enum(['none','inspect','reason']).optional()})).max(12).optional(),
 }))});
 const REQUIREMENT_NOTE = `The request has also been broken into numbered requirements, listed after the request. For each candidate also return requirement_checks: exactly one entry per listed requirement id, with status supported, unknown or mismatch, the candidate field and a short exact verbatim quote from that field, under the same quoting rules as intent_checks. The inspected facts on a candidate (format, published date, publisher, access) were read from the page itself: rely on them over titles and snippets. A summary, review or excerpt of a work is a mismatch for a requirement that asks for the complete work.`;
 const requirementSchema = (ids: string[]) => ({...RESPONSE_SCHEMA, properties: {verdicts: {...RESPONSE_SCHEMA.properties.verdicts, items: {
  ...RESPONSE_SCHEMA.properties.verdicts.items, properties: {...RESPONSE_SCHEMA.properties.verdicts.items.properties,
    requirement_checks: {type: 'array', items: {type: 'object', properties: {id: {type: 'string', enum: ids},
-     status: {type: 'string', enum: ['supported', 'unknown', 'mismatch']}, field: {type: 'string', enum: evidenceField.options}, quote: {type: 'string'}},
-     required: ['id', 'status', 'field', 'quote']}}},
+     status: {type: 'string', enum: ['supported', 'unknown', 'mismatch']}, field: {type: 'string', enum: evidenceField.options}, quote: {type: 'string'}, evidence_id: {type: 'string'}, next_action: {type: 'string', enum: ['none','inspect','reason']}},
+     required: ['id', 'status', 'field', 'quote', 'evidence_id', 'next_action']}}},
  required: [...RESPONSE_SCHEMA.properties.verdicts.items.required, 'requirement_checks']}}}});
 
 // Ranks candidates with any model client. The bucket is the daily budget it spends.
@@ -134,25 +178,29 @@ export class ModelJudge implements Judge {
  async judge(query: string, candidates: JudgeCandidate[], context?: JudgeContext, screenshots?: Map<string,Buffer>): Promise<JudgeResult> {
    if (!candidates.length) return {model: this.client.models[0], verdicts: new Map()};
    const shown = new Set(candidates.filter(c => c.page?.screenshot && screenshots?.has(c.key)).map(c => c.key));
-   const images = [...shown].map(key => ({label: `Screenshot for candidate ${key}:`, mimeType: 'image/jpeg' as const, data: screenshots!.get(key)!}));
-   const listed = candidates.map(c => c.page?.screenshot && !shown.has(c.key) ? {...c, page: {...c.page, screenshot: false}} : c);
+   const images = [...shown].map(key => ({label: `Screenshot for candidate ${key}, evidence ${visualReference(screenshots!.get(key)!).id}:`, mimeType: candidates.find(c => c.key === key)?.visual?.mimeType ?? 'image/jpeg' as const, data: screenshots!.get(key)!}));
+   const listed = candidates.map(c => ({...c, visual: shown.has(c.key) ? visualReference(screenshots!.get(c.key)!, c.visual?.mimeType) : undefined,
+     ...(c.page?.screenshot && !shown.has(c.key) ? {page: {...c.page, screenshot: false}} : {})}));
    const required = context?.requirements?.length ? context.requirements : null;
    const text = [`Request: ${JSON.stringify(query)}`,
      ...(context ? [`Wanted: ${context.kind}`, `Criteria: ${JSON.stringify(context.criteria)}`] : []),
      ...(required ? [`Requirements: ${JSON.stringify(required)}`] : []),
+     ...(context?.search_date ? [`Search date: ${context.search_date}`] : []),
      ...(context?.anime ? [`Known anime match: ${JSON.stringify(animeSummary(context.anime, query))}`] : []),
      'Candidates follow, one JSON object per line.', '<candidates>', ...listed.map(c => JSON.stringify(c)), '</candidates>'].join('\n');
-   const reply = await this.client.json(this.bucket, required ? `${SYSTEM_INSTRUCTION}\n${REQUIREMENT_NOTE}` : SYSTEM_INSTRUCTION, text,
+   const evidenceNote = 'For visual evidence use field visual, evidence_id equal to the supplied candidate.visual.id, and quote a concise observation of the actual pixels. Never fabricate a text quote from an image. Other fields use an empty evidence_id. A visual observation cannot establish licence, authorship, non-AI provenance, freshness, or an unseen video event. Both support and mismatch require evidence. Missing evidence is unknown. For each requirement return next_action: none for a resolved check, inspect when evidence is absent or insufficient, reason only when the supplied evidence may suffice but interpreting it is difficult. A reason request must cite that supplied evidence. Deterministic facts override model guesses. review_focus names requirements needing independent resolution.';
+   const reply = await this.client.json(this.bucket, `${SYSTEM_INSTRUCTION}\n${evidenceNote}${required ? `\n${REQUIREMENT_NOTE}` : ''}`, text,
      required ? requirementSchema(required.map(r => r.id)) : RESPONSE_SCHEMA, images);
    const parsed = verdicts.safeParse(reply.value);
    if (!parsed.success) throw new UpstreamError('malformed_response');
-   const byKey = new Map(candidates.map(c => [c.key, c]));
+   const byKey = new Map(listed.map(c => [c.key, c]));
    const result = new Map<string,Verdict>();
    for (const v of parsed.data.verdicts) {
      const candidate = byKey.get(v.key);
      if (!candidate || result.has(v.key)) continue;
      const allowed = new Set(candidate.moments.map(m => m.key));
-     const ceiling=verdictCeiling(candidate,v.intent_checks);
+     const intentChecks = v.intent_checks?.map(ch => ch.status !== 'unknown' && !groundedCheck(candidate, ch) ? {...ch, status: 'unknown' as const} : ch);
+     const ceiling=verdictCeiling(candidate,intentChecks);
      const matches=ceiling>UNVERIFIED;
      const uncertainty=ceiling===TANGENTIAL?(v.relevance>ceiling?' Misses part of the request.':''):!matches?' Match not verified from the evidence.'
        :v.relevance<=ceiling?'':ceiling===6?' Metadata only; contents unverified.':' Supporting evidence only; exact match unverified.';
@@ -161,9 +209,9 @@ export class ModelJudge implements Judge {
        const c = v.requirement_checks?.find(x => x.id === r.id);
        return c ? [{...c, status: c.status === 'supported' && !groundedQuote(candidate, c) ? 'unknown' as const : c.status}] : [];
      }) : undefined;
-     result.set(v.key, {key: v.key, relevance: Math.min(v.relevance,ceiling), reason: v.reason.trim().slice(0, 240)+uncertainty,
-       ...(v.intent_checks?{intentChecks:v.intent_checks}:{}), ...(requirementChecks ? {requirementChecks} : {}),
-       momentKeys: matches ? [...new Set(v.moment_keys)].filter(k => allowed.has(k)) : [], lesserKnown: v.lesser_known});
+     result.set(v.key, enforceRequirements(candidate, {key: v.key, relevance: Math.min(v.relevance,ceiling), reason: v.reason.trim().slice(0, 240)+uncertainty,
+       ...(intentChecks?{intentChecks}:{}), ...(requirementChecks ? {requirementChecks} : {}),
+       momentKeys: matches ? [...new Set(v.moment_keys)].filter(k => allowed.has(k)) : [], lesserKnown: v.lesser_known}, required ?? undefined));
    }
    return {model: reply.model, verdicts: result};
  }

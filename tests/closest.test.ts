@@ -10,7 +10,8 @@ import {applySignals} from '../src/signals.js';
 
 test('closest matches load separately, respect ownership and deletion, and support feedback without entering main results',async()=>{
  const db=await database();
- const config={...testConfig,SEARXNG_BASE_URL:'http://localhost:8080'};
+ // This test isolates persistence/access of score-only suggestions; contract verification has separate coverage.
+ const config={...testConfig,SEARXNG_BASE_URL:'http://localhost:8080',REQUIREMENTS_ENABLED:false};
  const app=await createApp(db,config);
  try {
   const items=await Promise.all(['Strong','Uncertain','Tangential','Mismatch','Unrelated'].map(name=>fixture(db,`Reaction ${name}`)));

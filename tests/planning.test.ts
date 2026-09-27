@@ -204,7 +204,8 @@ test('a website request is planned, searched on several angles, page-checked and
    const scores:Record<string,number>={'studio.example.net':9,'showcase.example.com':8,'blog.example.org':3,'video.example.com':1};
    const judge:Judge={async judge(_q,candidates,ctx){judged=candidates;context=ctx;
      return {model:'test-judge',verdicts:new Map(candidates.map(c=>[c.key,{key:c.key,relevance:scores[c.site],reason:`TEST ${c.site}`,momentKeys:[]}]))};}};
-   const config={...testConfig,SEARXNG_BASE_URL:'http://localhost:8080',PAGE_CHECKS:20};
+   // This fixture isolates planner and page-check plumbing; its judge returns scores without requirement evidence.
+   const config={...testConfig,REQUIREMENTS_ENABLED:false,SEARXNG_BASE_URL:'http://localhost:8080',PAGE_CHECKS:20};
    const service=new SearchService(db,config);
    const started=await service.start({q,mode:'refresh'},'alice');
    await workOnce(db,config,[adapter],undefined,{planner,pages,judge});

@@ -11,6 +11,7 @@ import { tierSchema } from './tiers.js';
 import { rewriteQuery } from './query-rewrite.js';
 import { aiGenerated, excludesAI, openverseQuery, openverseResults, wantsLicense, type ImageLicense } from './image-signals.js';
 import { startImageReview } from './image-review.js';
+import { withSearchTrace, traceFields } from './search-trace.js';
 
 // Image search is discovery-only: results are returned straight from the engines and never
 // enter the catalogue. The evidence pipeline — transcripts, moments, scene analysis — is
@@ -86,7 +87,8 @@ function displayTitle(title: unknown, host: string) {
  return looksLikeFile ? host : text.slice(0, 300);
 }
 
-export async function searchImages(db: DB, config: Config, input: ImageSearchInput, deps: ImageSearchDeps = {}): Promise<ImageSearchResponse> {
+export const searchImages = (...args: Parameters<typeof searchImagesImpl>) => withSearchTrace(async () => Object.assign(await searchImagesImpl(...args), traceFields()));
+async function searchImagesImpl(db: DB, config: Config, input: ImageSearchInput, deps: ImageSearchDeps = {}): Promise<ImageSearchResponse> {
  // What was meant rather than what was typed, as on the Web tab (the planner step for images).
  const rewrite = await (deps.rewrite ?? rewriteQuery)(db, config, input.q, 'web').catch(() => null);
  const q = rewrite?.corrected ?? input.q;

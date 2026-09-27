@@ -3,21 +3,35 @@ import type { DB } from './db.js';
 import type { Config } from './config.js';
 import type { ProviderStatus } from './types.js';
 import { fetchImage } from './http.js';
-import { makeJudge, TANGENTIAL, type Judge, type JudgeCandidate, type JudgeContext } from './judge.js';
+import { makeJudge, visualReference, TANGENTIAL, type Judge, type JudgeCandidate, type JudgeContext } from './judge.js';
 import { cascadeOptions, cascadeReview, makeStrongJudge } from './cascade.js';
 import type { ImageResult } from './images.js';
+import type { ImageMime } from './model-client.js';
+import { planContract, judgeRequirements, type ContractDeps } from './search-contract.js';
+import { makeJevJudge } from './jev-judge.js';
+import { makeScreener, screeningOrder, type Screener } from './screener.js';
+import { contentInput } from './types.js';
+import { missingRequirements } from './cascade.js';
+import { PageChecker, pageTools, type PageCheck } from './pages.js';
 
 // The Images tab's review, run in the background like the Web tab's: the judge sees each image's thumbnail (the judge
 // models take images) with its title and host as context, and removes what the image does not show. The cascade's Strong
-// judge re-checks uncertain verdicts with the same thumbnails. An image whose thumbnail could not be fetched as a JPEG is
-// judged on its title and host alone and marked unseen.
+// judge re-checks interpretation disputes. Missing pixels or provenance first trigger bounded evidence collection.
 
-export type ReviewedImage = ImageResult & {judgement?: {relevance: number; reason: string}; unseen?: true};
+export type ReviewedImage = ImageResult & {judgement?: {relevance: number; reason: string}; unseen?: true;
+ verification?: 'verified'|'uncertain'; unmet_requirements?: string[]; ai_status?: 'source_marked'|'unknown'};
 export interface ImageReviewState { status: 'running'|'complete'; results: ReviewedImage[]; removed: number; providers: ProviderStatus[] }
-export interface ImageReviewDeps { judge?: Judge; strong?: Judge|null; thumbnail?: (url: string) => Promise<{contentType: string; data: Buffer}>; log?: (line: Record<string, unknown>) => void }
+export interface ImageReviewDeps extends ContractDeps { judge?: Judge; strong?: Judge|null; screener?: Screener; pages?: PageCheck; thumbnail?: (url: string) => Promise<{contentType: string; data: Buffer}>; log?: (line: Record<string, unknown>) => void }
 
 // The top of a results page is what gets judged; the rest keeps its search order after the judged ones.
 const REVIEW_POOL = 24, BATCH = 6, THUMB_MAX = 400 * 1024;
+export function imageMime(data: Buffer): ImageMime|null {
+ if (data[0] === 0xff && data[1] === 0xd8 && data[2] === 0xff) return 'image/jpeg';
+ if (data.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10]))) return 'image/png';
+ if (data.subarray(0, 4).toString() === 'RIFF' && data.subarray(8, 12).toString() === 'WEBP') return 'image/webp';
+ if (/^GIF8[79]a$/.test(data.subarray(0, 6).toString())) return 'image/gif';
+ return null;
+}
 const CRITERIA = ['An image whose visible content shows what the request describes. Judge from the image itself (its screenshot); the title and host are context, not proof',
  'Text, labels or a chart inside the image count when they are readable in the image',
  'Watermarked stock previews, illustrations and AI-generated images match only when the request allows them'];
@@ -25,39 +39,86 @@ const CRITERIA = ['An image whose visible content shows what the request describ
 export async function reviewImages(db: DB, config: Config, query: string, images: ImageResult[], deps: ImageReviewDeps & {judge: Judge}):
  Promise<{results: ReviewedImage[]; removed: number; providers: ProviderStatus[]}> {
  const providers: ProviderStatus[] = [];
- const pool = images.slice(0, REVIEW_POOL), rest = images.slice(REVIEW_POOL);
+ const contract = await planContract(db, config, query, 'images', deps);
+ const screener = 'screener' in deps ? deps.screener : makeScreener(db, config);
+ let ordered = images;
+ if (screener && images.length > REVIEW_POOL) {
+   try {
+     const leads = images.map((image, position) => ({item: contentInput.parse({url: image.image_url, title: image.title}), provider: image.engine, position, image}));
+     const screened = await screener.screen(query, leads, {requirements: judgeRequirements(contract), formats: ['image'], search_date: contract.search_date});
+     ordered = screeningOrder(leads, screened.promising).map(c => c.image);
+   } catch { providers.push({provider: 'jev_screener', status: 'unavailable', message: 'Images were checked in search order.'}); }
+ }
+ const pool = ordered.slice(0, REVIEW_POOL), rest = ordered.slice(REVIEW_POOL);
  const fetchThumb = deps.thumbnail ?? (url => fetchImage(url, {timeoutMs: 4000, maxBytes: THUMB_MAX}));
  const shots = new Map<string, Buffer>();
+ const visuals = new Map<string, NonNullable<JudgeCandidate['visual']>>();
+ const load = async (url: string, key: string, signal?: AbortSignal) => {
+   const got = await fetchThumb(url).catch(() => null);
+   const mime = got && imageMime(got.data);
+   if (!got || !mime || got.data.length > THUMB_MAX || signal?.aborted) return false;
+   shots.set(key, got.data); visuals.set(key, visualReference(got.data, mime)); return true;
+ };
  await Promise.all(pool.map(async (image, i) => {
-   const got = await fetchThumb(image.thumbnail).catch(() => null);
-   // The judge clients send images as JPEG; other formats are judged without their picture.
-   if (got && got.contentType === 'image/jpeg' && got.data.length <= THUMB_MAX) shots.set(`i${i + 1}`, got.data);
+   await load(image.thumbnail, `i${i + 1}`);
  }));
  const candidates: JudgeCandidate[] = pool.map((image, i) => {
    const key = `i${i + 1}`, seen = shots.has(key);
    return {key, kind: 'website', site: image.source_name, url: image.page_url, title: image.title, channel: null, official: false, duration: null, live: null,
      description: image.license ? `Licence: ${image.license.name}${image.license.creator ? ` by ${image.license.creator}` : ''}` : null,
+     provenance: [image.license ? `Licence: ${image.license.name}. Licence URL: ${image.license.url}. Creator: ${image.license.creator ?? 'unknown'}. Attribution: ${image.license.attribution ?? 'unknown'}.` : '',
+       image.ai_generated ? 'The source explicitly labels this image AI-generated.' : ''].filter(Boolean).join(' '),
+     visual: visuals.get(key),
+     facts: contract.requirements.filter(r => r.kind === 'format' && r.formats?.includes('image')).map(r =>
+       ({id: r.id, status: seen ? 'supported' as const : 'unknown' as const, field: 'facts', quote: `${r.id}: ${seen ? 'Inspected image pixels' : 'Image unavailable'}`})),
      comments: [], moments: [], discussions: [],
      ...(seen ? {page: {status: 'checked' as const, title: image.title, description: null, text: null, libraries: [], screenshot: true}} : {})};
  });
- const context: JudgeContext = {kind: 'websites', criteria: CRITERIA};
+ const context: JudgeContext = {kind: 'websites', criteria: CRITERIA, requirements: judgeRequirements(contract), search_date: contract.search_date};
+ // Jev can check textual provenance; image properties always proceed to the model that sees the pixels.
+ const judge = makeJevJudge(db, config, deps.judge, {settle: false}) ?? deps.judge;
  const done = await Promise.allSettled(Array.from({length: Math.ceil(candidates.length / BATCH)}, (_, b) => candidates.slice(b * BATCH, (b + 1) * BATCH))
-   .map(batch => deps.judge.judge(query, batch, context, shots)));
+   .map(batch => judge.judge(query, batch, context, shots)));
  const verdicts = new Map(done.flatMap(d => d.status === 'fulfilled' ? [...d.value.verdicts] : []));
+ const jev = new Map(done.flatMap(d => d.status === 'fulfilled' ? [...d.value.jev ?? []] : []));
  if (!verdicts.size) {
    providers.push({provider: 'judge', status: 'unavailable', message: 'Images could not be checked right now; they are shown in search order.'});
    return {results: images as ReviewedImage[], removed: 0, providers};
  }
  const strong = 'strong' in deps ? deps.strong : makeStrongJudge(db, config);
- const final = strong ? await cascadeReview(query, candidates, verdicts, undefined, context, shots, strong, {...cascadeOptions(config), log: deps.log}) : null;
+ let provenancePages = deps.pages;
+ const final = strong ? await cascadeReview(query, candidates, verdicts, jev, context, shots, strong, {...cascadeOptions(config), log: deps.log,
+   inspection: {judge, inspect: async (c, missing, signal) => {
+     const image = pool[candidates.findIndex(x => x.key === c.key)];
+     if (!image) return null;
+     let next = c;
+     const needs = context.requirements!.filter(r => missing.includes(r.id));
+     if ((!c.visual || needs.some(r => r.evidence_kind === 'visual')) && image.image_url !== image.thumbnail && await load(image.image_url, c.key, signal))
+       next = {...next, visual: visuals.get(c.key), page: {...c.page, status: 'checked', title: image.title, description: c.page?.description ?? null, text: c.page?.text ?? null, libraries: [], screenshot: true},
+         facts: c.facts?.map(f => ({...f, status: 'supported', quote: `${f.id}: Inspected image pixels`}))};
+     if (needs.some(r => r.evidence_kind === 'provenance') && !c.page?.text && !signal.aborted) {
+       provenancePages ??= new PageChecker(config, undefined, {...pageTools(config), renders: 0});
+       const page = await provenancePages.check(image.page_url).catch(() => null);
+       if (page?.status === 'checked' && page.text && !signal.aborted)
+         next = {...next, page: {status: 'checked', title: page.title, description: page.description, text: page.text, libraries: [], screenshot: !!next.visual}};
+     }
+     return signal.aborted || next === c ? null : next;
+   }}}) : null;
  if (final) providers.push(...final.providers);
  const scored = pool.map((image, i) => ({image, i, v: (final?.verdicts ?? verdicts).get(`i${i + 1}`), seen: shots.has(`i${i + 1}`)}));
  const kept = scored.filter(s => s.v && s.v.relevance > TANGENTIAL).sort((a, b) => b.v!.relevance - a.v!.relevance || a.i - b.i);
  const unjudged = scored.filter(s => !s.v), removed = scored.length - kept.length - unjudged.length;
  providers.push({provider: 'judge', status: 'ok', message: `${pool.length} images were checked by looking at them (${shots.size} seen); ${removed} did not match.`});
  (deps.log ?? (line => process.stdout.write(`${JSON.stringify(line)}\n`)))({event: 'image_review', tier: config.TIER, judged: pool.length, seen: shots.size, removed});
- const out = (s: typeof scored[number]): ReviewedImage => ({...s.image, ...(s.v ? {judgement: {relevance: s.v.relevance, reason: s.v.reason}} : {}), ...(s.seen ? {} : {unseen: true as const})});
- return {results: [...kept.map(out), ...unjudged.map(out), ...rest], removed, providers};
+ const out = (s: typeof scored[number]): ReviewedImage => {
+   const candidate = (final?.candidates ?? candidates)[s.i];
+   const missing = s.v ? missingRequirements(candidate, s.v, context.requirements) : context.requirements!.map(r => r.id);
+   return {...s.image, ...(s.v ? {judgement: {relevance: s.v.relevance, reason: s.v.reason}} : {}), ...(s.seen ? {} : {unseen: true as const}),
+     verification: missing.length || !s.seen || (s.v?.relevance ?? 0) <= 5 ? 'uncertain' : 'verified',
+     unmet_requirements: context.requirements!.filter(r => missing.includes(r.id)).map(r => r.text), ai_status: s.image.ai_generated ? 'source_marked' : 'unknown'};
+ };
+ return {results: [...kept.map(out), ...unjudged.map(out), ...rest.map(image => ({...image, verification: 'uncertain' as const,
+   unseen: true as const, ai_status: image.ai_generated ? 'source_marked' as const : 'unknown' as const}))], removed, providers};
 }
 
 // Reviews wait here by token for the page to poll, for ten minutes.

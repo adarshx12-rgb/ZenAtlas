@@ -4,6 +4,7 @@ import time
 import uuid
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -15,7 +16,7 @@ from .subtitles import MAX_SUBTITLE_BYTES, Cue, SubtitleError, cues_sha256, medi
 from .transcribe import transcribe, transcription_installed
 from .validation import ModelOutputRejected, validate_scenes
 
-PIPELINE_VERSION = "gemini-scenes-v2"
+PIPELINE_VERSION = "gemini-scenes-v3"
 DIALOGUE_SOURCES = frozenset({"database_transcript", "sidecar_file", "faster_whisper"})
 Heartbeat = Callable[[], None]
 Transcriber = Callable[[Path, Heartbeat], list[tuple[float, float, str]]]
@@ -62,8 +63,10 @@ def resolution_for(model: str) -> str:
     return "default" if "/" in model else MEDIA_RESOLUTION
 
 
-def analysis_version_for(model: str, subtitles: str, window: tuple[float, float] | None = None) -> str:
-    span = f":w{window[0]:.0f}-{window[1]:.0f}" if window else ""
+def analysis_version_for(model: str, subtitles: str, window: tuple[float, float] | None = None,
+                         windows: tuple[tuple[float, float], ...] = ()) -> str:
+    spans = windows or ((window,) if window else ())
+    span = ":w" + ",".join(f"{a:.0f}-{b:.0f}" for a, b in spans) if spans else ""
     return f"{PIPELINE_VERSION}:{model}:fps{FRAME_SAMPLING_FPS:g}:{resolution_for(model)}:{subtitles}{span}"
 
 
@@ -76,6 +79,35 @@ def job_window(job: dict[str, Any], duration: float) -> tuple[float, float] | No
     if not all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in (start, end)) or start < 0 or end <= start or start >= duration:
         return None
     return float(start), float(min(end, duration))
+
+
+def job_windows(job: dict[str, Any], duration: float) -> tuple[tuple[float, float], ...]:
+    raw = job.get("payload", {}).get("windows")
+    if raw is None:
+        old = job_window(job, duration)
+        return (old,) if old else ()
+    if not isinstance(raw, list) or len(raw) > 3:
+        raise TerminalAnalysisError("invalid_scene_windows")
+    spans = []
+    for item in raw:
+        if not isinstance(item, dict):
+            raise TerminalAnalysisError("invalid_scene_windows")
+        span = job_window({"payload": {"window": item}}, duration)
+        if span is None:
+            raise TerminalAnalysisError("invalid_scene_windows")
+        spans.append(span)
+    return tuple(sorted(spans))
+
+
+def observed_ranges(scenes: Any) -> list[list[float]]:
+    """Coverage is derived from accepted observations, never copied from the requested intervals."""
+    ranges: list[list[float]] = []
+    for scene in scenes:
+        if ranges and scene.start <= ranges[-1][1]:
+            ranges[-1][1] = max(ranges[-1][1], scene.end)
+        else:
+            ranges.append([scene.start, scene.end])
+    return ranges
 
 
 class SceneModel(Protocol):
@@ -181,13 +213,14 @@ class ScenePipeline:
 
         plan = self._subtitle_plan(context, local)
         window = job_window(job, context.duration)
+        windows = job_windows(job, context.duration)
         models = candidate_models(model, self.settings, context.media_kind)
         # An analysis by any model in the chain is reused: the stored record names the model that produced it. A whole-
         # video analysis also serves any window.
         for candidate in models:
-            for version in dict.fromkeys([analysis_version_for(candidate, plan.identity), analysis_version_for(candidate, plan.identity, window)]):
+            for version in dict.fromkeys([analysis_version_for(candidate, plan.identity), analysis_version_for(candidate, plan.identity, windows=windows)]):
                 cached = store.cached_analysis(self.conn, version_id, version)
-                if cached:
+                if cached and store.covers_analysis(self.conn, cached, windows or ((0.0, context.duration),), context.timeline_offset):
                     store.cached(self.conn, job, version_id, cached)
                     return Outcome("cached", analysis_id=cached)
         cues = self._transcribe(context, local, heartbeat) if plan.source == "faster_whisper" and not plan.cues else plan.cues
@@ -197,6 +230,16 @@ class ScenePipeline:
         # Models cooling down after such a failure are skipped without spending budget.
         models = self.cooldowns.usable(models)
         for index, candidate in enumerate(models):
+            timeout = None
+            deadline = job.get("payload", {}).get("interactive_until")
+            if deadline and context.media_kind == "youtube":
+                try:
+                    remaining = (datetime.fromisoformat(deadline.replace("Z", "+00:00")) - datetime.now(timezone.utc)).total_seconds()
+                except (ValueError, TypeError):
+                    raise TerminalAnalysisError("invalid_job_payload") from None
+                if remaining <= 0:
+                    raise TransientAnalysisError("provider_timeout")
+                timeout = min(self.settings.gemini_timeout_seconds, remaining, 45.0)
             if not store.take_budget(self.conn, "scene_analysis_requests", self.settings.daily_request_budget):
                 store.defer_for_budget(self.conn, job, version_id)
                 return Outcome("deferred", "budget_exhausted")
@@ -205,21 +248,23 @@ class ScenePipeline:
                     model=candidate, media_kind=context.media_kind,
                     youtube_url=context.media_reference if context.media_kind == "youtube" else None,
                     local_path=local.path if local else None, mime_type=local.mime_type if local else None,
-                    media_duration=context.duration, cues=cues, focus_query=focus if isinstance(focus, str) else "", window=window), heartbeat)
+                    media_duration=context.duration, cues=cues, focus_query=focus if isinstance(focus, str) else "", window=window,
+                    timeout_seconds=timeout, windows=windows, requirements=tuple(r for r in job.get("payload", {}).get("requirements", [])[:12]
+                                                      if isinstance(r, dict) and isinstance(r.get("id"), str) and isinstance(r.get("text"), str))), heartbeat)
                 model = candidate
                 break
             except TransientAnalysisError as error:
                 self.cooldowns.failed(candidate, error.code)
                 if error.code not in HANDOFF_CODES or index == len(models) - 1:
                     raise
-        analysis_version = analysis_version_for(model, plan.identity, window)
+        analysis_version = analysis_version_for(model, plan.identity, windows=windows)
         validated = validate_scenes(text, media_duration=context.duration, timeline_offset=context.timeline_offset,
-                                    content_duration=context.content_duration, cues=cues)
+                                    content_duration=context.content_duration, cues=cues, requested_ranges=windows)
         analysis_id = store.store_analysis(self.conn, job, context, store.AnalysisRecord(
             analysis_version=analysis_version, model=model, subtitle_source=plan.source,
             subtitle_sha256=cues_sha256(cues) if cues else None,
             dialogue_source=plan.source if plan.source in DIALOGUE_SOURCES else None,
-            inspected_ranges=inspected_ranges(context, window), frame_sampling_fps=FRAME_SAMPLING_FPS,
+            inspected_ranges=observed_ranges(validated.scenes), frame_sampling_fps=FRAME_SAMPLING_FPS,
             media_resolution=resolution_for(model), validated=validated,
             retained_cues=tuple(cues) if plan.source in ("sidecar_file", "faster_whisper") else ()))
         return Outcome("complete", analysis_id=analysis_id, scenes=len(validated.scenes))

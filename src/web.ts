@@ -17,6 +17,7 @@ import { findDocuments, type SourceFindings } from './doc-sources.js';
 import { viewerOf } from './doc-viewers.js';
 import { refreshBlocklists, unsafeLink } from './safety.js';
 import { startWebReview } from './web-review.js';
+import { withSearchTrace, traceFields } from './search-trace.js';
 import { walledSite, walledToken } from './walled.js';
 import type { PeekResponse } from './http.js';
 
@@ -106,7 +107,8 @@ type Deps = {transport: typeof fetchJSON; budget: (db: DB, key: string, limit: n
  review?: false | ((query: string, results: WebResult[]) => string | null);
  rewrite?: (query: string, tab: 'web'|'docs') => Promise<QueryRewrite>};
 
-export async function searchWeb(db: DB, config: Config, input: WebSearchInput,
+export const searchWeb = (...args: Parameters<typeof searchWebImpl>) => withSearchTrace(async () => Object.assign(await searchWebImpl(...args), traceFields()));
+async function searchWebImpl(db: DB, config: Config, input: WebSearchInput,
  deps: Deps = {transport: fetchJSON, budget: takeBudget}): Promise<WebSearchResponse> {
  const docs = input.kind === 'docs';
  const wanted: readonly string[] = docs ? (input.doc_type === 'any' ? ALL_EXTENSIONS : DOCUMENT_TYPES[input.doc_type]) : [];

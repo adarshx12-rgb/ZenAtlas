@@ -79,6 +79,8 @@ export interface ClosestMatchesResponse {
  search_id: string; status: 'pending'|'ready'|'unavailable'|'cancelled'; results: Result[]; message: string;
 }
 export interface SearchResponse {
+ revision?: number;
+ verification?: {status:'running'|'complete'|'partial'; deadline:string; items:{content_id:string; status:string}[]};
  query: string; search_id: string; status: 'complete'|'discovering'|'partial'|'cancelled';
  depth: SearchInput['depth']; stage: DiscoveryStage|null;
  results: Result[]; next_cursor: string|null; has_more: boolean;

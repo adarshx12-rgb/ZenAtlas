@@ -6,7 +6,7 @@ import { discoveryQuery, sameWord, STOPWORDS, tokens } from './ranking.js';
 import { UpstreamError } from './http.js';
 import { takeBudget } from './budgets.js';
 import { YouTubeData, youtubeId, type VideoDetails, type ViewerComment, type YouTubeClient } from './youtube.js';
-import { makeJudge, type Judge, type JudgeCandidate, type JudgeContext, type JudgeResult, type Verdict } from './judge.js';
+import { makeJudge, visualReference, type Judge, type JudgeCandidate, type JudgeContext, type JudgeResult, type Verdict } from './judge.js';
 import { councilReview, makeCouncil, type CouncilSeats } from './council.js';
 import { cascadeOptions, cascadeReview, makeStrongJudge } from './cascade.js';
 import { rankBoost } from './canonical.js';
@@ -14,10 +14,12 @@ import { PageChecker, type PageCheck, type PageEvidence } from './pages.js';
 import type { SearchTarget } from './planner.js';
 import {PublicVideoEvidence,selectComments,type VideoEvidenceAdapter,type VideoEvidence} from './video-evidence.js';
 import {importTranscript} from './moments.js';
-import {retainedEvidence,queueSceneShortlist,quoteMoments} from './retained-evidence.js';
+import {retainedEvidence,queueSceneShortlist,requestSceneAnalysis,quoteMoments,type SceneRequest} from './retained-evidence.js';
+import type {SceneReviewPlan} from './scene-verification.js';
 import { MOMENT_QUERY, captionCommand, fetchCaptionsNow, pythonCaptions, type CaptionFetcher } from './captions.js';
 import {queueCaptions} from './captions.js';
-import { decide, detectFormat, inspect, type Decision, type Finding } from './evidence.js';
+import { decide, detectFormat, inspect, factsFromFindings, type Decision, type Finding } from './evidence.js';
+import { judgeRequirements } from './search-contract.js';
 import { hardEach, type RequirementsContract } from './requirements.js';
 import { accessKind, accessLabel, fullCopyAccess } from './access.js';
 
@@ -32,7 +34,7 @@ export interface Discussion { title: string; url: string; snippet: string|null }
 // council: the judge council's Checker and Chair (src/council.ts); null turns it off, absent builds it from settings when
 // JUDGE_ARCHITECTURE is council. strong: the cascade's Strong judge (src/cascade.ts); absent builds it unless a council is given.
 // captions: fetches captions during a moment search (src/captions.ts); null turns it off, absent builds it from settings.
-export interface SignalDeps { youtube?: YouTubeClient; judge?: Judge; council?: CouncilSeats|null; strong?: Judge|null; captions?: CaptionFetcher|null; pages?: PageCheck; videoEvidence?:VideoEvidenceAdapter; discussions?: (query: string) => Promise<Discussion[]> }
+export interface SignalDeps { sceneLive?:boolean; youtube?: YouTubeClient; judge?: Judge; council?: CouncilSeats|null; strong?: Judge|null; captions?: CaptionFetcher|null; pages?: PageCheck; videoEvidence?:VideoEvidenceAdapter; discussions?: (query: string) => Promise<Discussion[]> }
 // What the search plan wanted, and which kind of search found each result (by result id).
 // underrated is retained for callers; obscurity is a badge, never a ranking boost.
 // contract: the search's shared requirements; findings: evidence already gathered for these candidates (exploration).
@@ -156,6 +158,7 @@ const unavailable = (provider: string, error: unknown, message: string): Provide
 export interface Judged { id: string; relevance: number|null; reason: string|null; basis: 'metadata'|'viewer_claims'|'direct_evidence'|null }
 export async function applySignals(db: DB, config: Config, query: string, results: Result[], deps: SignalDeps = {}, context?: SignalContext) {
  const providers: ProviderStatus[] = [];
+ let sceneRequests:SceneRequest[]=[],sceneCandidates:JudgeCandidate[]=[],sceneContext:JudgeContext|undefined,sceneDeadline='';
  const previews = new Map<string,Buffer>();
  const findings: Finding[] = [], decisions = new Map<string,Decision>(), jevRecords = new Map<string,unknown>();
  if (!results.length) return {results, closest: [] as Result[], providers, previews, judged: [] as Judged[], findings, decisions, jev: jevRecords};
@@ -244,7 +247,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
  const captionsNowTask = async (): Promise<ProviderStatus|null> => {
    const fetcher = 'captions' in deps ? deps.captions : config.YOUTUBE_CAPTIONS && captionCommand(config)
      ? pythonCaptions(captionCommand(config), {proxy: config.YOUTUBE_CAPTIONS_PROXY, supadataKey: config.SUPADATA_API_KEY}) : null;
-   if (!fetcher || !MOMENT_QUERY.test(query)) return null;
+   if (!fetcher || !MOMENT_QUERY.test(query) && !(deps.sceneLive&&config.SCENE_AUTO_QUEUE)) return null;
    const got = await fetchCaptionsNow(db, config, results, fetcher, config.CAPTIONS_NOW, config.CAPTIONS_NOW_MS).catch(() => null);
    return got?.tried ? {provider: 'captions_now', status: got.imported ? 'ok' : 'partial',
      message: `Captions were fetched for ${got.imported} of ${got.tried} video${got.tried === 1 ? '' : 's'} during this search to find the moment.`} : null;
@@ -302,20 +305,22 @@ export async function applySignals(db: DB, config: Config, query: string, result
        moments: (e?.stored ?? []).map((s, j) => ({key: `${key}m${j + 1}`,
          at: formatSeconds(Math.min(...s.cluster.mentions.map(m => m.seconds))), viewers_said: s.cluster.mentions.map(m => m.excerpt)})),
        discussions: (e?.discussions ?? []).map(t => t.title),
+       visual: previews.has(r.id) ? visualReference(previews.get(r.id)!) : undefined,
+       facts: contract ? factsFromFindings(findingsOf(r.canonical_url)) : undefined,
        ...(page ? {page: {status: page.status, title: page.title, description: page.description, text: page.text, libraries: page.libraries,
          screenshot: previews.has(r.id)}} : {}),
        ...(contract ? {description_source: d?.description ? 'api' as const : 'search' as const,
          inspected: {format: detectFormat(r.canonical_url, page).format, published: page?.meta?.published ?? d?.publishedAt?.slice(0, 10) ?? null,
            publisher: page?.meta?.publisher ?? page?.meta?.site_name ?? null, access: accessKind(r.canonical_url)}} : {})};
    });
-   const listed = contract ? hardEach(contract).map(r => ({id: r.id, text: r.text, evidence: r.evidence})) : [];
+   const listed = contract ? judgeRequirements(contract) : [];
    const requirements = listed.length ? listed : undefined;
    // The planner's "websites" is a guess, and told as such to a judge it rejects every video, even ones presenting the
    // requested tools or sites. Mixed keeps the websites preference without excluding them.
    const wanted = context?.kind === 'websites' ? 'mixed' as const : context?.kind ?? 'videos';
    const screenshots = new Map([...previews].flatMap(([id, image]) => keys.has(id) ? [[keys.get(id)!, image] as const] : []));
    // Smaller batches in parallel answer faster, and a failed batch only leaves its own results unjudged.
-   const judgeContext = context ? {kind: wanted, criteria: context.criteria, anime: context.anime, ...(requirements ? {requirements} : {})} : undefined;
+   const judgeContext = context ? {kind: wanted, criteria: context.criteria, anime: context.anime, ...(contract ? {search_date: contract.search_date} : {}), ...(requirements ? {requirements} : {})} : undefined;
    const judgeAll = (list: JudgeCandidate[], size: number) => Promise.allSettled(
      Array.from({length: Math.ceil(list.length/size)}, (_, b) => list.slice(b*size, (b + 1)*size)).map(batch =>
        judge.judge(query, batch, judgeContext, screenshots).then(out => ({batch, out}))));
@@ -335,14 +340,50 @@ export async function applySignals(db: DB, config: Config, query: string, result
    // Lighter fallback models often skip candidates in long batches; the skipped ones are asked once more in short batches.
    const skipped = settled.flatMap(s => s.status === 'fulfilled' ? s.value.batch.filter(c => !byKey.has(c.key)) : []);
    if (skipped.length) collect(await judgeAll(skipped, RETRY_BATCH));
+   // Start watching while the remaining evidence checks and ranking run. Every subscribed search will receive the
+   // later result revision; no model call is held open here waiting for the Python worker.
+   if(deps.sceneLive&&config.SCENE_AUTO_QUEUE&&config.SCENE_SEARCH_LIMIT){
+     sceneCandidates=candidates.filter(c=>c.kind==='video'&&!c.scenes?.length&&byKey.has(c.key)&&byKey.get(c.key)!.relevance>=3&&
+       !byKey.get(c.key)!.intentChecks?.some(ch=>ch.status==='mismatch')).sort((a,b)=>byKey.get(b.key)!.relevance-byKey.get(a.key)!.relevance).slice(0,config.SCENE_SEARCH_LIMIT);
+     sceneContext=judgeContext??{kind:'videos',criteria:[],...(requirements?{requirements}:{})};
+     sceneDeadline=new Date(Date.now()+config.SCENE_VERIFY_MS).toISOString();
+     const watching=sceneCandidates.map(c=>{const id=idOf.get(c.key)!,r=pool.find(r=>r.id===id)!;return {...r,duration:r.duration??extra.get(id)?.details?.duration??null,
+       judgement:{relevance:byKey.get(c.key)!.relevance,reason:'Pending scene inspection',model:'pending'}};});
+     sceneRequests=await requestSceneAnalysis(db,config,watching,query,{interactive:true,deadline:sceneDeadline,
+       requirements:requirements?.filter(r=>!['format','date','duration','authority','completeness'].includes(r.kind??''))}).catch(()=>[]);
+   }
    // The second stage re-checks verdicts across all batches: the cascade sends only uncertain ones to one Strong judge;
    // the council (JUDGE_ARCHITECTURE=council) re-checks the top ones, with a Chair where the two disagree.
    const council = 'council' in deps ? deps.council : config.JUDGE_ARCHITECTURE === 'council' ? makeCouncil(db, config) : null;
    const strong = 'strong' in deps ? deps.strong : 'council' in deps ? null : makeStrongJudge(db, config);
    if (strong && byKey.size) {
      const jevByKey = new Map([...keys].flatMap(([id, key]) => jevRecords.has(id) ? [[key, jevRecords.get(id)] as const] : []));
-     const reviewed = await cascadeReview(query, candidates, byKey, jevByKey, judgeContext, screenshots, strong, cascadeOptions(config));
+     const reviewed = await cascadeReview(query, candidates, byKey, jevByKey, judgeContext, screenshots, strong, {...cascadeOptions(config),
+       inspection: {judge, inspect: async (c, _missing, signal) => {
+         const id = idOf.get(c.key)!, r = pool.find(r => r.id === id)!;
+         if (youtubeId(c.url ?? '') && !c.transcripts?.length) {
+           const fetcher = 'captions' in deps ? deps.captions : config.YOUTUBE_CAPTIONS && captionCommand(config)
+             ? pythonCaptions(captionCommand(config), {proxy: config.YOUTUBE_CAPTIONS_PROXY, supadataKey: config.SUPADATA_API_KEY}) : null;
+           if (!fetcher) return null;
+           await fetchCaptionsNow(db, config, [r], fetcher, 1, config.CASCADE_INSPECTION_MS);
+           const evidence = await retainedEvidence(db, [id], query);
+           const fresh = evidence.get(id);
+           if (!fresh?.transcripts.length || signal.aborted) return null;
+           retained.set(id, fresh);
+           return {...c, transcripts: fresh.transcripts};
+         }
+         if (!pages || c.page?.text || c.kind === 'video') return null;
+         const page = await pages.check(c.url!);
+         if (page.status !== 'checked' || !page.text || signal.aborted) return null;
+         info(id).page = page;
+         if (page.screenshot) { previews.set(id, page.screenshot); screenshots.set(c.key, page.screenshot); }
+         if (contract) findings.push(...inspect(contract, {url: r.canonical_url, title: r.title, description: r.description, published_at: r.published_at, page}));
+         return {...c, page: {...page, screenshot: !!page.screenshot}, visual: page.screenshot ? visualReference(page.screenshot) : undefined,
+           facts: contract ? factsFromFindings(findingsOf(r.canonical_url)) : undefined};
+       }}});
      for (const [key, v] of reviewed.verdicts) byKey.set(key, v);
+     for (const [key, record] of reviewed.jev) if (idOf.has(key)) jevRecords.set(idOf.get(key)!, record);
+     for (const [key, record] of reviewed.records) if (record.model) modelOf.set(key, record.model);
      providers.push(...reviewed.providers);
    } else if (council && byKey.size) {
      const reviewed = await councilReview(query, candidates, byKey, judgeContext, screenshots, council,
@@ -432,10 +473,10 @@ export async function applySignals(db: DB, config: Config, query: string, result
  for (const id of previews.keys()) if (!shown.has(id)) previews.delete(id);
  // With nothing verified, the closest candidates are the videos worth watching: they are queued for inspection too, so a
  // later search can confirm or reject what only watching can settle (actions, their order, sound).
- const queued=await queueSceneShortlist(db,config,ranked.length?ranked:closest,query,ranked.length?6:3).catch(()=>0);
+ const queued=deps.sceneLive?sceneRequests.length:await queueSceneShortlist(db,config,ranked.length?ranked:closest,query,ranked.length?6:3).catch(()=>0);
  const unwatched=!ranked.length && closest.some(r=>r.duration!==null) && !closest.some(r=>(r.evidence_coverage?.analysed_scenes??0)>0);
  if(unwatched) providers.push({provider:'video_inspection',status:'ok',message:queued
-   ? `No candidate video has been watched yet, so what happens in them (actions, their order, sound) is unverified. ${queued} were queued for inspection; search again in a few minutes to check them.`
+   ? `Video actions, their order and sound are being checked for ${queued} candidates.${deps.sceneLive?' This search will update automatically.':' Completed scenes help later searches.'}`
    : 'No candidate video has been watched, and video inspection is not available for them right now, so what happens in them (actions, their order, sound) is unverified.'});
  else if(queued) providers.push({provider:'scene_analysis',status:'partial',message:`${queued} videos queued for scene analysis; these pending analyses are not evidence in this ranking.`});
  const captioned=await queueCaptions(db,config,ranked).catch(()=>0);
@@ -443,5 +484,8 @@ export async function applySignals(db: DB, config: Config, query: string, result
  // Every candidate's verdict, rejected ones included, for the search's learning trace.
  const judged: Judged[] = scored.map(s => ({id: s.result.id, relevance: s.result.judgement?.relevance ?? null, reason: s.result.judgement?.reason ?? null,
    basis: s.result.judgement ? s.result.evidence_coverage?.basis ?? null : null}));
- return {results: ranked, closest, providers, previews, judged, findings, decisions, jev: jevRecords};
+ const sceneReview:SceneReviewPlan|undefined=sceneRequests.length&&sceneContext?{deadline:sceneDeadline,context:sceneContext,...(contract?{contract}:{}),
+   entries:sceneRequests.flatMap(j=>{const candidate=sceneCandidates.find(c=>c.key===keys.get(j.content_id)),result=scored.find(s=>s.result.id===j.content_id)?.result;
+     return candidate&&result?[{...j,candidate,result,findings:findingsOf(result.canonical_url)}]:[];})}:undefined;
+ return {results: ranked, closest, providers, previews, judged, findings, decisions, jev: jevRecords,sceneReview};
 }

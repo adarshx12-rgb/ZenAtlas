@@ -30,6 +30,8 @@ export interface TraceEntry {
  jev?: unknown;
 }
 export interface SearchTrace {
+ // Correlates model-cost and cascade logs with this persisted trace; separate from the database row ID.
+ trace_id?: string;
  exploration?: ExplorationTrace;
  query: string; depth: 'quick'|'deep';
  plan: {kind: string; criteria: string[]; model: string|null};

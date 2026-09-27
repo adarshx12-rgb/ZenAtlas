@@ -26,7 +26,8 @@ const retryDelayMs = (error: unknown) => {
  const seconds = Number(/retry=(\d+(?:\.\d+)?)s/.exec((error as UpstreamError).detail ?? '')?.[1] ?? 10);
  return Math.min(30_000, Math.max(1000, seconds*1000));
 };
-export interface InlineImage { label: string; mimeType: 'image/jpeg'; data: Buffer }
+export type ImageMime = 'image/jpeg'|'image/png'|'image/webp'|'image/gif';
+export interface InlineImage { label: string; mimeType: ImageMime; data: Buffer }
 
 // The provider-independent half of a model client: which models to try in what order, when to set one aside, what to
 // spend, and what to record. A subclass supplies only one provider's request and response shape.

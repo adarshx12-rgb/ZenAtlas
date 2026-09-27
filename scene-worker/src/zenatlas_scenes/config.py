@@ -74,6 +74,7 @@ class Settings:
     gemini_fallback_models: tuple[str, ...] = ()
     openrouter_api_key: str = ""
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
+    concurrency: int = 2
 
     @classmethod
     def from_env(cls, env: Mapping[str, str]) -> Settings:
@@ -113,6 +114,7 @@ class Settings:
             daily_request_budget=_integer(env, "SCENE_ANALYSIS_DAILY_BUDGET", 20, 0, 10000),
             lease_seconds=lease,
             poll_seconds=_integer(env, "SCENE_POLL_SECONDS", 5, 1, 300),
+            concurrency=_integer(env, "SCENE_CONCURRENCY", 2, 1, 4),
             transcribe_fallback=_boolean(env, "SCENE_TRANSCRIBE_FALLBACK", False),
             whisper_model=whisper_model,
             whisper_device=device,

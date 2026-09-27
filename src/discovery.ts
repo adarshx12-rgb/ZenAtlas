@@ -22,6 +22,9 @@ import { criteriaOf, explicitFormats, hardEach, normaliseContract, rulesContract
 import { coverage, decide, inspect, type Finding } from './evidence.js';
 import { exploreGaps, type GapCandidate, type GapChooser, type GapTrace } from './gaps.js';
 import { makeJevJudge } from './jev-judge.js';
+import { completeContract } from './search-contract.js';
+import { withSearchTrace, traceFields } from './search-trace.js';
+import type {SceneReviewPlan} from './scene-verification.js';
 import { unauthorized } from './access.js';
 import { contentInput } from './types.js';
 import { YouTubeData, youtubeId, type VideoDetails, type YouTubeClient } from './youtube.js';
@@ -105,10 +108,15 @@ function leadsMaterial(results: {url: string; title: string; creator: string|nul
 // specialist indexes and grounded follow-ups, then rechecks quick and deep finds together.
 // Returns the final order, the records it stored, the addresses its judge rejected after they had been shown, and the
 // searches it ran.
-export async function runDiscovery(db: DB, config: Config, input: SearchInput, adapters: SourceAdapter[]|undefined,
+export const runDiscovery = (...args: Parameters<typeof runDiscoveryImpl>) => withSearchTrace(async () => {
+ const out = await runDiscoveryImpl(...args);
+ Object.assign(out.trace, traceFields());
+ return Object.assign(out, traceFields());
+});
+async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adapters: SourceAdapter[]|undefined,
  deps: DiscoveryDeps, health: Health, progress: Progress = async () => {}): Promise<{results: Result[]; closest: Result[]; ingested: Result[]; dropped: string[];
  providers: ProviderStatus[]; previews: Map<string,Buffer>; searches: PlannedSearch[]; trace: SearchTrace;
- contract?: RequirementsContract|null; unmet?: string[]}> {
+  contract?: RequirementsContract|null; unmet?: string[]; sceneReview?:SceneReviewPlan}> {
  const deep = input.depth === 'deep' && !input.source;
  const providers = adapters ?? configuredProviders(config);
  const archives = deep ? deps.archives ?? configuredArchives(config, input.q) : [];
@@ -288,7 +296,7 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
  if (failure) throw failure;
  // The contract: the planner's draft normalised against the search date, or the query's own words when planning failed.
  const contract: RequirementsContract|null = contracted
-   ? plan.draft !== undefined ? normaliseContract(input.q, today, plan.draft) : rulesContract(input.q, today) : null;
+   ? completeContract(plan.draft !== undefined ? normaliseContract(input.q, today, plan.draft) : rulesContract(input.q, today), 'videos') : null;
  if (contract) {
    plan = {...plan, criteria: [...new Set([...criteriaOf(contract), ...plan.criteria])].slice(0, 5)};
    if (named.length && named.every(f => f === 'video')) plan = {...plan, kind: 'videos'};
@@ -305,7 +313,7 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
  const checker = deps.pages ?? (config.PAGE_CHECKS ? new PageChecker(config) : undefined);
  // Gap exploration visits pages on top of the ordinary evidence checks, and every fetch is shared through this cache.
  const gapping = !!contract && config.GAP_EXPLORATION && !/(?:^|\s)site:/i.test(input.q) &&
-   contract.requirements.some(r => r.hardness === 'hard' || r.scope === 'set');
+   contract.requirements.some(r => r.scope === 'set' || r.hardness === 'hard' && r.kind !== 'subject');
  const pageBudget = config.PAGE_CHECKS + (gapping ? config.JEV_EXPLORATION_VISITS + GAP_INITIAL : 0);
  const checkPage = async (url: string): Promise<PageEvidence> => {
    if (!cachedPages.has(url) && checker && cachedPages.size < pageBudget)
@@ -475,7 +483,7 @@ export async function runDiscovery(db: DB, config: Config, input: SearchInput, a
  const byUrl = new Map(found.map(r => [r.canonical_url, r.id]));
  return {results, closest:signals.closest.filter(r=>matchesFilters(r,input)), ingested: found, previews: signals.previews, searches,
    dropped: [...new Set([...found, ...earlier.results].filter(r => !kept.has(r.canonical_url)).map(r => r.canonical_url))], providers: [...statuses, ...signals.providers],
-   contract, unmet,
+   contract, unmet,sceneReview:signals.sceneReview,
    trace: {...base, ...(exploration?{exploration}:{}),
      ...(contract ? {contract, unmet, ...(gapTrace ? {gaps: gapTrace} : {}),
        pool: base.pool.map(p => {

@@ -170,6 +170,22 @@ const worker: Check = {name: 'worker', label: 'Background worker', category: 'se
    return ok('running', `Running for ${ago(beat.uptime)} (pid ${beat.pid}).`, details);
  }};
 
+const sceneWorker:Check={name:'scene_worker',label:'Scene analysis worker',category:'services',every:()=>1,confirm:1,
+ async run({db,config}){
+   if(!config.SCENE_AUTO_QUEUE)return ok('disabled','Automatic scene analysis is disabled.');
+   const beat=(await db.query("SELECT extract(epoch FROM now()-beat_at)::int AS silent,details FROM service_heartbeats WHERE service='scene-worker'")).rows[0];
+   const q=(await db.query(`SELECT count(*) FILTER(WHERE status='queued' AND run_after<=now())::int AS ready,
+     extract(epoch FROM now()-min(run_after) FILTER(WHERE status='queued' AND run_after<=now()))::int AS oldest,
+     count(*) FILTER(WHERE status='running' AND lease_until>=now())::int AS running,
+     count(*) FILTER(WHERE status='queued' AND error_code='budget_exhausted')::int AS deferred
+     FROM jobs WHERE kind='scene_analysis' AND status IN ('queued','running')`)).rows[0];
+   if(!beat||beat.silent>config.WATCHDOG_STALE_SECONDS)return failing('scene_worker_stopped','The scene worker has no recent heartbeat; queued video checks cannot finish.',q);
+   if(beat.details?.alive<beat.details?.slots)return failing('scene_slot_stopped','A scene worker slot stopped.',q);
+   if(q.oldest>config.WATCHDOG_QUEUE_SECONDS)return warning('scene_queue_delayed',`The oldest ready scene job has waited ${ago(q.oldest)}.`,q);
+   if(q.deferred)return warning('scene_budget_deferred',`${q.deferred} scene jobs are deferred by the provider-attempt budget.`,q);
+   return ok('running',`${q.ready} ready, ${q.running} running scene jobs.`,q);
+ }};
+
 const queue: Check = {name: 'job_queue', label: 'Job queue', category: 'services', every: () => 1,
  async run({db, config}) {
    // A running job whose lease ran out is waiting again: its worker stopped.
@@ -621,7 +637,7 @@ const vulnerabilities: Check = {name: 'vulnerabilities', label: 'Known vulnerabi
    return hits.some(h => h.severity === 'high' || h.severity === 'critical') ? failing('vulnerable', text, details) : warning('vulnerable', text, details);
  }};
 
-export const CHECKS: Check[] = [api, worker, queue, database, budgets, runningCode, searchProviders, searxng, searxngEngines, searxngRelease,
+export const CHECKS: Check[] = [api, worker, sceneWorker, queue, database, budgets, runningCode, searchProviders, searxng, searxngEngines, searxngRelease,
  gemini, tierModels, embeddings, youtube, anilist, browser, pageText, nodeRuntime, packages, vulnerabilities, packageUpdates];
 
 export function defaultEnv(db: DB, config: Config, root = process.cwd()): CheckEnv {

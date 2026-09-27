@@ -43,11 +43,11 @@ test('Roswell "real article": the contract reaches every stage, videos cannot sa
        pages:pagesOf(site),judge:judgeSeeing(contexts),screener,today:DAY},async()=>{});
    const format=out.contract!.requirements.find(r=>r.kind==='format')!;
    assert.deepEqual(format.formats,['article']);
-   assert.deepEqual(screened?.requirements.map(r=>r.id),[format.id],'the screener works from the contract');
+   assert.deepEqual(screened?.requirements.map(r=>r.id),out.contract!.requirements.filter(r=>r.hardness==='hard'&&r.scope==='each').map(r=>r.id),'the screener works from the complete contract');
    assert.ok(contexts.every(c=>c?.requirements?.some(r=>r.id===format.id)),'the judge checks the same requirement IDs');
    assert.deepEqual(out.trace.contract?.query,q,'the trace keeps the contract with the original query');
    assert.deepEqual(out.results.map(r=>r.canonical_url),['https://www.smithsonianmag.com/history/roswell-incident']);
-   assert.deepEqual(out.results[0].requirements?.map(r=>[r.id,r.status,r.excerpt]),[[format.id,'supported','NewsArticle']]);
+   assert.deepEqual(out.results[0].requirements?.filter(r=>r.id===format.id).map(r=>[r.id,r.status,r.excerpt]),[[format.id,'supported','NewsArticle']]);
    assert.ok(!out.ingested.some(r=>r.canonical_url.includes('youtube')),
      'inspection before admission already contradicted the article-only requirement, so the video is never admitted');
    const ablation=await runDiscovery(db,{...config,GAP_EXPLORATION:false},searchInput.parse({q}),[provider({[q]:rows})],

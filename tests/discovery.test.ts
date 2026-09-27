@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {database,fixture,testConfig} from './helpers.js';
+import {database,fixture,testConfig as baseConfig} from './helpers.js';
 import {rankDiscovery,type DiscoveryCandidate} from '../src/ranking.js';
 import {BraveSearch,SearXNG} from '../src/providers.js';
 import {SearchService} from '../src/search.js';
@@ -15,6 +15,10 @@ import {runDiscovery} from '../src/discovery.js';
 import type {Screener} from '../src/screener.js';
 import {UpstreamError} from '../src/http.js';
 import type {Explorer} from '../src/exploration.js';
+
+// These scheduling/admission fixtures inject bare scores, without inspected requirement evidence.
+// Contract integration is covered separately by pipeline and evidence-routing tests.
+const testConfig={...baseConfig,REQUIREMENTS_ENABLED:false};
 
 const lead=(url:string,title:string,provider='searxng',position=0,description:string|null=null):DiscoveryCandidate=>
  ({item:contentInput.parse({url,title,description}),provider,position});

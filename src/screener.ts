@@ -4,6 +4,7 @@ import type { DB } from './db.js';
 import type { DiscoveryCandidate } from './ranking.js';
 import { fetchJSON, UpstreamError } from './http.js';
 import { takeBudget } from './budgets.js';
+import { decisionCost } from './search-trace.js';
 
 const probability = z.number().min(0).max(1);
 const answer = z.object({
@@ -92,7 +93,9 @@ export class JevScreener implements Screener {
          ...(this.config.OPENROUTER_SITE_NAME ? {'X-Title': this.config.OPENROUTER_SITE_NAME} : {})},
        timeoutMs: this.config.JEV_SCREEN_TIMEOUT_MS, maxBytes: 128 * 1024, body,
      });
-     const parsed = response.safeParse(await call().catch(error => (error as {code?: string})?.code === 'ECONNRESET' ? call() : Promise.reject(error)));
+     const raw = await call().catch(error => (error as {code?: string})?.code === 'ECONNRESET' ? call() : Promise.reject(error));
+     decisionCost(this.config, 'jev_screen_calls', raw);
+     const parsed = response.safeParse(raw);
      if (!parsed.success || Object.keys(parsed.data.answers).length !== batch.length ||
        batch.some((_, i) => !Object.hasOwn(parsed.data.answers, `c${i}`))) throw new UpstreamError('malformed_response');
      return batch.map((c, i): ScreenDecision => {

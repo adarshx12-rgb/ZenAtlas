@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from pathlib import Path
 
 import httpx
@@ -19,6 +20,17 @@ def request(model="google/gemini-3.8-flash", kind="youtube"):
 
 def model_with(handler):
     return OpenRouterSceneModel("key-1", "https://openrouter.ai/api/v1", 60, transport=httpx.MockTransport(handler))
+
+
+def test_multiple_intervals_are_instructions_with_full_video_url_and_bounded_timeout():
+    def handler(req):
+        body = json.loads(req.content)
+        parts = body["messages"][1]["content"]
+        assert parts[0] == {"type": "video_url", "video_url": {"url": "https://www.youtube.com/watch?v=abc"}}
+        assert "[[10, 20], [40, 50]]" in parts[1]["text"] and "ORIGINAL video timeline" in parts[1]["text"]
+        assert req.extensions["timeout"]["read"] == 12
+        return httpx.Response(200, json={"choices": [{"message": {"content": "{}"}}]})
+    model_with(handler).analyse(replace(request(), windows=((10, 20), (40, 50)), timeout_seconds=12), lambda: None)
 
 
 def test_the_youtube_url_system_instruction_and_json_schema_go_to_openrouter_and_the_reply_text_comes_back():

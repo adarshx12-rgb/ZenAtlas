@@ -40,6 +40,7 @@ const withDetails = (item: Result, found: Result): Result => ({...item,
  duration: item.duration ?? found.duration, published_at: item.published_at ?? found.published_at, creator: item.creator ?? found.creator,
  badges: found.badges ?? item.badges, judgement: found.judgement ?? item.judgement,
  evidence_coverage: found.evidence_coverage ?? item.evidence_coverage,
+ evidence: found.evidence,
  ...(found.requirements ? {requirements: found.requirements, uncertainties: found.uncertainties} : {}),
  moments: [...item.moments, ...found.moments.filter(m => !item.moments.some(o => o.id === m.id))].sort((a, b) => a.start_seconds - b.start_seconds),
  ...(found.preview && found.id === item.id ? {preview: true} : {})});
@@ -107,7 +108,8 @@ export class SearchService {
      ({search_id:id,status,message,results});
    if(snapshot.cancelled) return response('cancelled','Discovery updates were stopped. Start another search to see closest matches.');
    if(!snapshot.job_id) return response('unavailable','Closest matches are available after external discovery. Try a fresh discovery search.');
-   const job=(await this.db.query('SELECT status,result FROM jobs WHERE id=$1',[snapshot.job_id])).rows[0];
+   const job=(await this.db.query('SELECT status,result,lease_token FROM jobs WHERE id=$1',[snapshot.job_id])).rows[0];
+   if(snapshot.applied_run&&snapshot.applied_run!==job?.lease_token) return response('unavailable','This discovery run has expired. Start a fresh search for closest matches.');
    if(job && ['queued','running'].includes(job.status)) return response('pending','Closest matches will be available when discovery finishes.');
    if(job?.status!=='complete') return response('unavailable','Discovery could not finish. Retry the search to see closest matches.');
    const main=new Set((job.result?.results??[]).map((r:Result)=>r.canonical_url));
@@ -156,21 +158,24 @@ export class SearchService {
        JSON.stringify(providers),this.config.SEARCH_TTL_SECONDS])).rows[0];
  }
  private async refresh(initial: any): Promise<{snapshot: any; job: any}> {
-   const job = initial.job_id ? (await this.db.query('SELECT status,result FROM jobs WHERE id=$1',[initial.job_id])).rows[0] : null;
-   if (!job?.result || initial.discovery_applied || initial.cancelled) return {snapshot:initial,job};
+   const job = initial.job_id ? (await this.db.query('SELECT status,result,lease_token FROM jobs WHERE id=$1',[initial.job_id])).rows[0] : null;
+   if(initial.applied_run&&initial.applied_run!==job?.lease_token)return {snapshot:initial,job:null};
+   const revision=job?.result?.revision??0;
+   if (!job?.result || initial.discovery_applied&&revision<=(initial.applied_revision??0) || initial.cancelled) return {snapshot:initial,job};
    const final = job.status==='complete';
    const found: Result[] = job.result.results ?? [];
    const known = new Set((initial.results as Result[]).map(r=>r.canonical_url));
    if (!final && !found.some(r=>!known.has(r.canonical_url) && matchesFilters(r,initial.filters))) return {snapshot:initial,job};
    const snapshot = await this.db.transaction(async tx=>{
      const current = (await tx.query('SELECT * FROM searches WHERE id=$1 FOR UPDATE',[initial.id])).rows[0];
-     if (current.discovery_applied || current.cancelled) return current;
+     if (current.applied_run&&current.applied_run!==job.lease_token || current.discovery_applied&&revision<=(current.applied_revision??0) || current.cancelled) return current;
      const results = merge(current.results,found,current.filters,
        final ? {dropped:job.result.dropped??[],deep:current.filters.depth==='deep',
          checked:(job.result.providers??[]).some((p:ProviderStatus)=>p.provider==='judge')} : null);
-     const providers = final ? [...current.provider_status,...(job.result.providers??[])] : current.provider_status;
-     return (await tx.query(`UPDATE searches SET results=$2,provider_status=$3,discovery_applied=$4 WHERE id=$1 RETURNING *`,
-       [current.id,JSON.stringify(results.slice(0,250)),JSON.stringify(providers),final])).rows[0];
+     const providers = final ? [...current.provider_status.filter((p:ProviderStatus)=>!(job.result.providers??[]).some((n:ProviderStatus)=>n.provider===p.provider)&&
+       !['scene_analysis','video_inspection','scene_verification'].includes(p.provider)),...(job.result.providers??[])] : current.provider_status;
+     return (await tx.query(`UPDATE searches SET results=$2,provider_status=$3,discovery_applied=$4,applied_revision=$5,applied_run=$6 WHERE id=$1 RETURNING *`,
+       [current.id,JSON.stringify(results.slice(0,250)),JSON.stringify(providers),final,revision,final?job.lease_token:null])).rows[0];
    });
    return {snapshot,job};
  }
@@ -222,7 +227,10 @@ export class SearchService {
      results:slice.flatMap(r=>shown.get(r.id)??[]),has_more:more,next_cursor:more?encodeCursor(this.config,snapshot.id,offset+filters.limit):null,
      discovered:found.flatMap(r=>shown.get(r.id)??[]),catalogue_total:all.length-found.length,
      ranked:all.flatMap(r=>shown.get(r.id)??[]),
-     discovery_job_id:snapshot.job_id,providers,ranking_version:snapshot.ranking_version,
+     discovery_job_id:snapshot.job_id,providers,ranking_version:snapshot.ranking_version,revision:snapshot.applied_revision??0,
+     ...(!snapshot.cancelled&&job?.result?.verification?{verification:{...job.result.verification,
+       ...(job.result.verification.status==='running'&&Date.now()>Date.parse(job.result.verification.deadline)+15000?{status:'partial',items:job.result.verification.items.map((i:any)=>
+         ['queued','analysing'].includes(i.status)?{...i,status:'timed_out'}:i)}:{})}}:{}),
      ...(job?.status==='complete'&&job.result?.contract?{interpretation:interpretationOf(job.result.contract,job.result.unmet)}:{})};
  }
 }

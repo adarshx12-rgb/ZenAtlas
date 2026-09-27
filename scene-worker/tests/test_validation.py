@@ -9,6 +9,17 @@ from zenatlas_scenes.subtitles import Cue
 from zenatlas_scenes.validation import ModelOutputRejected, parse_timestamp, validate_scenes
 
 
+def test_instruction_windows_reject_timestamps_between_requested_spans():
+    from zenatlas_scenes.pipeline import observed_ranges
+    result = validate_scenes(scenes_reply(
+        {"start": "00:12", "end": "00:15", "description": "Launch visible."},
+        {"start": "00:40", "end": "00:45", "description": "Landing visible."},
+        {"start": "00:25", "end": "00:30", "description": "Outside requested intervals."}),
+        media_duration=60, timeline_offset=5, content_duration=70, cues=[], requested_ranges=((10, 20), (40, 50)))
+    assert result.rejected == {"outside_requested_range": 1}
+    assert observed_ranges(result.scenes) == [[17, 20], [45, 50]], "actual observations must not imply full requested coverage"
+
+
 def validate(text: str, *, duration: float = 60.0, offset: float = 0.0, content: float | None = None, cues=()):
     return validate_scenes(text, media_duration=duration, timeline_offset=offset, content_duration=content, cues=list(cues))
 

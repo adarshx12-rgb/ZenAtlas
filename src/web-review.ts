@@ -11,6 +11,7 @@ import { makeCouncil, type CouncilSeats } from './council.js';
 import { cascadeOptions, makeStrongJudge } from './cascade.js';
 import { makeRefillPlanner, mergeReviewed, type RefillPlanner } from './refill.js';
 import type { WebResult } from './web.js';
+import { planContract, type ContractDeps } from './search-contract.js';
 
 // The Web tab's relevance review, run in the background after /api/web answers with the search results. Every page is
 // read (no browser); Jev analyses each page's text for relevance and accuracy and removes confident failures; every page
@@ -19,7 +20,7 @@ import type { WebResult } from './web.js';
 
 export interface WebReviewState { status: 'running'|'complete'; results: WebResult[]; removed: number; providers: ProviderStatus[] }
 // refill: the planner's check of what was kept (null turns it off); fetch: runs its searches (web.ts passes the Brave search).
-export type WebReviewDeps = {judge?: Judge; pages?: PageCheck; screener?: Screener; council?: CouncilSeats|null; strong?: Judge|null;
+export type WebReviewDeps = ContractDeps & {judge?: Judge; pages?: PageCheck; screener?: Screener; council?: CouncilSeats|null; strong?: Judge|null;
  refill?: RefillPlanner|null; fetch?: (searches: string[]) => Promise<WebResult[]>; log?: (line: Record<string, unknown>) => void};
 // New pages a refill may add to the review.
 const REFILL_POOL = 20;
@@ -30,7 +31,7 @@ const CRITERIA = ['A web page that itself answers, explains or provides what the
  'Home pages, search or listing pages and link farms match only when the request asks for that site',
  "The page's information is accurate and trustworthy: prefer primary, specific, current sources. jev_check, when present, is a fast first reading (relevance 0-4, accuracy 0-1): advisory only"];
 
-// Jev in gate mode in front of the LLM judge: Jev removes pages that confidently miss or look unreliable and, unless
+// Jev in gate mode in front of the LLM judge: Jev removes pages with grounded contradictions and, unless
 // WEB_JEV_SETTLE, forwards even its confident matches.
 export function webJudge(db: DB, config: Config): Judge|undefined {
  return makeJevJudge(db, {...config, JEV_JUDGE_REJECT: true}, makeJudge(db, config), {settle: config.WEB_JEV_SETTLE, accuracy: true});
@@ -44,6 +45,7 @@ export function webReviewMetrics(trace: ReviewOutcome<unknown>['trace']) {
 }
 
 export async function reviewWeb(db: DB, config: Config, query: string, results: WebResult[], deps: WebReviewDeps & {judge: Judge}) {
+ const contract = await planContract(db, config, query, 'web', deps);
  const pages = deps.pages ?? new PageChecker(config, undefined, {...pageTools(config), renders: 0});
  const read = async (items: WebResult[]) => {
    const text = new Map<string, PageEvidence>();
@@ -53,7 +55,7 @@ export async function reviewWeb(db: DB, config: Config, query: string, results: 
    clearTimeout(timer);
    return new Map(text);
  };
- const plan = {noun: 'pages', criteria: CRITERIA, textPool: WEB_POOL, reviewPool: WEB_POOL, read, judge: deps.judge,
+ const plan = {noun: 'pages', contract, criteria: CRITERIA, textPool: WEB_POOL, reviewPool: WEB_POOL, read, judge: deps.judge,
    // A council passed in (tests) keeps the council; otherwise JUDGE_ARCHITECTURE picks the second stage.
    council: 'council' in deps ? deps.council : config.JUDGE_ARCHITECTURE === 'council' ? makeCouncil(db, config) : null,
    strong: 'strong' in deps ? deps.strong : 'council' in deps ? null : makeStrongJudge(db, config), cascade: cascadeOptions(config), councilTop: config.COUNCIL_CHECK_TOP, councilGap: config.COUNCIL_DISAGREEMENT, councilSure: config.COUNCIL_SURE_SCORE,
@@ -69,8 +71,8 @@ export async function reviewWeb(db: DB, config: Config, query: string, results: 
  if (refill && deps.fetch) {
    const started = Date.now();
    const kept = out.results.filter(r => r.judgement).slice(0, 15)
-     .map(r => ({title: r.title, host: r.source_name, relevance: r.judgement!.relevance, reason: r.judgement!.reason}));
-   const decision = await refill(query, kept, [query]).catch(() => null);
+     .map(r => ({title: r.title, host: r.source_name, relevance: r.judgement!.relevance, reason: r.judgement!.reason, missing: r.unmet_requirements}));
+   const decision = await refill(query, kept, [query], contract).catch(() => null);
    let added = 0, fetched = 0;
    if (decision?.searches.length) {
      const seen = new Set(results.map(r => r.url));

@@ -4,12 +4,12 @@ import {decide} from '../src/evidence.js';
 
 const contract=(texts:string[])=>({requirements:texts.map((text,i)=>({id:`R${i+1}`,text,kind:'property',hardness:'hard',scope:'each',evidence:'e'}))}) as any;
 
-test('an exclusion the evidence cannot confirm is waived with a note, not counted as unverified',()=>{
+test('an exclusion the evidence cannot confirm stays uncertain with a note',()=>{
  const c=contract(['removes a stuck seatpost using heat','exclude background music','not from big news channels','No talking']);
  const d=decide(c,[],[{id:'R1',status:'supported',field:'title',quote:'heat gun'}]);
- assert.equal(d.status,'verified');
- assert.deepEqual(d.requirements.map(r=>r.status),['supported','waived','waived','waived']);
- assert.deepEqual(d.unconfirmed,[]);
+ assert.equal(d.status,'uncertain');
+ assert.deepEqual(d.requirements.map(r=>r.status),['supported','unknown','unknown','unknown']);
+ assert.deepEqual(d.unconfirmed,['R2','R3','R4']);
  assert.ok(d.notes.some(n=>/Could not check: exclude background music/.test(n)));
 });
 
@@ -19,10 +19,10 @@ test('an exclusion the evidence contradicts still removes the result; ordinary u
  assert.equal(excluded.status,'excluded');
  const unknown=decide(c,[],[]);
  assert.equal(unknown.status,'uncertain');
- assert.deepEqual(unknown.unconfirmed,['R1']);
+ assert.deepEqual(unknown.unconfirmed,['R1','R2']);
 });
 
-test('the judge is told to prefer official or canonical copies, and that an unknown exclusion does not lower a score',async()=>{
+test('the judge prefers canonical copies and leaves an unknown hard exclusion uncertain',async()=>{
  const {ModelJudge}=await import('../src/judge.js');
  const {testConfig}=await import('./helpers.js');
  let system='';
@@ -30,6 +30,6 @@ test('the judge is told to prefer official or canonical copies, and that an unkn
  await new ModelJudge(client,testConfig).judge('q',[{key:'c1',kind:'video',site:'youtube.com',title:'t',channel:null,official:false,duration:null,live:null,description:null,comments:[],moments:[],discussions:[]}]);
  assert.match(system,/official or canonical/i);
  assert.match(system,/re-upload, mirror, excerpt, compilation or re-edit of the same work scores at most 7/);
- assert.match(system,/unknown exclusion must not lower the score/i);
+ assert.match(system,/unknown hard exclusion remains a possible match, capped at 5/i);
  assert.doesNotMatch(system,/For film or TV scene requests, prefer candidates marked official\./);
 });

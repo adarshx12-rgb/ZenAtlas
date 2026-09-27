@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {transcriptChunks,musicOnly,chooseSceneWindow,covered} from '../src/scene-window.js';
+import {transcriptChunks,musicOnly,chooseSceneWindow,chooseSceneWindows,covered} from '../src/scene-window.js';
 import {testConfig} from './helpers.js';
 
 const seg=(start:number,text:string)=>({start,end:start+8,text});
@@ -8,6 +8,22 @@ const config={...testConfig,OPENROUTER_API_KEY:'k'};
 const db={async query(){return {rows:[{used:1}]};}} as any;
 const webcast=[seg(10,'welcome to the falcon heavy test flight'),...Array.from({length:120},(_,i)=>seg(60+i*15,`telemetry update ${i}`)),
  seg(1740,'side boosters are coming in for landing'),seg(1760,'the falcons have landed')];
+
+test('multiple requirements select separate original-timeline intervals with retained cue IDs',async()=>{
+ const segments=webcast.map((s,i)=>({...s,id:`cue-${i}`}));
+ const chunks=transcriptChunks(segments,2059);
+ const requirements=[{id:'R1',text:'launch'},{id:'R2',text:'landing'}];
+ const transport=(async()=>({answers:{R1:{choice:chunks[0].id,confidence:.95},R2:{choice:chunks.at(-2)!.id,confidence:.9}}})) as any;
+ const windows=await chooseSceneWindows(db,config,'launch and landing',segments,2059,requirements,transport);
+ assert.equal(windows.length,2);assert.deepEqual(windows.map(w=>w.requirement_ids),[['R1'],['R2']]);
+ assert.ok(windows[0].end<windows[1].start);assert.ok(windows[0].cue_ids.includes('cue-0'));
+ const missing=(async()=>({answers:{R1:{choice:chunks[0].id,confidence:.95},R2:{choice:'none',confidence:.99}}})) as any;
+ assert.deepEqual(await chooseSceneWindows(db,config,'launch and landing',segments,2059,requirements,missing),[],
+   'one unlocated requirement needs whole-video analysis');
+ let calls=0;
+ assert.deepEqual(await chooseSceneWindows(db,config,'dancing',[seg(0,'[Music]')],600,[],(async()=>{calls++;}) as any),[]);
+ assert.equal(calls,0,'music-only tracks bypass the locator');
+});
 
 test('transcripts are cut into about 40 chunks on the video timeline, text trimmed',()=>{
  const chunks=transcriptChunks(webcast,2059);

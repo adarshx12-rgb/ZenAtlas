@@ -1,25 +1,30 @@
 import type { DB } from './db.js';
 import type { Config } from './config.js';
 import type { ProviderStatus } from './types.js';
-import { ModelJudge, groundedQuote, judgeModels, TANGENTIAL, type Judge, type JudgeCandidate, type JudgeContext, type Verdict } from './judge.js';
+import { createHash, randomUUID } from 'node:crypto';
+import { ModelJudge, groundedQuote, eligibleCheck, enforceRequirements, judgeModels, TANGENTIAL, type Judge, type JudgeCandidate, type JudgeContext, type Verdict } from './judge.js';
 import { snippetsOf, type JevRecord } from './jev-judge.js';
 import { OpenAICompatibleClient } from './openai-compatible.js';
+import { traceFields } from './search-trace.js';
 
 // The judge cascade (docs/superpowers/specs/2026-09-27-judge-cascade-design.md), in place of the council. Jev decides only
 // on snippets cut verbatim from inspected content; the Scorer (the ordinary judge) scores the rest; each verdict is then
 // flagged when it is uncertain, and one Strong judge re-judges only the flagged ones. Its verdict is final: no Chair.
 // Confidence (Jev's or a model's) only routes work here; quotes are the only evidence.
 
-export type Flag = 'borderline'|'conflicts_with_evidence'|'unbacked'|'jev_reject_unbacked'|'settle_audit';
-export interface CascadeRecord { scorer: number; strong?: number; flags: Flag[] }
+export type Flag = 'borderline'|'conflicts_with_evidence'|'unbacked'|'jev_reject_unbacked'|'settle_audit'|'reject_audit'|'needs_evidence'|'interpretation';
+export interface CascadeRecord { scorer: number; strong?: number; flags: Flag[]; missing?: string[]; inspected?: boolean; model?: string }
 // border: Scorer relevance range the Strong judge re-checks (keep is relevance > 4). auditRate: share of Jev-settled
 // verdicts still re-checked, to keep measuring settle precision. confidence: Jev's JEV_JUDGE_CONFIDENCE.
-export interface CascadeOptions { border: [number, number]; auditRate: number; confidence: number; tier?: string; random?: () => number; log?: (line: Record<string, unknown>) => void }
+export interface CascadeOptions { border: [number, number]; auditRate: number; confidence: number; tier?: string; random?: () => number; log?: (line: Record<string, unknown>) => void;
+ traceId?: string; requirements?: JudgeContext['requirements']; inspectionLimit?: number; inspectionMs?: number;
+ inspection?: {judge: Judge; inspect: (candidate: JudgeCandidate, missing: string[], signal: AbortSignal) => Promise<JudgeCandidate|null>} }
 
-// Measured on 2026-09-27 (scripts/judge-arch-bench.ts): flash-lite then terra on 4-7 matched or beat the council's
-// accuracy at about 60% of its cost and time; a 4-6 band missed a confident 7 that was the wrong kind of video.
+// Retain the prior benchmark's 4-7 band: a 4-6 band missed a confident 7 that was the wrong kind of video.
+// Those historical measurements predate evidence-v2; the new routing needs its own live quality/cost evaluation.
 export const cascadeOptions = (config: Config): CascadeOptions =>
- ({border: [config.CASCADE_BORDER_LOW, config.CASCADE_BORDER_HIGH], auditRate: config.JEV_SETTLED_AUDIT_RATE, confidence: config.JEV_JUDGE_CONFIDENCE, tier: config.TIER});
+ ({border: [config.CASCADE_BORDER_LOW, config.CASCADE_BORDER_HIGH], auditRate: config.JEV_SETTLED_AUDIT_RATE, confidence: config.JEV_JUDGE_CONFIDENCE, tier: config.TIER,
+   inspectionLimit: config.CASCADE_INSPECTION_LIMIT, inspectionMs: config.CASCADE_INSPECTION_MS});
 
 const list = (value: string) => [...new Set(value.split(',').map(m => m.trim()).filter(Boolean))];
 
@@ -35,21 +40,48 @@ export function makeStrongJudge(db: DB, config: Config): Judge|undefined {
 // Why a verdict needs the Strong judge; none means it stands. required: how many requirements the request carries.
 export function flagsFor(c: JudgeCandidate, v: Verdict, jev: JevRecord|undefined, required: number, options: CascadeOptions): Flag[] {
  const answers = Object.values(jev?.requirements ?? {});
- const jevMismatch = answers.some(a => a.choice === 'mismatch' && a.confidence >= options.confidence);
+ const backed = (a: typeof answers[number]) => !!a.check && a.confidence >= options.confidence && eligibleCheck(c, a.check, options.requirements?.find(r => r.id === a.check!.id));
+ const jevMismatch = answers.some(a => a.check?.status === 'mismatch' && backed(a));
  // Jev's own decisions: a settle is snippet-backed by construction, so only a random audit re-checks it; a rejection
  // stands only when a snippet shows a requirement fails, not when it rests on Jev's low score and confidence alone.
- if (jev?.outcome === 'settled') return (options.random ?? Math.random)() < options.auditRate ? ['settle_audit'] : [];
- if (jev?.outcome === 'rejected') return jevMismatch ? [] : ['jev_reject_unbacked'];
+ if (jev?.outcome === 'settled' && answers.length === required && answers.every(a => a.check?.status === 'supported' && backed(a)))
+   return (options.random ?? Math.random)() < options.auditRate ? ['settle_audit'] : [];
+ if (jev?.outcome === 'rejected' && jevMismatch) return (options.random ?? Math.random)() < options.auditRate ? ['reject_audit'] : [];
  const out: Flag[] = [];
- if (v.relevance >= options.border[0] && v.relevance <= options.border[1]) out.push('borderline');
- const jevBacked = required > 0 && answers.length === required && answers.every(a => a.choice.startsWith('s') && a.confidence >= options.confidence);
+ const jevBacked = required > 0 && answers.length === required && answers.every(a => a.check?.status === 'supported' && backed(a));
  if ((jevMismatch && v.relevance > TANGENTIAL) || (jevBacked && v.relevance <= TANGENTIAL)) out.push('conflicts_with_evidence');
+ if (!out.length && (inspectionRequirements(c, v, options.requirements).length ||
+   v.relevance > TANGENTIAL && !c.visual && !snippetsOf(c).length)) return ['needs_evidence'];
+ if (missingRequirements(c, v, options.requirements).length) out.push('interpretation');
+ if (jev?.outcome === 'rejected' && !jevMismatch) out.push('jev_reject_unbacked');
+ if (v.relevance >= options.border[0] && v.relevance <= options.border[1]) out.push('borderline');
  // Scored above the border with a requirement no grounded quote supports: a hallucination or injected text is possible.
  // Only when there was content to quote from; a page nobody could read is not suspicious.
  const grounded = (v.requirementChecks ?? []).filter(ch => ch.status === 'supported' && groundedQuote(c, ch)).length;
  if (v.relevance > options.border[1] && required > 0 && grounded < required && snippetsOf(c).length) out.push('unbacked');
  return out;
 }
+
+export function missingRequirements(c: JudgeCandidate, v: Verdict, requirements: JudgeContext['requirements']): string[] {
+ if (v.requirementChecks?.some(ch => ch.status === 'mismatch' && eligibleCheck(c, ch, requirements?.find(r => r.id === ch.id)))) return [];
+ return (requirements ?? []).filter(r => {
+   const check = v.requirementChecks?.find(ch => ch.id === r.id);
+   return !check || check.status === 'unknown' || !eligibleCheck(c, check, r);
+ }).map(r => r.id);
+}
+
+function inspectionRequirements(c: JudgeCandidate, v: Verdict, requirements: JudgeContext['requirements']): string[] {
+ return missingRequirements(c, v, requirements).filter(id => {
+   const check = v.requirementChecks?.find(ch => ch.id === id);
+   // A cheap model cannot send empty or fabricated evidence to Strong by merely asking for more reasoning.
+   return check?.next_action !== 'reason' || !eligibleCheck(c, {...check, status: 'supported'}, requirements?.find(r => r.id === id));
+ });
+}
+
+export const evidenceFingerprint = (c: JudgeCandidate) => createHash('sha256').update(JSON.stringify({
+ page: c.page, description: c.description, description_source: c.description_source, comments: c.comments, moments: c.moments,
+ transcripts: c.transcripts, scenes: c.scenes, inspected: c.inspected, visual: c.visual, provenance: c.provenance, facts: c.facts,
+})).digest('hex');
 
 const STRONG_BATCH = 5;
 const STRONG_NOTE = 'A faster judge already scored these candidates, and each was flagged as uncertain: close to the keep line, '
@@ -60,12 +92,43 @@ export async function cascadeReview(query: string, candidates: JudgeCandidate[],
  const verdicts = new Map(scored), records = new Map<string, CascadeRecord>(), providers: ProviderStatus[] = [];
  const log = options.log ?? (line => process.stdout.write(`${JSON.stringify(line)}\n`));
  const required = context?.requirements?.length ?? 0, flagged: JudgeCandidate[] = [], reasons: Record<string, number> = {};
+ const current = new Map(candidates.map(c => [c.key, c]));
+ const reading = new Map(jev), traceId = options.traceId ?? traceFields().trace_id ?? randomUUID();
+ const routing = {...options, requirements: context?.requirements};
  for (const c of candidates) {
-   const v = scored.get(c.key);
+   const v = verdicts.get(c.key);
+   if (v) verdicts.set(c.key, enforceRequirements(c, v, context?.requirements));
+ }
+ const needing = candidates.filter(c => {
+   const v = verdicts.get(c.key);
+   return v && flagsFor(c, v, reading.get(c.key) as JevRecord|undefined, required, routing).includes('needs_evidence');
+ }).slice(0, options.inspectionLimit ?? 3);
+ let inspections = 0, refreshed = 0;
+ if (options.inspection) await Promise.all(needing.map(async c => {
+   inspections++;
+   const abort = new AbortController();
+   let timer: NodeJS.Timeout|undefined;
+   try {
+     const next = await Promise.race([options.inspection!.inspect(c, missingRequirements(c, verdicts.get(c.key)!, context?.requirements), abort.signal),
+       new Promise<null>(resolve => { timer = setTimeout(() => { abort.abort(); resolve(null); }, options.inspectionMs ?? 8000); })]);
+     if (!next || next.key !== c.key || next.url !== c.url || evidenceFingerprint(next) === evidenceFingerprint(c)) return;
+     current.set(c.key, next); refreshed++;
+     const out = await options.inspection!.judge.judge(query, [next], context, screenshots);
+     const v = out.verdicts.get(c.key);
+     if (v) verdicts.set(c.key, enforceRequirements(next, v, context?.requirements));
+     reading.delete(c.key);
+     if (out.jev?.has(c.key)) reading.set(c.key, out.jev.get(c.key));
+   } catch { /* Inspection failure leaves a possible lead, not a confident rejection. */ }
+   finally { clearTimeout(timer); abort.abort(); }
+ }));
+ for (const c of current.values()) {
+   const v = verdicts.get(c.key);
    if (!v) continue;
-   const flags = flagsFor(c, v, jev?.get(c.key) as JevRecord|undefined, required, options);
-   records.set(c.key, {scorer: v.relevance, flags});
-   if (flags.length) flagged.push(c);
+   const flags = flagsFor(c, v, reading.get(c.key) as JevRecord|undefined, required, routing);
+   const missing = missingRequirements(c, v, context?.requirements);
+   records.set(c.key, {scorer: v.relevance, flags, missing, inspected: c !== candidates.find(x => x.key === c.key)});
+   if (flags.includes('needs_evidence')) verdicts.set(c.key, {...v, relevance: Math.min(v.relevance, 5)});
+   else if (flags.length) flagged.push({...c, review_focus: {flags, requirements: missing.length ? missing : (context?.requirements ?? []).map(r => r.id)}});
    for (const f of flags) reasons[f] = (reasons[f] ?? 0) + 1;
  }
  let answered = 0, model: string|null = null;
@@ -76,10 +139,13 @@ export async function cascadeReview(query: string, candidates: JudgeCandidate[],
      .map(batch => strong.judge(query, batch, strongContext, screenshots)));
    for (const d of done) if (d.status === 'fulfilled') {
      model = d.value.model;
-     for (const [key, v] of d.value.verdicts) { const record = records.get(key); if (!record?.flags.length) continue; verdicts.set(key, v); record.strong = v.relevance; answered++; }
+     for (const [key, v] of d.value.verdicts) { const record = records.get(key); if (!record?.flags.length || record.flags.includes('needs_evidence')) continue;
+       const final = enforceRequirements(current.get(key)!, v, context?.requirements);
+       verdicts.set(key, final); record.strong = final.relevance; record.model = d.value.model; answered++; }
    }
    if (answered < flagged.length) providers.push({provider: 'cascade', status: 'partial', message: 'Some uncertain results could not get a second check; they keep the first score.'});
  }
- log({event: 'cascade', tier: options.tier, judged: records.size, escalated: flagged.length, answered, reasons, strong: model, strong_ms: flagged.length && strong ? Date.now() - started : 0});
- return {verdicts, records, providers};
+ log({event: 'cascade', version: 'evidence-v2', trace_id: traceId, tier: options.tier, judged: records.size, escalated: flagged.length, answered, inspections, refreshed, reasons, strong: model, strong_ms: flagged.length && strong ? Date.now() - started : 0,
+   candidates: [...records].map(([key, record]) => ({key, evidence_hash: evidenceFingerprint(current.get(key)!), ...record}))});
+ return {verdicts, records, providers, candidates: [...current.values()], jev: reading};
 }

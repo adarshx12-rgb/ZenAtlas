@@ -23,21 +23,24 @@ test('only borderline scores go to the Strong judge; clear ones stand',()=>{
 });
 
 test('Jev confidence routes work but is never evidence: rejections stand only on a mismatch snippet',()=>{
- assert.deepEqual(flagsFor(cand('a'),v('a',4),jev('rejected',{R1:{choice:'mismatch',confidence:0.9}}),1,opts),[]);
- assert.deepEqual(flagsFor(cand('a'),v('a',4),jev('rejected',{R1:{choice:'unknown',confidence:0.95}}),1,opts),['jev_reject_unbacked']);
+ const check={id:'R1',status:'mismatch' as const,field:'page',quote:text};
+ assert.deepEqual(flagsFor(cand('a'),v('a',4),jev('rejected',{R1:{choice:'m_s1',confidence:0.9,check}}),1,opts),[]);
+ assert.ok(flagsFor(cand('a'),v('a',4),jev('rejected',{R1:{choice:'mismatch',confidence:0.95}}),1,opts).includes('jev_reject_unbacked'));
+ assert.ok(flagsFor(cand('a'),v('a',4),jev('rejected',{R1:{choice:'m_s1',confidence:0.95,check:{...check,quote:'invented contradiction'}}}),1,opts).includes('jev_reject_unbacked'));
 });
 
 test('settled verdicts are audited at the configured rate only',()=>{
- assert.deepEqual(flagsFor(cand('a'),v('a',8),jev('settled'),1,{...opts,random:()=>0.05}),['settle_audit']);
- assert.deepEqual(flagsFor(cand('a'),v('a',8),jev('settled'),1,{...opts,random:()=>0.5}),[]);
+ const backed=jev('settled',{R1:{choice:'s1',confidence:0.95,check:{id:'R1',status:'supported',field:'page',quote:text}}});
+ assert.deepEqual(flagsFor(cand('a'),v('a',8),backed,1,{...opts,random:()=>0.05}),['settle_audit']);
+ assert.deepEqual(flagsFor(cand('a'),v('a',8),backed,1,{...opts,random:()=>0.5}),[]);
 });
 
 test('a Scorer verdict against snippet-backed evidence, or confident without a grounded quote, is flagged',()=>{
- assert.ok(flagsFor(cand('a'),v('a',9),jev('forwarded',{R1:{choice:'mismatch',confidence:0.9}}),1,opts).includes('conflicts_with_evidence'));
- assert.ok(flagsFor(cand('a'),v('a',2),jev('would_settle',{R1:{choice:'s1',confidence:0.9}}),1,opts).includes('conflicts_with_evidence'));
+ assert.ok(flagsFor(cand('a'),v('a',9),jev('forwarded',{R1:{choice:'m_s1',confidence:0.9,check:{id:'R1',status:'mismatch',field:'page',quote:text}}}),1,opts).includes('conflicts_with_evidence'));
+ assert.ok(flagsFor(cand('a'),v('a',2),jev('would_settle',{R1:{choice:'s1',confidence:0.9,check:{id:'R1',status:'supported',field:'page',quote:text}}}),1,opts).includes('conflicts_with_evidence'));
  assert.deepEqual(flagsFor(cand('a'),v('a',9,{requirementChecks:[{id:'R1',status:'supported',field:'page',quote:'not on the page'}]}),undefined,1,opts),['unbacked']);
  assert.deepEqual(flagsFor(cand('a'),v('a',9,{requirementChecks:[{id:'R1',status:'supported',field:'page',quote:'ran both databases in production'}]}),undefined,1,opts),[]);
- assert.deepEqual(flagsFor(cand('a',false),v('a',9),undefined,1,opts),[],'nothing was read, so a missing quote is not suspicious');
+ assert.deepEqual(flagsFor(cand('a',false),v('a',9),undefined,1,opts),['needs_evidence'],'unread evidence needs inspection, not another opinion');
 });
 
 test('the Strong judge sees only flagged candidates and its verdict is final; a failed batch keeps the first score',async()=>{
@@ -47,7 +50,7 @@ test('the Strong judge sees only flagged candidates and its verdict is final; a 
  assert.deepEqual(seen.flat().map(c=>c.key),['b']);
  assert.equal(out.verdicts.get('b')!.relevance,3);
  assert.equal(out.verdicts.get('a')!.relevance,9);
- assert.deepEqual(out.records.get('b'),{scorer:6,strong:3,flags:['borderline']});
+ assert.deepEqual(out.records.get('b'),{scorer:6,strong:3,flags:['borderline'],missing:[],inspected:false,model:'strong'});
  const failing:Judge={async judge(){throw new Error('down');}};
  const kept=await cascadeReview('q',candidates,scored,undefined,undefined,undefined,failing,opts);
  assert.equal(kept.verdicts.get('b')!.relevance,6);

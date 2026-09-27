@@ -15,6 +15,7 @@ import { tierConfig } from './tiers.js';
 import { providerHealth } from './health.js';
 import { saveTrace } from './learning.js';
 import { captionCommand, captionJob, pythonCaptions, type CaptionFetcher } from './captions.js';
+import {sceneProgress} from './scene-verification.js';
 
 export { providerHealth };
 export async function workOnce(db:DB,config:Config,adapters?:SourceAdapter[],probe?:typeof probeURL,deps?:DiscoveryDeps,captions?:CaptionFetcher) {
@@ -35,13 +36,18 @@ export async function workOnce(db:DB,config:Config,adapters?:SourceAdapter[],pro
    } else if(job.kind==='discovery') {
      // The search's own model tier; stored, shared work (enrichment) keeps the base settings.
      const input=searchInput.parse(job.payload),tiered=tierConfig(config,input.tier);
-     const outcome=await runDiscovery(db,tiered,input,adapters,deps??{},(name,ok,code)=>providerHealth(db,name,ok,code),
+     const outcome=await runDiscovery(db,tiered,input,adapters,{...deps,sceneLive:true},(name,ok,code)=>providerHealth(db,name,ok,code),
        update=>progress(db,job,update));
      for(const result of outcome.ingested) await enqueueEnrichment(db,config,result);
      await storePreviews(db,job,outcome.previews);
      await learnFrom(db,config,job,{...outcome.trace,tier:input.tier});
-     await complete(db,job,{results:outcome.results,closest:outcome.closest,providers:outcome.providers,dropped:outcome.dropped,searches:outcome.searches,
-       ...(outcome.contract?{contract:outcome.contract,unmet:outcome.unmet??[]}:{})});
+     await db.transaction(async tx=>{
+       if(!(await tx.query("SELECT 1 FROM jobs WHERE id=$1 AND lease_token=$2 AND status='running' FOR UPDATE",[job.id,job.lease_token])).rows.length)return;
+       await complete(tx,job,{results:outcome.results,closest:outcome.closest,providers:outcome.providers,dropped:outcome.dropped,searches:outcome.searches,revision:1,
+         ...(outcome.sceneReview?{_scene_review:outcome.sceneReview,verification:sceneProgress(outcome.sceneReview)}:{}),
+         ...(outcome.contract?{contract:outcome.contract,unmet:outcome.unmet??[]}:{})});
+       if(outcome.sceneReview)await enqueue(tx,'scene_review',`scene-review:${job.id}:${job.lease_token}`,{discovery_job_id:job.id,run_id:job.lease_token});
+     });
    } else if(job.kind==='youtube_captions') {
      const outcome=await captionJob(db,config,job,captions??pythonCaptions(captionCommand(config),{proxy:config.YOUTUBE_CAPTIONS_PROXY,supadataKey:config.SUPADATA_API_KEY}));
      if(outcome) {

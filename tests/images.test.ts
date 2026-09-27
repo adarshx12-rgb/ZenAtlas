@@ -43,20 +43,21 @@ test('the judge sees each image and keeps only what it shows; ranking follows it
  const judge:Judge={async judge(_q,cs,_ctx,shots){seen.push(shots?.size??0);
   return {model:'m',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,relevance:c.title==='Blue wall bicycle'?9:c.title==='Car'?2:6,reason:`r ${c.title}`,momentKeys:[]}]))};}};
  const out=await reviewImages({} as any,testConfig,'red bicycle against a blue wall',[img('a','Maybe bicycle'),img('b','Car'),img('c','Blue wall bicycle')],
-  {judge,strong:null,thumbnail:async()=>({contentType:'image/jpeg',data:Buffer.from('jpg')}),log:()=>{}});
+  {judge,strong:null,thumbnail:async()=>({contentType:'image/jpeg',data:Buffer.from([0xff,0xd8,0xff,0xe0])}),log:()=>{}});
  assert.ok(seen.reduce((a,b)=>a+b,0)===3,'every thumbnail went to the judge');
  assert.deepEqual(out.results.map(r=>r.id),['c','a']);
  assert.equal(out.results[0]!.judgement!.relevance,9);
  assert.equal(out.removed,1);
 });
 
-test('an image whose thumbnail cannot be fetched or is not a JPEG is judged on its title and marked unseen',async()=>{
+test('PNG thumbnails are inspected; inaccessible images remain unseen',async()=>{
  let shots=-1;
  const judge:Judge={async judge(_q,cs,_ctx,s){shots=s?.size??0;return {model:'m',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,relevance:7,reason:'r',momentKeys:[]}]))};}};
  const out=await reviewImages({} as any,testConfig,'q',[img('a','A'),img('b','B')],{judge,strong:null,
-  thumbnail:async(u:string)=>u.includes('a-t')?{contentType:'image/png',data:Buffer.from('png')}:Promise.reject(new Error('404')),log:()=>{}});
- assert.equal(shots,0);
- assert.ok(out.results.every(r=>r.unseen));
+  thumbnail:async(u:string)=>u.includes('a-t')?{contentType:'image/png',data:Buffer.from([137,80,78,71,13,10,26,10])}:Promise.reject(new Error('404')),log:()=>{}});
+ assert.equal(shots,1);
+ assert.ok(!out.results[0].unseen);
+ assert.ok(out.results[1].unseen);
 });
 
 test('Openverse is asked for the subject, not the whole sentence',()=>{

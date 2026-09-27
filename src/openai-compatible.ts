@@ -3,6 +3,7 @@ import type { DB } from './db.js';
 import type { Config } from './config.js';
 import { fetchJSON, UpstreamError } from './http.js';
 import { ModelClient, type InlineImage } from './model-client.js';
+import { traceFields } from './search-trace.js';
 
 const response = z.object({choices: z.array(z.object({
  finish_reason: z.string().nullish(),
@@ -41,7 +42,7 @@ export class OpenAICompatibleClient extends ModelClient {
    if (!raw.success) throw new UpstreamError('malformed_response');
    // What the call cost and on which tier (OpenRouter reports it when asked), for comparing SSJ1 with SSJ3.
    const u = raw.data.usage;
-   if (u) this.log({event: 'model_cost', tier: this.config.TIER, bucket, model, input_tokens: u.prompt_tokens ?? null, output_tokens: u.completion_tokens ?? null, cost: u.cost ?? null});
+   if (u) this.log({event: 'model_cost', ...traceFields(), tier: this.config.TIER, bucket, model, input_tokens: u.prompt_tokens ?? null, output_tokens: u.completion_tokens ?? null, cost: u.cost ?? null});
    const first = raw.data.choices[0];
    // Reasoning models can spend the whole token cap before writing any answer; that is a truncated reply, not bad JSON.
    if (first.finish_reason && first.finish_reason !== 'stop') throw new UpstreamError('model_output_incomplete');

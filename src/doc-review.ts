@@ -12,6 +12,7 @@ import { viewerOf } from './doc-viewers.js';
 import { reviewResults } from './review.js';
 import { makeCouncil } from './council.js';
 import { cascadeOptions, makeStrongJudge } from './cascade.js';
+import { planContract, type ContractDeps } from './search-contract.js';
 
 // Checking documents for the Docs tab. Verification (inside the search request) removes spam links, dead links and pages
 // posing as documents, reading only the first 4 KB of each file. Review (during the document hunt, src/doc-hunt.ts)
@@ -72,7 +73,8 @@ export async function verifyDocuments(results: WebResult[], config: Config, peek
  return {results: kept, removed};
 }
 
-export type ReviewedDoc = VerifiedDoc & {judgement?: {relevance: number; reason: string}};
+export type ReviewedDoc = VerifiedDoc & {judgement?: {relevance: number; reason: string}; verification?: 'verified'|'uncertain';
+ unmet_requirements?: string[]; content_hash?: string; alternatives?: {url:string;title:string}[]};
 // Up to REVIEW_POOL documents are judged; beyond that they are not shown, since nothing vouches for them. The text of the
 // first TEXT_POOL is read (within TEXT_BUDGET_MS); the others are judged on their title and snippet. With more than
 // TEXT_POOL documents the Jev screener decides the order, so its promising picks are read first.
@@ -80,7 +82,7 @@ export type ReviewedDoc = VerifiedDoc & {judgement?: {relevance: number; reason:
 // documents loaded, so 15 s left the most important file unread on slower runs.
 export const REVIEW_POOL = 60, TEXT_POOL = 20, TEXT_BUDGET_MS = 30000;
 // office: reads an office document's text; absent when no converter or text helper is configured.
-type ReviewDeps = {judge?: Judge; pages?: PageCheck; screener?: Screener; office?: (url: string) => Promise<PageEvidence|null>; textBudgetMs?: number};
+type ReviewDeps = ContractDeps & {judge?: Judge; pages?: PageCheck; screener?: Screener; office?: (url: string) => Promise<PageEvidence|null>; textBudgetMs?: number};
 const OFFICE = new Set(['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'odt', 'odp', 'ods', 'rtf', 'key']);
 export const OFFICE_READS = 4;
 export function officeReader(db: DB, config: Config): ((url: string) => Promise<PageEvidence|null>)|undefined {
@@ -122,7 +124,8 @@ export async function reviewDocuments(db: DB, config: Config, query: string, doc
    clearTimeout(timer);
    return new Map(text);
  };
- const out = await reviewResults(query, docs, {noun: 'documents', textPool: TEXT_POOL, reviewPool: REVIEW_POOL, read, judge, keepUnjudged: false,
+ const contract = await planContract(db, config, query, 'docs', deps);
+ const out = await reviewResults(query, docs, {noun: 'documents', contract, textPool: TEXT_POOL, reviewPool: REVIEW_POOL, read, judge, keepUnjudged: false,
    council: 'judge' in deps || config.JUDGE_ARCHITECTURE !== 'council' ? null : makeCouncil(db, config),
    strong: 'judge' in deps ? null : makeStrongJudge(db, config), cascade: cascadeOptions(config), councilTop: config.COUNCIL_CHECK_TOP, councilGap: config.COUNCIL_DISAGREEMENT, councilSure: config.COUNCIL_SURE_SCORE,
    screener: 'screener' in deps ? deps.screener : makeScreener(db, config),

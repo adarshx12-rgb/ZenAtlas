@@ -101,6 +101,7 @@ export const configSchema = z.object({
   CASCADE_STRONG_MODELS: z.string().regex(/^[\w.,\/:\s-]*$/).default('openai/gpt-5.6-terra,mistralai/mistral-medium-3.1,openai/gpt-5.4-mini'),
   CASCADE_STRONG_TIMEOUT_MS: number(35000, 5000, 120000), CASCADE_STRONG_DAILY_BUDGET: number(1500, 0, 100000),
   CASCADE_BORDER_LOW: number(4, 0, 10), CASCADE_BORDER_HIGH: number(7, 0, 10),
+  CASCADE_INSPECTION_LIMIT: number(3, 0, 10), CASCADE_INSPECTION_MS: number(8000, 500, 30000),
   JEV_SETTLED_AUDIT_RATE: z.coerce.number().min(0).max(1).default(0.1),
   COUNCIL_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
   // Chosen by the 2026-09-26 seat benchmarks (scripts/council-bench.ts): gpt-5.6-terra was most accurate (99% labels, 94%
@@ -173,6 +174,8 @@ export const configSchema = z.object({
   VIDEO_EVIDENCE_CHECKS: number(12, 0, 40),
   SCENE_AUTO_QUEUE: z.enum(['true','false']).default('true').transform(v => v === 'true'),
   SCENE_SHORTLIST: number(3, 0, 10),
+  SCENE_SEARCH_LIMIT: number(2, 0, 3), SCENE_VERIFY_MS: number(90000, 1000, 300000),
+  SCENE_AUTO_DAILY_JOBS: number(20, 0, 10000),
   // Transcript-guided scene analysis (src/scene-window.ts): videos at least SCENE_WINDOW_MIN_SECONDS long whose transcript
   // Jev ties to the moment (confidence >= SCENE_WINDOW_CONFIDENCE) are analysed around that chunk, +-SCENE_WINDOW_PAD_SECONDS.
   SCENE_WINDOW_MIN_SECONDS: number(600, 60, 7200), SCENE_WINDOW_PAD_SECONDS: number(60, 0, 600),

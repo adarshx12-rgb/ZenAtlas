@@ -91,7 +91,21 @@ def load_context(conn: psycopg.Connection[Row], version_id: str, *, lock: bool =
                       row["subtitle_offset_seconds"], row["content_duration"], row["policy"], row["ineligible"])
 
 
-def claim(conn: psycopg.Connection[Row], lease_seconds: int) -> Row | None:
+def claim(conn: psycopg.Connection[Row], lease_seconds: int, concurrency: int = 2, interactive_only: bool = False) -> Row | None:
+    # Serialize only admission, never model calls. The count enforces capacity across multiple worker processes.
+    with conn.transaction():
+        conn.execute("SELECT pg_advisory_xact_lock(746220)")
+        conn.execute("""UPDATE jobs SET priority=0,payload=payload-'interactive_until' WHERE kind='scene_analysis'
+            AND status='queued' AND priority=10 AND payload->>'interactive_until' IS NOT NULL
+            AND (payload->>'interactive_until')::timestamptz<=now()""")
+        running = conn.execute("""SELECT count(*) AS total FROM jobs WHERE kind='scene_analysis'
+            AND status='running' AND lease_until>=now()""").fetchone()["total"]
+        if running >= concurrency:
+            return None
+        return _claim(conn, lease_seconds, concurrency, interactive_only)
+
+
+def _claim(conn: psycopg.Connection[Row], lease_seconds: int, concurrency: int, interactive_only: bool) -> Row | None:
     """Claim one scene job with the same lease/attempt protocol as the Node worker, which never claims this kind."""
     conn.execute("""WITH exhausted AS (UPDATE jobs SET status='failed',error_code='retry_exhausted',lease_until=NULL,updated_at=now()
         WHERE kind='scene_analysis' AND attempts>=3 AND ((status='running' AND lease_until<now()) OR status='queued')
@@ -101,8 +115,17 @@ def claim(conn: psycopg.Connection[Row], lease_seconds: int) -> Row | None:
     return conn.execute("""UPDATE jobs SET status='running',attempts=attempts+1,lease_token=%s,
         lease_until=now()+(%s*interval '1 second'),updated_at=now() WHERE id=(SELECT id FROM jobs
         WHERE kind='scene_analysis' AND attempts<3 AND ((status='queued' AND run_after<=now()) OR (status='running' AND lease_until<now()))
-        ORDER BY run_after,id FOR UPDATE SKIP LOCKED LIMIT 1)
-        RETURNING id::text AS id,lease_token::text AS lease_token,payload,attempts""", (uuid.uuid4(), lease_seconds)).fetchone()
+        AND (NOT %s OR priority=10)
+        AND (priority=10 OR (SELECT count(*) FROM jobs busy WHERE busy.kind='scene_analysis'
+             AND busy.status='running' AND busy.lease_until>=now() AND busy.priority<10)<%s)
+        ORDER BY priority DESC,run_after,id FOR UPDATE SKIP LOCKED LIMIT 1)
+        RETURNING id::text AS id,lease_token::text AS lease_token,payload,attempts""", (uuid.uuid4(), lease_seconds, interactive_only, max(1, concurrency-1))).fetchone()
+
+
+def covers_analysis(conn: psycopg.Connection[Row], analysis_id: str, windows: tuple[tuple[float, float], ...], offset: float) -> bool:
+    row = conn.execute("SELECT inspected_ranges FROM scene_analyses WHERE id=%s", (analysis_id,)).fetchone()
+    ranges = row["inspected_ranges"] if row else []
+    return all(any(a <= start+offset and b >= end+offset for a, b in ranges) for start, end in windows)
 
 
 def renew(conn: psycopg.Connection[Row], job: Row, lease_seconds: int) -> None:

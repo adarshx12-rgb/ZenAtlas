@@ -23,7 +23,7 @@ test('the judge checks each shared requirement by ID, and an unquoted "supported
  const v=out.verdicts.get('r1')!;
  assert.deepEqual(v.requirementChecks,[{id:'R1',status:'unknown',field:'title',quote:'this is an article'},
    {id:'R2',status:'supported',field:'page',quote:'In July 1947 a rancher found debris'}],'invented quotes and unknown IDs are not evidence');
- assert.equal(v.relevance,8,'the intent ceiling still applies as before');
+ assert.equal(v.relevance,5,'an unsupported hard requirement caps even a confident intent match');
 });
 
 test('without requirements the judge asks exactly what it asked before',async()=>{

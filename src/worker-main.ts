@@ -3,6 +3,7 @@ import { readConfig } from './config.js';
 import { schedule, workOnce } from './worker.js';
 import { keepBeating } from './health.js';
 import { critiqueOnce } from './learning.js';
+import {reviewScenesOnce} from './scene-verification.js';
 const config=readConfig(); const db=connect(config.DATABASE_URL);
 let stopping=false;
 process.on('SIGINT',()=>{stopping=true;}); process.on('SIGTERM',()=>{stopping=true;});
@@ -16,9 +17,15 @@ const critic=(async()=>{
    catch { console.error(JSON.stringify({event:'critic_cycle_failed',time:new Date().toISOString()})); await new Promise(r=>setTimeout(r,10000)); }
  }
 })();
+const scenes=(async()=>{
+ while(!stopping){
+   try{if(!await reviewScenesOnce(db,config))await new Promise(r=>setTimeout(r,1000));}
+   catch{console.error(JSON.stringify({event:'scene_review_cycle_failed'}));await new Promise(r=>setTimeout(r,1000));}
+ }
+})();
 try {
  while(!stopping) {
    try { await schedule(db,config); if(!await workOnce(db,config)) await new Promise(r=>setTimeout(r,1000)); failures=0; }
    catch { failures++; console.error(JSON.stringify({event:'worker_cycle_failed',time:new Date().toISOString()})); await new Promise(r=>setTimeout(r,5000)); }
  }
-} finally { await critic; stopBeating(); await db.close(); }
+} finally { await Promise.all([critic,scenes]); stopBeating(); await db.close(); }

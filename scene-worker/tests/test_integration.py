@@ -256,6 +256,8 @@ def test_access_policy_budget_and_lease_boundaries_never_store_scenes(database, 
 
     assert run_job(settings, LeaseStealingModel(), youtube_check=public).status == "lease_lost"
     assert rows(owner, scene_count, (version["id"],)) == [{"n": 0}]
+    # This test simulated another live owner; release its slot before the next test shares this database.
+    rows(owner, "UPDATE jobs SET status='failed',lease_until=NULL WHERE payload->>'media_version_id'=%s RETURNING id", (version["id"],))
 
 
 def test_retained_transcripts_are_reused_with_offsets_and_speech_to_text_is_the_fallback(database, tmp_path, monkeypatch, capsys):
@@ -327,3 +329,31 @@ def test_an_overloaded_model_falls_back_to_the_next_and_records_the_model_that_a
 def run_job_if_due(settings):
     with store.connect(settings.database_url) as conn:
         return store.claim(conn, settings.lease_seconds)
+
+
+def test_claim_reserves_interactive_capacity_across_connections_and_expires_priority(database):
+    owner = database["owner"]
+    ids = []
+    def queued(priority=0, deadline=None):
+        payload = {"interactive_until": deadline} if deadline else {}
+        row = rows(owner, "INSERT INTO jobs(kind,dedupe_key,payload,priority) VALUES('scene_analysis',%s,%s,%s) RETURNING id::text AS id",
+                   (f"fixture-capacity-{uuid.uuid4()}", Jsonb(payload), priority))[0]
+        ids.append(row["id"])
+        return row["id"]
+    try:
+        background = queued()
+        queued()
+        with store.connect(database["app"]) as a, store.connect(database["app"]) as b:
+            assert store.claim(a, 120)["id"] == background
+            assert store.claim(b, 120) is None, "background work cannot occupy the reserved slot"
+            interactive = queued(10, "2099-01-01T00:00:00Z")
+            assert store.claim(b, 120, interactive_only=True)["id"] == interactive
+            queued(10, "2099-01-01T00:00:00Z")
+            assert store.claim(a, 120) is None, "global capacity includes jobs leased through another connection"
+            rows(owner, "UPDATE jobs SET status='complete',lease_until=NULL WHERE id=ANY(%s::uuid[]) RETURNING id", (ids,))
+            expired = queued(10, "2000-01-01T00:00:00Z")
+            assert store.claim(b, 120, interactive_only=True) is None
+            assert rows(owner, "SELECT priority FROM jobs WHERE id=%s", (expired,))[0]["priority"] == 0
+            assert store.claim(a, 120)["id"] == expired
+    finally:
+        rows(owner, "DELETE FROM jobs WHERE id=ANY(%s::uuid[]) RETURNING id", (ids,))

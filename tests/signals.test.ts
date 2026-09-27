@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {database,testConfig} from './helpers.js';
 import {timestampMentions,clusterMentions,matchDiscussions,applySignals} from '../src/signals.js';
 import {YouTubeData,isoSeconds,type YouTubeClient} from '../src/youtube.js';
-import {GeminiJudge,ModelJudge,FallbackJudge,makeJudge,type Judge} from '../src/judge.js';
+import {GeminiJudge,ModelJudge,FallbackJudge,makeJudge,visualReference,type Judge} from '../src/judge.js';
 import {OpenAICompatibleClient} from '../src/openai-compatible.js';
 import {UpstreamError} from '../src/http.js';
 import {SearchService} from '../src/search.js';
@@ -105,7 +105,7 @@ test('Gemini judge sends a structured request and keeps only verdicts and moment
    await new GeminiJudge(db,config,reply({verdicts:[]}) as any).judge('3d sites',[site,{...site,key:'r3'}],undefined,
      new Map([['r2',shot],['r9',Buffer.from('not in this batch')]]));
    const parts=sent.body.contents[0].parts;
-   assert.deepEqual(parts.slice(1),[{text:'Screenshot for candidate r2:'},{inlineData:{mimeType:'image/jpeg',data:shot.toString('base64')}}]);
+   assert.deepEqual(parts.slice(1),[{text:`Screenshot for candidate r2, evidence ${visualReference(shot).id}:`},{inlineData:{mimeType:'image/jpeg',data:shot.toString('base64')}}]);
    assert.match(parts[0].text,/"key":"r2".*"screenshot":true/);
    assert.match(parts[0].text,/"key":"r3".*"screenshot":false/,'a candidate without an image is not described as having one');
    assert.equal(sent.body.generationConfig.mediaResolution,'MEDIA_RESOLUTION_MEDIUM');
@@ -176,7 +176,7 @@ test('discovery uses viewer timestamps, Reddit and AI judgement to rank, explain
      return {model:'test-model',verdicts:new Map(candidates.map(c=>[c.key,{key:c.key,relevance:c.title.includes('Twist')?9:c.title.includes('Unrelated')?1:6,
        reason:`TEST reason for ${c.title}`,momentKeys:c.moments.slice(0,1).map(m=>m.key)}]))};}};
    const discussions=async()=>[{title:'Best horror story with a twist? youtube AAAAAAAAAA2',url:'https://www.reddit.com/r/horror/comments/1',snippet:null}];
-   const config={...testConfig,SEARXNG_BASE_URL:'http://localhost:8080',OFFICIAL_YOUTUBE_CHANNELS:'UCofficial'};
+   const config={...testConfig,REQUIREMENTS_ENABLED:false,SEARXNG_BASE_URL:'http://localhost:8080',OFFICIAL_YOUTUBE_CHANNELS:'UCofficial'};
    const service=new SearchService(db,config);
    const started=await service.start({q:'horror story plot twist',mode:'refresh'},'alice');
    await workOnce(db,config,[adapter],undefined,{youtube,judge,discussions});

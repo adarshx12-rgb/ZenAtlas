@@ -7,7 +7,8 @@ import { join } from 'node:path';
 
 const BASE = 'http://127.0.0.1:3000', TIER = process.argv[2] ?? 'ssj3';
 const QUERIES: {tab: 'videos'|'docs'|'web'|'images'; q: string; repeat?: number}[] = [
- {tab: 'videos', q: "the part in Steve Jobs' Stanford commencement speech where he talks about connecting the dots", repeat: 3},
+ // Repeats within DISCOVERY_CACHE_SECONDS (10 minutes) replay the first run, so stability needs runs further apart.
+ {tab: 'videos', q: "the part in Steve Jobs' Stanford commencement speech where he talks about connecting the dots"},
  {tab: 'videos', q: 'moment in the Falcon Heavy test flight video when both side boosters land at the same time'},
  {tab: 'videos', q: 'hindi explainer on how UPI works, under 10 minutes, not from big news channels'},
  {tab: 'docs', q: 'which article of the GDPR covers the right to be forgotten'},
@@ -50,8 +51,12 @@ async function webOrDocs(q: string, kind: 'web'|'docs') {
  return {rewrite: body.rewrite ?? null, providers: body.providers, results: pick(body.results ?? [])};
 }
 async function images(q: string) {
- const body = await get(`/api/images?${new URLSearchParams({q, limit: '12'})}`);
- return {providers: body.providers, results: (body.results ?? []).slice(0, 12).map((r: any) => ({title: r.title, page_url: r.page_url, source: r.source_name, engine: r.engine}))};
+ let body = await get(`/api/images?${new URLSearchParams({q, limit: '24', tier: TIER})}`);
+ if (body.review) for (let i = 0; i < 60; i++) { const s = await get(`/api/images/review?token=${body.review}`);
+   if (s.status === 'complete') { body = {...body, ...s}; break; } await sleep(2000); }
+ return {providers: body.providers, removed: body.removed ?? null, results: (body.results ?? []).slice(0, 12).map((r: any) => ({title: r.title, page_url: r.page_url,
+   source: r.source_name, engine: r.engine, license: r.license?.name ?? null, ai: !!r.ai_generated, relevance: r.judgement?.relevance ?? null,
+   unseen: !!r.unseen, reason: r.judgement?.reason ?? null}))};
 }
 
 const rows: any[] = [];

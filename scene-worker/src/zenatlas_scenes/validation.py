@@ -109,7 +109,8 @@ def _tags(values: Sequence[str]) -> tuple[str, ...]:
 
 
 def validate_scenes(
-    text: str, *, media_duration: float, timeline_offset: float, content_duration: float | None, cues: Sequence[Cue]
+    text: str, *, media_duration: float, timeline_offset: float, content_duration: float | None, cues: Sequence[Cue],
+    requested_ranges: Sequence[tuple[float, float]] = ()
 ) -> ValidatedScenes:
     """Accept only well-formed scenes inside the analysed media and the content timeline.
 
@@ -147,6 +148,9 @@ def validate_scenes(
             end, adjusted = upper, adjusted + 1
         if end <= start:
             rejected["non_positive_duration"] += 1
+            continue
+        if requested_ranges and not any(a <= start and end <= b for a, b in requested_ranges):
+            rejected["outside_requested_range"] += 1
             continue
         description = clean_text(scene.description)
         if not description:

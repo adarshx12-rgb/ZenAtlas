@@ -147,7 +147,7 @@ function resetClosest(resetView=true){
  closestAbort?.abort();closestAbort=null;closestRequest=null;closestSearch=null;closestLoaded=false;
  closestBox.replaceChildren();closestRetry.hidden=true;closestPanel.removeAttribute('aria-busy');
  closestStatus.textContent='Select this tab to load closest matches.';
- if(resetView)matchView='matches';
+ if(resetView){matchView='matches';autoRevealMatches=false;}
 }
 function showMatchView(){
  const images=tabOf(window.location.search)!=='videos',closest=matchView==='closest';
@@ -183,6 +183,7 @@ async function loadClosest(){
  finally{if(closestRequest===request){closestRequest=null;closestPanel.removeAttribute('aria-busy');}}
 }
 function selectMatchView(view){
+ autoRevealMatches=false;
  matchView=view;
  if(view==='matches'){
   clearTimeout(closestTimer);
@@ -212,31 +213,39 @@ function interpretation(info){
  return box;
 }
 function render(data){
+ const revised=lastSearchData?.search_id===data.search_id&&(data.revision??0)>(lastSearchData?.revision??0);
+ if(revised)resetClosest(false);
  lastSearchData=data;
  if(searchId!==data.search_id)resetClosest(false);
  searchId=data.search_id;catalogueTotal=data.catalogue_total;
  catalogueBox.replaceChildren();showFound(data.ranked??[...data.results.filter(r=>r.origin==='catalogue'),...data.discovered]);
  notices.replaceChildren(...(data.interpretation?[interpretation(data.interpretation)]:[]),
   ...data.providers.filter(p=>p.status!=='ok'||p.provider==='relevance_filter'||p.provider==='video_inspection'||p.message.includes('did not')).map(p=>node('p',p.message,'notice')));
- const busy=data.status==='discovering',partial=data.status==='partial',deepDone=data.depth==='deep';
- cancel.hidden=!busy;
+ const busy=data.status==='discovering',verifying=data.verification?.status==='running',partial=data.status==='partial',deepDone=data.depth==='deep';
+ cancel.hidden=!(busy||verifying);
+ if(data.verification){
+  const names={queued:'waiting for scene inspection',analysing:'analysing scenes',complete:'scene check complete',budget_deferred:'scene budget reached',timed_out:'scene check timed out',failed:'scene analysis failed',review_failed:'scene review failed',review_unavailable:'scene review unavailable',unavailable:'scene evidence unavailable',inaccessible:'video inaccessible',not_permitted:'scene analysis not permitted'};
+  const counts=new Map();for(const item of data.verification.items){const text=names[item.status]??item.status;counts.set(text,(counts.get(text)??0)+1);}
+  notices.append(node('p',[...counts].map(([text,n])=>`${n} ${n===1?'video':'videos'}: ${text}`).join(' · '),'notice'));
+ }
  missing.hidden=busy;if(missing.dataset.search!==data.search_id){missing.dataset.search=data.search_id;missingStatus.textContent='';}
  more.hidden=!!data.ranked||!(next&&pageEnd<catalogueTotal);
  deepRow.hidden=busy||deepDone||data.status==='cancelled'||params.get('mode')==='catalogue';
  showDeepHeading(data,busy);
  const count=shownCount();
  const label=`${count} ${count===1?'result':'results'}`;
- status.textContent=busy?`${label} so far. ${progressText(data)}`
+ status.textContent=busy?`${label} so far. ${progressText(data)}`:verifying?`${label} · Retrieval complete. Checking scenes; results will update.`
   :count?`${label}${levelTag()} · ${deepDone?(partial?'Deep dive finished; some services were unavailable':'Deep dive complete'):partial?'Some search services are unavailable':'Search complete'}`
   :partial?'No catalogue matches. Discovery is unavailable or incomplete.':'No matching results. Try another query or broader filters.';
  // A finished discovery with nothing verified opens the unverified candidates instead of an empty page (once per search,
  // so choosing "Matches" again is respected).
  if(!busy&&!count&&data.discovery_job_id&&data.status!=='cancelled'&&matchView==='matches'&&autoClosest!==data.search_id){
-  autoClosest=data.search_id;matchView='closest';
+  autoClosest=data.search_id;matchView='closest';autoRevealMatches=true;
  }
+ if(revised&&count&&autoRevealMatches){matchView='matches';autoRevealMatches=false;}
  showMatchView();if(matchView==='closest'&&closestRetry.hidden)void loadClosest();
 }
-let autoClosest=null;
+let autoClosest=null,autoRevealMatches=false;
 const UNVERIFIED_INTRO='No result could be verified. These candidates may match: each shows which requirements are confirmed (✓) and which are still unverified (?).';
 async function poll(token,deadline,misses=0){if(!controller.current(token.generation))return;
  if(Date.now()>deadline){cancel.hidden=true;retry.hidden=false;const count=shownCount();
@@ -245,7 +254,7 @@ async function poll(token,deadline,misses=0){if(!controller.current(token.genera
   // Polling reads the first page; once later pages are loaded, keep their cursor.
   if(pageEnd<=PAGE)next=data.next_cursor;
   render(data);
-  if(data.status==='discovering')pollTimer=setTimeout(()=>poll(token,deadline),1500);
+  if(data.status==='discovering'||data.verification?.status==='running')pollTimer=setTimeout(()=>poll(token,Math.max(deadline,Date.parse(data.verification?.deadline??'')+15000||0)),1500);
  }catch(error){if(!controller.current(token.generation))return;
   // A brief outage, such as the service restarting, should not end the search.
   if(error.network&&misses<5){pollTimer=setTimeout(()=>poll(token,deadline,misses+1),3000);return;}
@@ -253,7 +262,7 @@ async function poll(token,deadline,misses=0){if(!controller.current(token.genera
 }
 function follow(token,data){
  next=data.next_cursor;pageEnd=PAGE;render(data);
- if(data.status==='discovering')pollTimer=setTimeout(()=>poll(token,Date.now()+POLL_WINDOW_MS[data.depth]),1500);
+ if(data.status==='discovering'||data.verification?.status==='running')pollTimer=setTimeout(()=>poll(token,Math.max(Date.now()+POLL_WINDOW_MS[data.depth],Date.parse(data.verification?.deadline??'')+15000||0)),1500);
 }
 async function search(){clearTimeout(pollTimer);const previous=searchId;current=controller.begin();const token=current;
  resetClosest();lastSearchData=null;showMatchView();
@@ -353,7 +362,12 @@ async function followImageReview(token,page,review){
   let before=[...tiles.values()][0]?.previousElementSibling??null;
   for(const [id,tile] of tiles)if(!byId.has(id))tile.remove();
   for(const r of snap.results){const tile=tiles.get(r.id);if(!tile)continue;
-   if(r.judgement)tile.title=`Why this matches (${r.judgement.relevance}/10): ${r.judgement.reason}`;
+   if(r.judgement)tile.title=`${r.verification==='uncertain'?'Possible match':'Why this matches'} (${r.judgement.relevance}/10): ${r.judgement.reason}`;
+   if(r.verification==='uncertain'&&!tile.querySelector('.image-uncertain')){
+    const badge=node('span',r.unseen?'Image not inspected':'Possible match','image-tile-badge image-uncertain');
+    badge.title=(r.unmet_requirements??[]).join('; ')||'Some requested details could not be confirmed.';
+    tile.append(badge);
+   }
    if(before)before.after(tile);else imageGrid.prepend(tile);before=tile;}
   for(const p of snap.providers)if(p.status!=='ok')notices.append(node('p',p.message,'notice'));
   const count=imageGrid.children.length;
@@ -576,6 +590,14 @@ function renderSites(sites){
 }
 // A reviewed result whose page or file could not be opened is a lead: matched on its title and snippet only.
 function markLead(row,item){
+ if(item?.verification==='uncertain'&&!row.querySelector('.badge-uncertain')){
+  const b=node('span','Possible match','badge badge-uncertain');b.title=(item.unmet_requirements??[]).join('; ')||'Some requested details could not be confirmed.';
+  row.querySelector('.web-item-source')?.append(b);
+ }
+ if(item?.alternatives?.length&&!row.querySelector('.copy-alternatives')){
+  const copies=node('details',undefined,'copy-alternatives');copies.append(node('summary',`${item.alternatives.length} other ${item.alternatives.length===1?'copy':'copies'}`));
+  for(const copy of item.alternatives){const p=node('p');p.append(link(copy.url,copy.title));copies.append(p);}row.append(copies);
+ }
  if(!item?.lead||row.querySelector('.badge-lead'))return;
  const b=node('span','Lead · not opened','badge badge-lead');b.title='ZenAtlas could not open this page or file, so it was matched on its title and description only.';
  row.querySelector('.web-item-source')?.append(b);
@@ -604,7 +626,7 @@ async function followReview(token,page,review){
   for(const row of reorderPage(page,snap.results)){
    row.querySelector('.why')?.remove();
    const r=byId.get(row.dataset.id);markLead(row,r);
-   if(r?.judgement)row.querySelector('h3').after(node('p',`Why this matches (${r.judgement.relevance}/10): ${r.judgement.reason}`,'why'));
+   if(r?.judgement)row.querySelector('h3').after(node('p',`${r.verification==='uncertain'?'Possible match':'Why this matches'} (${r.judgement.relevance}/10): ${r.judgement.reason}`,'why'));
   }
   for(const p of snap.providers)if(p.status!=='ok')notices.append(node('p',p.message,'notice'));
   const count=webList.children.length;

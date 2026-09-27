@@ -21,6 +21,17 @@ function env(db:DB,overrides:Partial<CheckEnv>={}):CheckEnv{
 }
 const fails=(error:unknown)=>async()=>{throw error;};
 
+test('scene watchdog distinguishes stopped workers, healthy slots and budget deferrals',async()=>{
+ const db=await database();try{
+   const run=()=>check('scene_worker').run(env(db,{config:{...testConfig,SCENE_AUTO_QUEUE:true}}));
+   assert.equal((await run()).code,'scene_worker_stopped');
+   await db.query(`INSERT INTO service_heartbeats(service,pid,host,started_at,details) VALUES('scene-worker',1,'fixture',now(),'{"slots":2,"alive":2}')`);
+   assert.equal((await run()).code,'running');
+   await db.query(`INSERT INTO jobs(kind,dedupe_key,payload,error_code,run_after) VALUES('scene_analysis','fixture-deferred','{}','budget_exhausted',now()+interval '1 day')`);
+   assert.equal((await run()).code,'scene_budget_deferred');
+ }finally{await db.close();}
+});
+
 test('version ranges follow npm semantics for advisories, package.json and engines',()=>{
  const cases:[string,string,boolean|null][]=[
    ['5.12.4','<5.12.1',false],['5.12.0','<5.12.1',true],['4.5.0','>=4.0.0 <4.10.2',true],['4.10.2','>=4.0.0 <4.10.2',false],

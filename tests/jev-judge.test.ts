@@ -25,7 +25,7 @@ test('snippets come only from inspected content, each an exact excerpt of its fi
  for(const s of snips)assert.ok(groundedQuote(c,{status:'supported',field:s.field,quote:s.text}),s.text);
  assert.deepEqual(snippetsOf(base('b')),[],'nothing inspected, nothing to quote');
  const api=base('c',{description:'Official upload. Filmed in 2024.',description_source:'api',comments:['Great footage of the launch']});
- assert.deepEqual(snippetsOf(api).map(s=>s.field),['description','description','comments']);
+ assert.deepEqual(snippetsOf(api).map(s=>s.field),['description','comments','description']);
 });
 
 type Reply=(body:any)=>any;
@@ -56,12 +56,15 @@ test('confident, snippet-backed matches are settled by Jev; the rest go to the L
 
 test('would-reject stays in shadow by default and rejects only when switched on; failures always forward',async()=>{
  const inner:Judge={async judge(_q,cs){return {model:'llm',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,relevance:7,reason:'llm',momentKeys:[]}]))};}};
- const reject=jev(body=>confident(body,0,'mismatch',0.9));
+ const reject=jev(body=>confident(body,0,`m_${Object.keys(body.state.candidate.snippets).find(k=>body.state.candidate.snippets[k].text.includes('July 1947'))}`,0.9));
  const shadow=await new JevJudge(db,config,inner,reject).judge('roswell article',[inspected('a')],context);
  assert.deepEqual([shadow.verdicts.get('a')!.reason,(shadow.jev!.get('a') as any).outcome],['llm','would_reject']);
  const live=await new JevJudge(db,{...config,JEV_JUDGE_REJECT:true},inner,reject).judge('roswell article',[inspected('a')],context);
  assert.ok(live.verdicts.get('a')!.relevance<=4);
  assert.ok(live.verdicts.get('a')!.requirementChecks!.some(c=>c.status==='mismatch'));
+ assert.ok(live.verdicts.get('a')!.requirementChecks!.filter(c=>c.status==='mismatch').every(c=>c.quote.length>0));
+ const unbacked=await new JevJudge(db,{...config,JEV_JUDGE_REJECT:true},inner,jev(body=>confident(body,0,'mismatch',0.99))).judge('q',[inspected('a')],context);
+ assert.equal(unbacked.verdicts.get('a')!.reason,'llm','a categorical mismatch without an evidence ID must go to the cheap scorer');
  let calls=0;
  const reset=jev(()=>{calls++;const e:any=new Error('socket hang up');e.code='ECONNRESET';throw e;});
  const failed=await new JevJudge(db,config,inner,reset).judge('roswell article',[inspected('a')],context);
@@ -74,7 +77,7 @@ test('would-reject stays in shadow by default and rejects only when switched on;
  assert.equal(plain.verdicts.get('a')!.reason,'llm','without a contract Jev does not settle anything');
 });
 
-test('gate mode: a confident match still goes to the LLM judge with Jev findings; unreliable pages are rejected',async()=>{
+test('gate mode: matches and unsupported reliability concerns go to the cheap judge',async()=>{
  const seen:JudgeCandidate[]=[];
  const inner:Judge={async judge(_q,cs){seen.push(...cs);return {model:'llm',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,relevance:7,reason:'llm',momentKeys:[]}]))};}};
  const asked:any[]=[];
@@ -83,10 +86,9 @@ test('gate mode: a confident match still goes to the LLM judge with Jev findings
    .judge('roswell article',[inspected('a'),inspected('bad')],context);
  assert.equal(out.verdicts.get('a')!.reason,'llm','a confident match is not settled by Jev');
  assert.deepEqual([(out.jev!.get('a') as any).outcome,(out.jev!.get('a') as any).accuracy],['would_settle',0.9]);
- assert.deepEqual(seen.map(c=>[c.key,c.jev_check]),[['a',{relevance:4,accuracy:0.9}]]);
- assert.equal(out.verdicts.get('bad')!.reason,'Jev: unreliable information.');
- assert.ok(out.verdicts.get('bad')!.relevance<=4);
- assert.equal((out.jev!.get('bad') as any).outcome,'rejected');
+ assert.deepEqual(seen.map(c=>[c.key,c.jev_check]),[['a',{relevance:4,accuracy:0.9}],['bad',{relevance:4,accuracy:0.1}]]);
+ assert.equal(out.verdicts.get('bad')!.reason,'llm');
+ assert.equal((out.jev!.get('bad') as any).outcome,'would_reject');
  assert.ok(asked.every(b=>b.questions.accuracy?.type==='noul'));
 });
 
