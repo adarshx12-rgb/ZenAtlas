@@ -9,7 +9,7 @@ import { publicURL } from './urls.js';
 import { engineStatus } from './providers.js';
 import { tierSchema } from './tiers.js';
 import { rewriteQuery } from './query-rewrite.js';
-import { aiGenerated, excludesAI, openverseResults, wantsLicense, type ImageLicense } from './image-signals.js';
+import { aiGenerated, excludesAI, openverseQuery, openverseResults, wantsLicense, type ImageLicense } from './image-signals.js';
 import { startImageReview } from './image-review.js';
 
 // Image search is discovery-only: results are returned straight from the engines and never
@@ -90,7 +90,7 @@ export async function searchImages(db: DB, config: Config, input: ImageSearchInp
  // What was meant rather than what was typed, as on the Web tab (the planner step for images).
  const rewrite = await (deps.rewrite ?? rewriteQuery)(db, config, input.q, 'web').catch(() => null);
  const q = rewrite?.corrected ?? input.q;
- const licensed = openverse(db, config, q, input.page);
+ const licensed = openverse(db, config, openverseQuery(q, rewrite?.topic ?? null), input.page);
  const found = await engineImages(db, config, {...input, q});
  const extra = await licensed;
  const seen = new Set(found.results.map(r => r.image_url));

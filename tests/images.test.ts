@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {aiGenerated,excludesAI,wantsLicense,openverseResults,licenseLabel} from '../src/image-signals.js';
+import {aiGenerated,excludesAI,wantsLicense,openverseResults,licenseLabel,openverseQuery} from '../src/image-signals.js';
 import {reviewImages} from '../src/image-review.js';
 import type {Judge} from '../src/judge.js';
 import type {ImageResult} from '../src/images.js';
@@ -57,4 +57,10 @@ test('an image whose thumbnail cannot be fetched or is not a JPEG is judged on i
   thumbnail:async(u:string)=>u.includes('a-t')?{contentType:'image/png',data:Buffer.from('png')}:Promise.reject(new Error('404')),log:()=>{}});
  assert.equal(shots,0);
  assert.ok(out.results.every(r=>r.unseen));
+});
+
+test('Openverse is asked for the subject, not the whole sentence',()=>{
+ assert.equal(openverseQuery('free to use photo of mount everest with license and attribution',null),'mount everest');
+ assert.equal(openverseQuery('creative commons pictures of a red panda','Red panda'),'Red panda');
+ assert.equal(openverseQuery('royalty-free images of tokyo at night',null),'tokyo at night');
 });

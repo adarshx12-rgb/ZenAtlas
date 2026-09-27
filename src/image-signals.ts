@@ -39,3 +39,12 @@ export function openverseResults(payload: unknown): (ImageResult & {license: Ima
        url: media(r.data.license_url), creator: text(r.data.creator, 200), attribution: text(r.data.attribution, 500)}}];
  });
 }
+
+// Openverse matches words against titles and tags, so a whole sentence ("free to use photo of mount everest with license
+// and attribution") finds nothing: it is asked for the subject, the rewrite's topic when there is one.
+const FILLER = /\b(?:free[-\s]to[-\s]use|royalty[-\s]?free|copyright[-\s]?free|creative commons|public domain|cc0|cc[-\s]by(?:[-\s]sa)?|free|with|and|licen[cs]es?d?|attribution|photos?|pictures?|images?|pics?|stock|of|an?|the|hd|4k|high[-\s]resolution)\b/gi;
+export function openverseQuery(query: string, topic: string|null): string {
+ if (topic?.trim()) return topic.trim();
+ const subject = query.replace(FILLER, ' ').replace(/[^\p{L}\p{N}\s'-]/gu, ' ').replace(/\s+/g, ' ').trim();
+ return subject || query;
+}
