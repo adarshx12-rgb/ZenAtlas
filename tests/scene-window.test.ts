@@ -46,3 +46,20 @@ test('a window is covered when an earlier analysis inspected all of it',()=>{
  assert.ok(!covered({start:100,end:200},[[[0,150]],[[180,300]]]));
  assert.ok(!covered({start:100,end:200},[]));
 });
+
+test('probability spread over neighbouring chunks still makes a window, widened only as far as needed',async()=>{
+ const probabilities:Record<string,number>={none:0.01};
+ const chunks=transcriptChunks(webcast,2059);
+ chunks.forEach(c=>probabilities[c.id]=0);
+ const at=(i:number)=>chunks[i]!.id;
+ const top=chunks.length-3;
+ Object.assign(probabilities,{[at(top)]:0.52,[at(top-2)]:0.3,[at(top-3)]:0.08,[at(top-1)]:0.01});
+ const transport=(async()=>({model:'jev',answers:{window:{type:'choice',choice:at(top),confidence:0.49,probabilities}}})) as any;
+ const w=await chooseSceneWindow(db,config,'boosters land',webcast,2059,transport);
+ assert.ok(w,'0.52 alone is below the bar, but with its neighbours it clears it');
+ assert.equal(w!.start,chunks[top-2]!.start-60);
+ assert.equal(w!.end,Math.min(2059,chunks[top]!.end+60));
+ const flat=Object.fromEntries(chunks.map(c=>[c.id,1/chunks.length]));
+ assert.equal(await chooseSceneWindow(db,config,'q',webcast,2059,(async()=>({model:'jev',answers:{window:{type:'choice',choice:at(3),confidence:0.03,probabilities:flat}}})) as any),null,
+  'probability spread thinly over the whole video is not a window');
+});

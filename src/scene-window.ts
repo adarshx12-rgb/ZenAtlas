@@ -37,7 +37,25 @@ export function covered(window: SceneWindow, inspected: number[][][]): boolean {
  return inspected.some(ranges => ranges.some(([a, b]) => a <= window.start && b >= window.end));
 }
 
-const reply = z.object({answers: z.object({window: z.object({type: z.literal('choice'), choice: z.string(), confidence: z.number().min(0).max(1)})})});
+const reply = z.object({answers: z.object({window: z.object({type: z.literal('choice'), choice: z.string(), confidence: z.number().min(0).max(1),
+ probabilities: z.record(z.string(), z.number().min(0).max(1)).optional()})})});
+// At most this many adjacent chunks make one window: wider than that, the transcript is not pointing anywhere in particular.
+const MAX_SPAN = 6;
+
+// Commentary spreads over neighbouring chunks, so Jev's probability may be split between them ("touchdown very shortly",
+// then the landing): from the chosen chunk, add the likelier neighbour until the span holds `bar` or grows too wide.
+export function spanFor(chunks: Chunk[], choice: string, probabilities: Record<string, number>, bar: number): [number, number]|null {
+ let lo = chunks.findIndex(c => c.id === choice), hi = lo;
+ if (lo < 0) return null;
+ const p = (i: number) => probabilities[chunks[i]?.id ?? ''] ?? 0;
+ let mass = p(lo);
+ while (mass < bar && hi - lo + 1 < MAX_SPAN) {
+   const left = lo > 0 ? p(lo - 1) : -1, right = hi < chunks.length - 1 ? p(hi + 1) : -1;
+   if (left < 0 && right < 0) break;
+   if (left >= right) mass += p(--lo); else mass += p(++hi);
+ }
+ return mass >= bar ? [lo, hi] : null;
+}
 
 export async function chooseSceneWindow(db: DB, config: Config, query: string, segments: Segment[], duration: number,
  transport = fetchJSON): Promise<SceneWindow|null> {
@@ -59,10 +77,11 @@ export async function chooseSceneWindow(db: DB, config: Config, query: string, s
      timeoutMs: config.JEV_JUDGE_TIMEOUT_MS, maxBytes: 64 * 1024, body});
    const answer = reply.safeParse(raw);
    if (!answer.success) throw new UpstreamError('malformed_response');
-   const {choice, confidence} = answer.data.answers.window, chunk = chunks.find(c => c.id === choice);
-   if (!chunk || confidence < config.SCENE_WINDOW_CONFIDENCE) return null;
+   const {choice, confidence, probabilities} = answer.data.answers.window;
+   const span = spanFor(chunks, choice, probabilities ?? {[choice]: confidence}, config.SCENE_WINDOW_CONFIDENCE);
+   if (!span) return null;
    // A margin either side: a commentator names a landing as it happens or just after.
    const pad = config.SCENE_WINDOW_PAD_SECONDS;
-   return {start: Math.max(0, chunk.start - pad), end: Math.min(duration, chunk.end + pad), confidence};
+   return {start: Math.max(0, chunks[span[0]]!.start - pad), end: Math.min(duration, chunks[span[1]]!.end + pad), confidence};
  } catch { return null; }
 }
