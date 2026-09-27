@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 import uuid
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -21,6 +22,32 @@ Transcriber = Callable[[Path, Heartbeat], list[tuple[float, float, str]]]
 
 
 HANDOFF_CODES = frozenset({"provider_unavailable", "provider_rate_limited", "provider_timeout", "provider_unreachable"})
+# How long a model that just failed this way is skipped. The direct key's free daily quota runs out early in the day,
+# and every attempt spent a unit of the daily budget before the job fell through to OpenRouter: on 2026-09-27 the 60
+# requests bought 30 analyses.
+COOLDOWN_SECONDS = {"provider_rate_limited": 3600, "provider_unavailable": 600, "provider_timeout": 300, "provider_unreachable": 300}
+
+
+class Cooldowns:
+    """Models to skip for a while after an overload, rate limit or outage. Shared by every pipeline in the process,
+    since the worker rebuilds its pipeline whenever the database connection is renewed."""
+
+    def __init__(self, clock: Callable[[], float] = time.monotonic):
+        self._clock = clock
+        self._until: dict[str, float] = {}
+
+    def failed(self, model: str, code: str) -> None:
+        if code in COOLDOWN_SECONDS:
+            self._until[model] = self._clock() + COOLDOWN_SECONDS[code]
+
+    def usable(self, models: list[str]) -> list[str]:
+        """The models not cooling down; when all are, the last one is still tried rather than none."""
+        now = self._clock()
+        live = [m for m in models if self._until.get(m, 0.0) <= now]
+        return live or models[-1:]
+
+
+COOLDOWNS = Cooldowns()
 
 
 def candidate_models(primary: str, settings: Settings, media_kind: str) -> list[str]:
@@ -86,7 +113,9 @@ def _job_payload(job: dict[str, Any]) -> tuple[str, str] | None:
 
 class ScenePipeline:
     def __init__(self, conn: Any, settings: Settings, model: SceneModel, *,
-                 youtube_check: Callable[[str], None] = check_youtube, transcriber: Transcriber | None = None):
+                 youtube_check: Callable[[str], None] = check_youtube, transcriber: Transcriber | None = None,
+                 cooldowns: Cooldowns = COOLDOWNS):
+        self.cooldowns = cooldowns
         self.conn = conn
         self.settings = settings
         self.model = model
@@ -148,6 +177,8 @@ class ScenePipeline:
 
         focus = job.get("payload", {}).get("query", "")
         # An overloaded, rate-limited or unreachable model hands the job to the next one; any other failure ends the chain.
+        # Models cooling down after such a failure are skipped without spending budget.
+        models = self.cooldowns.usable(models)
         for index, candidate in enumerate(models):
             if not store.take_budget(self.conn, "scene_analysis_requests", self.settings.daily_request_budget):
                 store.defer_for_budget(self.conn, job, version_id)
@@ -161,6 +192,7 @@ class ScenePipeline:
                 model = candidate
                 break
             except TransientAnalysisError as error:
+                self.cooldowns.failed(candidate, error.code)
                 if error.code not in HANDOFF_CODES or index == len(models) - 1:
                     raise
         analysis_version = analysis_version_for(model, plan.identity)

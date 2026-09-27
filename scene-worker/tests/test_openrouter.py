@@ -88,3 +88,30 @@ def test_candidates_start_with_the_job_model_and_skip_openrouter_without_a_key_o
     assert candidate_models("gemini-3.8-flash", keyed, "youtube") == ["gemini-3.8-flash", "google/gemini-3.8-flash", "gemini-3.5-flash"]
     assert candidate_models("gemini-3.8-flash", keyed, "local_file") == ["gemini-3.8-flash", "gemini-3.5-flash"]
     assert candidate_models("gemini-3.8-flash", Settings.from_env(base), "youtube") == ["gemini-3.8-flash", "gemini-3.5-flash"]
+
+
+def test_a_model_that_just_failed_is_skipped_for_a_while_so_no_budget_is_spent_on_it():
+    from zenatlas_scenes.pipeline import Cooldowns
+    now = [1000.0]
+    cool = Cooldowns(clock=lambda: now[0])
+    models = ["gemini-3.8-flash", "google/gemini-3.8-flash", "gemini-3.5-flash"]
+    assert cool.usable(models) == models
+    cool.failed("gemini-3.8-flash", "provider_rate_limited")
+    assert cool.usable(models) == ["google/gemini-3.8-flash", "gemini-3.5-flash"]
+    now[0] += 3599
+    assert "gemini-3.8-flash" not in cool.usable(models), "a used-up daily quota is skipped for an hour"
+    now[0] += 2
+    assert cool.usable(models) == models
+    cool.failed("google/gemini-3.8-flash", "provider_unavailable")
+    now[0] += 599
+    assert cool.usable(models) == ["gemini-3.8-flash", "gemini-3.5-flash"]
+    cool.failed("gemini-3.5-flash", "model_output_truncated")
+    assert "gemini-3.5-flash" in cool.usable(models), "only overloads, limits and outages cool a model"
+
+
+def test_when_every_model_is_cooling_the_last_one_is_still_tried():
+    from zenatlas_scenes.pipeline import Cooldowns
+    cool = Cooldowns(clock=lambda: 0.0)
+    for m in ("a", "b"):
+        cool.failed(m, "provider_unavailable")
+    assert cool.usable(["a", "b"]) == ["b"]
