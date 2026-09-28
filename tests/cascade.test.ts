@@ -68,7 +68,7 @@ test('one log line per review with counts and reasons, never the query',async()=
 
 test('Strong judge models: SSJ3 terra first; SSJ1 gemini-3.5-flash-lite first; never the Scorer main model; off for the council',()=>{
  const config={...testConfig,OPENROUTER_API_KEY:'k',JUDGE_MODELS:'google/gemini-3.5-flash-lite'};
- assert.deepEqual((makeStrongJudge({} as any,config) as any).client.models,['openai/gpt-6-luna','openai/gpt-5.6-terra','mistralai/mistral-medium-3.1']);
+ assert.deepEqual((makeStrongJudge({} as any,config) as any).client.models,['openai/gpt-6-luna','mistralai/mistral-medium-3.1','anthropic/claude-haiku-4.5','openai/gpt-5.6-terra']);
  const ssj1=tierConfig(config,'ssj1');
  assert.equal((makeStrongJudge({} as any,ssj1) as any).client.models[0],'google/gemini-3.5-flash-lite');
  assert.ok(!(makeStrongJudge({} as any,{...config,CASCADE_STRONG_MODELS:'google/gemini-3.5-flash-lite,openai/gpt-5.6-terra'}) as any).client.models.includes('google/gemini-3.5-flash-lite'));
