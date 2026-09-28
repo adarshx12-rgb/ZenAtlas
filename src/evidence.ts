@@ -2,6 +2,7 @@ import type { PageEvidence } from './pages.js';
 import { accessKind, accessLabel, fullCopyAccess } from './access.js';
 import { hardEach, type Format, type Requirement, type RequirementsContract } from './requirements.js';
 import type { RequirementVerdict } from './judge.js';
+import { requirementNeeds } from './search-contract.js';
 
 // One finding links a candidate to a requirement: what supports or contradicts it, where, and how it was obtained.
 // Provisional findings (search snippets, URL guesses, model predictions) steer priority and exploration; they never
@@ -203,7 +204,10 @@ export function decide(contract: RequirementsContract, findings: Finding[], judg
  }
  for (const s of states) if (s.status === 'unknown' && EXCLUSION.test(s.text)) notes.push(`Could not check: ${s.text}.`);
  const contradicted = states.filter(s => s.status === 'contradicted').map(s => s.id);
- const unconfirmed = states.filter(s => s.status === 'unknown').map(s => s.id);
+ // An unchecked content exclusion is reported above, not held against the result; provenance exclusions stay strict.
+ const open = (s: RequirementState) => { const r = contract.requirements.find(x => x.id === s.id)!;
+   return !(r.polarity === 'exclude' && requirementNeeds(r) === 'content'); };
+ const unconfirmed = states.filter(s => s.status === 'unknown' && open(s)).map(s => s.id);
  return {status: contradicted.length ? 'excluded' : unconfirmed.length ? 'uncertain' : 'verified', requirements: states, contradicted, unconfirmed, notes};
 }
 

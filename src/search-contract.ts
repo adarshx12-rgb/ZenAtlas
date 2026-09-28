@@ -4,13 +4,24 @@ import { OpenAICompatibleClient } from './openai-compatible.js';
 import { contractDraft, DRAFT_INSTRUCTION, DRAFT_REQUIRED, DRAFT_SCHEMA, hardEach, normaliseContract, type Requirement, type RequirementsContract } from './requirements.js';
 
 export type SearchModality = 'videos'|'web'|'docs'|'images';
-export const provenanceRequest = (s: string) => /\b(?:licen[cs]e|attribution|copyright|creative commons|free to use|not AI|no AI|non-AI|not generated|not AI-generated)\b/i.test(s);
+const BARE_YEAR = /^\s*(?:in\s+)?((?:19|20)\d{2})\s*$/i;
+const NEGATED = /^\s*(?:not|no|non|never|without|excluding|except|avoid)\b/i;
+export const provenanceRequest =(s: string) => /\b(?:licen[cs]e|attribution|copyright|creative commons|free to use|not AI|no AI|non-AI|not generated|not AI-generated)\b/i.test(s);
 
 // Complete a planner's contract from the actual request. Fallback clauses preserve all words, including constraints
 // beyond the old 150-character review limit. The original request remains authoritative in every judge call.
 export function completeContract(contract: RequirementsContract, modality?: SearchModality): RequirementsContract {
  const query = contract.query;
- const requirements = contract.requirements.map(r => ({...r, hardness: r.kind === 'subject' && r.scope === 'each' ? 'hard' as const : r.hardness}));
+ // A bare year names the event ("first launch in 2018"): attach it to the first event requirement instead of letting it
+ // stand alone, where no evidence field ever states it and it held every correct result at 5.
+ const years = contract.requirements.flatMap(r => BARE_YEAR.exec(r.text)?.[1] ?? []);
+ const events = contract.requirements.filter(r => !BARE_YEAR.test(r.text));
+ const host = events.find(r => r.kind === 'subject' && r.scope === 'each');
+ const missing = host ? years.filter(y => !host.text.includes(y)) : [];
+ const folded = !years.length ? contract.requirements
+   : host ? events.map(r => r === host && missing.length ? {...r, text: `${r.text} (${missing.join(', ')})`} : r)
+   : contract.requirements.map(r => BARE_YEAR.test(r.text) ? {...r, hardness: 'preferred' as const} : r);
+ const requirements = folded.map(r => ({...r, hardness: r.kind === 'subject' && r.scope === 'each' && !BARE_YEAR.test(r.text) ? 'hard' as const : r.hardness}));
  const setItems = requirements.filter(r => r.scope === 'set').flatMap(r => r.set_items ?? []);
  // A set-level publisher list must not become a demand that every result comes from every publisher.
  const names = setItems.map(item => item.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
@@ -20,6 +31,8 @@ export function completeContract(contract: RequirementsContract, modality?: Sear
  for (const [i, text] of clauses.entries()) {
    if (i === 0 && requirements.some(r => r.kind === 'subject' && r.scope === 'each')) continue;
    if (requirements.some(r => r.text.toLowerCase() === text.toLowerCase() || r.source_quote === text)) continue;
+   // "where the two side boosters touch down together" restates "two side boosters touch down together".
+   if (requirements.some(r => r.text.length >= 12 && text.toLowerCase().includes(r.text.toLowerCase()))) continue;
    if (/^(?:under|less than)\b/i.test(text) && requirements.some(r => r.kind === 'duration')) continue;
    requirements.push({id: '', text, source_quote: text, kind: i === 0 ? 'subject' : 'property', hardness: 'hard', scope: 'each',
      evidence: provenanceRequest(text) ? 'Explicit source provenance or licence and attribution; appearance and missing labels prove nothing.'
@@ -33,14 +46,16 @@ export function completeContract(contract: RequirementsContract, modality?: Sear
  const tagged = requirements.map(r => ({...r,
    text: modality === 'images' && r.kind === 'subject' ? r.text.replace(/\bfree to use\s+|\bnon-AI\s+/gi, '').trim() : r.text,
    evidence_kind: modality === 'images' && r.kind === 'subject' ? 'visual' as const : provenanceRequest(r.source_quote ?? r.text) ? 'provenance' as const
-   : modality === 'images' && r.kind === 'property' ? 'visual' as const : r.evidence_kind ?? 'content' as const}));
+   : modality === 'images' && r.kind === 'property' ? 'visual' as const : r.evidence_kind ?? 'content' as const}))
+   // Provenance exclusions ("not AI-generated") stay strict: the user needs that assurance, not just an absence of doubt.
+   .map(r => r.evidence_kind !== 'provenance' && NEGATED.test(r.text) ? {...r, polarity: 'exclude' as const} : r);
  // Preserve hard requirements before preferences when a verbose draft fills the contract.
  const ordered = [...tagged.filter(r => r.hardness === 'hard'), ...tagged.filter(r => r.hardness !== 'hard')].slice(0, 12);
  return {...contract, requirements: ordered.map((r, i) => ({...r, id: `R${i + 1}`}))};
 }
 
 export const judgeRequirements = (contract: RequirementsContract) => hardEach(contract).map(r =>
- ({id: r.id, text: r.text, evidence: r.evidence, kind: r.kind, evidence_kind: r.evidence_kind, source_quote: r.source_quote}));
+ ({id: r.id, text: r.text, evidence: r.evidence, kind: r.kind, evidence_kind: r.evidence_kind, source_quote: r.source_quote, polarity: r.polarity}));
 
 type DraftModel = (query: string, modality: SearchModality) => Promise<unknown>;
 export interface ContractDeps { contract?: RequirementsContract; contractModel?: DraftModel; searchDate?: string }

@@ -35,7 +35,8 @@ export interface JudgeCandidate {
 // anime: a confidently matched anime from AniList, for recognising fan-subbed, dubbed or renamed uploads of it.
 // requirements: the shared contract's hard per-result requirements, checked one by one.
 export interface JudgeContext { kind: 'videos'|'websites'|'mixed'; criteria: string[]; anime?: AnimeMatch|null; search_date?: string;
- requirements?: {id: string; text: string; evidence: string; kind?: string; evidence_kind?: 'content'|'visual'|'provenance'; source_quote?: string}[] }
+ requirements?: {id: string; text: string; evidence: string; kind?: string; evidence_kind?: 'content'|'visual'|'provenance'; source_quote?: string;
+   polarity?: 'exclude'}[] }
 export interface RequirementVerdict { id: string; status: 'supported'|'unknown'|'mismatch'; field: string; quote: string; evidence_id?: string;
  next_action?: 'none'|'inspect'|'reason' }
 export interface Verdict { key: string; relevance: number; reason: string; momentKeys: string[]; lesserKnown?: boolean; intentChecks?:IntentCheck[];
@@ -103,19 +104,49 @@ export function eligibleCheck(c: JudgeCandidate, check: RequirementVerdict, requ
  return true;
 }
 
-// Unknown remains a possible lead. Every hard requirement must have eligible support before a high score is retained.
+// A grounded quote from the title, URL or a search snippet: support that keeps a result shown at the metadata-only level
+// (6) instead of discarding it. Visual and provenance needs, and properties the platform facts own, never take it.
+export function weakCheck(c: JudgeCandidate, check: RequirementVerdict, requirement?: NonNullable<JudgeContext['requirements']>[number]): boolean {
+ if (!requirement || !groundedQuote(c, check)) return false;
+ if (['format','date','duration','authority','completeness'].includes(requirement.kind ?? '') && c.facts?.some(f => f.id === requirement.id)) return false;
+ if (requirementNeeds(requirement) !== 'content') return false;
+ return check.field === 'title' || check.field === 'url' || check.field === 'description' && c.description_source !== 'api';
+}
+const METADATA_ONLY = 6;
+
+// Whether a quote appears anywhere in the candidate's own metadata or evidence, whichever field the model named.
+const inCandidate = (c: JudgeCandidate, quote: string) => normaliseQuote(quote).length >= 2 && [c.title, c.url ?? '', c.channel ?? '',
+ c.duration ?? '', c.description ?? '', ...c.comments, ...c.moments.flatMap(m => m.viewers_said), ...(c.transcripts ?? []).map(t => t.text),
+ ...(c.scenes ?? []).map(s => s.description), c.page?.title ?? '', c.page?.description ?? '', c.page?.text ?? '', c.provenance ?? '',
+ ...(c.facts ?? []).map(f => f.quote)].some(text => quoted(quote, text));
+
+// Unknown remains a possible lead. Every hard requirement must have eligible support before a high score is retained,
+// except a content exclusion: nothing checks "not a news channel", so only evidence of the excluded thing can fail it.
 export function enforceRequirements(c: JudgeCandidate, v: Verdict, requirements: JudgeContext['requirements']): Verdict {
  if (!requirements?.length) return v;
+ const weak = new Set<string>();
+ let invented = false;
  const checks = requirements.map(r => {
    const fact = c.facts?.find(f => f.id === r.id && f.status !== 'unknown');
    const answer = fact ?? v.requirementChecks?.find(ch => ch.id === r.id);
    const check: RequirementVerdict = answer ?? {id: r.id, status: 'unknown', field: '', quote: ''};
-   return check.status !== 'unknown' && !eligibleCheck(c, check, r) ? {...check, status: 'unknown' as const} : check;
+   if (check.status === 'unknown' || eligibleCheck(c, check, r)) return check;
+   if (weakCheck(c, check, r)) { weak.add(r.id); return check; }
+   if (check.status === 'mismatch' && !inCandidate(c, check.quote)) invented = true;
+   return {...check, status: 'unknown' as const};
  });
+ const open = requirements.filter(r => checks.find(ch => ch.id === r.id)!.status === 'unknown');
+ const openExclusions = open.filter(r => r.polarity === 'exclude' && requirementNeeds(r) === 'content');
  const contradicted = checks.some(ch => ch.status === 'mismatch') || v.intentChecks?.some(ch => ch.status === 'mismatch' && groundedCheck(c, ch));
- const ceiling = contradicted ? 4 : checks.some(ch => ch.status === 'unknown') ? 5 : 10;
- return {...v, relevance: ceiling === 5 ? 5 : Math.min(v.relevance, ceiling), requirementChecks: checks,
-   reason: v.reason + (v.relevance > ceiling ? ceiling === 4 ? ' Contradicts a required property.' : ' Required evidence is missing.' : '')};
+ const ceiling = contradicted ? 4 : open.length > openExclusions.length ? 5 : weak.size ? METADATA_ONLY : 10;
+ const note = ` Not checked: ${openExclusions.map(r => r.text).join('; ')}.`;
+ const notChecked = !contradicted && openExclusions.length && !v.reason.includes(note) ? note : '';
+ // A rejection resting on a contradiction found nowhere in the candidate stays a possible lead (5); one citing real
+ // evidence the gate cannot use (the duration, the channel, a title) keeps the model's own low score.
+ const relevance = invented && ceiling === 5 ? 5 : Math.min(v.relevance, ceiling);
+ return {...v, relevance, requirementChecks: checks,
+   reason: v.reason + (v.relevance > ceiling ? ceiling === 4 ? ' Contradicts a required property.' : ceiling === 5 ? ' Required evidence is missing.'
+     : ' Supported only by a title or search snippet.' : '') + notChecked};
 }
 
 // Scores at or below this are dropped: 3-4 is "only tangential" on the rubric.
@@ -136,7 +167,7 @@ Format: "Wanted" is a planner's guess, not a restriction. This engine serves vid
 Respect the tone and genre the request implies: a request for scary, serious or dramatic material is not satisfied by comedy, pranks or parody unless those are requested. Do not assert that footage presented as real is authentic. A title, hashtag or thumbnail claim alone does not establish a specific property such as a twist, a reveal or a reaction; look for supporting description, comments or other evidence.
 Videos: use site, title, channel, duration, live status, description, top viewer comments, moments that viewers pointed to with timestamps, and titles of Reddit threads that appear to discuss it. Prefer videos whose comments confirm the requested content, such as viewers reacting to a story, a twist or a scene. Score lower for clickbait whose comments contradict the title, unrelated compilations, and uploads that look like unofficial full copies of commercial films or TV episodes.
 Official or canonical copies: when a candidate is a copy of one specific work (an opening, trailer, scene, speech, lecture, paper, report or article), prefer its official or canonical source: the rights holder's, publisher's or author's own channel or site, or the original venue (the studio's or distributor's channel, the university that hosted the speech, the author's institution, the journal or conference). A re-upload, mirror, excerpt, compilation or re-edit of the same work scores at most 7 unless the request asks for such a version; a candidate marked official, or whose inspected publisher is the rights holder, may score 8-10 when its evidence supports it. Judge officialness only from the channel, publisher, site or official flag given, never from a title's claim.
-Exclusions ("not X", "no talking", "without background music", "not from big channels") are checked against evidence like any other requirement: mark mismatch with grounded evidence of the excluded thing. If neither absence nor presence is established, mark unknown. An unknown hard exclusion remains a possible match, capped at 5; it is not a verified match or a proven mismatch.
+Exclusions ("not X", "no talking", "without background music", "not from big channels") are checked against evidence like any other requirement: mark mismatch with grounded evidence of the excluded thing. If neither absence nor presence is established, mark unknown. An unknown exclusion is not a proven mismatch: score the candidate on its other requirements; the open question is reported alongside it. Licence, attribution and AI-provenance exclusions are the exception: unknown caps them at 5.
 Websites: use the page check when present: page title, description, main text and front-end libraries found in the page source or seen running in a browser (for example three.js, WebGL or Spline for 3D; GSAP, Lottie or Rive for motion). A library found is evidence; a library not found proves nothing, because many sites bundle their code. When page.screenshot is true, a screenshot of that candidate's first screen after loading follows the candidates, labelled with its key: use it as visual evidence of the design, such as a 3D scene or a bold animated hero, remembering that one still frame cannot show motion. Showcase or gallery pages that collect many matching sites are relevant when the user asks to find such websites. Articles that merely discuss the topic are less relevant than examples of it unless the request asks for articles.
 Retained transcripts quote spoken or captioned text with publisher timing; they do not prove visible action. Retained scenes describe sampled video observations only within inspected_ranges. Use them as direct evidence for the details they actually establish. Comment/caption status empty, unavailable, unsupported or not_permitted means unknown, never evidence against relevance. A correction in a comment is a claim to investigate, not a verified fact.
 Score relevance from 0 (unrelated) to 10 (exactly what was asked).

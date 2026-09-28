@@ -22,7 +22,7 @@ test('an exclusion the evidence contradicts still removes the result; ordinary u
  assert.deepEqual(unknown.unconfirmed,['R1','R2']);
 });
 
-test('the judge prefers canonical copies and leaves an unknown hard exclusion uncertain',async()=>{
+test('the judge prefers canonical copies and reports an unknown exclusion without failing it',async()=>{
  const {ModelJudge}=await import('../src/judge.js');
  const {testConfig}=await import('./helpers.js');
  let system='';
@@ -30,6 +30,7 @@ test('the judge prefers canonical copies and leaves an unknown hard exclusion un
  await new ModelJudge(client,testConfig).judge('q',[{key:'c1',kind:'video',site:'youtube.com',title:'t',channel:null,official:false,duration:null,live:null,description:null,comments:[],moments:[],discussions:[]}]);
  assert.match(system,/official or canonical/i);
  assert.match(system,/re-upload, mirror, excerpt, compilation or re-edit of the same work scores at most 7/);
- assert.match(system,/unknown hard exclusion remains a possible match, capped at 5/i);
+ assert.match(system,/unknown exclusion is not a proven mismatch/i);
+ assert.match(system,/AI-provenance exclusions are the exception: unknown caps them at 5/);
  assert.doesNotMatch(system,/For film or TV scene requests, prefer candidates marked official\./);
 });

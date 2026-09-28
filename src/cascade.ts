@@ -6,6 +6,7 @@ import { ModelJudge, groundedQuote, eligibleCheck, enforceRequirements, judgeMod
 import { snippetsOf, type JevRecord } from './jev-judge.js';
 import { OpenAICompatibleClient } from './openai-compatible.js';
 import { traceFields } from './search-trace.js';
+import { requirementNeeds } from './search-contract.js';
 
 // The judge cascade (docs/superpowers/specs/2026-09-27-judge-cascade-design.md), in place of the council. Jev decides only
 // on snippets cut verbatim from inspected content; the Scorer (the ordinary judge) scores the rest; each verdict is then
@@ -66,6 +67,8 @@ export function missingRequirements(c: JudgeCandidate, v: Verdict, requirements:
  if (v.requirementChecks?.some(ch => ch.status === 'mismatch' && eligibleCheck(c, ch, requirements?.find(r => r.id === ch.id)))) return [];
  return (requirements ?? []).filter(r => {
    const check = v.requirementChecks?.find(ch => ch.id === r.id);
+   // As in enforceRequirements: an unchecked content exclusion is reported, not missing evidence.
+   if ((!check || check.status === 'unknown') && r.polarity === 'exclude' && requirementNeeds(r) === 'content') return false;
    return !check || check.status === 'unknown' || !eligibleCheck(c, check, r);
  }).map(r => r.id);
 }

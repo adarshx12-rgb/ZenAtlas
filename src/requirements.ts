@@ -13,6 +13,8 @@ const requirement = z.object({
  id: z.string().regex(/^R\d{1,2}$/), text: z.string().min(1).max(200),
  source_quote: z.string().max(500).optional(),
  evidence_kind: z.enum(['content', 'visual', 'provenance']).optional(),
+ // "exclude": the request rules something out ("not from big news channels"); only evidence of it can fail a result.
+ polarity: z.literal('exclude').optional(),
  kind: z.enum(['subject', 'format', 'date', 'duration', 'authority', 'completeness', 'property']),
  hardness: z.enum(['hard', 'preferred']), scope: z.enum(['each', 'set']), evidence: z.string().max(300),
  date_range: z.object({from: z.string(), to: z.string()}).optional(),
@@ -68,7 +70,7 @@ export const DRAFT_SCHEMA = {
 };
 // Strict structured output (see openai-compatible.ts) only returns properties listed as required, so all of them are.
 export const DRAFT_REQUIRED = Object.keys(DRAFT_SCHEMA);
-export const DRAFT_INSTRUCTION =`Also describe the request as a contract: intent (one sentence), completeness ("full" only when the request asks for a whole work such as a complete book, paper, issue or document; otherwise "any"), entities it names, official_domains (web domains you believe the named organisation or product officially publishes on; they are checked before use), and requirements. Each requirement is one atomic, checkable property copied from the request: kind subject, property, authority or completeness (dates and file formats are handled separately); hardness "hard" only when the request states it as essential (for example "real", "official", "full"), otherwise "preferred"; scope "each" when every result must meet it, "set" when the results together must cover it (then list set_items, such as each organisation that must be represented); evidence states what would show a result meets it. Never invent requirements the request does not state. List material ambiguities and the assumptions you made instead of asking.`;
+export const DRAFT_INSTRUCTION =`Also describe the request as a contract: intent (one sentence), completeness ("full" only when the request asks for a whole work such as a complete book, paper, issue or document; otherwise "any"), entities it names, official_domains (web domains you believe the named organisation or product officially publishes on; they are checked before use), and requirements. Each requirement is one atomic, checkable property copied from the request: kind subject, property, authority or completeness (dates and file formats are handled separately); hardness "hard" only when the request states it as essential (for example "real", "official", "full"), otherwise "preferred"; scope "each" when every result must meet it, "set" when the results together must cover it (then list set_items, such as each organisation that must be represented); evidence states what would show a result meets it. Write each requirement's text in English, translating transliterated or non-English words (Hinglish "kaise kaam karta hai" is "explains how it works"), and never copy the whole request as one requirement. A year that identifies an event belongs in that event's requirement ("first Falcon Heavy launch (2018)"), not a requirement of its own. State an exclusion as "Not …". Never invent requirements the request does not state. List material ambiguities and the assumptions you made instead of asking.`;
 
 const NUMBERS: Record<string,number> = {one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, a: 1};
 const iso = (d: Date) => d.toISOString().slice(0, 10);
