@@ -98,7 +98,8 @@ export const configSchema = z.object({
   // Cascade: the Strong judge re-judges verdicts scored CASCADE_BORDER_LOW-HIGH, in conflict with Jev's quoted evidence,
   // or above the border without a grounded quote, plus JEV_SETTLED_AUDIT_RATE of Jev's settles. gpt-5.6-terra: 93-99% on
   // labelled cases (2026-09-26); with flash-lite scoring first it scored 100% labels at 60% of the council's cost.
-  CASCADE_STRONG_MODELS: z.string().regex(/^[\w.,\/:\s-]*$/).default('openai/gpt-5.6-terra,mistralai/mistral-medium-3.1,openai/gpt-5.4-mini'),
+  // 2026-09-28: switched to gpt-6-luna (~1/20 of terra's price); terra stays as its first fallback.
+  CASCADE_STRONG_MODELS: z.string().regex(/^[\w.,\/:\s-]*$/).default('openai/gpt-6-luna,openai/gpt-5.6-terra,mistralai/mistral-medium-3.1'),
   CASCADE_STRONG_TIMEOUT_MS: number(35000, 5000, 120000), CASCADE_STRONG_DAILY_BUDGET: number(1500, 0, 100000),
   CASCADE_BORDER_LOW: number(4, 0, 10), CASCADE_BORDER_HIGH: number(7, 0, 10),
   CASCADE_INSPECTION_LIMIT: number(3, 0, 10), CASCADE_INSPECTION_MS: number(8000, 500, 30000),

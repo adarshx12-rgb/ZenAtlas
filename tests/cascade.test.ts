@@ -68,9 +68,18 @@ test('one log line per review with counts and reasons, never the query',async()=
 
 test('Strong judge models: SSJ3 terra first; SSJ1 gemini-3.5-flash-lite first; never the Scorer main model; off for the council',()=>{
  const config={...testConfig,OPENROUTER_API_KEY:'k',JUDGE_MODELS:'google/gemini-3.5-flash-lite'};
- assert.deepEqual((makeStrongJudge({} as any,config) as any).client.models,['openai/gpt-5.6-terra','mistralai/mistral-medium-3.1','openai/gpt-5.4-mini']);
+ assert.deepEqual((makeStrongJudge({} as any,config) as any).client.models,['openai/gpt-6-luna','openai/gpt-5.6-terra','mistralai/mistral-medium-3.1']);
  const ssj1=tierConfig(config,'ssj1');
  assert.equal((makeStrongJudge({} as any,ssj1) as any).client.models[0],'google/gemini-3.5-flash-lite');
  assert.ok(!(makeStrongJudge({} as any,{...config,CASCADE_STRONG_MODELS:'google/gemini-3.5-flash-lite,openai/gpt-5.6-terra'}) as any).client.models.includes('google/gemini-3.5-flash-lite'));
  assert.equal(makeStrongJudge({} as any,{...config,JUDGE_ARCHITECTURE:'council'}),undefined);
+});
+
+test('an unchecked content exclusion is not missing evidence, so it neither caps nor inspects',()=>{
+ const reqs=[{id:'R1',text:'Explains the benchmark',evidence:'Page text'},{id:'R2',text:'Not from a vendor blog',evidence:'Publisher',polarity:'exclude' as const}];
+ const checks=[{id:'R1',status:'supported' as const,field:'page',quote:text},{id:'R2',status:'unknown' as const,field:'',quote:''}];
+ const flags=flagsFor(cand('a'),v('a',9,{requirementChecks:checks}),undefined,2,{...opts,requirements:reqs});
+ assert.ok(!flags.includes('needs_evidence'),`flags: ${flags}`);
+ assert.ok(flagsFor(cand('a'),v('a',9,{requirementChecks:checks}),undefined,2,{...opts,requirements:[reqs[0],{...reqs[1],polarity:undefined}]})
+  .includes('needs_evidence'),'an unknown positive requirement still needs evidence');
 });

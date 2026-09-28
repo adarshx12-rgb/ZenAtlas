@@ -406,7 +406,7 @@ test('tier models: a model OpenRouter no longer offers is named, with the tier a
  const check=CHECKS.find(c=>c.name==='tier_models')!;
  assert.ok(check,'the tier_models check exists');
  const offered=['google/gemini-2.5-flash-lite','openai/gpt-5.6-luna','anthropic/claude-haiku-4.5','openai/gpt-4.1-nano',
-   'google/gemini-3.5-flash-lite','openai/gpt-5.6-terra','anthropic/claude-sonnet-5'];
+   'google/gemini-3.5-flash-lite','openai/gpt-5.6-terra','openai/gpt-6-luna','anthropic/claude-sonnet-5'];
  const config={...testConfig,OPENROUTER_API_KEY:'k',JUDGE_MODELS:'google/gemini-3.5-flash-lite',COUNCIL_CHECKER_MODELS:'openai/gpt-5.6-terra',
    COUNCIL_CHAIR_MODELS:'anthropic/claude-sonnet-5',MODE_ROUTER_MODEL:'google/gemini-3.5-flash-lite',QUERY_REWRITE_MODEL:'google/gemini-3.5-flash-lite'};
  const env=(ids:string[]):CheckEnv=>({db:{} as any,config,root:'.',launchBrowser:async()=>'',extractor:()=>({}) as any,

@@ -21,7 +21,7 @@ const config = configSchema.parse({...process.env, JUDGE_DAILY_BUDGET: '100000',
 // Budgets and health rows are not the point here: a stand-in database accepts every write.
 const db = {async query() { return {rows: [{used: 1}]}; }, async transaction(fn: (tx: DB) => unknown) { return fn(db); }, async close() {}} as unknown as DB;
 const runs = Number(process.argv[2]) || 3;
-const SCORER = 'google/gemini-3.5-flash-lite', CHECKER = 'openai/gpt-5.6-terra', CHAIR = 'anthropic/claude-sonnet-5', STRONG = 'openai/gpt-5.6-terra';
+const SCORER = 'google/gemini-3.5-flash-lite', CHECKER = 'openai/gpt-5.6-terra', CHAIR = 'anthropic/claude-sonnet-5', STRONG = 'openai/gpt-6-luna';
 // BENCH_ARCHS=cascade runs one architecture; CASCADE_SCORER / CASCADE_STRONG swap the cascade's two judges.
 // CASCADE_BORDER=4-7: the Scorer relevance range the Strong judge re-checks.
 const BORDER = (process.env.CASCADE_BORDER ?? `${config.CASCADE_BORDER_LOW}-${config.CASCADE_BORDER_HIGH}`).split('-').map(Number) as [number, number];

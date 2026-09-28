@@ -1,0 +1,1787 @@
+{
+ "cascade": {
+  "architecture_version": "evidence-v2",
+  "production_router": true,
+  "frozen_evidence": true,
+  "source_hash": "78a7b51a4262edd0a52f444c8b2a89248737084cd6e05730c1794b8c9ee70adc",
+  "web_settle": false,
+  "border": [
+   4,
+   7
+  ],
+  "scorer": "google/gemini-3.5-flash-lite",
+  "strong": "openai/gpt-6-luna",
+  "summary": {
+   "case_runs": 18,
+   "failures": [],
+   "missing_verdicts": 0,
+   "label_accuracy": 0.885,
+   "pair_accuracy": 0.765,
+   "cost_per_case": 0.00587,
+   "reported_cost_per_case": 0.00587,
+   "unpriced_calls": 0,
+   "median_ms": 9899,
+   "p90_ms": 13653,
+   "per_role": {
+    "scorer": {
+     "calls_per_case": 1,
+     "cost_per_case": 0.00549,
+     "reported_cost_per_case": 0.00549,
+     "unpriced_calls": 0,
+     "failed_calls": 0,
+     "ms_per_call": 5187
+    },
+    "jev": {
+     "calls_per_case": 2.5,
+     "cost_per_case": 0.00013,
+     "reported_cost_per_case": 0.00013,
+     "unpriced_calls": 0,
+     "failed_calls": 0,
+     "ms_per_call": 700
+    },
+    "strong": {
+     "calls_per_case": 0.56,
+     "cost_per_case": 0.00024,
+     "reported_cost_per_case": 0.00024,
+     "unpriced_calls": 0,
+     "failed_calls": 0,
+     "ms_per_call": 6739
+    }
+   }
+  },
+  "rows": [
+   {
+    "case": "aot-official",
+    "run": 1,
+    "ms": 4145,
+    "spend": {
+     "scorer": {
+      "calls": 1,
+      "cost": 0.003611,
+      "ms": 4087,
+      "unpriced": 0,
+      "failed": 0
+     }
+    },
+    "scores": {
+     "c1": 8,
+     "c2": 8,
+     "c3": 3,
+     "c4": 1,
+     "c5": 3
+    },
+    "stages": {
+     "event": "cascade",
+     "version": "evidence-v2",
+     "trace_id": "a8ccad9a-06b9-4552-8be1-86fe17155627",
+     "tier": "ssj3",
+     "judged": 5,
+     "escalated": 0,
+     "answered": 0,
+     "inspections": 0,
+     "refreshed": 0,
+     "reasons": {},
+     "strong": null,
+     "strong_ms": 0,
+     "candidates": [
+      {
+       "key": "c1",
+       "evidence_hash": "af6484112b7a0496473e018610a7e16c2762b9942114e5e36bd3a2c9b1b9637a",
+       "scorer": 8,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c2",
+       "evidence_hash": "6ebf69774d811a602db5fedade3f872ad6a3c533f175736673b6dcb8ef11bfa2",
+       "scorer": 8,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c3",
+       "evidence_hash": "b8368c4d1622d683080c69417fa40e535b84c963dce0efa9265133ec11dfc42f",
+       "scorer": 3,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c4",
+       "evidence_hash": "45036e260835bca6a9b07b585fc27795a678a01473e00bd8a086e1c2dff5165b",
+       "scorer": 1,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c5",
+       "evidence_hash": "68aaa00eea21a0b1147f46c31eada605e5b7fd8093e20b66c4af5e57018f3859",
+       "scorer": 3,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      }
+     ]
+    },
+    "jev": {},
+    "error": null
+   },
+   {
+    "case": "mapreduce-canonical",
+    "run": 1,
+    "ms": 14800,
+    "spend": {
+     "jev": {
+      "calls": 5,
+      "cost": 0.000233646,
+      "ms": 4441,
+      "unpriced": 0,
+      "failed": 0
+     },
+     "scorer": {
+      "calls": 1,
+      "cost": 0.0061531,
+      "ms": 5867,
+      "unpriced": 0,
+      "failed": 0
+     },
+     "strong": {
+      "calls": 1,
+      "cost": 0.0006818,
+      "ms": 7844,
+      "unpriced": 0,
+      "failed": 0
+     }
+    },
+    "scores": {
+     "c1": 5,
+     "c2": 8,
+     "c3": 3,
+     "c4": 3,
+     "c5": 2
+    },
+    "stages": {
+     "event": "cascade",
+     "version": "evidence-v2",
+     "trace_id": "8b381a21-2c05-49dc-a2b0-ad9c0fff0ae3",
+     "tier": "ssj3",
+     "judged": 5,
+     "escalated": 1,
+     "answered": 1,
+     "inspections": 0,
+     "refreshed": 0,
+     "reasons": {
+      "needs_evidence": 3,
+      "borderline": 1
+     },
+     "strong": "openai/gpt-6-luna",
+     "strong_ms": 7846,
+     "candidates": [
+      {
+       "key": "c1",
+       "evidence_hash": "c3febac7622a248ff5a94c597499578abcf7e93dae7778ae800aadd0fed2a942",
+       "scorer": 5,
+       "flags": [
+        "needs_evidence"
+       ],
+       "missing": [
+        "R1"
+       ],
+       "inspected": false
+      },
+      {
+       "key": "c2",
+       "evidence_hash": "fc25c427a10242ce74838781414c4946010d7c2b160ac2debf35d8733d1d760a",
+       "scorer": 8,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c3",
+       "evidence_hash": "75d4db98e0381ca7c3d00be8c18adff7957c419d6045b29b8810accad89aa468",
+       "scorer": 4,
+       "flags": [
+        "borderline"
+       ],
+       "missing": [],
+       "inspected": false,
+       "strong": 3,
+       "model": "openai/gpt-6-luna"
+      },
+      {
+       "key": "c4",
+       "evidence_hash": "e5f2e355b8a1099e34dc64d46df5828a717caf9becb8445e4bb37cea34f87c4a",
+       "scorer": 3,
+       "flags": [
+        "needs_evidence"
+       ],
+       "missing": [
+        "R1"
+       ],
+       "inspected": false
+      },
+      {
+       "key": "c5",
+       "evidence_hash": "6f3f121bf33d56373f6c375e13d4f7c86c29f8eeae3930c87d294dc65f782515",
+       "scorer": 2,
+       "flags": [
+        "needs_evidence"
+       ],
+       "missing": [
+        "R1"
+       ],
+       "inspected": false
+      }
+     ]
+    },
+    "jev": {
+     "would_reject": 1,
+     "forwarded": 4
+    },
+    "error": null
+   },
+   {
+    "case": "rice-authority",
+    "run": 1,
+    "ms": 12226,
+    "spend": {
+     "scorer": {
+      "calls": 1,
+      "cost": 0.0039814,
+      "ms": 4354,
+      "unpriced": 0,
+      "failed": 0
+     },
+     "strong": {
+      "calls": 1,
+      "cost": 0.0007363,
+      "ms": 7841,
+      "unpriced": 0,
+      "failed": 0
+     }
+    },
+    "scores": {
+     "c1": 10,
+     "c2": 3,
+     "c3": 0,
+     "c4": 10
+    },
+    "stages": {
+     "event": "cascade",
+     "version": "evidence-v2",
+     "trace_id": "bca815af-fa5b-4f82-86ea-adb8f0e54bac",
+     "tier": "ssj3",
+     "judged": 4,
+     "escalated": 1,
+     "answered": 1,
+     "inspections": 0,
+     "refreshed": 0,
+     "reasons": {
+      "borderline": 1
+     },
+     "strong": "openai/gpt-6-luna",
+     "strong_ms": 7841,
+     "candidates": [
+      {
+       "key": "c1",
+       "evidence_hash": "4c1f6fbac07e30714741293aa528fc71529501ca768682b447daa63e11fcf79c",
+       "scorer": 10,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c2",
+       "evidence_hash": "8fb78f7fbafc6990861d2d6bf96c036fce66bb29fca363fd84dd6fd57350cf2d",
+       "scorer": 4,
+       "flags": [
+        "borderline"
+       ],
+       "missing": [],
+       "inspected": false,
+       "strong": 3,
+       "model": "openai/gpt-6-luna"
+      },
+      {
+       "key": "c3",
+       "evidence_hash": "38add817a88e7b08db3ced6421d7e35f90e0a145891d3d46d7c327292085d351",
+       "scorer": 0,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c4",
+       "evidence_hash": "154955fd5f8ac21e72c653612add302e1cf0bb75b9dceeffa14e7718c33326cb",
+       "scorer": 10,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      }
+     ]
+    },
+    "jev": {},
+    "error": null
+   },
+   {
+    "case": "upi-constraints",
+    "run": 1,
+    "ms": 6974,
+    "spend": {
+     "jev": {
+      "calls": 5,
+      "cost": 0.00026266799999999997,
+      "ms": 4253,
+      "unpriced": 0,
+      "failed": 0
+     },
+     "scorer": {
+      "calls": 1,
+      "cost": 0.0071017,
+      "ms": 6054,
+      "unpriced": 0,
+      "failed": 0
+     }
+    },
+    "scores": {
+     "c1": 5,
+     "c2": 2,
+     "c3": 5,
+     "c4": 3,
+     "c5": 5
+    },
+    "stages": {
+     "event": "cascade",
+     "version": "evidence-v2",
+     "trace_id": "10ee520e-0a9c-4060-966d-e2897099db30",
+     "tier": "ssj3",
+     "judged": 5,
+     "escalated": 0,
+     "answered": 0,
+     "inspections": 0,
+     "refreshed": 0,
+     "reasons": {
+      "needs_evidence": 5
+     },
+     "strong": null,
+     "strong_ms": 0,
+     "candidates": [
+      {
+       "key": "c1",
+       "evidence_hash": "6552e9ce3b89529468ccec7fcff864f9d2ed4cd255cc90225168554b10819ce8",
+       "scorer": 5,
+       "flags": [
+        "needs_evidence"
+       ],
+       "missing": [
+        "R1",
+        "R2",
+        "R3"
+       ],
+       "inspected": false
+      },
+      {
+       "key": "c2",
+       "evidence_hash": "3f0ac25c57ac411a5eaf5e2c39da8164d533c1b6dcbb26c36a8687b4af66b48c",
+       "scorer": 2,
+       "flags": [
+        "needs_evidence"
+       ],
+       "missing": [
+        "R1",
+        "R2",
+        "R3"
+       ],
+       "inspected": false
+      },
+      {
+       "key": "c3",
+       "evidence_hash": "a023e4a817501a2cfcb925b2ce31f776e6605e9fef535f9595477dabe802c3dd",
+       "scorer": 5,
+       "flags": [
+        "needs_evidence"
+       ],
+       "missing": [
+        "R1",
+        "R2",
+        "R3"
+       ],
+       "inspected": false
+      },
+      {
+       "key": "c4",
+       "evidence_hash": "8f2db833d1a6090160ee6be75b3510ea55424df9723efa876b5f6f472660b2b9",
+       "scorer": 3,
+       "flags": [
+        "needs_evidence"
+       ],
+       "missing": [
+        "R1",
+        "R2",
+        "R3"
+       ],
+       "inspected": false
+      },
+      {
+       "key": "c5",
+       "evidence_hash": "b9d19910a26c8e72ad433f7a64b25572210648f2528e835c1b209920ca9ea8c0",
+       "scorer": 5,
+       "flags": [
+        "needs_evidence"
+       ],
+       "missing": [
+        "R1",
+        "R2",
+        "R3"
+       ],
+       "inspected": false
+      }
+     ]
+    },
+    "jev": {
+     "forwarded": 5
+    },
+    "error": null
+   },
+   {
+    "case": "postgres-firsthand",
+    "run": 1,
+    "ms": 13653,
+    "spend": {
+     "jev": {
+      "calls": 5,
+      "cost": 0.00029799,
+      "ms": 4509,
+      "unpriced": 0,
+      "failed": 0
+     },
+     "scorer": {
+      "calls": 1,
+      "cost": 0.0072377,
+      "ms": 6316,
+      "unpriced": 0,
+      "failed": 0
+     },
+     "strong": {
+      "calls": 1,
+      "cost": 0.000643925,
+      "ms": 6186,
+      "unpriced": 0,
+      "failed": 0
+     }
+    },
+    "scores": {
+     "c1": 1,
+     "c2": 9,
+     "c3": 5,
+     "c4": 1,
+     "c5": 2
+    },
+    "stages": {
+     "event": "cascade",
+     "version": "evidence-v2",
+     "trace_id": "a80b17b5-e0fe-4a84-99b3-8768e0cb56f5",
+     "tier": "ssj3",
+     "judged": 5,
+     "escalated": 1,
+     "answered": 1,
+     "inspections": 0,
+     "refreshed": 0,
+     "reasons": {
+      "borderline": 1
+     },
+     "strong": "openai/gpt-6-luna",
+     "strong_ms": 6188,
+     "candidates": [
+      {
+       "key": "c1",
+       "evidence_hash": "927c450dae6c83db13f85ab2c6991c0cee51a52db36347640939ff2ff1eb8dd3",
+       "scorer": 1,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c2",
+       "evidence_hash": "31e04c710269b5677405ce32ed70a5cd6dbac1c0e5e2c1ddb3fff5f8839310cf",
+       "scorer": 9,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c3",
+       "evidence_hash": "ad9c20f1c9e2b2055ab1ea8ea70e7d2d4958b646c05909e7326019141db9224a",
+       "scorer": 5,
+       "flags": [
+        "borderline"
+       ],
+       "missing": [],
+       "inspected": false,
+       "strong": 5,
+       "model": "openai/gpt-6-luna"
+      },
+      {
+       "key": "c4",
+       "evidence_hash": "39612fb129c3ea4f9e4243fd94826d708e25bdc2e136865934f1ab7ac75e9344",
+       "scorer": 1,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c5",
+       "evidence_hash": "69b43674ab3c895de8edb14dfd8bc3d32eae9c92298d948cc24bbd6b58a49fd1",
+       "scorer": 2,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      }
+     ]
+    },
+    "jev": {
+     "forwarded": 3,
+     "would_reject": 2
+    },
+    "error": null
+   },
+   {
+    "case": "free-solo",
+    "run": 1,
+    "ms": 12830,
+    "spend": {
+     "scorer": {
+      "calls": 1,
+      "cost": 0.0049278,
+      "ms": 5132,
+      "unpriced": 0,
+      "failed": 0
+     },
+     "strong": {
+      "calls": 1,
+      "cost": 0.00038097,
+      "ms": 7667,
+      "unpriced": 0,
+      "failed": 0
+     }
+    },
+    "scores": {
+     "c1": 8,
+     "c2": 3,
+     "c3": 4,
+     "c4": 8,
+     "c5": 2
+    },
+    "stages": {
+     "event": "cascade",
+     "version": "evidence-v2",
+     "trace_id": "64c447d8-20de-44c4-969f-76c9bec890ac",
+     "tier": "ssj3",
+     "judged": 5,
+     "escalated": 1,
+     "answered": 1,
+     "inspections": 0,
+     "refreshed": 0,
+     "reasons": {
+      "borderline": 1
+     },
+     "strong": "openai/gpt-6-luna",
+     "strong_ms": 7668,
+     "candidates": [
+      {
+       "key": "c1",
+       "evidence_hash": "1141fbe254cd2059da946227e166643fefdfa8b9480e09f9b23f929895cd5549",
+       "scorer": 8,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c2",
+       "evidence_hash": "90c06a2b4e6b0a91cea20be32de5bac7e472b4421e0035188c2730e6222b51c6",
+       "scorer": 3,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c3",
+       "evidence_hash": "afa11a4a5b083ed07c535bdecfd749fcc5a6a809ec379e97e0d6840114627a56",
+       "scorer": 7,
+       "flags": [
+        "borderline"
+       ],
+       "missing": [],
+       "inspected": false,
+       "strong": 4,
+       "model": "openai/gpt-6-luna"
+      },
+      {
+       "key": "c4",
+       "evidence_hash": "2be736860a03a8ddd8bd8d77119622f5f77fa6a5b7d6dc509aa81bc7b8b13096",
+       "scorer": 8,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c5",
+       "evidence_hash": "d5bc1e0ea5d4eae343a2c5d3db69aecc538bd22effa5794fde352714c65a903a",
+       "scorer": 2,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      }
+     ]
+    },
+    "jev": {},
+    "error": null
+   },
+   {
+    "case": "aot-official",
+    "run": 2,
+    "ms": 3890,
+    "spend": {
+     "scorer": {
+      "calls": 1,
+      "cost": 0.0035035,
+      "ms": 3850,
+      "unpriced": 0,
+      "failed": 0
+     }
+    },
+    "scores": {
+     "c1": 8,
+     "c2": 8,
+     "c3": 3,
+     "c4": 1,
+     "c5": 3
+    },
+    "stages": {
+     "event": "cascade",
+     "version": "evidence-v2",
+     "trace_id": "07b0d330-535c-48e5-9a1f-7fbc13e8a04f",
+     "tier": "ssj3",
+     "judged": 5,
+     "escalated": 0,
+     "answered": 0,
+     "inspections": 0,
+     "refreshed": 0,
+     "reasons": {},
+     "strong": null,
+     "strong_ms": 0,
+     "candidates": [
+      {
+       "key": "c1",
+       "evidence_hash": "af6484112b7a0496473e018610a7e16c2762b9942114e5e36bd3a2c9b1b9637a",
+       "scorer": 8,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c2",
+       "evidence_hash": "6ebf69774d811a602db5fedade3f872ad6a3c533f175736673b6dcb8ef11bfa2",
+       "scorer": 8,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c3",
+       "evidence_hash": "b8368c4d1622d683080c69417fa40e535b84c963dce0efa9265133ec11dfc42f",
+       "scorer": 3,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c4",
+       "evidence_hash": "45036e260835bca6a9b07b585fc27795a678a01473e00bd8a086e1c2dff5165b",
+       "scorer": 1,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c5",
+       "evidence_hash": "68aaa00eea21a0b1147f46c31eada605e5b7fd8093e20b66c4af5e57018f3859",
+       "scorer": 3,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      }
+     ]
+    },
+    "jev": {},
+    "error": null
+   },
+   {
+    "case": "mapreduce-canonical",
+    "run": 2,
+    "ms": 12123,
+    "spend": {
+     "jev": {
+      "calls": 5,
+      "cost": 0.000233646,
+      "ms": 3181,
+      "unpriced": 0,
+      "failed": 0
+     },
+     "scorer": {
+      "calls": 1,
+      "cost": 0.0061681,
+      "ms": 5642,
+      "unpriced": 0,
+      "failed": 0
+     },
+     "strong": {
+      "calls": 1,
+      "cost": 0.000319635,
+      "ms": 5635,
+      "unpriced": 0,
+      "failed": 0
+     }
+    },
+    "scores": {
+     "c1": 10,
+     "c2": 8,
+     "c3": 4,
+     "c4": 2,
+     "c5": 2
+    },
+    "stages": {
+     "event": "cascade",
+     "version": "evidence-v2",
+     "trace_id": "44605109-8333-4542-93bd-8947808e9fa5",
+     "tier": "ssj3",
+     "judged": 5,
+     "escalated": 1,
+     "answered": 1,
+     "inspections": 0,
+     "refreshed": 0,
+     "reasons": {
+      "needs_evidence": 1,
+      "borderline": 1
+     },
+     "strong": "openai/gpt-6-luna",
+     "strong_ms": 5637,
+     "candidates": [
+      {
+       "key": "c1",
+       "evidence_hash": "c3febac7622a248ff5a94c597499578abcf7e93dae7778ae800aadd0fed2a942",
+       "scorer": 10,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c2",
+       "evidence_hash": "fc25c427a10242ce74838781414c4946010d7c2b160ac2debf35d8733d1d760a",
+       "scorer": 8,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c3",
+       "evidence_hash": "75d4db98e0381ca7c3d00be8c18adff7957c419d6045b29b8810accad89aa468",
+       "scorer": 4,
+       "flags": [
+        "needs_evidence"
+       ],
+       "missing": [
+        "R1"
+       ],
+       "inspected": false
+      },
+      {
+       "key": "c4",
+       "evidence_hash": "e5f2e355b8a1099e34dc64d46df5828a717caf9becb8445e4bb37cea34f87c4a",
+       "scorer": 4,
+       "flags": [
+        "borderline"
+       ],
+       "missing": [],
+       "inspected": false,
+       "strong": 2,
+       "model": "openai/gpt-6-luna"
+      },
+      {
+       "key": "c5",
+       "evidence_hash": "6f3f121bf33d56373f6c375e13d4f7c86c29f8eeae3930c87d294dc65f782515",
+       "scorer": 2,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      }
+     ]
+    },
+    "jev": {
+     "would_reject": 1,
+     "forwarded": 4
+    },
+    "error": null
+   },
+   {
+    "case": "rice-authority",
+    "run": 2,
+    "ms": 9222,
+    "spend": {
+     "scorer": {
+      "calls": 1,
+      "cost": 0.0042339,
+      "ms": 4070,
+      "unpriced": 0,
+      "failed": 0
+     },
+     "strong": {
+      "calls": 1,
+      "cost": 0.00024534,
+      "ms": 5124,
+      "unpriced": 0,
+      "failed": 0
+     }
+    },
+    "scores": {
+     "c1": 10,
+     "c2": 4,
+     "c3": 0,
+     "c4": 10
+    },
+    "stages": {
+     "event": "cascade",
+     "version": "evidence-v2",
+     "trace_id": "7e26e690-5a13-4639-9e99-28b78cea8072",
+     "tier": "ssj3",
+     "judged": 4,
+     "escalated": 1,
+     "answered": 1,
+     "inspections": 0,
+     "refreshed": 0,
+     "reasons": {
+      "borderline": 1
+     },
+     "strong": "openai/gpt-6-luna",
+     "strong_ms": 5125,
+     "candidates": [
+      {
+       "key": "c1",
+       "evidence_hash": "4c1f6fbac07e30714741293aa528fc71529501ca768682b447daa63e11fcf79c",
+       "scorer": 10,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c2",
+       "evidence_hash": "8fb78f7fbafc6990861d2d6bf96c036fce66bb29fca363fd84dd6fd57350cf2d",
+       "scorer": 5,
+       "flags": [
+        "borderline"
+       ],
+       "missing": [],
+       "inspected": false,
+       "strong": 4,
+       "model": "openai/gpt-6-luna"
+      },
+      {
+       "key": "c3",
+       "evidence_hash": "38add817a88e7b08db3ced6421d7e35f90e0a145891d3d46d7c327292085d351",
+       "scorer": 0,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c4",
+       "evidence_hash": "154955fd5f8ac21e72c653612add302e1cf0bb75b9dceeffa14e7718c33326cb",
+       "scorer": 10,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      }
+     ]
+    },
+    "jev": {},
+    "error": null
+   },
+   {
+    "case": "upi-constraints",
+    "run": 2,
+    "ms": 7226,
+    "spend": {
+     "jev": {
+      "calls": 5,
+      "cost": 0.000262668,
+      "ms": 3665,
+      "unpriced": 0,
+      "failed": 0
+     },
+     "scorer": {
+      "calls": 1,
+      "cost": 0.0072592,
+      "ms": 6362,
+      "unpriced": 0,
+      "failed": 0
+     }
+    },
+    "scores": {
+     "c1": 5,
+     "c2": 5,
+     "c3": 5,
+     "c4": 5,
+     "c5": 5
+    },
+    "stages": {
+     "event": "cascade",
+     "version": "evidence-v2",
+     "trace_id": "5797e42c-0d9e-4ee0-88fc-0db1a1f65342",
+     "tier": "ssj3",
+     "judged": 5,
+     "escalated": 0,
+     "answered": 0,
+     "inspections": 0,
+     "refreshed": 0,
+     "reasons": {
+      "needs_evidence": 5
+     },
+     "strong": null,
+     "strong_ms": 0,
+     "candidates": [
+      {
+       "key": "c1",
+       "evidence_hash": "6552e9ce3b89529468ccec7fcff864f9d2ed4cd255cc90225168554b10819ce8",
+       "scorer": 6,
+       "flags": [
+        "needs_evidence"
+       ],
+       "missing": [
+        "R1",
+        "R2",
+        "R3"
+       ],
+       "inspected": false
+      },
+      {
+       "key": "c2",
+       "evidence_hash": "3f0ac25c57ac411a5eaf5e2c39da8164d533c1b6dcbb26c36a8687b4af66b48c",
+       "scorer": 5,
+       "flags": [
+        "needs_evidence"
+       ],
+       "missing": [
+        "R1",
+        "R2",
+        "R3"
+       ],
+       "inspected": false
+      },
+      {
+       "key": "c3",
+       "evidence_hash": "a023e4a817501a2cfcb925b2ce31f776e6605e9fef535f9595477dabe802c3dd",
+       "scorer": 5,
+       "flags": [
+        "needs_evidence"
+       ],
+       "missing": [
+        "R1",
+        "R2",
+        "R3"
+       ],
+       "inspected": false
+      },
+      {
+       "key": "c4",
+       "evidence_hash": "8f2db833d1a6090160ee6be75b3510ea55424df9723efa876b5f6f472660b2b9",
+       "scorer": 5,
+       "flags": [
+        "needs_evidence"
+       ],
+       "missing": [
+        "R1",
+        "R2",
+        "R3"
+       ],
+       "inspected": false
+      },
+      {
+       "key": "c5",
+       "evidence_hash": "b9d19910a26c8e72ad433f7a64b25572210648f2528e835c1b209920ca9ea8c0",
+       "scorer": 6,
+       "flags": [
+        "needs_evidence"
+       ],
+       "missing": [
+        "R1",
+        "R2",
+        "R3"
+       ],
+       "inspected": false
+      }
+     ]
+    },
+    "jev": {
+     "forwarded": 5
+    },
+    "error": null
+   },
+   {
+    "case": "postgres-firsthand",
+    "run": 2,
+    "ms": 7403,
+    "spend": {
+     "jev": {
+      "calls": 5,
+      "cost": 0.00029799,
+      "ms": 3252,
+      "unpriced": 0,
+      "failed": 0
+     },
+     "scorer": {
+      "calls": 1,
+      "cost": 0.0070102,
+      "ms": 6531,
+      "unpriced": 0,
+      "failed": 0
+     }
+    },
+    "scores": {
+     "c1": 2,
+     "c2": 9,
+     "c3": 9,
+     "c4": 1,
+     "c5": 3
+    },
+    "stages": {
+     "event": "cascade",
+     "version": "evidence-v2",
+     "trace_id": "99220676-2cb9-4e29-b5b8-69a2e71ad845",
+     "tier": "ssj3",
+     "judged": 5,
+     "escalated": 0,
+     "answered": 0,
+     "inspections": 0,
+     "refreshed": 0,
+     "reasons": {},
+     "strong": null,
+     "strong_ms": 0,
+     "candidates": [
+      {
+       "key": "c1",
+       "evidence_hash": "927c450dae6c83db13f85ab2c6991c0cee51a52db36347640939ff2ff1eb8dd3",
+       "scorer": 2,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c2",
+       "evidence_hash": "31e04c710269b5677405ce32ed70a5cd6dbac1c0e5e2c1ddb3fff5f8839310cf",
+       "scorer": 9,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c3",
+       "evidence_hash": "ad9c20f1c9e2b2055ab1ea8ea70e7d2d4958b646c05909e7326019141db9224a",
+       "scorer": 9,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c4",
+       "evidence_hash": "39612fb129c3ea4f9e4243fd94826d708e25bdc2e136865934f1ab7ac75e9344",
+       "scorer": 1,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c5",
+       "evidence_hash": "69b43674ab3c895de8edb14dfd8bc3d32eae9c92298d948cc24bbd6b58a49fd1",
+       "scorer": 3,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      }
+     ]
+    },
+    "jev": {
+     "would_reject": 2,
+     "forwarded": 3
+    },
+    "error": null
+   },
+   {
+    "case": "free-solo",
+    "run": 2,
+    "ms": 9899,
+    "spend": {
+     "scorer": {
+      "calls": 1,
+      "cost": 0.0047503,
+      "ms": 4798,
+      "unpriced": 0,
+      "failed": 0
+     },
+     "strong": {
+      "calls": 1,
+      "cost": 0.0002754,
+      "ms": 5088,
+      "unpriced": 0,
+      "failed": 0
+     }
+    },
+    "scores": {
+     "c1": 8,
+     "c2": 3,
+     "c3": 4,
+     "c4": 8,
+     "c5": 2
+    },
+    "stages": {
+     "event": "cascade",
+     "version": "evidence-v2",
+     "trace_id": "95e75eee-4b33-41a2-aa67-7cf5b48717c4",
+     "tier": "ssj3",
+     "judged": 5,
+     "escalated": 1,
+     "answered": 1,
+     "inspections": 0,
+     "refreshed": 0,
+     "reasons": {
+      "borderline": 1
+     },
+     "strong": "openai/gpt-6-luna",
+     "strong_ms": 5089,
+     "candidates": [
+      {
+       "key": "c1",
+       "evidence_hash": "1141fbe254cd2059da946227e166643fefdfa8b9480e09f9b23f929895cd5549",
+       "scorer": 8,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c2",
+       "evidence_hash": "90c06a2b4e6b0a91cea20be32de5bac7e472b4421e0035188c2730e6222b51c6",
+       "scorer": 3,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c3",
+       "evidence_hash": "afa11a4a5b083ed07c535bdecfd749fcc5a6a809ec379e97e0d6840114627a56",
+       "scorer": 7,
+       "flags": [
+        "borderline"
+       ],
+       "missing": [],
+       "inspected": false,
+       "strong": 4,
+       "model": "openai/gpt-6-luna"
+      },
+      {
+       "key": "c4",
+       "evidence_hash": "2be736860a03a8ddd8bd8d77119622f5f77fa6a5b7d6dc509aa81bc7b8b13096",
+       "scorer": 8,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c5",
+       "evidence_hash": "d5bc1e0ea5d4eae343a2c5d3db69aecc538bd22effa5794fde352714c65a903a",
+       "scorer": 2,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      }
+     ]
+    },
+    "jev": {},
+    "error": null
+   },
+   {
+    "case": "aot-official",
+    "run": 3,
+    "ms": 10194,
+    "spend": {
+     "scorer": {
+      "calls": 1,
+      "cost": 0.003496,
+      "ms": 3647,
+      "unpriced": 0,
+      "failed": 0
+     },
+     "strong": {
+      "calls": 1,
+      "cost": 0.00039772,
+      "ms": 6534,
+      "unpriced": 0,
+      "failed": 0
+     }
+    },
+    "scores": {
+     "c1": 8,
+     "c2": 7,
+     "c3": 3,
+     "c4": 1,
+     "c5": 3
+    },
+    "stages": {
+     "event": "cascade",
+     "version": "evidence-v2",
+     "trace_id": "1392c714-4f88-4b8b-b47b-422b83bc85a4",
+     "tier": "ssj3",
+     "judged": 5,
+     "escalated": 1,
+     "answered": 1,
+     "inspections": 0,
+     "refreshed": 0,
+     "reasons": {
+      "borderline": 1
+     },
+     "strong": "openai/gpt-6-luna",
+     "strong_ms": 6534,
+     "candidates": [
+      {
+       "key": "c1",
+       "evidence_hash": "af6484112b7a0496473e018610a7e16c2762b9942114e5e36bd3a2c9b1b9637a",
+       "scorer": 8,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c2",
+       "evidence_hash": "6ebf69774d811a602db5fedade3f872ad6a3c533f175736673b6dcb8ef11bfa2",
+       "scorer": 7,
+       "flags": [
+        "borderline"
+       ],
+       "missing": [],
+       "inspected": false,
+       "strong": 7,
+       "model": "openai/gpt-6-luna"
+      },
+      {
+       "key": "c3",
+       "evidence_hash": "b8368c4d1622d683080c69417fa40e535b84c963dce0efa9265133ec11dfc42f",
+       "scorer": 3,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c4",
+       "evidence_hash": "45036e260835bca6a9b07b585fc27795a678a01473e00bd8a086e1c2dff5165b",
+       "scorer": 1,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c5",
+       "evidence_hash": "68aaa00eea21a0b1147f46c31eada605e5b7fd8093e20b66c4af5e57018f3859",
+       "scorer": 3,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      }
+     ]
+    },
+    "jev": {},
+    "error": null
+   },
+   {
+    "case": "mapreduce-canonical",
+    "run": 3,
+    "ms": 5677,
+    "spend": {
+     "jev": {
+      "calls": 5,
+      "cost": 0.000233646,
+      "ms": 2293,
+      "unpriced": 0,
+      "failed": 0
+     },
+     "scorer": {
+      "calls": 1,
+      "cost": 0.0061231,
+      "ms": 5137,
+      "unpriced": 0,
+      "failed": 0
+     }
+    },
+    "scores": {
+     "c1": 10,
+     "c2": 8,
+     "c3": 3,
+     "c4": 2,
+     "c5": 2
+    },
+    "stages": {
+     "event": "cascade",
+     "version": "evidence-v2",
+     "trace_id": "b85e5253-d8c4-46e7-a315-5f324b10f529",
+     "tier": "ssj3",
+     "judged": 5,
+     "escalated": 0,
+     "answered": 0,
+     "inspections": 0,
+     "refreshed": 0,
+     "reasons": {
+      "needs_evidence": 1
+     },
+     "strong": null,
+     "strong_ms": 0,
+     "candidates": [
+      {
+       "key": "c1",
+       "evidence_hash": "c3febac7622a248ff5a94c597499578abcf7e93dae7778ae800aadd0fed2a942",
+       "scorer": 10,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c2",
+       "evidence_hash": "fc25c427a10242ce74838781414c4946010d7c2b160ac2debf35d8733d1d760a",
+       "scorer": 8,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c3",
+       "evidence_hash": "75d4db98e0381ca7c3d00be8c18adff7957c419d6045b29b8810accad89aa468",
+       "scorer": 3,
+       "flags": [
+        "needs_evidence"
+       ],
+       "missing": [
+        "R1"
+       ],
+       "inspected": false
+      },
+      {
+       "key": "c4",
+       "evidence_hash": "e5f2e355b8a1099e34dc64d46df5828a717caf9becb8445e4bb37cea34f87c4a",
+       "scorer": 2,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c5",
+       "evidence_hash": "6f3f121bf33d56373f6c375e13d4f7c86c29f8eeae3930c87d294dc65f782515",
+       "scorer": 2,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      }
+     ]
+    },
+    "jev": {
+     "forwarded": 4,
+     "would_reject": 1
+    },
+    "error": null
+   },
+   {
+    "case": "rice-authority",
+    "run": 3,
+    "ms": 12298,
+    "spend": {
+     "scorer": {
+      "calls": 1,
+      "cost": 0.0042814,
+      "ms": 4026,
+      "unpriced": 0,
+      "failed": 0
+     },
+     "strong": {
+      "calls": 1,
+      "cost": 0.00036534,
+      "ms": 8263,
+      "unpriced": 0,
+      "failed": 0
+     }
+    },
+    "scores": {
+     "c1": 10,
+     "c2": 3,
+     "c3": 0,
+     "c4": 10
+    },
+    "stages": {
+     "event": "cascade",
+     "version": "evidence-v2",
+     "trace_id": "cbeeefc6-a397-47ff-8e8a-2f719e9a7873",
+     "tier": "ssj3",
+     "judged": 4,
+     "escalated": 1,
+     "answered": 1,
+     "inspections": 0,
+     "refreshed": 0,
+     "reasons": {
+      "borderline": 1
+     },
+     "strong": "openai/gpt-6-luna",
+     "strong_ms": 8263,
+     "candidates": [
+      {
+       "key": "c1",
+       "evidence_hash": "4c1f6fbac07e30714741293aa528fc71529501ca768682b447daa63e11fcf79c",
+       "scorer": 10,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c2",
+       "evidence_hash": "8fb78f7fbafc6990861d2d6bf96c036fce66bb29fca363fd84dd6fd57350cf2d",
+       "scorer": 4,
+       "flags": [
+        "borderline"
+       ],
+       "missing": [],
+       "inspected": false,
+       "strong": 3,
+       "model": "openai/gpt-6-luna"
+      },
+      {
+       "key": "c3",
+       "evidence_hash": "38add817a88e7b08db3ced6421d7e35f90e0a145891d3d46d7c327292085d351",
+       "scorer": 0,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c4",
+       "evidence_hash": "154955fd5f8ac21e72c653612add302e1cf0bb75b9dceeffa14e7718c33326cb",
+       "scorer": 10,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      }
+     ]
+    },
+    "jev": {},
+    "error": null
+   },
+   {
+    "case": "upi-constraints",
+    "run": 3,
+    "ms": 7123,
+    "spend": {
+     "jev": {
+      "calls": 5,
+      "cost": 0.00026266799999999997,
+      "ms": 2467,
+      "unpriced": 0,
+      "failed": 0
+     },
+     "scorer": {
+      "calls": 1,
+      "cost": 0.0071667,
+      "ms": 6554,
+      "unpriced": 0,
+      "failed": 0
+     }
+    },
+    "scores": {
+     "c1": 5,
+     "c2": 5,
+     "c3": 5,
+     "c4": 5,
+     "c5": 5
+    },
+    "stages": {
+     "event": "cascade",
+     "version": "evidence-v2",
+     "trace_id": "680d8847-b394-44f4-99a7-a98f9efc0942",
+     "tier": "ssj3",
+     "judged": 5,
+     "escalated": 0,
+     "answered": 0,
+     "inspections": 0,
+     "refreshed": 0,
+     "reasons": {
+      "needs_evidence": 5
+     },
+     "strong": null,
+     "strong_ms": 0,
+     "candidates": [
+      {
+       "key": "c1",
+       "evidence_hash": "6552e9ce3b89529468ccec7fcff864f9d2ed4cd255cc90225168554b10819ce8",
+       "scorer": 5,
+       "flags": [
+        "needs_evidence"
+       ],
+       "missing": [
+        "R1",
+        "R2",
+        "R3"
+       ],
+       "inspected": false
+      },
+      {
+       "key": "c2",
+       "evidence_hash": "3f0ac25c57ac411a5eaf5e2c39da8164d533c1b6dcbb26c36a8687b4af66b48c",
+       "scorer": 5,
+       "flags": [
+        "needs_evidence"
+       ],
+       "missing": [
+        "R1",
+        "R2",
+        "R3"
+       ],
+       "inspected": false
+      },
+      {
+       "key": "c3",
+       "evidence_hash": "a023e4a817501a2cfcb925b2ce31f776e6605e9fef535f9595477dabe802c3dd",
+       "scorer": 5,
+       "flags": [
+        "needs_evidence"
+       ],
+       "missing": [
+        "R1",
+        "R2",
+        "R3"
+       ],
+       "inspected": false
+      },
+      {
+       "key": "c4",
+       "evidence_hash": "8f2db833d1a6090160ee6be75b3510ea55424df9723efa876b5f6f472660b2b9",
+       "scorer": 5,
+       "flags": [
+        "needs_evidence"
+       ],
+       "missing": [
+        "R1",
+        "R2",
+        "R3"
+       ],
+       "inspected": false
+      },
+      {
+       "key": "c5",
+       "evidence_hash": "b9d19910a26c8e72ad433f7a64b25572210648f2528e835c1b209920ca9ea8c0",
+       "scorer": 5,
+       "flags": [
+        "needs_evidence"
+       ],
+       "missing": [
+        "R1",
+        "R2",
+        "R3"
+       ],
+       "inspected": false
+      }
+     ]
+    },
+    "jev": {
+     "forwarded": 5
+    },
+    "error": null
+   },
+   {
+    "case": "postgres-firsthand",
+    "run": 3,
+    "ms": 8054,
+    "spend": {
+     "jev": {
+      "calls": 5,
+      "cost": 0.00029799,
+      "ms": 3417,
+      "unpriced": 0,
+      "failed": 0
+     },
+     "scorer": {
+      "calls": 1,
+      "cost": 0.007103,
+      "ms": 6560,
+      "unpriced": 0,
+      "failed": 0
+     }
+    },
+    "scores": {
+     "c1": 2,
+     "c2": 9,
+     "c3": 9,
+     "c4": 1,
+     "c5": 3
+    },
+    "stages": {
+     "event": "cascade",
+     "version": "evidence-v2",
+     "trace_id": "59b2b48f-65e1-46c5-82e8-8e54ff3e1ece",
+     "tier": "ssj3",
+     "judged": 5,
+     "escalated": 0,
+     "answered": 0,
+     "inspections": 0,
+     "refreshed": 0,
+     "reasons": {},
+     "strong": null,
+     "strong_ms": 0,
+     "candidates": [
+      {
+       "key": "c1",
+       "evidence_hash": "927c450dae6c83db13f85ab2c6991c0cee51a52db36347640939ff2ff1eb8dd3",
+       "scorer": 2,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c2",
+       "evidence_hash": "31e04c710269b5677405ce32ed70a5cd6dbac1c0e5e2c1ddb3fff5f8839310cf",
+       "scorer": 9,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c3",
+       "evidence_hash": "ad9c20f1c9e2b2055ab1ea8ea70e7d2d4958b646c05909e7326019141db9224a",
+       "scorer": 9,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c4",
+       "evidence_hash": "39612fb129c3ea4f9e4243fd94826d708e25bdc2e136865934f1ab7ac75e9344",
+       "scorer": 1,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c5",
+       "evidence_hash": "69b43674ab3c895de8edb14dfd8bc3d32eae9c92298d948cc24bbd6b58a49fd1",
+       "scorer": 3,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      }
+     ]
+    },
+    "jev": {
+     "forwarded": 3,
+     "would_reject": 2
+    },
+    "error": null
+   },
+   {
+    "case": "free-solo",
+    "run": 3,
+    "ms": 11597,
+    "spend": {
+     "scorer": {
+      "calls": 1,
+      "cost": 0.0047628,
+      "ms": 4378,
+      "unpriced": 0,
+      "failed": 0
+     },
+     "strong": {
+      "calls": 1,
+      "cost": 0.0003569,
+      "ms": 7210,
+      "unpriced": 0,
+      "failed": 0
+     }
+    },
+    "scores": {
+     "c1": 8,
+     "c2": 3,
+     "c3": 4,
+     "c4": 8,
+     "c5": 2
+    },
+    "stages": {
+     "event": "cascade",
+     "version": "evidence-v2",
+     "trace_id": "00bf1e20-c6e8-4f25-9347-7f15efdb8c89",
+     "tier": "ssj3",
+     "judged": 5,
+     "escalated": 1,
+     "answered": 1,
+     "inspections": 0,
+     "refreshed": 0,
+     "reasons": {
+      "borderline": 1
+     },
+     "strong": "openai/gpt-6-luna",
+     "strong_ms": 7210,
+     "candidates": [
+      {
+       "key": "c1",
+       "evidence_hash": "1141fbe254cd2059da946227e166643fefdfa8b9480e09f9b23f929895cd5549",
+       "scorer": 8,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c2",
+       "evidence_hash": "90c06a2b4e6b0a91cea20be32de5bac7e472b4421e0035188c2730e6222b51c6",
+       "scorer": 3,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c3",
+       "evidence_hash": "afa11a4a5b083ed07c535bdecfd749fcc5a6a809ec379e97e0d6840114627a56",
+       "scorer": 7,
+       "flags": [
+        "borderline"
+       ],
+       "missing": [],
+       "inspected": false,
+       "strong": 4,
+       "model": "openai/gpt-6-luna"
+      },
+      {
+       "key": "c4",
+       "evidence_hash": "2be736860a03a8ddd8bd8d77119622f5f77fa6a5b7d6dc509aa81bc7b8b13096",
+       "scorer": 8,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      },
+      {
+       "key": "c5",
+       "evidence_hash": "d5bc1e0ea5d4eae343a2c5d3db69aecc538bd22effa5794fde352714c65a903a",
+       "scorer": 2,
+       "flags": [],
+       "missing": [],
+       "inspected": false
+      }
+     ]
+    },
+    "jev": {},
+    "error": null
+   }
+  ]
+ }
+}
