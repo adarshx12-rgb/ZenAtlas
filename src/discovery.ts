@@ -49,6 +49,8 @@ type Search = PlannedSearch & {page: number; engines: 'standard'|'extra'|'all'};
 const CLEAR_MATCH = 0.5;
 // A deep dive only asks for follow-up leads when this much of its search time is left.
 const FOLLOW_UP_MIN_MS = 15000;
+// Uploads a quick search reads from a named creator's channel (link expansion); deep searches read LINK_UPLOAD_SCAN.
+const QUICK_UPLOAD_SCAN = 200;
 // Leads inspected before requirement gaps are measured (they are the first pages checked anyway).
 const GAP_INITIAL = 8;
 
@@ -493,7 +495,8 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
    let scanned: {channel: string; items: number}|null = null;
    if (creators.length && youtube?.uploads && config.LINK_UPLOAD_SCAN
      && needsExpansion([...picks, ...fresh].map(l => basePotential(l.item.url)), config.LINK_STRONG_MIN)) {
-     const up = await youtube.uploads(creators[0], config.LINK_UPLOAD_SCAN).catch(() => null);
+     // A quick search reads only the newest uploads: the full scan and its screening took ~20 s on 2026-09-29.
+     const up = await youtube.uploads(creators[0], deep ? config.LINK_UPLOAD_SCAN : Math.min(config.LINK_UPLOAD_SCAN, QUICK_UPLOAD_SCAN)).catch(() => null);
      if (up && sameCreator(up.channel, creators[0])) {
        scanned = {channel: up.channel, items: up.items.length};
        const uploads: Lead[] = [];
