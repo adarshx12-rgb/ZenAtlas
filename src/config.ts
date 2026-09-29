@@ -189,8 +189,14 @@ export const configSchema = z.object({
   YOUTUBE_CAPTIONS_SHORTLIST: number(5, 0, 20), YOUTUBE_CAPTIONS_DAILY_BUDGET: number(200, 0, 5000),
   // Python with the scene-worker "captions" extra; empty uses PAGE_TEXT_PYTHON.
   CAPTIONS_PYTHON: optional, YOUTUBE_CAPTIONS_PROXY: optional,
-  // Moment searches fetch the top CAPTIONS_NOW videos' captions during the search, waiting at most CAPTIONS_NOW_MS.
-  CAPTIONS_NOW: number(4, 0, 10), CAPTIONS_NOW_MS: number(15000, 2000, 60000),
+  // Link building (docs/superpowers/specs/2026-09-29-link-building-design.md). Video searches fetch captions for up to
+  // LINK_CAPTIONS candidates in link-potential order (none below LINK_MIN_POTENTIAL) within LINK_CAPTIONS_MS, give the
+  // judge each transcript in full up to LINK_TRANSCRIPT_CHARS (batches split at LINK_BATCH_CHARS of transcript), and
+  // search once more before judging when fewer than LINK_STRONG_MIN candidates look strong.
+  LINK_MIN_POTENTIAL: z.coerce.number().min(0).max(1).default(0.25),
+  LINK_CAPTIONS: number(10, 0, 30), LINK_CAPTIONS_MS: number(20000, 2000, 60000),
+  LINK_TRANSCRIPT_CHARS: number(24000, 2400, 100000), LINK_BATCH_CHARS: number(60000, 10000, 400000),
+  LINK_STRONG_MIN: number(2, 0, 10), LINK_EXPANSION_SEARCHES: number(4, 0, 8), LINK_UPLOAD_SCAN: number(1000, 0, 5000),
   // Used only while YouTube blocks direct caption requests; one credit per video. The free plan has 100 credits a month.
   SUPADATA_API_KEY: optional, SUPADATA_DAILY_BUDGET: number(3, 0, 10000), SUPADATA_PER_MINUTE: number(30, 1, 600),
   OFFICIAL_YOUTUBE_CHANNELS: optional,

@@ -248,7 +248,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
    const fetcher = 'captions' in deps ? deps.captions : config.YOUTUBE_CAPTIONS && captionCommand(config)
      ? pythonCaptions(captionCommand(config), {proxy: config.YOUTUBE_CAPTIONS_PROXY, supadataKey: config.SUPADATA_API_KEY}) : null;
    if (!fetcher || !MOMENT_QUERY.test(query) && !(deps.sceneLive&&config.SCENE_AUTO_QUEUE)) return null;
-   const got = await fetchCaptionsNow(db, config, results, fetcher, config.CAPTIONS_NOW, config.CAPTIONS_NOW_MS).catch(() => null);
+   const got = await fetchCaptionsNow(db, config, results, fetcher, config.LINK_CAPTIONS, config.LINK_CAPTIONS_MS).catch(() => null);
    return got?.tried ? {provider: 'captions_now', status: got.imported ? 'ok' : 'partial',
      message: `Captions were fetched for ${got.imported} of ${got.tried} video${got.tried === 1 ? '' : 's'} during this search to find the moment.`} : null;
  };
