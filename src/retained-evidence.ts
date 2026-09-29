@@ -5,9 +5,30 @@ import {activeScene,sceneSelect,sceneMoment} from './scenes.js';
 import {youtubeId} from './youtube.js';
 import {takeBudget} from './budgets.js';
 import {captionWeight} from './moments.js';
+import {transcriptPassages} from './transcript-passages.js';
 import {chooseSceneWindow,chooseSceneWindows,covered,type SceneWindow,type SceneInterval} from './scene-window.js';
 
-export async function retainedEvidence(db:DB,ids:string[],query:string) {
+// options.maxChars: the judge reads each transcript in full up to that many characters (verbatim passages in time order,
+// spec 2026-09-29-link-building) instead of the three windows ranked against the query; options.terms choose which
+// passages a longer transcript keeps.
+export async function retainedEvidence(db:DB,ids:string[],query:string,options:{terms?:string[];maxChars?:number}={}) {
+ const retained=await rankedEvidence(db,ids,query);
+ if(!options.maxChars) return retained;
+ // Only transcripts that still have an active window, so a revoked transcript never reaches the judge.
+ const segs=(await db.query(`SELECT t.content_id,t.start_seconds,t.end_seconds,t.text FROM transcript_segments t
+   JOIN content c ON c.id=t.content_id JOIN sources s ON s.id=c.source_id
+   WHERE t.content_id=ANY($1::uuid[]) AND (s.policy->>'transcripts')::boolean=true AND c.expires_at>now() AND c.availability<>'unavailable'
+   AND s.status='active' AND s.health_status<>'down' AND split_part(split_part(c.canonical_url,'://',2),'/',1)=s.active_domain
+   AND EXISTS(SELECT 1 FROM moments m WHERE m.content_id=c.id AND m.status='active' AND m.evidence_type='transcript_supported')
+   ORDER BY t.content_id,t.start_seconds`,[ids])).rows;
+ for(const [id,evidence] of retained){
+   const own=segs.filter(r=>r.content_id===id).map(r=>({start:Number(r.start_seconds),end:Number(r.end_seconds),text:String(r.text)}));
+   if(own.length) evidence.transcripts=transcriptPassages(own,options.terms??[],options.maxChars);
+ }
+ return retained;
+}
+
+async function rankedEvidence(db:DB,ids:string[],query:string) {
  const rows=(await db.query(`SELECT c.id,x.* FROM content c JOIN sources s ON s.id=c.source_id
  CROSS JOIN LATERAL (SELECT m.id AS evidence_id,m.start_seconds,m.end_seconds,m.summary,m.evidence_type
    FROM moments m WHERE m.content_id=c.id AND m.status='active' AND m.evidence_type='transcript_supported'
