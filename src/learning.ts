@@ -39,6 +39,8 @@ export interface SearchTrace {
  plan: {kind: string; criteria: string[]; model: string|null};
  searches: {query: string; target: string; round: number}[];
  rounds: number; providers: ProviderStatus[]; pool: TraceEntry[];
+ // Milliseconds from the start when each stage finished; evidence holds the evidence steps inside judging.
+ timings?: Record<string, number|Record<string, number>>;
  contract?: RequirementsContract; unmet?: string[]; gaps?: GapTrace;
  // The model tier the search ran on; absent on traces saved before tiers existed (SSJ3).
  tier?: Tier;

@@ -122,6 +122,9 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
  providers: ProviderStatus[]; previews: Map<string,Buffer>; searches: PlannedSearch[]; trace: SearchTrace;
   contract?: RequirementsContract|null; unmet?: string[]; sceneReview?:SceneReviewPlan}> {
  const deep = input.depth === 'deep' && !input.source;
+ // Milliseconds from the start at which each stage finished, in the trace, to keep searches inside their time budget.
+ const began = Date.now(), timings: Record<string, number> = {};
+ const mark = (stage: string) => { timings[stage] = Date.now() - began; };
  const providers = adapters ?? configuredProviders(config);
  const archives = deep ? deps.archives ?? configuredArchives(config, input.q) : [];
  const planner = input.source ? undefined : deps.planner ?? makePlanner(db, config);
@@ -434,6 +437,7 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
  // promising metadata matches while reserving every fourth pick for this original order.
  const clear = new Set(rankDiscovery(input.q, leads, leads.length, CLEAR_MATCH).map(l => l.item.url));
  let picks = [...ranked.filter(l => clear.has(l.item.url)), ...ranked.filter(l => !clear.has(l.item.url))];
+ mark('retrieved');
  const screener = deps.screener ?? makeScreener(db, config);
  // The screener's decisions start each candidate's link potential (src/link-potential.ts).
  const screens = new Map<string, ScreenSignal>();
@@ -455,6 +459,7 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
      await health('jev_screener', false, code);
    }
  }
+ mark('screened');
  // Link expansion (spec 2026-09-29-link-building): too few candidates look strong after screening, so look again before
  // judging, in the words videos use and on the named creator's channel. It needs the screener's verdicts to go on.
  const basePotential = (url: string) => linkPotential({screen: screens.get(url), creators: [], comments: [], terms: []}).base;
@@ -509,6 +514,7 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
      strong: fresh.filter(l => basePotential(l.item.url) >= 0.5).length, uploads: scanned})}
 `);
  }
+ mark('expanded');
  if (contract) {
    // Inspected evidence steers admission with the same rule as the final decision: a lead that decision would exclude
    // stays out; one with inspected support moves forward.
@@ -533,6 +539,7 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
  const targets = new Map(found.map(r => [r.id, webUrls.has(leadUrl.get(r.id)!) ? 'web' as const : 'videos' as const]));
  const signals = await applySignals(db, {...config, JUDGE_CANDIDATES: found.length}, input.q, found, {...signalDeps, judge, pages: {check: checkPage}},
    {kind: plan.kind, criteria: plan.criteria, targets, underrated: deep, anime: anime.anime, screens, ...(contract ? {contract, findings: gapFindings} : {})});
+ mark('judged');
  // Semantic-only candidates were admitted for judging. If that check fails, they must not
  // displace supported keyword matches merely because the model had been configured.
  const lexical = new Set(rankDiscovery(input.q, leads, leads.length).map(l => l.item.url));
@@ -548,7 +555,7 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
  return {results, closest:signals.closest.filter(r=>matchesFilters(r,input)), ingested: found, previews: signals.previews, searches,
    dropped: [...new Set([...found, ...earlier.results].filter(r => !kept.has(r.canonical_url)).map(r => r.canonical_url))], providers: [...statuses, ...signals.providers],
    contract, unmet,sceneReview:signals.sceneReview,
-   trace: {...base, ...(exploration?{exploration}:{}),
+   trace: {...base, timings: {...timings, evidence: signals.timings}, ...(exploration?{exploration}:{}),
      ...(contract ? {contract, unmet, ...(gapTrace ? {gaps: gapTrace} : {}),
        pool: base.pool.map(p => {
          const id = byUrl.get(p.url), decision = id ? signals.decisions.get(id) : undefined;

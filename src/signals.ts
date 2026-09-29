@@ -174,10 +174,13 @@ const unavailable = (provider: string, error: unknown, message: string): Provide
 export interface Judged { id: string; relevance: number|null; reason: string|null; basis: 'metadata'|'viewer_claims'|'direct_evidence'|null }
 export async function applySignals(db: DB, config: Config, query: string, results: Result[], deps: SignalDeps = {}, context?: SignalContext) {
  const providers: ProviderStatus[] = [];
+ // When each step finished, in milliseconds from the start (the discovery trace's timings.evidence).
+ const began = Date.now(), timings: Record<string, number> = {};
+ const mark = (step: string) => { timings[step] = Date.now() - began; };
  let sceneRequests:SceneRequest[]=[],sceneCandidates:JudgeCandidate[]=[],sceneContext:JudgeContext|undefined,sceneDeadline='';
  const previews = new Map<string,Buffer>();
  const findings: Finding[] = [], decisions = new Map<string,Decision>(), jevRecords = new Map<string,unknown>();
- if (!results.length) return {results, closest: [] as Result[], providers, previews, judged: [] as Judged[], findings, decisions, jev: jevRecords, links: new Map<string,LinkScore>()};
+ if (!results.length) return {results, closest: [] as Result[], providers, previews, judged: [] as Judged[], findings, decisions, jev: jevRecords, links: new Map<string,LinkScore>(), timings};
  const rows = (await db.query(`SELECT c.id,c.duration,(s.policy->>'viewer_signals')::boolean AS viewer_signals,
    (s.policy->>'transcripts')::boolean AS transcripts FROM content c
    JOIN sources s ON s.id=c.source_id WHERE c.id=ANY($1::uuid[]) AND s.status='active' AND s.health_status<>'down'
@@ -279,7 +282,9 @@ export async function applySignals(db: DB, config: Config, query: string, result
    return got.imported ? {provider: 'captions_now', status: 'ok', message: `Captions were fetched for ${got.imported} of ${got.tried} promising video${got.tried === 1 ? '' : 's'} during this search.`}
      : {provider: 'captions_now', status: 'partial', message: 'Captions unavailable right now; videos were judged on titles, descriptions and comments.'};
  };
- const [youtubeStatus, reddit, pageStatus, , captionsNow] = await Promise.all([youtubeRun, redditTask(), pageTask(), adapterTask(), linkCaptionsTask()]);
+ const [youtubeStatus, reddit, pageStatus, , captionsNow] = await Promise.all([youtubeRun.finally(() => mark('comments')), redditTask(), pageTask(), adapterTask(),
+   linkCaptionsTask().finally(() => mark('captions'))]);
+ mark('evidence');
  for (const status of [youtubeStatus, reddit.status, pageStatus, captionsNow]) if (status) providers.push(status);
  const transcriptOptions={terms:linkTerms,maxChars:config.LINK_TRANSCRIPT_CHARS};
  const retained=await retainedEvidence(db,results.map(r=>r.id),query,transcriptOptions);
@@ -364,6 +369,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
      }
    };
    const settled = await judgeAll(candidates, Math.min(config.JUDGE_BATCH_SIZE,12));
+   mark('judge');
    collect(settled);
    // Lighter fallback models often skip candidates in long batches; the skipped ones are asked once more in short batches.
    const skipped = settled.flatMap(s => s.status === 'fulfilled' ? s.value.batch.filter(c => !byKey.has(c.key)) : []);
@@ -419,6 +425,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
      for (const [key, v] of reviewed.verdicts) byKey.set(key, v);
      providers.push(...reviewed.providers);
    }
+   mark('review');
    const failed = settled.flatMap(s => s.status === 'rejected' ? [s.reason] : []);
    if (failed.length < settled.length) {
      verdicts = new Map(pool.flatMap(r => { const v = byKey.get(keys.get(r.id)!); return v ? [[r.id, v] as const] : []; }));
@@ -515,5 +522,5 @@ export async function applySignals(db: DB, config: Config, query: string, result
  const sceneReview:SceneReviewPlan|undefined=sceneRequests.length&&sceneContext?{deadline:sceneDeadline,context:sceneContext,...(contract?{contract}:{}),
    entries:sceneRequests.flatMap(j=>{const candidate=sceneCandidates.find(c=>c.key===keys.get(j.content_id)),result=scored.find(s=>s.result.id===j.content_id)?.result;
      return candidate&&result?[{...j,candidate,result,findings:findingsOf(result.canonical_url)}]:[];})}:undefined;
- return {results: ranked, closest, providers, previews, judged, findings, decisions, jev: jevRecords,sceneReview,links:new Map(results.map(r=>[r.id,link(r)]))};
+ return {results: ranked, closest, providers, previews, judged, findings, decisions, jev: jevRecords,sceneReview,links:new Map(results.map(r=>[r.id,link(r)])),timings};
 }
