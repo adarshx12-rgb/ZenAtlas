@@ -49,6 +49,8 @@ async function run(tab:'videos'|'web',q:string){
  row.elapsed_ms=Date.now()-started;await save();
  console.log(JSON.stringify({event:'finished',tab,q,ms:row.elapsed_ms,status:row.final?.status,count:row.final?.results?.length,error:row.error}));
 }
-for(const q of ['mr beast buys ps5 to a subscriber','moment in a MKBHD review where he drops the phone',
- 'documentary about the guy who climbed El Capitan without ropes','video of a cat knocking a glass off a table in slow motion']) await run('videos',q);
+// Queries from the command line, or the four that showed nothing before link building.
+const queries=process.argv.slice(2).length?process.argv.slice(2):['mr beast buys ps5 to a subscriber','moment in a MKBHD review where he drops the phone',
+ 'documentary about the guy who climbed El Capitan without ropes','video of a cat knocking a glass off a table in slow motion'];
+for(const q of queries) await run('videos',q);
 out.finished_at=new Date().toISOString();await save();console.log('Saved '+file);
