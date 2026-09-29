@@ -24,6 +24,9 @@ export interface YouTubeClient {
 }
 export interface Uploads { channel: string; items: {id: string; title: string; description: string}[] }
 
+// YouTube's block page, which search engines sometimes index in place of a video's own title and description.
+export const blockPageTitle = (title: string|null|undefined) => /not currently available on this device|before you continue to youtube|^\s*-?\s*youtube\s*$/i.test(title ?? '');
+
 export function youtubeId(url: string): string|null {
  const u = new URL(url);
  const id = u.searchParams.get('v');

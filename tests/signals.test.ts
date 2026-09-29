@@ -371,3 +371,22 @@ test('captions go to the most promising videos first, for any video search, and 
    assert.equal(judged.transcripts.map((t:any)=>t.text).join(' '),lines.map(l=>l.text).join(' '),'every caption line reaches the judge');
  }finally{await db.close();}
 });
+
+test('a YouTube block-page title from a search engine is replaced by the video\'s own title',async()=>{
+ const db=await database();
+ try{
+   await db.query(`INSERT INTO sources(domain,display_name,status,policy,provenance) VALUES('www.youtube.com','YouTube','active',
+     '{"metadata":true,"viewer_signals":true,"retention_days":30}','{"fixture":true}')`);
+   const item=(await ingest(db,contentInput.parse({url:'https://www.youtube.com/watch?v=DHybgVhPCIw',title:'YouTube is not currently available on this device. - YouTube',
+     description:'To learn more, please visit the YouTube Help Center: https://www.youtube.com/help'}),{fixture:true}))!;
+   const youtube:YouTubeClient={async videos(ids){return new Map(ids.map(id=>[id,{id,title:'Cat knocks glass off table in slow motion',description:'Slow-mo cat',
+     channelId:'UC1',channelTitle:'Cats',publishedAt:null,duration:60,live:'none' as const,wasLive:false}]));},async comments(){return [];}};
+   let seen:any[]=[];
+   const judge:Judge={async judge(_q,cs){seen=cs;return {model:'t',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,relevance:8,reason:'r',momentKeys:[]}]))};}};
+   const out=await applySignals(db,testConfig,'cat glass slow motion',[{...item,moments:[],evidence:'metadata_match' as const,origin:'discovery' as const}] as any,{judge,youtube,council:null,strong:null});
+   assert.equal(seen[0].title,'Cat knocks glass off table in slow motion','the judge reads the real title');
+   assert.equal(out.results[0].title,'Cat knocks glass off table in slow motion','and the result shows it');
+   const row=(await db.query('SELECT title,description FROM content WHERE id=$1',[item.id])).rows[0];
+   assert.equal(row.title,'Cat knocks glass off table in slow motion');assert.equal(row.description,'Slow-mo cat');
+ }finally{await db.close();}
+});

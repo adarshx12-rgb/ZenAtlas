@@ -5,7 +5,7 @@ import { SearXNG } from './providers.js';
 import { discoveryQuery, sameWord, STOPWORDS, tokens } from './ranking.js';
 import { UpstreamError } from './http.js';
 import { takeBudget } from './budgets.js';
-import { YouTubeData, youtubeId, type VideoDetails, type ViewerComment, type YouTubeClient } from './youtube.js';
+import { YouTubeData, blockPageTitle, youtubeId, type VideoDetails, type ViewerComment, type YouTubeClient } from './youtube.js';
 import { makeJudge, visualReference, type Judge, type JudgeCandidate, type JudgeContext, type JudgeResult, type Verdict } from './judge.js';
 import { councilReview, makeCouncil, type CouncilSeats } from './council.js';
 import { cascadeOptions, cascadeReview, makeStrongJudge } from './cascade.js';
@@ -195,7 +195,16 @@ export async function applySignals(db: DB, config: Config, query: string, result
    if (!youtube || !eligible.length) return null;
    try {
      const details = await youtube.videos(eligible.map(r => youtubeId(r.canonical_url)!));
-     for (const r of eligible) { const d = details.get(youtubeId(r.canonical_url)!); if (d) info(r.id).details = d; }
+     for (const r of eligible) {
+       const d = details.get(youtubeId(r.canonical_url)!);
+       if (!d) continue;
+       info(r.id).details = d;
+       // A search engine's copy of YouTube's block page is replaced by the video's own title and description.
+       if (blockPageTitle(r.title) && d.title) {
+         r.title = d.title; r.description = d.description.slice(0, 5000) || null;
+         await db.query('UPDATE content SET title=$2,description=$3 WHERE id=$1', [r.id, r.title, r.description]).catch(() => {});
+       }
+     }
      detailsReady();
      let failed = 0;
      await mapLimit(eligible, 5, async r => {
