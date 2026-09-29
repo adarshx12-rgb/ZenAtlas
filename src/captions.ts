@@ -143,10 +143,9 @@ async function fetchAndStore(db: DB, config: Config, row: {id: string; canonical
  return {status: 'waiting', wait: (await pausedUntil(db, 'youtube_captions')) ?? new Date(Date.now() + CAPTION_PAUSE_MINUTES * 60_000), code: 'youtube_blocked'};
 }
 
-// During a search that asks for a moment ("the part where...", "timestamp"): the top YouTube results without a transcript
-// get their captions now, in parallel and within budgetMs, so the judge can quote them and the same search can show the
-// timestamp. Results still loading when the time is up finish in the background and help later searches.
-export const MOMENT_QUERY = /\bthe (?:part|moment|bit|scene|point|section)\b|\bmoments?\b|\btimestamps?\b|\bat what (?:point|time|minute)\b|\bwhere (?:he|she|they|it|someone) (?:says|talks|explains|mentions|describes)\b/i;
+// During a video search: the caller's most promising YouTube results without a transcript get their captions now, in the
+// caller's order, in parallel and within budgetMs, so the judge can read and quote them. Results still loading when the
+// time is up finish in the background and help later searches.
 export async function fetchCaptionsNow(db: DB, config: Config, results: Result[], fetch: CaptionFetcher, max: number, budgetMs: number) {
  const ids = results.filter(r => youtubeId(r.canonical_url)).map(r => r.id);
  const rows = ids.length ? (await db.query(`SELECT c.id,c.canonical_url,c.language,c.duration FROM content c JOIN sources s ON s.id=c.source_id

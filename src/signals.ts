@@ -16,7 +16,8 @@ import {PublicVideoEvidence,selectComments,type VideoEvidenceAdapter,type VideoE
 import {importTranscript} from './moments.js';
 import {retainedEvidence,queueSceneShortlist,requestSceneAnalysis,quoteMoments,type SceneRequest} from './retained-evidence.js';
 import type {SceneReviewPlan} from './scene-verification.js';
-import { MOMENT_QUERY, captionCommand, fetchCaptionsNow, pythonCaptions, type CaptionFetcher } from './captions.js';
+import { captionCommand, fetchCaptionsNow, pythonCaptions, type CaptionFetcher } from './captions.js';
+import { creatorNames, linkPotential, requirementTerms, type LinkScore, type ScreenSignal } from './link-potential.js';
 import {queueCaptions} from './captions.js';
 import { decide, detectFormat, inspect, factsFromFindings, type Decision, type Finding } from './evidence.js';
 import { judgeRequirements } from './search-contract.js';
@@ -38,12 +39,27 @@ export interface SignalDeps { sceneLive?:boolean; youtube?: YouTubeClient; judge
 // What the search plan wanted, and which kind of search found each result (by result id).
 // underrated is retained for callers; obscurity is a badge, never a ranking boost.
 // contract: the search's shared requirements; findings: evidence already gathered for these candidates (exploration).
+// screens: the screener's decision per canonical URL, the start of each candidate's link potential (src/link-potential.ts).
 export interface SignalContext extends JudgeContext { targets: Map<string,SearchTarget>; underrated?: boolean;
- contract?: RequirementsContract; findings?: Finding[] }
+ contract?: RequirementsContract; findings?: Finding[]; screens?: Map<string,ScreenSignal> }
 export const UNDERRATED_BADGE = 'Underrated find';
 // Uncertain verdicts remain in the trace, never as filler in the main results.
 const UNVERIFIED_SCORE = 5;
 const RETRY_BATCH = 10;
+
+// Judge batches of at most size candidates and maxChars of transcript text, in order. Whole transcripts
+// (spec 2026-09-29-link-building) would otherwise make one call too long for the judge's time limit.
+export function judgeBatches<T extends {transcripts?: {text: string}[]}>(list: T[], size: number, maxChars: number): T[][] {
+ const out: T[][] = [];
+ let batch: T[] = [], chars = 0;
+ for (const item of list) {
+   const own = (item.transcripts ?? []).reduce((n, t) => n + t.text.length, 0);
+   if (batch.length && (batch.length >= size || chars + own > maxChars)) { out.push(batch); batch = []; chars = 0; }
+   batch.push(item); chars += own;
+ }
+ if (batch.length) out.push(batch);
+ return out;
+}
 
 // h:mm:ss or m:ss, not part of a longer number, ratio or clock time such as "10:30 pm".
 const STAMP = /(?<![\w:.])(?:(\d{1,2}):)?(\d{1,3}):([0-5]\d)(?![\w:])(?!\s*[ap]\.?m\b)/gi;
@@ -161,7 +177,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
  let sceneRequests:SceneRequest[]=[],sceneCandidates:JudgeCandidate[]=[],sceneContext:JudgeContext|undefined,sceneDeadline='';
  const previews = new Map<string,Buffer>();
  const findings: Finding[] = [], decisions = new Map<string,Decision>(), jevRecords = new Map<string,unknown>();
- if (!results.length) return {results, closest: [] as Result[], providers, previews, judged: [] as Judged[], findings, decisions, jev: jevRecords};
+ if (!results.length) return {results, closest: [] as Result[], providers, previews, judged: [] as Judged[], findings, decisions, jev: jevRecords, links: new Map<string,LinkScore>()};
  const rows = (await db.query(`SELECT c.id,c.duration,(s.policy->>'viewer_signals')::boolean AS viewer_signals,
    (s.policy->>'transcripts')::boolean AS transcripts FROM content c
    JOIN sources s ON s.id=c.source_id WHERE c.id=ANY($1::uuid[]) AND s.status='active' AND s.health_status<>'down'
@@ -171,11 +187,15 @@ export async function applySignals(db: DB, config: Config, query: string, result
  const official = new Set(config.OFFICIAL_YOUTUBE_CHANNELS.split(',').map(s => s.trim()).filter(Boolean));
  const extra = new Map<string,Extra>();
  const info = (id: string) => extra.get(id) ?? extra.set(id, {stored: [], comments: [], discussions: [], badges: []}).get(id)!;
+ // Link potential orders the evidence fetches: comments, then captions (src/link-potential.ts).
+ const linkTerms = requirementTerms(context?.contract, query), creators = creatorNames(context?.contract);
+ const link = (r: Result): LinkScore => linkPotential({screen: context?.screens?.get(r.canonical_url),
+   channel: extra.get(r.id)?.details?.channelTitle ?? r.creator, creators, comments: extra.get(r.id)?.comments ?? [], terms: linkTerms});
 
  const youtube = deps.youtube ?? (config.YOUTUBE_API_KEY ? new YouTubeData(db, config) : undefined);
  // Details (one request per 50 videos) cover every permitted video; comments only the first SIGNAL_VIDEOS.
  const eligible = results.filter(r => youtubeId(r.canonical_url) && stored.get(r.id)?.viewer_signals);
- const commented = new Set(eligible.slice(0, config.SIGNAL_VIDEOS).map(r => r.id));
+ const commented = new Set([...eligible].sort((a, b) => link(b).value - link(a).value).slice(0, config.SIGNAL_VIDEOS).map(r => r.id));
  const youtubeTask = async (): Promise<ProviderStatus|null> => {
    if (!youtube || !eligible.length) return null;
    try {
@@ -243,18 +263,26 @@ export async function applySignals(db: DB, config: Config, query: string, result
      }
    });
  };
- // A moment search gets the top videos' captions now, so the judge can quote them and this search can show the timestamp.
- const captionsNowTask = async (): Promise<ProviderStatus|null> => {
+ // Every video search fetches captions for its most promising videos now, after comments have added to their link
+ // potential, so the judge can read and quote them (spec 2026-09-29-link-building). The rest are queued for later searches.
+ const youtubeRun = youtubeTask();
+ const linkCaptionsTask = async (): Promise<ProviderStatus|null> => {
    const fetcher = 'captions' in deps ? deps.captions : config.YOUTUBE_CAPTIONS && captionCommand(config)
      ? pythonCaptions(captionCommand(config), {proxy: config.YOUTUBE_CAPTIONS_PROXY, supadataKey: config.SUPADATA_API_KEY}) : null;
-   if (!fetcher || !MOMENT_QUERY.test(query) && !(deps.sceneLive&&config.SCENE_AUTO_QUEUE)) return null;
-   const got = await fetchCaptionsNow(db, config, results, fetcher, config.LINK_CAPTIONS, config.LINK_CAPTIONS_MS).catch(() => null);
-   return got?.tried ? {provider: 'captions_now', status: got.imported ? 'ok' : 'partial',
-     message: `Captions were fetched for ${got.imported} of ${got.tried} video${got.tried === 1 ? '' : 's'} during this search to find the moment.`} : null;
+   if (!fetcher || context?.kind === 'websites' || !config.LINK_CAPTIONS) return null;
+   await youtubeRun;
+   const ordered = results.filter(r => youtubeId(r.canonical_url)).map(r => ({r, v: link(r).value}))
+     .filter(x => x.v >= config.LINK_MIN_POTENTIAL).sort((a, b) => b.v - a.v).map(x => x.r);
+   if (!ordered.length) return null;
+   const got = await fetchCaptionsNow(db, config, ordered, fetcher, config.LINK_CAPTIONS, config.LINK_CAPTIONS_MS).catch(() => null);
+   if (!got?.tried) return null;
+   return got.imported ? {provider: 'captions_now', status: 'ok', message: `Captions were fetched for ${got.imported} of ${got.tried} promising video${got.tried === 1 ? '' : 's'} during this search.`}
+     : {provider: 'captions_now', status: 'partial', message: 'Captions unavailable right now; videos were judged on titles, descriptions and comments.'};
  };
- const [youtubeStatus, reddit, pageStatus, , captionsNow] = await Promise.all([youtubeTask(), redditTask(), pageTask(), adapterTask(), captionsNowTask()]);
+ const [youtubeStatus, reddit, pageStatus, , captionsNow] = await Promise.all([youtubeRun, redditTask(), pageTask(), adapterTask(), linkCaptionsTask()]);
  for (const status of [youtubeStatus, reddit.status, pageStatus, captionsNow]) if (status) providers.push(status);
- const retained=await retainedEvidence(db,results.map(r=>r.id),query);
+ const transcriptOptions={terms:linkTerms,maxChars:config.LINK_TRANSCRIPT_CHARS};
+ const retained=await retainedEvidence(db,results.map(r=>r.id),query,transcriptOptions);
  for(const provider of ['peertube','archive']) {
    const checks=[...extra.values()].flatMap(e=>e.video?.provider===provider?[e.video]:[]);
    if(checks.length) providers.push({provider:`${provider}_evidence`,status:checks.some(e=>e.commentStatus==='available'||e.captionStatus==='available')?'ok':'partial',
@@ -322,7 +350,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
    // Smaller batches in parallel answer faster, and a failed batch only leaves its own results unjudged.
    const judgeContext = context ? {kind: wanted, criteria: context.criteria, anime: context.anime, ...(contract ? {search_date: contract.search_date} : {}), ...(requirements ? {requirements} : {})} : undefined;
    const judgeAll = (list: JudgeCandidate[], size: number) => Promise.allSettled(
-     Array.from({length: Math.ceil(list.length/size)}, (_, b) => list.slice(b*size, (b + 1)*size)).map(batch =>
+     judgeBatches(list, size, config.LINK_BATCH_CHARS).map(batch =>
        judge.judge(query, batch, judgeContext, screenshots).then(out => ({batch, out}))));
    const byKey = new Map<string,Verdict>();
    const idOf = new Map([...keys].map(([id, key]) => [key, id]));
@@ -366,7 +394,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
              ? pythonCaptions(captionCommand(config), {proxy: config.YOUTUBE_CAPTIONS_PROXY, supadataKey: config.SUPADATA_API_KEY}) : null;
            if (!fetcher) return null;
            await fetchCaptionsNow(db, config, [r], fetcher, 1, config.CASCADE_INSPECTION_MS);
-           const evidence = await retainedEvidence(db, [id], query);
+           const evidence = await retainedEvidence(db, [id], query, transcriptOptions);
            const fresh = evidence.get(id);
            if (!fresh?.transcripts.length || signal.aborted) return null;
            retained.set(id, fresh);
@@ -487,5 +515,5 @@ export async function applySignals(db: DB, config: Config, query: string, result
  const sceneReview:SceneReviewPlan|undefined=sceneRequests.length&&sceneContext?{deadline:sceneDeadline,context:sceneContext,...(contract?{contract}:{}),
    entries:sceneRequests.flatMap(j=>{const candidate=sceneCandidates.find(c=>c.key===keys.get(j.content_id)),result=scored.find(s=>s.result.id===j.content_id)?.result;
      return candidate&&result?[{...j,candidate,result,findings:findingsOf(result.canonical_url)}]:[];})}:undefined;
- return {results: ranked, closest, providers, previews, judged, findings, decisions, jev: jevRecords,sceneReview};
+ return {results: ranked, closest, providers, previews, judged, findings, decisions, jev: jevRecords,sceneReview,links:new Map(results.map(r=>[r.id,link(r)]))};
 }

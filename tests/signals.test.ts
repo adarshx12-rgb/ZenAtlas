@@ -334,3 +334,40 @@ test('makeJudge picks the configured models over Gemini',async()=>{
    assert.ok(both && !(both instanceof GeminiJudge),'configured models take over judging');
  }finally{await db.close();}
 });
+
+test('judge batches never exceed the item count or the transcript budget, keep order and are never empty',async()=>{
+ const {judgeBatches}=await import('../src/signals.js');
+ const item=(n:number,chars:number)=>({n,transcripts:chars?[{text:'x'.repeat(chars)}]:[]});
+ const list=[item(1,0),item(2,40000),item(3,30000),item(4,0),item(5,90000),item(6,10)];
+ const batches=judgeBatches(list,3,60000);
+ assert.deepEqual(batches.flat().map(i=>i.n),[1,2,3,4,5,6]);
+ for(const b of batches){assert.ok(b.length>=1&&b.length<=3);
+   const chars=b.reduce((s,i)=>s+i.transcripts.reduce((t,x)=>t+x.text.length,0),0);
+   assert.ok(chars<=60000||b.length===1,'only a single oversized item may exceed the budget');}
+ assert.deepEqual(judgeBatches([],3,60000),[]);
+});
+
+test('captions go to the most promising videos first, for any video search, and the judge reads the whole transcript',async()=>{
+ const db=await database();
+ try{
+   await db.query(`INSERT INTO sources(domain,display_name,status,policy,provenance) VALUES('www.youtube.com','YouTube','active',
+     '{"metadata":true,"transcripts":true,"retention_days":30}','{"fixture":true}')`);
+   const a=(await ingest(db,contentInput.parse({url:'https://www.youtube.com/watch?v=aaaaaaaaaaa',title:'Video A',duration:600}),{fixture:true}))!;
+   const b=(await ingest(db,contentInput.parse({url:'https://www.youtube.com/watch?v=bbbbbbbbbbb',title:'Video B',duration:600}),{fixture:true}))!;
+   const lines=Array.from({length:30},(_,i)=>({start:i*10,end:i*10+10,text:`line ${i} of the giveaway`}));
+   const asked:string[]=[];
+   const captions=async(id:string)=>{asked.push(id);return {status:'ok' as const,kind:'youtube_manual' as const,language:'en',track:'en',segments:lines};};
+   let seen:any[]=[];
+   const judge:Judge={async judge(_q,cs){seen.push(...cs);return {model:'t',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,relevance:6,reason:'r',momentKeys:[]}]))};}};
+   const screen=(p:number)=>({choice:'uncertain' as const,confidence:0.5,probabilities:{promising:p,uncertain:0,mismatch:1-p}});
+   const context={kind:'videos' as const,criteria:[],targets:new Map(),screens:new Map([[a.canonical_url,screen(0.1)],[b.canonical_url,screen(0.9)]])};
+   const config={...testConfig,YOUTUBE_CAPTIONS:true,CAPTIONS_PYTHON:'python-with-captions-extra',LINK_CAPTIONS:1};
+   const results=[a,b].map(r=>({...r,moments:[],evidence:'metadata_match' as const,origin:'discovery' as const}));
+   await applySignals(db,{...config,LINK_MIN_POTENTIAL:0.95},'a giveaway',results as any,{judge,captions,council:null,strong:null},context);
+   assert.deepEqual(asked,[],'nothing clears a 0.95 threshold');
+   await applySignals(db,config,'a giveaway',results as any,{judge,captions,council:null,strong:null},context);
+   assert.deepEqual(asked,['bbbbbbbbbbb'],'the one caption fetch goes to the promising video, though the query asks for no moment');
+   const judged=seen.filter(c=>c.title==='Video B').at(-1);
+   assert.equal(judged.transcripts.map((t:any)=>t.text).join(' '),lines.map(l=>l.text).join(' '),'every caption line reaches the judge');
+ }finally{await db.close();}
+});

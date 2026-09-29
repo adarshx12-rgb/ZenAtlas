@@ -63,16 +63,20 @@ test('a moment query fetches captions during the search, so the same search can 
    {judge:judging('The first story is about connecting the dots.'),council:null,captions});
   assert.deepEqual(asked,['UF8uR6Z6KLc:supadata']);
   assert.equal(out.results[0].moments.find(m=>m.analysis_version==='judge-quote-v1')?.start_seconds,55.85);
-  assert.ok(out.providers.some(p=>p.provider==='captions_now'&&/1 video/.test(p.message)));
+  assert.ok(out.providers.some(p=>p.provider==='captions_now'&&/1 of 1 promising video/.test(p.message)));
  } finally {await db.close();}
 });
 
-test('ordinary queries do not wait for captions',async()=>{
+test('every video search fetches captions for its promising videos, and a web search does not',async()=>{
  const db=await database();
  try {
   const item=await video(db,'UF8uR6Z6KLd');
   let calls=0;const captions=async()=>{calls++;return {status:'none' as const,reason:'x'};};
-  await applySignals(db,{...testConfig,YOUTUBE_CAPTIONS:true,CAPTIONS_PYTHON:'python'},'steve jobs stanford speech',[item],{judge:judging('x'),council:null,captions});
-  assert.equal(calls,0);
+  const config={...testConfig,YOUTUBE_CAPTIONS:true,CAPTIONS_PYTHON:'python'};
+  await applySignals(db,config,'steve jobs stanford speech',[item],{judge:judging('x'),council:null,captions},{kind:'websites',criteria:[],targets:new Map()});
+  assert.equal(calls,0,'a web search never waits for captions');
+  const out=await applySignals(db,config,'steve jobs stanford speech',[item],{judge:judging('x'),council:null,captions});
+  assert.equal(calls,1,'no moment wording is needed');
+  assert.ok(out.providers.some(p=>p.provider==='captions_now'&&p.status==='partial'&&/unavailable/.test(p.message)),'a failed fetch is reported');
  } finally {await db.close();}
 });
