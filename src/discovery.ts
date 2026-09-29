@@ -17,6 +17,7 @@ import { matchesFilters } from './catalogue.js';
 import { makeJudge } from './judge.js';
 import type { SearchTrace } from './learning.js';
 import { makeScreener, screeningOrder, type Screener } from './screener.js';
+import type { ScreenSignal } from './link-potential.js';
 import { exploreSources, makeExplorer, makeGapChooser, type Explorer, type ExplorationTrace } from './exploration.js';
 import { criteriaOf, explicitFormats, hardEach, normaliseContract, rulesContract, siteOnly, type RequirementsContract } from './requirements.js';
 import { coverage, decide, inspect, type Finding } from './evidence.js';
@@ -431,6 +432,8 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
  const clear = new Set(rankDiscovery(input.q, leads, leads.length, CLEAR_MATCH).map(l => l.item.url));
  let picks = [...ranked.filter(l => clear.has(l.item.url)), ...ranked.filter(l => !clear.has(l.item.url))];
  const screener = deps.screener ?? makeScreener(db, config);
+ // The screener's decisions start each candidate's link potential (src/link-potential.ts).
+ const screens = new Map<string, ScreenSignal>();
  stage = 'checking'; await report();
  if (screener && picks.length) {
    try {
@@ -438,6 +441,7 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
        formats: contract.deliverable.formats, search_date: contract.search_date} : undefined);
      await health('jev_screener', true);
      picks = screeningOrder(picks, screened.promising);
+     for (const d of screened.decisions ?? []) screens.set(d.url, {choice: d.choice, confidence: d.confidence, probabilities: d.probabilities});
      notes.push({provider: 'jev_screener', status: 'ok',
        message: `Screened ${screened.screened} of ${ranked.length} leads to prioritize evidence checks; final relevance is checked separately.`});
    } catch (error) {
@@ -470,7 +474,7 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
  const webUrls = new Set(leads.filter(l => l.target === 'web').map(l => l.item.url));
  const targets = new Map(found.map(r => [r.id, webUrls.has(leadUrl.get(r.id)!) ? 'web' as const : 'videos' as const]));
  const signals = await applySignals(db, {...config, JUDGE_CANDIDATES: found.length}, input.q, found, {...signalDeps, judge, pages: {check: checkPage}},
-   {kind: plan.kind, criteria: plan.criteria, targets, underrated: deep, anime: anime.anime, ...(contract ? {contract, findings: gapFindings} : {})});
+   {kind: plan.kind, criteria: plan.criteria, targets, underrated: deep, anime: anime.anime, screens, ...(contract ? {contract, findings: gapFindings} : {})});
  // Semantic-only candidates were admitted for judging. If that check fails, they must not
  // displace supported keyword matches merely because the model had been configured.
  const lexical = new Set(rankDiscovery(input.q, leads, leads.length).map(l => l.item.url));
@@ -479,8 +483,10 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
  const kept = new Set(results.map(r => r.canonical_url));
  for (const [id] of signals.previews) if (!results.some(r => r.id === id)) signals.previews.delete(id);
  const unmet = contract ? unmetRequirements(contract, results, signals.findings) : [];
- const base = traceOf(input, plan, searches, rounds, [...statuses, ...signals.providers], leads, found, leadUrl, signals.judged, results, roundOf);
  const byUrl = new Map(found.map(r => [r.canonical_url, r.id]));
+ const traced = traceOf(input, plan, searches, rounds, [...statuses, ...signals.providers], leads, found, leadUrl, signals.judged, results, roundOf);
+ // Each candidate's link potential, to tune the evidence order from real searches.
+ const base = {...traced, pool: traced.pool.map(p => { const id = byUrl.get(p.url); return id && signals.links.has(id) ? {...p, link: signals.links.get(id)} : p; })};
  return {results, closest:signals.closest.filter(r=>matchesFilters(r,input)), ingested: found, previews: signals.previews, searches,
    dropped: [...new Set([...found, ...earlier.results].filter(r => !kept.has(r.canonical_url)).map(r => r.canonical_url))], providers: [...statuses, ...signals.providers],
    contract, unmet,sceneReview:signals.sceneReview,

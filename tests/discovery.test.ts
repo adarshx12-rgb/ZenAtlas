@@ -488,3 +488,20 @@ test('auto mode also runs discovery when strong catalogue matches come from too 
    assert.notEqual(diverse.discovery_job_id,null);
  }finally{await db.close();}
 });
+
+test('the screener decisions become each candidate\'s link potential, recorded in the trace',async()=>{
+ const db=await database();
+ try{
+   const items=[0,1].map(i=>contentInput.parse({url:`https://link.example.org/${i}`,title:`Giveaway video ${i}`}));
+   const provider:SourceAdapter={name:'link-fixture',capabilities:{transcripts:false,comments:false,embeds:false,accessible_media:false},
+     async search(){return {results:items,next_cursor:null,status:{provider:'link-fixture',status:'ok',message:'TEST'}};}};
+   const judge:Judge={async judge(_q,cs){return {model:'j',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,relevance:6,reason:'r',momentKeys:[]}]))};}};
+   const decision=(url:string,promising:number)=>({url,model:'jev',choice:'uncertain' as const,confidence:0.5,promoted:false,
+     probabilities:{promising,uncertain:0.2,mismatch:0.8-promising}});
+   const screener:Screener={async screen(_q,cs){return {screened:cs.length,promising:new Set(),decisions:[decision(items[0].url,0.6),decision(items[1].url,0.1)]};}};
+   const out=await runDiscovery(db,baseConfig,searchInput.parse({q:'giveaway video'}),[provider],{judge,screener},async()=>{});
+   const link=(url:string)=>out.trace.pool.find((p:any)=>p.url===url)?.link;
+   assert.equal(link(items[0].url)?.base,0.7);
+   assert.equal(link(items[1].url)?.base,0.2);
+ }finally{await db.close();}
+});

@@ -24,6 +24,8 @@ export interface TraceEntry {
  round: number;
  relevance: number|null; reason: string|null; basis: 'metadata'|'viewer_claims'|'direct_evidence'|null;
  shown: boolean; rank: number|null; badges: string[];
+ // Link potential when it was computed (src/link-potential.ts).
+ link?: {value: number; base: number; creator: boolean; comment: boolean; capped: boolean};
  // With a requirements contract: the decision behind the outcome, the evidence findings, and Jev's pre-judgement.
  decision?: {status: 'verified'|'uncertain'|'excluded'; contradicted: string[]; unconfirmed: string[]};
  findings?: {requirement_id: string; status: string; method: string; access: string; provisional: boolean; excerpt: string|null; key?: string}[];
