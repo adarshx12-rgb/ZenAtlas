@@ -59,6 +59,10 @@ export function completeContract(contract: RequirementsContract, modality?: Sear
  return {...contract, requirements: ordered.map((r, i) => ({...r, id: `R${i + 1}`}))};
 }
 
+// Preferred per-result properties, which the judge ranks by but never requires.
+export const preferencesOf = (contract: RequirementsContract) =>
+ contract.requirements.filter(r => r.hardness === 'preferred' && r.scope === 'each' && r.kind !== 'date').map(r => r.text);
+
 export const judgeRequirements = (contract: RequirementsContract) => hardEach(contract).map(r =>
  ({id: r.id, text: r.text, evidence: r.evidence, kind: r.kind, evidence_kind: r.evidence_kind, source_quote: r.source_quote, polarity: r.polarity}));
 

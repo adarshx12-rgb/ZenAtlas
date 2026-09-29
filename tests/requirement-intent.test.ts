@@ -42,3 +42,22 @@ test('a scene re-check that disputes only the format keeps the video as a closes
  assert.equal(applySceneVerdict(result,candidate,verdict('subject'),'m',plan,[],[]).excluded,true);
  assert.equal(applySceneVerdict(result,candidate,verdict('format',1),'m',plan,[],[]).excluded,true,'a near-zero score still goes');
 });
+
+test('the judge is told which properties are only preferences, so their absence never makes intent unknown',async()=>{
+ const {ModelJudge}=await import('../src/judge.js');
+ const {testConfig}=await import('./helpers.js');
+ let system='',text='';
+ const client:any={models:['m'],async json(_b:string,s:string,t:string){system=s;text=t;return {model:'m',value:{verdicts:[]}};}};
+ const ctx={kind:'videos' as const,criteria:[],preferences:['in slow motion']};
+ await new ModelJudge(client,testConfig).judge('video of a cat knocking a glass off a table in slow motion',[candidate],ctx).catch(()=>{});
+ assert.match(text,/Preferences: \["in slow motion"\]/);
+ assert.match(system,/preferences/i);
+ await new ModelJudge(client,testConfig).judge('q',[candidate],{kind:'videos',criteria:[]}).catch(()=>{});
+ assert.doesNotMatch(text,/Preferences:/,'no preferences, no line');
+});
+
+test('preferred requirements reach the judge context as preferences',async()=>{
+ const {preferencesOf}=await import('../src/search-contract.js');
+ const c=completeContract(rulesContract('video of a cat knocking a glass off a table in slow motion',DAY,{requirements:[req('cat knocks a glass off a table','subject'),req('in slow motion','property')]}),'videos');
+ assert.deepEqual(preferencesOf(c),['in slow motion']);
+});

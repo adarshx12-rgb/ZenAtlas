@@ -22,7 +22,7 @@ export { judgeBatches };
 import { creatorNames, linkPotential, requirementTerms, type LinkScore, type ScreenSignal } from './link-potential.js';
 import {queueCaptions} from './captions.js';
 import { decide, detectFormat, inspect, factsFromFindings, type Decision, type Finding } from './evidence.js';
-import { judgeRequirements } from './search-contract.js';
+import { judgeRequirements, preferencesOf } from './search-contract.js';
 import { hardEach, type RequirementsContract } from './requirements.js';
 import { accessKind, accessLabel, fullCopyAccess } from './access.js';
 
@@ -347,7 +347,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
    const wanted = context?.kind === 'websites' ? 'mixed' as const : context?.kind ?? 'videos';
    const screenshots = new Map([...previews].flatMap(([id, image]) => keys.has(id) ? [[keys.get(id)!, image] as const] : []));
    // Smaller batches in parallel answer faster, and a failed batch only leaves its own results unjudged.
-   const judgeContext = context ? {kind: wanted, criteria: context.criteria, anime: context.anime, ...(contract ? {search_date: contract.search_date} : {}), ...(requirements ? {requirements} : {})} : undefined;
+   const judgeContext = context ? {kind: wanted, criteria: context.criteria, anime: context.anime, ...(contract ? {search_date: contract.search_date} : {}), ...(requirements ? {requirements} : {}), ...(contract && preferencesOf(contract).length ? {preferences: preferencesOf(contract)} : {})} : undefined;
    const judgeAll = (list: JudgeCandidate[], size: number) => Promise.allSettled(
      judgeBatches(list, size, config.LINK_BATCH_CHARS).map(batch =>
        judge.judge(query, batch, judgeContext, screenshots).then(out => ({batch, out}))));

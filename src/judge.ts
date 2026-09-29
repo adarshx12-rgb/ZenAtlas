@@ -34,7 +34,8 @@ export interface JudgeCandidate {
 }
 // anime: a confidently matched anime from AniList, for recognising fan-subbed, dubbed or renamed uploads of it.
 // requirements: the shared contract's hard per-result requirements, checked one by one.
-export interface JudgeContext { kind: 'videos'|'websites'|'mixed'; criteria: string[]; anime?: AnimeMatch|null; search_date?: string;
+// preferences: properties the request would like but does not insist on (preferred requirements), which rank but never gate.
+export interface JudgeContext { kind: 'videos'|'websites'|'mixed'; criteria: string[]; anime?: AnimeMatch|null; search_date?: string; preferences?: string[];
  requirements?: {id: string; text: string; evidence: string; kind?: string; evidence_kind?: 'content'|'visual'|'provenance'; source_quote?: string;
    polarity?: 'exclude'}[] }
 export interface RequirementVerdict { id: string; status: 'supported'|'unknown'|'mismatch'; field: string; quote: string; evidence_id?: string;
@@ -195,6 +196,9 @@ const verdicts = z.object({verdicts: z.array(z.object({
  intent_checks:z.array(intentCheck).max(4).optional(),
  requirement_checks:z.array(z.object({id:z.string(),status:z.enum(['supported','unknown','mismatch']),field:z.string(),quote:z.string().max(500),evidence_id:z.string().max(100).optional(),next_action:z.enum(['none','inspect','reason']).optional()})).max(12).optional(),
 }))});
+// Watch-only wishes such as "in slow motion" are rarely stated anywhere a judge can read, so treated as essential they
+// held every matching video at 5 (requirement intent, 2026-09-29).
+const PREFERENCE_NOTE = `The request's listed preferences are wishes, not essentials: judge the intent and relationship dimensions on the rest of the request. A candidate that lacks evidence for a preference is not unknown or a mismatch for that reason alone; evidence that it meets a preference may raise its score within the level the essentials allow.`;
 const REQUIREMENT_NOTE = `The request has also been broken into numbered requirements, listed after the request. For each candidate also return requirement_checks: exactly one entry per listed requirement id, with status supported, unknown or mismatch, the candidate field and a short exact verbatim quote from that field, under the same quoting rules as intent_checks. The inspected facts on a candidate (format, published date, publisher, access) were read from the page itself: rely on them over titles and snippets. A summary, review or excerpt of a work is a mismatch for a requirement that asks for the complete work.`;
 const requirementSchema = (ids: string[]) => ({...RESPONSE_SCHEMA, properties: {verdicts: {...RESPONSE_SCHEMA.properties.verdicts, items: {
  ...RESPONSE_SCHEMA.properties.verdicts.items, properties: {...RESPONSE_SCHEMA.properties.verdicts.items.properties,
@@ -216,11 +220,13 @@ export class ModelJudge implements Judge {
    const text = [`Request: ${JSON.stringify(query)}`,
      ...(context ? [`Wanted: ${context.kind}`, `Criteria: ${JSON.stringify(context.criteria)}`] : []),
      ...(required ? [`Requirements: ${JSON.stringify(required)}`] : []),
+     ...(context?.preferences?.length ? [`Preferences: ${JSON.stringify(context.preferences)}`] : []),
      ...(context?.search_date ? [`Search date: ${context.search_date}`] : []),
      ...(context?.anime ? [`Known anime match: ${JSON.stringify(animeSummary(context.anime, query))}`] : []),
      'Candidates follow, one JSON object per line.', '<candidates>', ...listed.map(c => JSON.stringify(c)), '</candidates>'].join('\n');
    const evidenceNote = 'For visual evidence use field visual, evidence_id equal to the supplied candidate.visual.id, and quote a concise observation of the actual pixels. Never fabricate a text quote from an image. Other fields use an empty evidence_id. A visual observation cannot establish licence, authorship, non-AI provenance, freshness, or an unseen video event. Both support and mismatch require evidence. Missing evidence is unknown. For each requirement return next_action: none for a resolved check, inspect when evidence is absent or insufficient, reason only when the supplied evidence may suffice but interpreting it is difficult. A reason request must cite that supplied evidence. Deterministic facts override model guesses. review_focus names requirements needing independent resolution.';
-   const reply = await this.client.json(this.bucket, `${SYSTEM_INSTRUCTION}\n${evidenceNote}${required ? `\n${REQUIREMENT_NOTE}` : ''}`, text,
+   const preferred = context?.preferences?.length ? `\n${PREFERENCE_NOTE}` : '';
+   const reply = await this.client.json(this.bucket, `${SYSTEM_INSTRUCTION}\n${evidenceNote}${required ? `\n${REQUIREMENT_NOTE}` : ''}${preferred}`, text,
      required ? requirementSchema(required.map(r => r.id)) : RESPONSE_SCHEMA, images);
    const parsed = verdicts.safeParse(reply.value);
    if (!parsed.success) throw new UpstreamError('malformed_response');
