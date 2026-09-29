@@ -505,3 +505,29 @@ test('the screener decisions become each candidate\'s link potential, recorded i
    assert.equal(link(items[1].url)?.base,0.2);
  }finally{await db.close();}
 });
+
+test('too few strong candidates after screening trigger one rewritten search round before judging',async()=>{
+ const db=await database();
+ try{
+   const weak=[0,1].map(i=>contentInput.parse({url:`https://www.youtube.com/watch?v=weak0000${i}xx`,title:`MrBeast reaction ${i}`}));
+   const strong=contentInput.parse({url:'https://www.youtube.com/watch?v=strong0000x',title:'Surprising a fan with a PS5'});
+   const asked:string[]=[];
+   const provider:SourceAdapter={name:'expand-fixture',capabilities:{transcripts:false,comments:false,embeds:false,accessible_media:false},
+     async search(q){asked.push(q);return {results:q==='giveaway ps5 to a fan'?[strong]:weak,next_cursor:null,status:{provider:'expand-fixture',status:'ok',message:'TEST'}};}};
+   const judge:Judge={async judge(_q,cs){return {model:'j',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,relevance:6,reason:'r',momentKeys:[]}]))};}};
+   const screener:Screener={async screen(_q,cs){return {screened:cs.length,promising:new Set(),decisions:cs.map(c=>({url:c.item.url,model:'jev',promoted:false,
+     choice:'uncertain' as const,confidence:0.5,probabilities:c.item.url===strong.url?{promising:0.9,uncertain:0.1,mismatch:0}:{promising:0.1,uncertain:0.2,mismatch:0.7}}))};}};
+   const rewrites:string[][]=[];
+   const linkRewriter=async(_q:string,_r:any,ran:string[])=>{rewrites.push(ran);return ['giveaway ps5 to a fan'];};
+   const config={...baseConfig,REQUIREMENTS_ENABLED:true};
+   const input=searchInput.parse({q:'mr beast buys ps5 to a subscriber'});
+   const out=await runDiscovery(db,config,input,[provider],{judge,screener,linkRewriter},async()=>{});
+   assert.ok(asked.includes('giveaway ps5 to a fan'),'the rewritten search ran');
+   assert.equal(rewrites.length,1,'expansion runs once');
+   assert.equal(out.ingested[0].canonical_url,strong.url,'the strong new candidate is checked first');
+   assert.ok(out.providers.some(p=>p.provider==='link_expansion'&&p.status==='ok'));
+   asked.length=0;
+   const off=await runDiscovery(db,{...config,LINK_STRONG_MIN:0},input,[provider],{judge,screener,linkRewriter},async()=>{});
+   assert.ok(!asked.includes('giveaway ps5 to a fan'));assert.ok(!off.providers.some(p=>p.provider==='link_expansion'));
+ }finally{await db.close();}
+});

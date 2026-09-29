@@ -19,7 +19,10 @@ export interface ViewerComment { id: string; text: string; likes: number; sample
 export interface YouTubeClient {
  videos(ids: string[]): Promise<Map<string,VideoDetails>>;
  comments(videoId: string, max: number): Promise<ViewerComment[]>;
+ // A creator's uploads by handle, newest first, up to max (src/link-expansion.ts); null when the handle has no channel.
+ uploads?(handle: string, max: number): Promise<Uploads|null>;
 }
+export interface Uploads { channel: string; items: {id: string; title: string; description: string}[] }
 
 export function youtubeId(url: string): string|null {
  const u = new URL(url);
@@ -56,6 +59,11 @@ const commentList = z.object({nextPageToken:z.string().optional(), items: z.arra
    textOriginal: z.string().optional(), textDisplay: z.string().optional(), likeCount: z.number().int().nonnegative().default(0)})})}),
 })).max(100).default([])});
 
+const channelList = z.object({items: z.array(z.object({id: z.string(), snippet: z.object({title: z.string()}),
+ contentDetails: z.object({relatedPlaylists: z.object({uploads: z.string().optional()})})})).max(5).default([])});
+const playlistPage = z.object({nextPageToken: z.string().optional(), items: z.array(z.object({snippet: z.object({title: z.string(),
+ description: z.string().default(''), resourceId: z.object({videoId: z.string().regex(/^[\w-]{11}$/)})})})).max(50).default([])});
+
 export class YouTubeData implements YouTubeClient {
  constructor(private db: DB, private config: Config, private transport = fetchJSON) {}
  private async get(path: string, params: Record<string,string>) {
@@ -81,6 +89,24 @@ export class YouTubeData implements YouTubeClient {
      }
    }
    return found;
+ }
+ // One unit for the channel and one per 50 uploads, so a 1,000-upload scan costs about 21 of the daily units.
+ async uploads(handle: string, max: number): Promise<Uploads|null> {
+   // Handles have no spaces: "Mr Beast" is asked as @MrBeast.
+   const clean = handle.replace(/[^\p{L}\p{N}._-]+/gu, '');
+   if (clean.length < 3) return null;
+   const channel = channelList.parse(await this.get('channels', {part: 'snippet,contentDetails', forHandle: `@${clean}`})).items[0];
+   const playlist = channel?.contentDetails.relatedPlaylists.uploads;
+   if (!channel || !playlist) return null;
+   const items: Uploads['items'] = [];
+   let pageToken: string|undefined;
+   while (items.length < max) {
+     const page = playlistPage.parse(await this.get('playlistItems', {part: 'snippet', playlistId: playlist, maxResults: '50', ...(pageToken ? {pageToken} : {})}));
+     for (const it of page.items) if (items.length < max) items.push({id: it.snippet.resourceId.videoId, title: it.snippet.title, description: it.snippet.description.slice(0, 500)});
+     pageToken = page.nextPageToken;
+     if (!pageToken || !page.items.length) break;
+   }
+   return {channel: channel.snippet.title, items};
  }
  async comments(videoId: string, max: number) {
    const limit = Math.max(1, Math.min(300, max));

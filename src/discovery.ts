@@ -17,7 +17,8 @@ import { matchesFilters } from './catalogue.js';
 import { makeJudge } from './judge.js';
 import type { SearchTrace } from './learning.js';
 import { makeScreener, screeningOrder, type Screener } from './screener.js';
-import type { ScreenSignal } from './link-potential.js';
+import { creatorNames, linkPotential, requirementTerms, type ScreenSignal } from './link-potential.js';
+import { creatorSearch, makeLinkRewriter, needsExpansion, sameCreator, type LinkRewriter } from './link-expansion.js';
 import { exploreSources, makeExplorer, makeGapChooser, type Explorer, type ExplorationTrace } from './exploration.js';
 import { criteriaOf, explicitFormats, hardEach, normaliseContract, rulesContract, siteOnly, type RequirementsContract } from './requirements.js';
 import { coverage, decide, inspect, type Finding } from './evidence.js';
@@ -32,7 +33,9 @@ import { YouTubeData, youtubeId, type VideoDetails, type YouTubeClient } from '.
 
 // today: the search date contracts resolve relative dates against (tests pin it). gapChooser: Jev's gap decisions.
 export interface DiscoveryDeps extends SignalDeps { planner?: Planner; anilist?: AnimeClient; archives?: SourceAdapter[]; screener?: Screener; explorer?: Explorer;
- gapChooser?: GapChooser; today?: string }
+ gapChooser?: GapChooser; today?: string;
+ // linkRewriter: the expansion round's search writer (src/link-expansion.ts); null turns the rewrite off.
+ linkRewriter?: LinkRewriter|null }
 export interface DiscoveryProgress { results: Result[]; providers: ProviderStatus[]; stage: 'searching'|'following'|'checking' }
 // code: why it failed, such as an engine's "blocked by a CAPTCHA".
 type Health = (provider: string, ok: boolean, code?: string) => Promise<void>;
@@ -434,11 +437,12 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
  const screener = deps.screener ?? makeScreener(db, config);
  // The screener's decisions start each candidate's link potential (src/link-potential.ts).
  const screens = new Map<string, ScreenSignal>();
+ const screenContract = contract ? {requirements: hardEach(contract).map(r => ({id: r.id, text: r.text})),
+   formats: contract.deliverable.formats, search_date: contract.search_date} : undefined;
  stage = 'checking'; await report();
  if (screener && picks.length) {
    try {
-     const screened = await screener.screen(input.q, picks, contract ? {requirements: hardEach(contract).map(r => ({id: r.id, text: r.text})),
-       formats: contract.deliverable.formats, search_date: contract.search_date} : undefined);
+     const screened = await screener.screen(input.q, picks, screenContract);
      await health('jev_screener', true);
      picks = screeningOrder(picks, screened.promising);
      for (const d of screened.decisions ?? []) screens.set(d.url, {choice: d.choice, confidence: d.confidence, probabilities: d.probabilities});
@@ -450,6 +454,60 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
        message: 'Candidate screening was unavailable; the original candidate order was used.'});
      await health('jev_screener', false, code);
    }
+ }
+ // Link expansion (spec 2026-09-29-link-building): too few candidates look strong after screening, so look again before
+ // judging, in the words videos use and on the named creator's channel. It needs the screener's verdicts to go on.
+ const basePotential = (url: string) => linkPotential({screen: screens.get(url), creators: [], comments: [], terms: []}).base;
+ if (contract && screener && screens.size && plan.kind !== 'websites' && needsExpansion(picks.map(l => basePotential(l.item.url)), config.LINK_STRONG_MIN)
+   && deadline - Date.now() > FOLLOW_UP_MIN_MS) {
+   stage = 'following'; await report();
+   const rewriter = 'linkRewriter' in deps ? deps.linkRewriter : makeLinkRewriter(db, config);
+   const creators = creatorNames(contract), terms = requirementTerms(contract, input.q);
+   const rewritten = rewriter ? await rewriter(input.q, hardEach(contract).map(r => ({id: r.id, text: r.text})), ran.map(s => s.query)).catch(() => [] as string[]) : [];
+   const wanted = [...rewritten, ...creators.slice(0, 1).map(name => creatorSearch(name, terms))];
+   const searches = uniqueSearches(wanted.map(query => ({query, target: 'videos' as const})), wanted.length, ran.map(s => s.query));
+   const before = leads.length, expansionRound = rounds + 1;
+   if (searches.length) {
+     round = expansionRound;
+     for (const s of searches) roundOf.set(`${s.target}:${s.query.toLowerCase()}`, round);
+     await run(searches.map(s => ({...s, page: 1, engines: 'standard' as const})));
+     await arrivals;
+     if (failure) throw failure;
+     ran.push(...searches);
+   }
+   const known = new Set(picks.map(l => l.item.url));
+   const fresh: Lead[] = [];
+   for (const l of leads.slice(before)) if (!known.has(l.item.url) && !unauthorized(l.item.url)) { known.add(l.item.url); fresh.push(l); }
+   const screenFresh = async (list: Lead[]) => {
+     if (!list.length) return;
+     const out = await screener.screen(input.q, list, screenContract).catch(() => null);
+     for (const d of out?.decisions ?? []) screens.set(d.url, {choice: d.choice, confidence: d.confidence, probabilities: d.probabilities});
+   };
+   await screenFresh(fresh);
+   // Only when the request names a creator and the first two routes still found too little: that creator's own uploads.
+   let scanned: {channel: string; items: number}|null = null;
+   if (creators.length && youtube?.uploads && config.LINK_UPLOAD_SCAN
+     && needsExpansion([...picks, ...fresh].map(l => basePotential(l.item.url)), config.LINK_STRONG_MIN)) {
+     const up = await youtube.uploads(creators[0], config.LINK_UPLOAD_SCAN).catch(() => null);
+     if (up && sameCreator(up.channel, creators[0])) {
+       scanned = {channel: up.channel, items: up.items.length};
+       const uploads: Lead[] = [];
+       for (const [position, v] of up.items.entries()) {
+         const item = contentInput.safeParse({url: `https://www.youtube.com/watch?v=${v.id}`, title: v.title, description: v.description || undefined, creator: up.channel});
+         if (item.success && !known.has(item.data.url)) { known.add(item.data.url); uploads.push({item: item.data, provider: 'creator_uploads', position, query: input.q, target: 'videos', round: expansionRound}); }
+       }
+       await screenFresh(uploads);
+       // A channel's whole catalogue is not a lead list: only the uploads the screener finds strong join.
+       fresh.push(...uploads.filter(l => basePotential(l.item.url) >= 0.5));
+     }
+   }
+   const strongFirst = [...fresh].sort((a, b) => basePotential(b.item.url) - basePotential(a.item.url));
+   picks = [...strongFirst.filter(l => basePotential(l.item.url) >= 0.5), ...picks, ...strongFirst.filter(l => basePotential(l.item.url) < 0.5)];
+   notes.push({provider: 'link_expansion', status: 'ok', message: `Looked again for matching videos: ${searches.length} new search${searches.length === 1 ? '' : 'es'}`
+     + `${scanned ? ` and ${scanned.items} uploads from ${scanned.channel}` : ''}, ${fresh.length} new candidate${fresh.length === 1 ? '' : 's'}.`});
+   process.stdout.write(`${JSON.stringify({event: 'link_expansion', tier: config.TIER, searches: searches.map(s => s.query), fresh: fresh.length,
+     strong: fresh.filter(l => basePotential(l.item.url) >= 0.5).length, uploads: scanned})}
+`);
  }
  if (contract) {
    // Inspected evidence steers admission with the same rule as the final decision: a lead that decision would exclude
@@ -527,6 +585,7 @@ function memoYouTube(client: YouTubeClient|undefined): YouTubeClient|undefined {
      return out;
    },
    comments: (id, max) => client.comments(id, max),
+   ...(client.uploads ? {uploads: (handle: string, max: number) => client.uploads!(handle, max)} : {}),
  };
 }
 
