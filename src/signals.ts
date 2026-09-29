@@ -199,10 +199,15 @@ export async function applySignals(db: DB, config: Config, query: string, result
  // Details (one request per 50 videos) cover every permitted video; comments only the first SIGNAL_VIDEOS.
  const eligible = results.filter(r => youtubeId(r.canonical_url) && stored.get(r.id)?.viewer_signals);
  const commented = new Set([...eligible].sort((a, b) => link(b).value - link(a).value).slice(0, config.SIGNAL_VIDEOS).map(r => r.id));
+ // Captions start once channel names are known (the creator boost), without waiting for every video's comments.
+ let detailsReady!: () => void;
+ const detailed = new Promise<void>(resolve => { detailsReady = resolve; });
  const youtubeTask = async (): Promise<ProviderStatus|null> => {
    if (!youtube || !eligible.length) return null;
    try {
      const details = await youtube.videos(eligible.map(r => youtubeId(r.canonical_url)!));
+     for (const r of eligible) { const d = details.get(youtubeId(r.canonical_url)!); if (d) info(r.id).details = d; }
+     detailsReady();
      let failed = 0;
      await mapLimit(eligible, 5, async r => {
        const d = details.get(youtubeId(r.canonical_url)!);
@@ -266,14 +271,14 @@ export async function applySignals(db: DB, config: Config, query: string, result
      }
    });
  };
- // Every video search fetches captions for its most promising videos now, after comments have added to their link
- // potential, so the judge can read and quote them (spec 2026-09-29-link-building). The rest are queued for later searches.
+ // Every video search fetches captions for its most promising videos now, so the judge can read and quote them
+ // (spec 2026-09-29-link-building). The rest are queued for later searches.
  const youtubeRun = youtubeTask();
  const linkCaptionsTask = async (): Promise<ProviderStatus|null> => {
    const fetcher = 'captions' in deps ? deps.captions : config.YOUTUBE_CAPTIONS && captionCommand(config)
      ? pythonCaptions(captionCommand(config), {proxy: config.YOUTUBE_CAPTIONS_PROXY, supadataKey: config.SUPADATA_API_KEY}) : null;
    if (!fetcher || context?.kind === 'websites' || !config.LINK_CAPTIONS) return null;
-   await youtubeRun;
+   await Promise.race([detailed, youtubeRun]);
    const ordered = results.filter(r => youtubeId(r.canonical_url)).map(r => ({r, v: link(r).value}))
      .filter(x => x.v >= config.LINK_MIN_POTENTIAL).sort((a, b) => b.v - a.v).map(x => x.r);
    if (!ordered.length) return null;
