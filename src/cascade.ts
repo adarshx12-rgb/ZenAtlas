@@ -7,6 +7,7 @@ import { snippetsOf, type JevRecord } from './jev-judge.js';
 import { OpenAICompatibleClient } from './openai-compatible.js';
 import { traceFields } from './search-trace.js';
 import { requirementNeeds } from './search-contract.js';
+import { judgeBatches } from './transcript-passages.js';
 
 // The judge cascade (docs/superpowers/specs/2026-09-27-judge-cascade-design.md), in place of the council. Jev decides only
 // on snippets cut verbatim from inspected content; the Scorer (the ordinary judge) scores the rest; each verdict is then
@@ -19,13 +20,15 @@ export interface CascadeRecord { scorer: number; strong?: number; flags: Flag[];
 // verdicts still re-checked, to keep measuring settle precision. confidence: Jev's JEV_JUDGE_CONFIDENCE.
 export interface CascadeOptions { border: [number, number]; auditRate: number; confidence: number; tier?: string; random?: () => number; log?: (line: Record<string, unknown>) => void;
  traceId?: string; requirements?: JudgeContext['requirements']; inspectionLimit?: number; inspectionMs?: number;
+ // batchChars: transcript characters per Strong judge call; whole transcripts made batches of five too slow (spec 2026-09-29-link-building).
+ batchChars?: number;
  inspection?: {judge: Judge; inspect: (candidate: JudgeCandidate, missing: string[], signal: AbortSignal) => Promise<JudgeCandidate|null>} }
 
 // Retain the prior benchmark's 4-7 band: a 4-6 band missed a confident 7 that was the wrong kind of video.
 // Those historical measurements predate evidence-v2; the new routing needs its own live quality/cost evaluation.
 export const cascadeOptions = (config: Config): CascadeOptions =>
  ({border: [config.CASCADE_BORDER_LOW, config.CASCADE_BORDER_HIGH], auditRate: config.JEV_SETTLED_AUDIT_RATE, confidence: config.JEV_JUDGE_CONFIDENCE, tier: config.TIER,
-   inspectionLimit: config.CASCADE_INSPECTION_LIMIT, inspectionMs: config.CASCADE_INSPECTION_MS});
+   inspectionLimit: config.CASCADE_INSPECTION_LIMIT, inspectionMs: config.CASCADE_INSPECTION_MS, batchChars: Math.floor(config.LINK_BATCH_CHARS / 2)});
 
 const list = (value: string) => [...new Set(value.split(',').map(m => m.trim()).filter(Boolean))];
 
@@ -138,7 +141,7 @@ export async function cascadeReview(query: string, candidates: JudgeCandidate[],
  const started = Date.now();
  if (flagged.length && strong) {
    const strongContext: JudgeContext = {kind: context?.kind ?? 'mixed', ...context, criteria: [...(context?.criteria ?? []), STRONG_NOTE]};
-   const done = await Promise.allSettled(Array.from({length: Math.ceil(flagged.length / STRONG_BATCH)}, (_, i) => flagged.slice(i * STRONG_BATCH, (i + 1) * STRONG_BATCH))
+   const done = await Promise.allSettled(judgeBatches(flagged, STRONG_BATCH, options.batchChars ?? Infinity)
      .map(batch => strong.judge(query, batch, strongContext, screenshots)));
    for (const d of done) if (d.status === 'fulfilled') {
      model = d.value.model;

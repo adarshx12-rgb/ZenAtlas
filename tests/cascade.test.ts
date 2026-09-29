@@ -83,3 +83,15 @@ test('an unchecked content exclusion is not missing evidence, so it neither caps
  assert.ok(flagsFor(cand('a'),v('a',9,{requirementChecks:checks}),undefined,2,{...opts,requirements:[reqs[0],{...reqs[1],polarity:undefined}]})
   .includes('needs_evidence'),'an unknown positive requirement still needs evidence');
 });
+
+test('the Strong judge gets transcript-heavy candidates in smaller calls within its character budget',async()=>{
+ const long=(key:string)=>({...cand(key),transcripts:[{start:0,end:60,text:'t'.repeat(20000)}]});
+ const candidates=['a','b','c','d'].map(long);
+ const scored=new Map(candidates.map(c=>[c.key,v(c.key,5)]));
+ const seen:JudgeCandidate[][]=[];
+ await cascadeReview('q',candidates,scored,undefined,undefined,undefined,strongSeat({a:6,b:6,c:6,d:6},seen),{...opts,batchChars:30000});
+ assert.deepEqual(seen.map(b=>b.map(c=>c.key)),[['a'],['b'],['c'],['d']],'20k characters each fit one per 30k call');
+ seen.length=0;
+ await cascadeReview('q',candidates,scored,undefined,undefined,undefined,strongSeat({a:6,b:6,c:6,d:6},seen),opts);
+ assert.deepEqual(seen.map(b=>b.length),[4],'without a budget the old batches of five stand');
+});

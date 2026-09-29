@@ -17,6 +17,8 @@ import {importTranscript} from './moments.js';
 import {retainedEvidence,queueSceneShortlist,requestSceneAnalysis,quoteMoments,type SceneRequest} from './retained-evidence.js';
 import type {SceneReviewPlan} from './scene-verification.js';
 import { captionCommand, fetchCaptionsNow, pythonCaptions, type CaptionFetcher } from './captions.js';
+import { judgeBatches } from './transcript-passages.js';
+export { judgeBatches };
 import { creatorNames, linkPotential, requirementTerms, type LinkScore, type ScreenSignal } from './link-potential.js';
 import {queueCaptions} from './captions.js';
 import { decide, detectFormat, inspect, factsFromFindings, type Decision, type Finding } from './evidence.js';
@@ -47,19 +49,6 @@ export const UNDERRATED_BADGE = 'Underrated find';
 const UNVERIFIED_SCORE = 5;
 const RETRY_BATCH = 10;
 
-// Judge batches of at most size candidates and maxChars of transcript text, in order. Whole transcripts
-// (spec 2026-09-29-link-building) would otherwise make one call too long for the judge's time limit.
-export function judgeBatches<T extends {transcripts?: {text: string}[]}>(list: T[], size: number, maxChars: number): T[][] {
- const out: T[][] = [];
- let batch: T[] = [], chars = 0;
- for (const item of list) {
-   const own = (item.transcripts ?? []).reduce((n, t) => n + t.text.length, 0);
-   if (batch.length && (batch.length >= size || chars + own > maxChars)) { out.push(batch); batch = []; chars = 0; }
-   batch.push(item); chars += own;
- }
- if (batch.length) out.push(batch);
- return out;
-}
 
 // h:mm:ss or m:ss, not part of a longer number, ratio or clock time such as "10:30 pm".
 const STAMP = /(?<![\w:.])(?:(\d{1,2}):)?(\d{1,3}):([0-5]\d)(?![\w:])(?!\s*[ap]\.?m\b)/gi;

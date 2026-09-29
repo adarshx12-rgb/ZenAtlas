@@ -23,3 +23,18 @@ export function transcriptPassages(segments: Passage[], terms: string[], maxChar
  for (const r of ranked) if (used + r.p.text.length <= maxChars) { kept.push(r); used += r.p.text.length; }
  return kept.sort((a, b) => a.i - b.i).map(r => r.p);
 }
+
+// Judge batches of at most size candidates and maxChars of transcript text, in order. Whole transcripts
+// (spec 2026-09-29-link-building) would otherwise make one call too long for the judge's time limit.
+// Used by the first judge (src/signals.ts) and the cascade's Strong judge (src/cascade.ts).
+export function judgeBatches<T extends {transcripts?: {text: string}[]}>(list: T[], size: number, maxChars: number): T[][] {
+ const out: T[][] = [];
+ let batch: T[] = [], chars = 0;
+ for (const item of list) {
+   const own = (item.transcripts ?? []).reduce((n, t) => n + t.text.length, 0);
+   if (batch.length && (batch.length >= size || chars + own > maxChars)) { out.push(batch); batch = []; chars = 0; }
+   batch.push(item); chars += own;
+ }
+ if (batch.length) out.push(batch);
+ return out;
+}
