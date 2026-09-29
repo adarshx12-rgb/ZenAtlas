@@ -6,6 +6,10 @@ import { contractDraft, DRAFT_INSTRUCTION, DRAFT_REQUIRED, DRAFT_SCHEMA, hardEac
 export type SearchModality = 'videos'|'web'|'docs'|'images';
 const BARE_YEAR = /^\s*(?:in\s+)?((?:19|20)\d{2})\s*$/i;
 const NEGATED = /^\s*(?:not|no|non|never|without|excluding|except|avoid)\b/i;
+// Properties only watching can confirm (requirement intent, 2026-09-29): metadata and transcripts almost never state them,
+// so as hard requirements they hid correct videos ("in slow motion", "exclude background music").
+const WATCH_ONLY = /\b(?:slow[- ]?motion|slo-?mo|time[- ]?lapse|camera angles?|close[- ]?ups?|drone shots?|aerial|first[- ]person|pov|background music|music|in (?:4k|hd|1080p|60 ?fps)|black and white|vertical video)\b/i;
+const INSISTS = /\b(?:must|only|exactly|strictly|has to|have to|needs? to)\b/i;
 export const provenanceRequest =(s: string) => /\b(?:licen[cs]e|attribution|copyright|creative commons|free to use|not AI|no AI|non-AI|not generated|not AI-generated)\b/i.test(s);
 
 // Complete a planner's contract from the actual request. Fallback clauses preserve all words, including constraints
@@ -22,6 +26,7 @@ export function completeContract(contract: RequirementsContract, modality?: Sear
    : host ? events.map(r => r === host && missing.length ? {...r, text: `${r.text} (${missing.join(', ')})`} : r)
    : contract.requirements.map(r => BARE_YEAR.test(r.text) ? {...r, hardness: 'preferred' as const} : r);
  const requirements = folded.map(r => ({...r, hardness: r.kind === 'subject' && r.scope === 'each' && !BARE_YEAR.test(r.text) ? 'hard' as const : r.hardness}));
+ const watchOnly = (text: string) => WATCH_ONLY.test(text) && !INSISTS.test(query);
  const setItems = requirements.filter(r => r.scope === 'set').flatMap(r => r.set_items ?? []);
  // A set-level publisher list must not become a demand that every result comes from every publisher.
  const names = setItems.map(item => item.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
@@ -34,7 +39,7 @@ export function completeContract(contract: RequirementsContract, modality?: Sear
    // "where the two side boosters touch down together" restates "two side boosters touch down together".
    if (requirements.some(r => r.text.length >= 12 && text.toLowerCase().includes(r.text.toLowerCase()))) continue;
    if (/^(?:under|less than)\b/i.test(text) && requirements.some(r => r.kind === 'duration')) continue;
-   requirements.push({id: '', text, source_quote: text, kind: i === 0 ? 'subject' : 'property', hardness: 'hard', scope: 'each',
+   requirements.push({id: '', text, source_quote: text, kind: i === 0 ? 'subject' : 'property', hardness: i > 0 && watchOnly(text) ? 'preferred' : 'hard', scope: 'each',
      evidence: provenanceRequest(text) ? 'Explicit source provenance or licence and attribution; appearance and missing labels prove nothing.'
        : /\b(?:current|latest|today)\b/i.test(text) ? `Dated primary-source evidence establishing the claim as of ${contract.search_date}; a page title saying current is insufficient.`
        : 'Inspected content establishing this exact property and event, not merely the same topic.'});
@@ -43,7 +48,7 @@ export function completeContract(contract: RequirementsContract, modality?: Sear
    if (!requirements.some(r => r.kind === 'property' && r.text === match[0])) requirements.push({id: '', text: match[0], source_quote: match[0], kind: 'property',
      hardness: 'hard', scope: 'each', evidence: 'Explicit source provenance, licence terms or creator attribution. Absence of an AI label is unknown.'});
  }
- const tagged = requirements.map(r => ({...r,
+ const tagged = requirements.map(r => r.kind === 'property' && r.hardness === 'hard' && watchOnly(r.text) ? {...r, hardness: 'preferred' as const} : r).map(r => ({...r,
    text: modality === 'images' && r.kind === 'subject' ? r.text.replace(/\bfree to use\s+|\bnon-AI\s+/gi, '').trim() : r.text,
    evidence_kind: modality === 'images' && r.kind === 'subject' ? 'visual' as const : provenanceRequest(r.source_quote ?? r.text) ? 'provenance' as const
    : modality === 'images' && r.kind === 'property' ? 'visual' as const : r.evidence_kind ?? 'content' as const}))

@@ -22,6 +22,10 @@ export function applySceneVerdict(result:Result,c:JudgeCandidate,v:Verdict,model
  const verdict=enforceRequirements(c,v,plan.context.requirements);
  const decision=plan.contract?decide(plan.contract,findings,verdict.requirementChecks):undefined;
  const contradicted=decision?.status==='excluded'||verdict.intentChecks?.some(ch=>ch.status==='mismatch');
+ // Only a wrong subject, or a near-zero score, removes a video; anything else leaves it among the closest matches with its
+ // reason (the Free Solo trailer, "not the documentary itself", vanished on 2026-09-29).
+ const subjects=new Set((plan.contract?.requirements??[]).filter(r=>r.kind==='subject').map(r=>r.id));
+ const wrongSubject=!!verdict.intentChecks?.some(ch=>ch.status==='mismatch'&&ch.dimension==='subject')||!!decision?.contradicted.some(id=>subjects.has(id));
  const verified=!contradicted&&verdict.relevance>5&&(!decision||decision.status==='verified')&&
    (!verdict.intentChecks||verdict.intentChecks.every(ch=>ch.status==='supported'));
  const used=scenes.filter(s=>verdict.requirementChecks?.some(ch=>ch.status==='supported'&&ch.field==='scenes'&&s.summary.includes(ch.quote)));
@@ -32,7 +36,7 @@ export function applySceneVerdict(result:Result,c:JudgeCandidate,v:Verdict,model
    evidence_coverage:{comments:result.evidence_coverage?.comments??'unavailable',captions:result.evidence_coverage?.captions??'unavailable',
      transcript_passages:c.transcripts?.length??0,analysed_scenes:scenes.length,basis:'direct_evidence'},
    ...(decision?{requirements:decision.requirements,uncertainties:[...decision.notes,...decision.requirements.filter(r=>r.status==='unknown').map(r=>`Not confirmed: ${r.text}`)]}:{})};
- return {result:updated,verified,excluded:!!contradicted||verdict.relevance<3};
+ return {result:updated,verified,excluded:wrongSubject||verdict.relevance<2};
 }
 
 // Independent lane: a scene model's slow response cannot occupy the discovery worker. Durable one-second checks are
