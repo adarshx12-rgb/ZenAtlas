@@ -30,15 +30,13 @@ import type {SceneReviewPlan} from './scene-verification.js';
 import { unauthorized } from './access.js';
 import { contentInput } from './types.js';
 import { YouTubeData, youtubeId, type VideoDetails, type YouTubeClient } from './youtube.js';
-import { identify, knownItem, type Identification, type IdentifyMaterial } from './identify.js';
+import { grounded, nameLike } from './identify.js';
 
 // today: the search date contracts resolve relative dates against (tests pin it). gapChooser: Jev's gap decisions.
 export interface DiscoveryDeps extends SignalDeps { planner?: Planner; anilist?: AnimeClient; archives?: SourceAdapter[]; screener?: Screener; explorer?: Explorer;
  gapChooser?: GapChooser; today?: string;
  // linkRewriter: the expansion round's search writer (src/link-expansion.ts); null turns the rewrite off.
- linkRewriter?: LinkRewriter|null;
- // identify: names what the first results say the request is after (src/identify.ts).
- identify?: (query: string, material: IdentifyMaterial[]) => Promise<Identification|null> }
+ linkRewriter?: LinkRewriter|null }
 export interface DiscoveryProgress { results: Result[]; providers: ProviderStatus[]; stage: 'searching'|'following'|'checking' }
 // code: why it failed, such as an engine's "blocked by a CAPTCHA".
 type Health = (provider: string, ok: boolean, code?: string) => Promise<void>;
@@ -168,12 +166,10 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
  // Publish stages, not provisional rankings. Every source gets to finish before selection.
  const report = () => progress({results: [], providers: notes, stage});
 
- // Candidates checked: fewer for a confidently identified known item (effort by request type).
- let poolCap = config.DISCOVERY_CANDIDATES;
  const store = async (picks: Lead[]) => {
    let added = 0;
    for (const lead of picks) {
-     if (found.length >= poolCap) break;
+     if (found.length >= config.DISCOVERY_CANDIDATES) break;
      if (tried.has(lead.item.url)) continue;
      tried.add(lead.item.url);
      const result = await ingest(db, lead.item, {adapter: lead.provider, method: 'search', discovered_at: new Date().toISOString()});
@@ -309,31 +305,8 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
  await arrivals;
  if (failure) throw failure;
  mark('searched');
- // Name it first (src/identify.ts): what the first results say the request is after. A confident known item is searched
- // for by name, its name steers the later searches and the judge, and a deep dive follows fewer leads. Putting leads that
- // carry the name first was tried and let pages merely about the item (Wikipedia, reviews, streaming pages) crowd out
- // the videos the request wanted (probe 2026-10-01); a smaller pool (KNOWN_ITEM_CANDIDATES) is off by default for the same reason.
- let identity: Identification|null = null;
- if (!input.source && !/(?:^|\s)site:/i.test(input.q)) {
-   const top = rankDiscovery(input.q, leads, 15, 0, true).map(l => ({title: l.item.title, description: l.item.description ?? null, creator: l.item.creator ?? null}));
-   identity = await (deps.identify ?? ((q: string, m: IdentifyMaterial[]) => identify(db, config, q, m)))(input.q, top).catch(() => null);
- }
- const isKnown = knownItem(identity, config.IDENTIFY_MIN_CONFIDENCE);
- const names = isKnown ? identity!.names : [];
- if (isKnown) {
-   const target: SearchTarget = plan.kind === 'websites' ? 'web' : 'videos';
-   const byName = uniqueSearches(identity!.searches.map(query => ({query, target})), 2, ran.map(s => s.query));
-   if (byName.length) {
-     await run(byName.map(s => ({...s, page: 1, engines: deep ? 'all' as const : 'standard' as const})));
-     await arrivals;
-     if (failure) throw failure;
-     ran.push(...byName);
-   }
-   if (config.KNOWN_ITEM_CANDIDATES) poolCap = Math.min(config.KNOWN_ITEM_CANDIDATES, config.DISCOVERY_CANDIDATES);
-   notes.push({provider: 'identify', status: 'ok', message: `Recognised the request as ${names.map(n => `“${n}”`).join(' / ')}`
-     + `${byName.length ? ' and searched for it by name' : ''}.`});
- }
- mark('identified');
+ // A name the expansion round grounds in the titles found (src/link-expansion.ts); a lead for the judge.
+ let names: string[] = [];
  // The contract: the planner's draft normalised against the search date, or the query's own words when planning failed.
  const contract: RequirementsContract|null = contracted
    ? completeContract(plan.draft !== undefined ? normaliseContract(input.q, today, plan.draft) : rulesContract(input.q, today), 'videos') : null;
@@ -382,7 +355,7 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
    }
  }
  let followed = 0, rounds = 0, leadError: unknown = null;
- while (deep && planner?.followUps && config.DEEP_FOLLOW_UPS && rounds < (isKnown ? 1 : config.DEEP_ROUNDS) && deadline - Date.now() > FOLLOW_UP_MIN_MS) {
+ while (deep && planner?.followUps && config.DEEP_FOLLOW_UPS && rounds < config.DEEP_ROUNDS && deadline - Date.now() > FOLLOW_UP_MIN_MS) {
    stage = 'following'; await report();
    const promising = rankDiscovery(input.q, leads, 40, CLEAR_MATCH);
    const material = leadsMaterial([...promising.map(l => l.item), ...earlier.results.map(r => ({...r, url: r.canonical_url}))], reddit?.threads ?? []);
@@ -416,7 +389,7 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
    const chooser = deps.gapChooser ?? makeGapChooser(db, config);
    const out = await exploreGaps({contract, deadline, chooser, ran: ran.map(s => s.query),
      initial: rankDiscovery(input.q, leads.filter(l => !unauthorized(l.item.url)), leads.length, 0, true).map(toCandidate),
-     initialInspect: GAP_INITIAL, rounds: deep && !isKnown ? config.GAP_ROUNDS : 1, name: names[0] ?? null,
+     initialInspect: GAP_INITIAL, rounds: deep ? config.GAP_ROUNDS : 1,
      visits: deep ? config.JEV_EXPLORATION_VISITS : Math.ceil(config.JEV_EXPLORATION_VISITS / 2),
      searches: deep ? config.GAP_SEARCHES : Math.ceil(config.GAP_SEARCHES / 2), target: config.GAP_TARGET_RESULTS,
      skip: url => unauthorized(url),
@@ -590,7 +563,7 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
  const byUrl = new Map(found.map(r => [r.canonical_url, r.id]));
  const traced = traceOf(input, plan, searches, rounds, [...statuses, ...signals.providers], leads, found, leadUrl, signals.judged, results, roundOf);
  // Each candidate's link potential, to tune the evidence order from real searches.
- const base = {...traced, ...(identity ? {identify: {...identity, known: isKnown}} : {}), pool: traced.pool.map(p => { const id = byUrl.get(p.url); return id && signals.links.has(id) ? {...p, link: signals.links.get(id)} : p; })};
+ const base = {...traced, ...(names[0] ? {named: names[0]} : {}), pool: traced.pool.map(p => { const id = byUrl.get(p.url); return id && signals.links.has(id) ? {...p, link: signals.links.get(id)} : p; })};
  return {results, closest:signals.closest.filter(r=>matchesFilters(r,input)), ingested: found, previews: signals.previews, searches,
    dropped: [...new Set([...found, ...earlier.results].filter(r => !kept.has(r.canonical_url)).map(r => r.canonical_url))], providers: [...statuses, ...signals.providers],
    contract, unmet,sceneReview:signals.sceneReview,

@@ -532,35 +532,6 @@ test('too few strong candidates after screening trigger one rewritten search rou
  }finally{await db.close();}
 });
 
-test('a confidently identified known item is searched by name, checked from a smaller pool, and named to the judge',async()=>{
- const db=await database();
- try{
-   const film=contentInput.parse({url:'https://www.natgeo.com/free-solo',title:'Free Solo | National Geographic',description:'The full documentary.'});
-   const others=Array.from({length:12},(_,i)=>contentInput.parse({url:`https://clips.example.com/v${i}`,title:`Climbed El Capitan without ropes clip ${i}`}));
-   const asked:string[]=[];
-   const provider:SourceAdapter={name:'known-fixture',capabilities:{transcripts:false,comments:false,embeds:false,accessible_media:false},
-     async search(q){asked.push(q);return {results:q==='Free Solo full documentary'?[film]:others,next_cursor:null,status:{provider:'known-fixture',status:'ok',message:'TEST'}};}};
-   const planner:Planner={async plan(q){return {kind:'videos',searches:[{query:q,target:'videos'}],criteria:[],model:'test'};}};
-   let seen:any;
-   const judge:Judge={async judge(_q,cs,context){seen=context;return {model:'j',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,relevance:7,reason:'r',momentKeys:[]}]))};}};
-   const identify=async()=>({kind:'known_item' as const,confidence:0.9,names:['Free Solo'],searches:['Free Solo full documentary']});
-   const q='documentary about the guy who climbed El Capitan without ropes';
-   const out=await runDiscovery(db,{...testConfig,KNOWN_ITEM_CANDIDATES:5},searchInput.parse({q}),[provider],{planner,judge,identify},async()=>{});
-   assert.ok(asked.includes('Free Solo full documentary'),'searched by name');
-   assert.equal(out.ingested.length,5,'the smaller pool');
-   assert.ok(out.ingested.some(r=>r.canonical_url===film.url),'the lead found by name is checked');
-   assert.deepEqual(seen?.identified,['Free Solo']);
-   assert.deepEqual((out.trace as any).identify,{kind:'known_item',confidence:0.9,names:['Free Solo'],searches:['Free Solo full documentary'],known:true});
-   assert.ok(out.providers.some(p=>p.provider==='identify'));
-   asked.length=0;
-   const open=await runDiscovery(db,{...testConfig,KNOWN_ITEM_CANDIDATES:5},searchInput.parse({q:'underrated climbing films'}),[provider],
-     {planner,judge,identify:async()=>({kind:'exploratory' as const,confidence:0.9,names:[],searches:[]})},async()=>{});
-   assert.ok(!asked.includes('Free Solo full documentary'));
-   assert.equal(open.ingested.length,12,'exploratory requests keep the full pool');
-   const uncapped=await runDiscovery(db,testConfig,searchInput.parse({q}),[provider],{planner,judge,identify},async()=>{});
-   assert.equal(uncapped.ingested.length,13,'the smaller pool is off by default');
- }finally{await db.close();}
-});
 
 test('other sites linking to a candidate reach the judge and break ties between equally relevant results',async()=>{
  const db=await database();

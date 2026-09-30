@@ -22,7 +22,7 @@ test('ssj1 swaps only the model settings, with the ssj3 models kept as backups',
  assert.deepEqual([c.CRITIC_MODEL,c.CRITIC_REVIEW_MODEL,c.MODE_ROUTER_MODEL,c.QUERY_REWRITE_MODEL],
    ['anthropic/claude-haiku-4.5','anthropic/claude-haiku-4.5','openai/gpt-4.1-nano','openai/gpt-4.1-nano']);
  const changed=Object.keys(base).filter(k=>(base as any)[k]!==(c as any)[k]).sort();
- assert.deepEqual(changed,['CASCADE_STRONG_MODELS','COUNCIL_CHAIR_MODELS','COUNCIL_CHECKER_MODELS','CRITIC_MODEL','CRITIC_REVIEW_MODEL','IDENTIFY_MODEL','JUDGE_MODELS',
+ assert.deepEqual(changed,['CASCADE_STRONG_MODELS','COUNCIL_CHAIR_MODELS','COUNCIL_CHECKER_MODELS','CRITIC_MODEL','CRITIC_REVIEW_MODEL','JUDGE_MODELS',
    'MODE_ROUTER_MODEL','QUERY_REWRITE_MODEL','TIER']);
  assert.equal(c.PLANNER_MODELS,base.PLANNER_MODELS);assert.equal(c.GEMINI_MODEL,base.GEMINI_MODEL);assert.equal(c.JEV_MODEL,base.JEV_MODEL);
 });

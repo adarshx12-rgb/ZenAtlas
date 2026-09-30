@@ -45,8 +45,8 @@ export interface SearchTrace {
  contract?: RequirementsContract; unmet?: string[]; gaps?: GapTrace;
  // The model tier the search ran on; absent on traces saved before tiers existed (SSJ3).
  tier?: Tier;
- // What the first results said the request is after (src/identify.ts); known: confident enough to act on.
- identify?: {kind: 'known_item'|'exploratory'; confidence: number; names: string[]; searches: string[]; known: boolean};
+ // A name the expansion round grounded in real titles (src/link-expansion.ts).
+ named?: string;
 }
 // The critic's model client: anything answering the ModelClient json() call.
 export interface CriticClient { models: string[]; json(bucket: string, system: string, text: string, schema: object): Promise<{model: string; value: unknown}> }

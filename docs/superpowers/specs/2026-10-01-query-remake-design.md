@@ -49,7 +49,7 @@ against Gemma's 5-7) and was fastest (4.6 s) at $0.0002 a call. No model fixed t
 ### 3. Unchanged
 
 The screener, Jev, judges, scene analysis, gap exploration and the query fixes and linked-from counting from
-`name-first` stay as they are. `KNOWN_ITEM_CANDIDATES` stays off.
+`name-first` stay as they are. `KNOWN_ITEM_CANDIDATES` is removed with the identify call.
 
 ## Error handling
 
