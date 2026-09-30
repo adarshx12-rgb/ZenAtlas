@@ -28,8 +28,9 @@ export const rewriteSystem = (max: number) => `A video search found too little f
 phrases) that would find videos meeting the requirements. picture is how the answer was imagined before searching; titles_found are
 the best candidates the search really found. Prefer the words, names and channels titles_found use for this subject over the
 request's own words (for "to a subscriber" the titles may say "surprises a fan"). Add no detail the request does not ask for.
-Plain search text only, no markup. name: what the titles show the request is about (a video, film, show or creator), written as
-in the titles, or an empty string. Each search must differ from the searches already run. Answer JSON
+Plain search text only, no markup. name: the film, show, song, game or creator the request is about, when the titles make it
+clear, written as in the titles; never the title of one found video, and an empty string when unsure. Do not steer searches
+toward one found video unless it clearly matches the request. Each search must differ from the searches already run. Answer JSON
 {"complete": false, "missing": string, "name": string, "searches": [string]}.`;
 
 // The planner's answer made safe to act on (src/refill.ts): at most max searches, trimmed, none empty or already run.

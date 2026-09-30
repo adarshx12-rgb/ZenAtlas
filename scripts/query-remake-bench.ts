@@ -1,7 +1,10 @@
 // Query remake benchmark (step A of the 2026-10-01 pipeline redesign): each model imagines the video that best answers an
 // everyday request, writes searches from that picture, and the searches run on Brave's video index only (no judge, no
 // captions). A run hits when a video past searches verified (relevance >= 7, output/query-remake-truth.json) comes back.
-// Usage: node --env-file-if-exists=.env --import tsx scripts/query-remake-bench.ts [runs] [modelA,modelB]
+// Usage: node --env-file-if-exists=.env --import tsx scripts/query-remake-bench.ts [runs] [modelA,modelB] [prompt|planner|second]
+//   prompt (default): each model answers this script's picture prompt. planner: the real planner (src/planner.ts) with the
+//   models as PLANNER_MODELS, lead first. second: the planner, then the expansion rewriter (src/link-expansion.ts) on the
+//   first round's real titles, for the cases the first pass misses (MrBeast, the slime anime).
 import { readFileSync, writeFileSync } from 'node:fs';
 import { configSchema } from '../src/config.js';
 import { connect } from '../src/db.js';
@@ -11,9 +14,12 @@ import { takeBudget } from '../src/budgets.js';
 import { canonicalize } from '../src/urls.js';
 import { searchInput } from '../src/types.js';
 import { fetchJSON } from '../src/http.js';
+import { makePlanner } from '../src/planner.js';
+import { rewriterFrom, rewriteSystem, REWRITE_SCHEMA } from '../src/link-expansion.js';
 
 const runs = Number(process.argv[2]) || 3;
 const models = (process.argv[3] ?? 'openai/gpt-6-luna,google/gemini-3.8-flash').split(',');
+const mode = (process.argv[4] ?? 'prompt') as 'prompt'|'planner'|'second';
 // Everyday wordings of targets past searches verified: vague, misspelt, Hinglish, slang, one broad control.
 const CASES: [string, string][] = [
  ['mrbeast_ps5', 'mr beast giving ps5 to his subscriber'],
@@ -49,19 +55,65 @@ const truth = JSON.parse(readFileSync('output/query-remake-truth.json', 'utf8'))
 const brave = new BraveSearch(config).forTarget('videos');
 const canon = (u: string) => { try { return canonicalize(u); } catch { return u; } };
 // Brave answers are reused within the run, so a search two runs share costs one query.
-const cache = new Map<string, Promise<string[]>>();
+type Hit = {url: string; title: string; creator: string|null};
+const cache = new Map<string, Promise<Hit[]>>();
 const search = (q: string) => cache.get(q.toLowerCase()) ?? cache.set(q.toLowerCase(), (async () => {
  if (!await takeBudget(db, 'discovery:brave', config.BRAVE_DAILY_BUDGET)) throw new Error('brave budget');
- return (await brave.search(q, searchInput.parse({q}), '0')).results.map(r => canon(r.url));
+ return (await brave.search(q, searchInput.parse({q}), '0')).results.map(r => ({url: canon(r.url), title: r.title, creator: r.creator ?? null}));
 })()).get(q.toLowerCase())!;
+const results = async (queries: string[]) => (await Promise.all(queries.map(q => search(q).catch(() => [] as Hit[])))).flat();
 const found = async (queries: string[], good: Set<string>) => {
- const urls = new Set((await Promise.all(queries.map(q => search(q).catch(() => [] as string[])))).flat());
+ const urls = new Set((await results(queries)).map(h => h.url));
  return [...good].filter(u => urls.has(u));
 };
 
 const rows: unknown[] = [];
+// Model cost of the planner and rewriter calls, from OpenRouter's reported usage.
+const metered = (s: {cost: number}) => (async (url: string, o: Parameters<typeof fetchJSON>[1]) => {
+ const raw = await fetchJSON(url, o); if (typeof raw?.usage?.cost === 'number') s.cost += raw.usage.cost; return raw; }) as typeof fetchJSON;
 const spend: Record<string, {calls: number; cost: number; ms: number; failed: number}> = {};
-for (const [key, q] of CASES) {
+if (mode !== 'prompt') {
+ const s = {calls: 0, cost: 0, ms: 0, failed: 0};
+ const planConfig = {...config, PLANNER_MODELS: models.join(','), REQUIREMENTS_ENABLED: true};
+ // The planner's own client is built inside makePlanner; its cost shows in the model_cost log lines, counted here.
+ const write = process.stdout.write.bind(process.stdout);
+ process.stdout.write = ((chunk: string | Uint8Array, ...rest: unknown[]) => {
+   for (const line of String(chunk).split(/\r?\n/)) { try { const v = JSON.parse(line); if (v?.event === 'model_cost') { s.cost += Number(v.cost ?? 0); return true; } } catch {} }
+   return (write as (...a: unknown[]) => boolean)(chunk, ...rest); }) as typeof process.stdout.write;
+ const planner = makePlanner(db, planConfig)!;
+ const rewriteClient = new OpenAICompatibleClient(db, config, [models[0]], metered(s), 1024);
+ (rewriteClient as unknown as {log: () => void}).log = () => {};
+ const rewriter = rewriterFrom(async text => (await rewriteClient.json('bench_remake', rewriteSystem(4), text, REWRITE_SCHEMA)).value, 4);
+ const cases = mode === 'second' ? CASES.filter(([k]) => ['mrbeast_ps5', 'reincarnated'].includes(k)) : CASES;
+ for (const [key, q] of cases) {
+   const good = new Set(truth[key].good.map(g => canon(g.u)));
+   const typed = await found([q], good);
+   rows.push({key, q, model: 'typed', run: 0, hits: typed.length, of: good.size});
+   console.log(JSON.stringify({key, model: 'typed', hits: `${typed.length}/${good.size}`}));
+   await Promise.all(Array.from({length: runs}, async (_, run) => {
+     const t = Date.now(); s.calls++;
+     try {
+       const plan = await planner.plan(q);
+       s.ms += Date.now() - t;
+       const searches = plan.searches.filter(x => x.target === 'videos').map(x => x.query).slice(0, 5);
+       const first = await found(searches, good);
+       const row: Record<string, unknown> = {key, q, model: 'planner', run: run + 1, lead: plan.model, titles: plan.target?.titles ?? null, searches, hits: first.length, of: good.size};
+       if (mode === 'second') {
+         const ran = [q, ...searches];
+         const seen = new Set<string>(), titles: string[] = [];
+         for (const h of await results(ran)) if (!seen.has(h.url) && titles.length < 10) { seen.add(h.url); titles.push(`${h.title}${h.creator ? ` — ${h.creator}` : ''}`); }
+         const remade = await rewriter(q, [], ran, titles, plan.target);
+         const second = await found(remade.searches, good), both = await found([...ran, ...remade.searches], good);
+         Object.assign(row, {remade: remade.searches, name: remade.name, second: second.length, both: both.length, second_urls: second});
+       }
+       rows.push(row);
+       console.log(JSON.stringify({key, run: run + 1, lead: plan.model, hits: `${first.length}/${good.size}`, ...(mode === 'second' ? {second: row.second, both: row.both, name: row.name, remade: row.remade} : {titles: (plan.target?.titles ?? []).slice(0, 2)})}));
+     } catch (e) { s.failed++; s.ms += Date.now() - t; rows.push({key, q, model: 'planner', run: run + 1, error: String(e)}); console.log(JSON.stringify({key, run: run + 1, error: String(e).slice(0, 120)})); }
+   }));
+ }
+ spend.planner = s;
+}
+for (const [key, q] of mode === 'prompt' ? CASES : []) {
  const good = new Set(truth[key].good.map(g => canon(g.u)));
  const typed = await found([q], good);
  rows.push({key, q, model: 'typed', run: 0, hits: typed.length, of: good.size, searches: [q]});
@@ -84,8 +136,8 @@ for (const [key, q] of CASES) {
    }));
  }
 }
-const file = `output/query-remake-bench-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
-writeFileSync(file, JSON.stringify({models, runs, spend, brave_queries: cache.size, rows}, null, 1));
+const file = `output/query-remake-bench-${mode}-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+writeFileSync(file, JSON.stringify({models, runs, mode, spend, brave_queries: cache.size, rows}, null, 1));
 console.log(JSON.stringify({spend, brave_queries: cache.size, file}));
 await db.close();
 process.exit(0);
