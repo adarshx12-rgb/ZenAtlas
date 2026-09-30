@@ -420,3 +420,9 @@ test('a missing or malformed picture never costs the plan its searches',async()=
    assert.ok(plan.searches.some(s=>s.query==='cat glass slow motion'));
  }
 });
+
+test('a search that adds a word to one already run is a refinement, not a duplicate',()=>{
+ assert.ok(!nearDuplicate('MrBeast PS5 giveaway fan','MrBeast PS5 giveaway fan reaction'));
+ assert.ok(!nearDuplicate('Free Solo documentary National Geographic','Free Solo documentary National Geographic 2018'));
+ assert.ok(nearDuplicate('climbed El Capitan without ropes','climbed El Capitan without ropes without ropes'));
+});

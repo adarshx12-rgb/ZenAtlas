@@ -34,3 +34,10 @@ test('without requirements the judge asks exactly what it asked before',async()=
  assert.equal(schema.properties.verdicts.items.properties.requirement_checks,undefined);
  assert.equal(out.verdicts.get('r1')!.requirementChecks,undefined);
 });
+
+test('the judge is told never to reveal the name lead or linked sites in the reason searchers see',async()=>{
+ let system='';
+ const client={models:['m'],async json(_b:string,s:string){system=s;return {model:'m',value:{verdicts:[{key:'r1',relevance:7,reason:'r',moment_keys:[],lesser_known:false}]}};}} as unknown as ModelClient;
+ await new ModelJudge(client,testConfig).judge('roswell',[{...candidate,linked_from:['news.example.org']}],{kind:'videos',criteria:[],identified:['Roswell']});
+ assert.match(system,/never mention[^.]*(Likely refers to|linked_from)/i);
+});

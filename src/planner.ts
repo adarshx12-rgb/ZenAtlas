@@ -88,14 +88,13 @@ export function fallbackPlan(query: string): SearchPlan {
 
 // A search's content words: without case, stopwords or order, so rewordings of one search compare equal.
 const contentWords = (query: string) => new Set(tokens(query).filter(t => !STOPWORDS.has(t)));
-// Near-duplicates: at least this share of their content words in common (Jaccard). A follow-up that only reorders or
-// repeats a search already run ("… without ropes without ropes") finds the same pages again.
-const NEAR_DUPLICATE = 0.8;
+// Near-duplicates: the same content words in any order or repetition. A follow-up that only reorders or repeats a
+// search already run ("… without ropes without ropes") finds the same pages again; one that adds a word ("reaction",
+// a year, a creator) is a refinement and runs.
 export function nearDuplicate(a: string, b: string) {
  const x = contentWords(a), y = contentWords(b);
  if (!x.size || !y.size) return a.trim().toLowerCase() === b.trim().toLowerCase();
- const shared = [...x].filter(w => y.has(w)).length;
- return shared / (x.size + y.size - shared) >= NEAR_DUPLICATE;
+ return x.size === y.size && [...x].every(w => y.has(w));
 }
 
 // Tidies and deduplicates planned searches, skipping any that repeat, or nearly repeat, a search already run.

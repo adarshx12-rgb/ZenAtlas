@@ -14,5 +14,15 @@ export function grounded(name: string, material: IdentifyMaterial[]): boolean {
  if (!words.length) return false;
  return material.some(m => { const text = tokens(`${m.title} ${m.description ?? ''} ${m.creator ?? ''}`); return words.every(w => text.some(t => sameWord(w, t))); });
 }
-// A name is a few words; a whole result title ("Free Solo - Alex Honnold Climbing … - YouTube") is not one.
-export const nameLike = (name: string) => content(name).length <= 6 && !/[|]|\s[-–—]\s/.test(name);
+// A name is essentially one found title when it carries most (80%) of that title's words: the rewriter copying a video's
+// title ("MrBeast Gave Away PS5 to Baba!") names that video, not what the request is about, and would let any uploader
+// plant a "name" for the judge in their own title.
+const titleOf = (name: string, material: IdentifyMaterial[]) => {
+ const words = new Set(content(name));
+ return material.some(m => { const t = content(m.title); return t.length > 0 && t.filter(w => words.has(w)).length / t.length >= 0.8; });
+};
+// A name the search may act on: short, carried by a found result, and not simply one found title.
+export const acceptName = (name: string, material: IdentifyMaterial[]) => nameLike(name) && grounded(name, material) && !titleOf(name, material);
+// A name is a few words (a show's full title can take eight: "That Time I Got Reincarnated as a Slime"); a whole result
+// title with separators ("Free Solo - Alex Honnold Climbing … - YouTube") is not one.
+export const nameLike = (name: string) => content(name).length <= 8 && !/[|]|\s[-–—]\s/.test(name);

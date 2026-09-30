@@ -30,7 +30,7 @@ import type {SceneReviewPlan} from './scene-verification.js';
 import { unauthorized } from './access.js';
 import { contentInput } from './types.js';
 import { YouTubeData, youtubeId, type VideoDetails, type YouTubeClient } from './youtube.js';
-import { grounded, nameLike } from './identify.js';
+import { acceptName } from './identify.js';
 
 // today: the search date contracts resolve relative dates against (tests pin it). gapChooser: Jev's gap decisions.
 export interface DiscoveryDeps extends SignalDeps { planner?: Planner; anilist?: AnimeClient; archives?: SourceAdapter[]; screener?: Screener; explorer?: Explorer;
@@ -480,7 +480,7 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
      .catch(() => none) : none;
    // A name counts only when the titles the search really found carry it (src/identify.ts); it is a lead for the judge.
    const titles = picks.slice(0, 10).map(l => ({title: l.item.title, description: l.item.description ?? null, creator: l.item.creator ?? null}));
-   if (remade.name && nameLike(remade.name) && grounded(remade.name, titles)) names = [remade.name];
+   if (remade.name && acceptName(remade.name, titles)) names = [remade.name];
    const wanted = [...remade.searches, ...creators.slice(0, 1).map(name => creatorSearch(name, terms))];
    const searches = uniqueSearches(wanted.map(query => ({query, target: 'videos' as const})), wanted.length, ran.map(s => s.query));
    const before = leads.length, expansionRound = rounds + 1;
