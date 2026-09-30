@@ -13,6 +13,7 @@ import type { ExplorationTrace } from './exploration.js';
 import type { RequirementsContract } from './requirements.js';
 import type { GapTrace } from './gaps.js';
 import { tierConfig, type Tier } from './tiers.js';
+import type { AnswerPicture } from './planner.js';
 
 // Learning loop, step 1. Every discovery search leaves a trace; a critic model audits it once results are shown,
 // testing any source it says was missed with a real search; once a week a reviewer re-checks a sample of audits.
@@ -36,7 +37,7 @@ export interface SearchTrace {
  trace_id?: string;
  exploration?: ExplorationTrace;
  query: string; depth: 'quick'|'deep';
- plan: {kind: string; criteria: string[]; model: string|null};
+ plan: {kind: string; criteria: string[]; model: string|null; target?: AnswerPicture};
  searches: {query: string; target: string; round: number}[];
  rounds: number; providers: ProviderStatus[]; pool: TraceEntry[];
  // Milliseconds from the start when each stage finished; evidence holds the evidence steps inside judging.

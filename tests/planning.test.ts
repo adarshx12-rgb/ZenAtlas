@@ -400,3 +400,23 @@ test('near-duplicate searches are dropped: reordered, repeated or already run, b
  ],10,['guy who climbed El Capitan without ropes']);
  assert.deepEqual(out.map(s=>`${s.target}:${s.query}`),['videos:El Capitan without ropes documentary','web:El Capitan without ropes documentary','videos:Free Solo full documentary']);
 });
+
+test('the planner pictures the answer first and keeps the picture on the plan',async()=>{
+ const target={titles:['MrBeast Surprises Fan With A PS5'],channel:'MrBeast',spoken:['this is for you'],wording:[{request:'subscriber',creators:['fan','viewer']}]};
+ let system='';
+ const client:any={models:['m'],async json(_b:string,s:string){system=s;return {model:'m',value:{kind:'videos',target,
+   searches:[{query:'MrBeast surprises fan with a PS5',target:'videos'}],criteria:['MrBeast gives a PS5']}};}};
+ const plan=await new ModelPlanner(client,{...testConfig,REQUIREMENTS_ENABLED:false}).plan('mr beast giving ps5 to his subscriber');
+ assert.match(system,/picture the video/i);
+ assert.deepEqual(plan.target,target);
+ assert.ok(plan.searches.some(s=>s.query==='MrBeast surprises fan with a PS5'));
+});
+
+test('a missing or malformed picture never costs the plan its searches',async()=>{
+ for(const bad of [undefined,null,{titles:'one'},{titles:[],channel:3}]){
+   const client:any={models:['m'],async json(){return {model:'m',value:{kind:'videos',target:bad,searches:[{query:'cat glass slow motion',target:'videos'}],criteria:[]}};}};
+   const plan=await new ModelPlanner(client,{...testConfig,REQUIREMENTS_ENABLED:false}).plan('cat pushing glass of table slow mo');
+   assert.equal(plan.target,undefined);
+   assert.ok(plan.searches.some(s=>s.query==='cat glass slow motion'));
+ }
+});
