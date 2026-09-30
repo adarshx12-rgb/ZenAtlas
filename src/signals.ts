@@ -25,6 +25,8 @@ import { decide, detectFormat, inspect, factsFromFindings, type Decision, type F
 import { judgeRequirements, preferencesOf } from './search-contract.js';
 import { hardEach, type RequirementsContract } from './requirements.js';
 import { accessKind, accessLabel, fullCopyAccess } from './access.js';
+import { linkedFrom, type LinkSource } from './corroboration.js';
+import { traceFields } from './search-trace.js';
 
 export const VIEWER_ANALYSIS_VERSION = 'viewer-comments-v1';
 const MOMENTS_PER_VIDEO = 3;
@@ -42,8 +44,9 @@ export interface SignalDeps { sceneLive?:boolean; youtube?: YouTubeClient; judge
 // underrated is retained for callers; obscurity is a badge, never a ranking boost.
 // contract: the search's shared requirements; findings: evidence already gathered for these candidates (exploration).
 // screens: the screener's decision per canonical URL, the start of each candidate's link potential (src/link-potential.ts).
+// linkSources: the pages the search has read, for finding which other sites link to a candidate (src/corroboration.ts).
 export interface SignalContext extends JudgeContext { targets: Map<string,SearchTarget>; underrated?: boolean;
- contract?: RequirementsContract; findings?: Finding[]; screens?: Map<string,ScreenSignal> }
+ contract?: RequirementsContract; findings?: Finding[]; screens?: Map<string,ScreenSignal>; linkSources?: () => Promise<LinkSource[]> }
 export const UNDERRATED_BADGE = 'Underrated find';
 // Uncertain verdicts remain in the trace, never as filler in the main results.
 const UNVERIFIED_SCORE = 5;
@@ -325,6 +328,12 @@ export async function applySignals(db: DB, config: Config, query: string, result
  const judge = deps.judge ?? makeJudge(db, config);
  let verdicts: Map<string,Verdict>|null = null;
  const modelOf = new Map<string,string>();
+ // Other sites linking to each candidate, from pages read by now, plus Reddit threads that discuss it.
+ const linkedMap = context?.linkSources ? linkedFrom(pool.map(r => r.canonical_url), await context.linkSources().catch(() => [])) : new Map<string,string[]>();
+ const linkedOf = (r: Result) => [...new Set([...(linkedMap.get(r.canonical_url) ?? []), ...(extra.get(r.id)?.discussions.length ? ['reddit.com'] : [])])].sort();
+ if (context?.linkSources) process.stdout.write(`${JSON.stringify({event: 'corroboration', ...traceFields(), candidates: pool.length,
+   linked: pool.filter(r => linkedOf(r).length).length, linked2: pool.filter(r => linkedOf(r).length >= 2).length})}
+`);
  if (judge) {
    const candidates: JudgeCandidate[] = pool.map(r => {
      const e = extra.get(r.id), d = e?.details, key = keys.get(r.id)!, duration = d?.duration ?? r.duration;
@@ -341,6 +350,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
        moments: (e?.stored ?? []).map((s, j) => ({key: `${key}m${j + 1}`,
          at: formatSeconds(Math.min(...s.cluster.mentions.map(m => m.seconds))), viewers_said: s.cluster.mentions.map(m => m.excerpt)})),
        discussions: (e?.discussions ?? []).map(t => t.title),
+       ...(linkedOf(r).length ? {linked_from: linkedOf(r)} : {}),
        visual: previews.has(r.id) ? visualReference(previews.get(r.id)!) : undefined,
        facts: contract ? factsFromFindings(findingsOf(r.canonical_url)) : undefined,
        ...(page ? {page: {status: page.status, title: page.title, description: page.description, text: page.text, libraries: page.libraries,
@@ -356,7 +366,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
    const wanted = context?.kind === 'websites' ? 'mixed' as const : context?.kind ?? 'videos';
    const screenshots = new Map([...previews].flatMap(([id, image]) => keys.has(id) ? [[keys.get(id)!, image] as const] : []));
    // Smaller batches in parallel answer faster, and a failed batch only leaves its own results unjudged.
-   const judgeContext = context ? {kind: wanted, criteria: context.criteria, anime: context.anime, ...(contract ? {search_date: contract.search_date} : {}), ...(requirements ? {requirements} : {}), ...(contract && preferencesOf(contract).length ? {preferences: preferencesOf(contract)} : {})} : undefined;
+   const judgeContext = context ? {kind: wanted, criteria: context.criteria, anime: context.anime, ...(context.identified?.length ? {identified: context.identified} : {}), ...(contract ? {search_date: contract.search_date} : {}), ...(requirements ? {requirements} : {}), ...(contract && preferencesOf(contract).length ? {preferences: preferencesOf(contract)} : {})} : undefined;
    const judgeAll = (list: JudgeCandidate[], size: number) => Promise.allSettled(
      judgeBatches(list, size, config.LINK_BATCH_CHARS).map(batch =>
        judge.judge(query, batch, judgeContext, screenshots).then(out => ({batch, out}))));
@@ -459,7 +469,8 @@ export async function applySignals(db: DB, config: Config, query: string, result
    // promote a weaker match. Unjudged candidates retain the deterministic lexical fallback order.
    const score = v ? v.relevance : -1;
    const evidence = e?.page?.status === 'checked' || chosen.length || r.evidence !== 'metadata_match' ? 1 : 0;
-   const badges = [...(e?.badges ?? []), ...(underrated ? [UNDERRATED_BADGE] : [])];
+   const linked = linkedOf(r).length;
+   const badges = [...(e?.badges ?? []), ...(underrated ? [UNDERRATED_BADGE] : []), ...(linked >= 2 ? [`Linked from ${linked} sites`] : [])];
    const evidenceData=retained.get(r.id);
    // With a contract, the decision on hard requirements (inspected evidence first, grounded judge quotes second)
    // decides what is shown; the judge's intent ceiling still bounds relevance.
@@ -475,7 +486,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
    const basis:'metadata'|'viewer_claims'|'direct_evidence'=evidenceData?.transcripts.length||evidenceData?.scenes.length||e?.page?.status==='checked'?'direct_evidence':e?.comments.length?'viewer_claims':'metadata';
    // The official channel's upload ranks above re-uploads within about one relevance point (src/canonical.ts).
    const rank = score + (score >= 0 && e?.badges.includes('Official channel') ? rankBoost('canonical') : 0);
-   return {score, rank, evidence, base, dropped, decision, result: {...r,
+   return {score, rank, evidence, base, linked, dropped, decision, result: {...r,
      evidence_coverage:{comments:e?.video?.commentStatus??(e?.comments.length?'available':'unavailable'),
        captions:e?.video?.captionStatus??(evidenceData?.transcripts.length?'available':'unavailable'),
        transcript_passages:evidenceData?.transcripts.length??0,analysed_scenes:evidenceData?.scenes.length??0,basis},
@@ -491,7 +502,8 @@ export async function applySignals(db: DB, config: Config, query: string, result
      ...(decision ? {requirements: decision.requirements, uncertainties: [...decision.notes,
        ...decision.requirements.filter(q => q.status === 'unknown').map(q => `Not confirmed: ${q.text}`)]} : {})}};
  });
- const order = (a: typeof scored[number], b: typeof scored[number]) => b.rank - a.rank || (a.score >= 0 ? b.evidence - a.evidence : 0) || b.base - a.base;
+ // Among equally relevant results, ones more other sites link to come first.
+ const order = (a: typeof scored[number], b: typeof scored[number]) => b.rank - a.rank || b.linked - a.linked || (a.score >= 0 ? b.evidence - a.evidence : 0) || b.base - a.base;
  const kept = scored.filter(s => !s.dropped);
  const rejected=scored.length-kept.length;
  if(rejected) providers.push({provider:'relevance_filter',status:'ok',message:kept.length

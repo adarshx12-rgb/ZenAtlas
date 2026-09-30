@@ -17,17 +17,21 @@ export const creatorSearch = (name: string, terms: string[]) =>
 // "Mr Beast" is the channel "MrBeast"; "MrBeast Gaming" is another channel.
 export const sameCreator = (channelTitle: string, name: string) => { const a = foldName(channelTitle); return a.length >= 3 && a === foldName(name); };
 
-export type LinkRewriter = (query: string, requirements: {id: string; text: string}[], ran: string[]) => Promise<string[]>;
+// found: the best candidates so far, "title — channel", whose words the new searches reuse.
+export type LinkRewriter = (query: string, requirements: {id: string; text: string}[], ran: string[], found?: string[]) => Promise<string[]>;
 const SCHEMA = {type: 'object', properties: {complete: {type: 'boolean'}, missing: {type: 'string'},
  searches: {type: 'array', items: {type: 'string'}}}, required: ['complete', 'missing', 'searches']};
 const system = (max: number) => `A video search found too little for a request. Write up to ${max} new video searches (YouTube-style titles or
 phrases) that would find videos meeting the requirements, in the words video titles and creators actually use rather than the
 request's own words (for "to a subscriber" try "giveaway to a fan" or "surprising a viewer"). Each must differ from the searches
-already run. Answer JSON {"complete": false, "missing": string, "searches": [string]}.`;
+already run. titles_found lists the best candidates found so far: reuse words and names they use for this subject when
+they fit the request, but add no details the request does not ask for. Plain search text only, no markup. Answer JSON
+{"complete": false, "missing": string, "searches": [string]}.`;
 
 // The planner's answer made safe to act on (src/refill.ts): at most max searches, trimmed, none empty or already run.
 export function rewriterFrom(ask: (text: string) => Promise<unknown>, max: number): LinkRewriter {
- return async (query, requirements, ran) => cleanDecision(await ask(JSON.stringify({request: query, requirements, searches_already_run: ran})), ran, max).searches;
+ return async (query, requirements, ran, found = []) => cleanDecision(await ask(JSON.stringify({request: query, requirements, searches_already_run: ran,
+   titles_found: found.slice(0, 10)})), ran, max).searches.map(q => q.replace(/[*_`#]+/g, '').replace(/\s+/g, ' ').trim()).filter(Boolean);
 }
 
 // The planner models, on the refill round's budget and time limit.

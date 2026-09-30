@@ -94,3 +94,13 @@ test('unauthorized and skipped addresses are never visited',async()=>{
  await h.run({initial:[cand('https://oceanofpdf.com/x'),cand('https://blog.whatsapp.com/2024')],skip:(u:string)=>u.includes('oceanofpdf')});
  assert.ok(!h.visited.some(u=>u.includes('oceanofpdf')));
 });
+
+test('gap searches never repeat the request, and use the identified name when there is one',()=>{
+ const q='documentary about the guy who climbed El Capitan without ropes';
+ const c=normaliseContract(q,DAY,{requirements:[{id:'r1',text:'without ropes',kind:'property',hardness:'hard',scope:'each'},
+   {id:'r2',text:'documentary about the guy who climbed El Capitan',kind:'subject',hardness:'hard',scope:'each'}]});
+ const plain=gapSearches(c,coverage(c,[],1).gaps,[q],8).map(s=>s.query);
+ assert.ok(!plain.some(s=>/without ropes without ropes|documentary about .*documentary about/i.test(s)),plain.join(' | '));
+ const named=gapSearches(c,coverage(c,[],1).gaps,[q],8,'Free Solo').map(s=>s.query);
+ assert.ok(named.length&&named.every(s=>s.startsWith('Free Solo')),named.join(' | '));
+});

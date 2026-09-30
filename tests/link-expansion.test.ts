@@ -46,3 +46,11 @@ test('the upload scan resolves the handle, pages to the cap, spends one unit per
    assert.equal(await yt.uploads('Nobody Here', 50), null);
  } finally { await db.close(); }
 });
+
+test('the rewriter is shown the titles found so far, at most ten', async () => {
+ let sent: any;
+ const rewrite = rewriterFrom(async text => { sent = JSON.parse(text as string); return {complete: false, missing: 'x', searches: ['a']}; }, 2);
+ await rewrite('q', [], [], Array.from({length: 12}, (_, i) => `Title ${i} — Channel`));
+ assert.equal(sent.titles_found.length, 10);
+ assert.equal(sent.titles_found[0], 'Title 0 — Channel');
+});

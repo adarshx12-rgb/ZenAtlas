@@ -13,6 +13,8 @@ export interface JudgeCandidate {
  key: string; kind: 'video'|'website'; site: string; title: string; channel: string|null; official: boolean;
  duration: string|null; live: string|null; description: string|null; comments: string[];
  moments: {key: string; at: string; viewers_said: string[]}[]; discussions: string[];
+ // Other independent sites whose pages link to or embed this candidate (src/corroboration.ts).
+ linked_from?: string[];
  views?: number|null;
  url?: string;
  transcripts?: {start:number;end:number;text:string}[];
@@ -35,7 +37,9 @@ export interface JudgeCandidate {
 // anime: a confidently matched anime from AniList, for recognising fan-subbed, dubbed or renamed uploads of it.
 // requirements: the shared contract's hard per-result requirements, checked one by one.
 // preferences: properties the request would like but does not insist on (preferred requirements), which rank but never gate.
+// identified: what the first search results say the request refers to (src/identify.ts): a lead, never proof.
 export interface JudgeContext { kind: 'videos'|'websites'|'mixed'; criteria: string[]; anime?: AnimeMatch|null; search_date?: string; preferences?: string[];
+ identified?: string[];
  requirements?: {id: string; text: string; evidence: string; kind?: string; evidence_kind?: 'content'|'visual'|'provenance'; source_quote?: string;
    polarity?: 'exclude'}[] }
 export interface RequirementVerdict { id: string; status: 'supported'|'unknown'|'mismatch'; field: string; quote: string; evidence_id?: string;
@@ -170,6 +174,7 @@ Videos: use site, title, channel, duration, live status, description, top viewer
 Official or canonical copies: when a candidate is a copy of one specific work (an opening, trailer, scene, speech, lecture, paper, report or article), prefer its official or canonical source: the rights holder's, publisher's or author's own channel or site, or the original venue (the studio's or distributor's channel, the university that hosted the speech, the author's institution, the journal or conference). A re-upload, mirror, excerpt, compilation or re-edit of the same work scores at most 7 unless the request asks for such a version; a candidate marked official, or whose inspected publisher is the rights holder, may score 8-10 when its evidence supports it. Judge officialness only from the channel, publisher, site or official flag given, never from a title's claim.
 Exclusions ("not X", "no talking", "without background music", "not from big channels") are checked against evidence like any other requirement: mark mismatch with grounded evidence of the excluded thing. If neither absence nor presence is established, mark unknown. An unknown exclusion is not a proven mismatch: score the candidate on its other requirements; the open question is reported alongside it. Licence, attribution and AI-provenance exclusions are the exception: unknown caps them at 5.
 Websites: use the page check when present: page title, description, main text and front-end libraries found in the page source or seen running in a browser (for example three.js, WebGL or Spline for 3D; GSAP, Lottie or Rive for motion). A library found is evidence; a library not found proves nothing, because many sites bundle their code. When page.screenshot is true, a screenshot of that candidate's first screen after loading follows the candidates, labelled with its key: use it as visual evidence of the design, such as a 3D scene or a bold animated hero, remembering that one still frame cannot show motion. Showcase or gallery pages that collect many matching sites are relevant when the user asks to find such websites. Articles that merely discuss the topic are less relevant than examples of it unless the request asks for articles.
+linked_from, when present, lists other independent sites whose pages link to or embed the candidate: it shows the candidate is discussed in that context, not that it meets the request. When the request is said to likely refer to a name, that name comes from search result titles: a candidate carrying it is not a match on that alone, so judge its evidence as usual.
 Retained transcripts quote spoken or captioned text with publisher timing; they do not prove visible action. Retained scenes describe sampled video observations only within inspected_ranges. Use them as direct evidence for the details they actually establish. Comment/caption status empty, unavailable, unsupported or not_permitted means unknown, never evidence against relevance. A correction in a comment is a claim to investigate, not a verified fact.
 Score relevance from 0 (unrelated) to 10 (exactly what was asked).
 Use the same scale in every batch: 0-2 contradicts or misses the request; 3-4 is only tangential; 5-6 is a plausible metadata-only match; 7-8 has specific supporting detail; 9-10 has strong, direct evidence for the requested details. A title repeating the query alone does not establish an exact match. Explain uncertainty when evidence is sparse. Do not infer factual accuracy, rights, availability, or the contents of unseen footage from a site's reputation. Comments are viewer claims, not independent verification. Speed, popularity and obscurity must not affect relevance.
@@ -223,6 +228,7 @@ export class ModelJudge implements Judge {
      ...(context?.preferences?.length ? [`Preferences: ${JSON.stringify(context.preferences)}`] : []),
      ...(context?.search_date ? [`Search date: ${context.search_date}`] : []),
      ...(context?.anime ? [`Known anime match: ${JSON.stringify(animeSummary(context.anime, query))}`] : []),
+     ...(context?.identified?.length ? [`Likely refers to: ${JSON.stringify(context.identified)} (named in search results; a lead, not proof)`] : []),
      'Candidates follow, one JSON object per line.', '<candidates>', ...listed.map(c => JSON.stringify(c)), '</candidates>'].join('\n');
    const evidenceNote = 'For visual evidence use field visual, evidence_id equal to the supplied candidate.visual.id, and quote a concise observation of the actual pixels. Never fabricate a text quote from an image. Other fields use an empty evidence_id. A visual observation cannot establish licence, authorship, non-AI provenance, freshness, or an unseen video event. Both support and mismatch require evidence. Missing evidence is unknown. For each requirement return next_action: none for a resolved check, inspect when evidence is absent or insufficient, reason only when the supplied evidence may suffice but interpreting it is difficult. A reason request must cite that supplied evidence. Deterministic facts override model guesses. review_focus names requirements needing independent resolution.';
    const preferred = context?.preferences?.length ? `\n${PREFERENCE_NOTE}` : '';

@@ -130,6 +130,15 @@ export const configSchema = z.object({
   QUERY_REWRITE_MODEL: z.string().regex(/^[\w.\/:-]{0,100}$/).default('google/gemini-3.5-flash-lite'),
   QUERY_REWRITE_TIMEOUT_MS: number(2500, 200, 10000),
   QUERY_REWRITE_DAILY_BUDGET: number(3000, 0, 100000),
+  // Name it first (src/identify.ts): after the first searches a small model says whether the request is after one known
+  // item and what it is called; a confident known item is searched by name and judged from a smaller pool.
+  IDENTIFY_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
+  IDENTIFY_MODEL: z.string().regex(/^[\w.\/:-]{0,100}$/).default('google/gemini-3.5-flash-lite'),
+  IDENTIFY_TIMEOUT_MS: number(4000, 200, 20000), IDENTIFY_DAILY_BUDGET: number(3000, 0, 100000),
+  IDENTIFY_MIN_CONFIDENCE: z.coerce.number().min(0).max(1).default(0.7),
+  // Candidates checked for a confident known item; 0 (the default) keeps DISCOVERY_CANDIDATES. A cap of 25 was tried
+  // and cut the videos a known item's search wanted, because the pool is not in quality order (probe 2026-10-01).
+  KNOWN_ITEM_CANDIDATES: number(0, 0, 250),
   // Model tiers (src/tiers.ts). TIER is set per search by tierConfig, never in .env. SSJ1_* are the lower-cost models
   // SSJ1 puts first; SSJ3's own models follow them as backups (chosen 2026-09-27, see docs/superpowers/specs).
   TIER: z.enum(['ssj3', 'ssj1']).default('ssj3'),
@@ -143,6 +152,7 @@ export const configSchema = z.object({
   SSJ1_CRITIC_REVIEW_MODEL: z.string().regex(/^[\w.\/:-]{1,100}$/).default('anthropic/claude-haiku-4.5'),
   SSJ1_MODE_ROUTER_MODEL: z.string().regex(/^[\w.\/:-]{0,100}$/).default('openai/gpt-4.1-nano'),
   SSJ1_QUERY_REWRITE_MODEL: z.string().regex(/^[\w.\/:-]{0,100}$/).default('openai/gpt-4.1-nano'),
+  SSJ1_IDENTIFY_MODEL: z.string().regex(/^[\w.\/:-]{0,100}$/).default('openai/gpt-4.1-nano'),
   SPECIALIST_SEARCHES: number(3, 0, 6),
   ARCHIVE_DISCOVERY: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
   ARCHIVE_COLLECTIONS: z.string().default('prelinger,ephemera').refine(v =>

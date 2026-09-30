@@ -1,6 +1,7 @@
 import { coverage, type Finding, type Gap } from './evidence.js';
 import { resolveDates, type RequirementsContract } from './requirements.js';
-import type { PlannedSearch, SearchTarget } from './planner.js';
+import { nearDuplicate, type PlannedSearch, type SearchTarget } from './planner.js';
+import { STOPWORDS, sameWord, tokens } from './ranking.js';
 
 // Exploration that works toward the requirements still unmet after the first retrieval and inspection. Gap searches
 // are built from the contract (never written by a model); Jev only chooses which real candidates and links to open.
@@ -33,6 +34,8 @@ export interface GapOptions {
  // Addresses never to open (unauthorized hosts, scoped searches).
  skip(url: string): boolean;
  ran?: string[];
+ // What the request was identified as, when confidently known (src/identify.ts).
+ name?: string|null;
 }
 
 const keyOf = (g: Gap) => g.item ? `${g.requirement_id}:${g.item}` : g.requirement_id;
@@ -52,10 +55,19 @@ function core(contract: RequirementsContract): string {
  return words.join(' ');
 }
 const cap = (q: string) => q.split(/\s+/).slice(0, 12).join(' ');
-
-// Deterministic searches for the gaps, plain queries first, then domain-restricted variants.
-export function gapSearches(contract: RequirementsContract, gaps: Gap[], ran: string[], limit: number): (PlannedSearch & {targets: string[]})[] {
- const topic = core(contract) || contract.query;
+// Requirement prose that is never worth searching for.
+const PROSE = new Set(['who', 'which', 'that', 'must', 'be', 'one', 'guy']);
+// The identified name followed by the request's own words from a requirement, which the name does not already carry. A
+// requirement's text is prose ("must be about …"), so only words the request itself used are kept. Without a name
+// the topic already has the request's words and such a search would only repeat it: null.
+function withRequestWords(name: string|null|undefined, request: string, requirement: string): string|null {
+ if (!name) return null;
+ const asked: string[] = tokens(request), have: string[] = tokens(name);
+ const added = requirement.split(/\s+/).filter(w => { const t = tokens(w); return t.length && t.every(x => !STOPWORDS.has(x) && !STOP.has(x) && !PROSE.has(x) && asked.includes(x)) && !t.every(x => have.some(h => sameWord(x, h))); });
+ return added.length ? `${name} ${[...new Set(added)].join(' ')}` : null;
+}
+export function gapSearches(contract: RequirementsContract, gaps: Gap[], ran: string[], limit: number, name?: string|null): (PlannedSearch & {targets: string[]})[] {
+ const topic = name || core(contract) || contract.query;
  const formats = contract.deliverable.formats;
  const target: SearchTarget = formats.length && formats.every(f => f === 'video') ? 'videos' : 'web';
  const domains = contract.requirements.flatMap(r => r.authority?.domains ?? []);
@@ -72,7 +84,7 @@ export function gapSearches(contract: RequirementsContract, gaps: Gap[], ran: st
    else if (r.kind === 'authority') scoped.push([domains[0] ? `site:${domains[0]} ${topic}` : `${topic} official`, key]);
    else if (r.kind === 'format' && !full) plain.push([`${topic} ${(r.formats ?? []).filter(f => f !== 'any')[0] ?? ''}`.trim(), key]);
    else if (r.kind === 'completeness') { plain.push([`${work} ebook`, key]); plain.push([`${work} library borrow`, key]); }
-   else if (r.kind === 'subject' || r.kind === 'property') plain.push([`${topic} ${r.text}`, key]);
+   else if (r.kind === 'subject' || r.kind === 'property') { const q = withRequestWords(name, contract.query, r.text); if (q) plain.push([q, key]); }
  }
  const seen = new Set(ran.map(q => q.toLowerCase()));
  const out: (PlannedSearch & {targets: string[]})[] = [];
@@ -80,7 +92,7 @@ export function gapSearches(contract: RequirementsContract, gaps: Gap[], ran: st
    const query = cap(raw), lower = query.toLowerCase();
    const existing = out.find(o => o.query.toLowerCase() === lower);
    if (existing) { if (!existing.targets.includes(key)) existing.targets.push(key); continue; }
-   if (seen.has(lower) || out.length >= limit) continue;
+   if (seen.has(lower) || ran.some(q => nearDuplicate(q, query)) || out.length >= limit) continue;
    out.push({query, target, targets: [key]});
  }
  return out;
@@ -125,7 +137,7 @@ export async function exploreGaps(o: GapOptions): Promise<{findings: Finding[]; 
    if (trace.visits >= o.visits) return finish('visits');
    const entry: GapTrace['rounds'][number] = {gaps: gaps.map(g => g.key), searches: [], visits: [], decisions_failed: 0};
    trace.rounds.push(entry);
-   const searches = gapSearches(o.contract, gaps, ran, o.searches);
+   const searches = gapSearches(o.contract, gaps, ran, o.searches, o.name);
    if (searches.length) {
      ran.push(...searches.map(s => s.query)); trace.searches += searches.length;
      entry.searches = searches.map(s => ({query: s.query, target: s.target, targets: s.targets}));

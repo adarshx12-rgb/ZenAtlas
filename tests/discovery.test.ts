@@ -531,3 +531,53 @@ test('too few strong candidates after screening trigger one rewritten search rou
    assert.ok(!asked.includes('giveaway ps5 to a fan'));assert.ok(!off.providers.some(p=>p.provider==='link_expansion'));
  }finally{await db.close();}
 });
+
+test('a confidently identified known item is searched by name, checked from a smaller pool, and named to the judge',async()=>{
+ const db=await database();
+ try{
+   const film=contentInput.parse({url:'https://www.natgeo.com/free-solo',title:'Free Solo | National Geographic',description:'The full documentary.'});
+   const others=Array.from({length:12},(_,i)=>contentInput.parse({url:`https://clips.example.com/v${i}`,title:`Climbed El Capitan without ropes clip ${i}`}));
+   const asked:string[]=[];
+   const provider:SourceAdapter={name:'known-fixture',capabilities:{transcripts:false,comments:false,embeds:false,accessible_media:false},
+     async search(q){asked.push(q);return {results:q==='Free Solo full documentary'?[film]:others,next_cursor:null,status:{provider:'known-fixture',status:'ok',message:'TEST'}};}};
+   const planner:Planner={async plan(q){return {kind:'videos',searches:[{query:q,target:'videos'}],criteria:[],model:'test'};}};
+   let seen:any;
+   const judge:Judge={async judge(_q,cs,context){seen=context;return {model:'j',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,relevance:7,reason:'r',momentKeys:[]}]))};}};
+   const identify=async()=>({kind:'known_item' as const,confidence:0.9,names:['Free Solo'],searches:['Free Solo full documentary']});
+   const q='documentary about the guy who climbed El Capitan without ropes';
+   const out=await runDiscovery(db,{...testConfig,KNOWN_ITEM_CANDIDATES:5},searchInput.parse({q}),[provider],{planner,judge,identify},async()=>{});
+   assert.ok(asked.includes('Free Solo full documentary'),'searched by name');
+   assert.equal(out.ingested.length,5,'the smaller pool');
+   assert.ok(out.ingested.some(r=>r.canonical_url===film.url),'the lead found by name is checked');
+   assert.deepEqual(seen?.identified,['Free Solo']);
+   assert.deepEqual((out.trace as any).identify,{kind:'known_item',confidence:0.9,names:['Free Solo'],searches:['Free Solo full documentary'],known:true});
+   assert.ok(out.providers.some(p=>p.provider==='identify'));
+   asked.length=0;
+   const open=await runDiscovery(db,{...testConfig,KNOWN_ITEM_CANDIDATES:5},searchInput.parse({q:'underrated climbing films'}),[provider],
+     {planner,judge,identify:async()=>({kind:'exploratory' as const,confidence:0.9,names:[],searches:[]})},async()=>{});
+   assert.ok(!asked.includes('Free Solo full documentary'));
+   assert.equal(open.ingested.length,12,'exploratory requests keep the full pool');
+   const uncapped=await runDiscovery(db,testConfig,searchInput.parse({q}),[provider],{planner,judge,identify},async()=>{});
+   assert.equal(uncapped.ingested.length,13,'the smaller pool is off by default');
+ }finally{await db.close();}
+});
+
+test('other sites linking to a candidate reach the judge and break ties between equally relevant results',async()=>{
+ const db=await database();
+ try{
+   const a=contentInput.parse({url:'https://www.youtube.com/watch?v=aaaaaaaaaaa',title:'Moon landing footage one'});
+   const b=contentInput.parse({url:'https://www.youtube.com/watch?v=bbbbbbbbbbb',title:'Moon landing footage two'});
+   const article=contentInput.parse({url:'https://news.example.org/moon',title:'Moon landing footage explained'});
+   const provider:SourceAdapter={name:'link-fixture',capabilities:{transcripts:false,comments:false,embeds:false,accessible_media:false},
+     async search(){return {results:[a,b,article],next_cursor:null,status:{provider:'link-fixture',status:'ok',message:'TEST'}};}};
+   const pages={async check(url:string){return {status:'checked' as const,title:'Moon',description:null,libraries:[],badges:[],
+     text:url===article.url?'Watch: <iframe src="https://www.youtube.com/embed/bbbbbbbbbbb"></iframe>':'',links:url===article.url?[]:[]};}};
+   let listed:any[]=[];
+   const judge:Judge={async judge(_q,cs){listed=cs;return {model:'j',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,relevance:7,reason:'r',momentKeys:[]}]))};}};
+   const out=await runDiscovery(db,{...testConfig,PAGE_CHECKS:8},searchInput.parse({q:'moon landing footage'}),[provider],{judge,pages},async()=>{});
+   assert.deepEqual(listed.find(c=>c.url===b.url)?.linked_from,['news.example.org']);
+   assert.equal(listed.find(c=>c.url===a.url)?.linked_from,undefined);
+   const order=out.results.map(r=>r.canonical_url);
+   assert.ok(order.indexOf(b.url)<order.indexOf(a.url),'the linked video ranks first among equals');
+ }finally{await db.close();}
+});

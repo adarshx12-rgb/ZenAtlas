@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {database,testConfig} from './helpers.js';
-import {fallbackPlan,normalisePlan,GeminiPlanner,EnsemblePlanner,ModelPlanner,makePlanner,type Planner,type PlannedSearch,type SearchPlan} from '../src/planner.js';
+import {fallbackPlan,normalisePlan,nearDuplicate,uniqueSearches,GeminiPlanner,EnsemblePlanner,ModelPlanner,makePlanner,type Planner,type PlannedSearch,type SearchPlan} from '../src/planner.js';
 import {OpenAICompatibleClient} from '../src/openai-compatible.js';
 import {robotsAllows,extractPage,PageChecker,type PageCheck,type PageEvidence} from '../src/pages.js';
 import {rankDiscovery} from '../src/ranking.js';
@@ -385,4 +385,18 @@ test('Gemini still plans when every OpenRouter model has failed',async()=>{
    // discovery.ts can tell the user why planning was skipped.
    await assert.rejects(new EnsemblePlanner(down('vendor/lead'),[],config).plan('query'),/upstream_failure/);
  }finally{await db.close();}
+});
+
+test('near-duplicate searches are dropped: reordered, repeated or already run, but other targets and real rewordings stay',()=>{
+ assert.ok(nearDuplicate('documentary about the guy who climbed El Capitan without ropes','documentary about the guy who climbed El Capitan without ropes without ropes'));
+ assert.ok(nearDuplicate('MKBHD drops phone during review','during review MKBHD drops phone'));
+ assert.ok(!nearDuplicate('MKBHD drops phone during review','MKBHD review phone drop fail'));
+ const out=uniqueSearches([
+   {query:'El Capitan without ropes documentary',target:'videos'},
+   {query:'documentary El Capitan without ropes',target:'videos'},
+   {query:'El Capitan without ropes documentary',target:'web'},
+   {query:'Free Solo full documentary',target:'videos'},
+   {query:'the guy who climbed El Capitan without ropes',target:'web'},
+ ],10,['guy who climbed El Capitan without ropes']);
+ assert.deepEqual(out.map(s=>`${s.target}:${s.query}`),['videos:El Capitan without ropes documentary','web:El Capitan without ropes documentary','videos:Free Solo full documentary']);
 });
