@@ -22,10 +22,20 @@ test('a channel is the creator only when the folded names are equal', () => {
  assert.ok(!sameCreator('', ''));
 });
 
-test('the rewriter keeps new, non-empty searches up to the limit', async () => {
- const rewrite = rewriterFrom(async () => ({complete: false, missing: 'x', searches: ['mrbeast ps5 giveaway fan', 'mr beast buys ps5 to a subscriber', '', 'surprising a viewer with a ps5', 'third', 'fourth', 'fifth']}), 3);
+test('the rewriter keeps new, non-empty, plain searches up to the limit and returns its name', async () => {
+ const rewrite = rewriterFrom(async () => ({complete: false, missing: 'x', name: 'MrBeast', searches: ['mrbeast ps5 giveaway fan', 'mr beast buys ps5 to a subscriber', '', '**surprising a viewer** with a ps5', 'third', 'fourth']}), 3);
  assert.deepEqual(await rewrite('q', [{id: 'R1', text: 't'}], ['mr beast buys ps5 to a subscriber']),
-   ['mrbeast ps5 giveaway fan', 'surprising a viewer with a ps5', 'third']);
+   {searches: ['mrbeast ps5 giveaway fan', 'surprising a viewer with a ps5', 'third'], name: 'MrBeast'});
+});
+
+test('the rewriter is shown the picture and at most ten titles; an empty name is none', async () => {
+ let sent: any;
+ const rewrite = rewriterFrom(async text => { sent = JSON.parse(text as string); return {complete: false, missing: 'x', name: '', searches: ['a b c']}; }, 2);
+ const target = {titles: ['MrBeast Surprises Fan With A PS5'], channel: 'MrBeast', spoken: [], wording: [{request: 'subscriber', creators: ['fan']}]};
+ const out = await rewrite('q', [], [], Array.from({length: 12}, (_, i) => `Title ${i} — Channel`), target);
+ assert.equal(sent.titles_found.length, 10);
+ assert.deepEqual(sent.picture, target);
+ assert.equal(out.name, null);
 });
 
 test('the upload scan resolves the handle, pages to the cap, spends one unit per call and finds nothing without a channel', async () => {
@@ -47,10 +57,3 @@ test('the upload scan resolves the handle, pages to the cap, spends one unit per
  } finally { await db.close(); }
 });
 
-test('the rewriter is shown the titles found so far, at most ten', async () => {
- let sent: any;
- const rewrite = rewriterFrom(async text => { sent = JSON.parse(text as string); return {complete: false, missing: 'x', searches: ['a']}; }, 2);
- await rewrite('q', [], [], Array.from({length: 12}, (_, i) => `Title ${i} — Channel`));
- assert.equal(sent.titles_found.length, 10);
- assert.equal(sent.titles_found[0], 'Title 0 — Channel');
-});

@@ -518,7 +518,7 @@ test('too few strong candidates after screening trigger one rewritten search rou
    const screener:Screener={async screen(_q,cs){return {screened:cs.length,promising:new Set(),decisions:cs.map(c=>({url:c.item.url,model:'jev',promoted:false,
      choice:'uncertain' as const,confidence:0.5,probabilities:c.item.url===strong.url?{promising:0.9,uncertain:0.1,mismatch:0}:{promising:0.1,uncertain:0.2,mismatch:0.7}}))};}};
    const rewrites:string[][]=[];
-   const linkRewriter=async(_q:string,_r:any,ran:string[])=>{rewrites.push(ran);return ['giveaway ps5 to a fan'];};
+   const linkRewriter=async(_q:string,_r:any,ran:string[])=>{rewrites.push(ran);return {searches:['giveaway ps5 to a fan'],name:null};};
    const config={...baseConfig,REQUIREMENTS_ENABLED:true};
    const input=searchInput.parse({q:'mr beast buys ps5 to a subscriber'});
    const out=await runDiscovery(db,config,input,[provider],{judge,screener,linkRewriter},async()=>{});
@@ -550,5 +550,29 @@ test('other sites linking to a candidate reach the judge and break ties between 
    assert.equal(listed.find(c=>c.url===a.url)?.linked_from,undefined);
    const order=out.results.map(r=>r.canonical_url);
    assert.ok(order.indexOf(b.url)<order.indexOf(a.url),'the linked video ranks first among equals');
+ }finally{await db.close();}
+});
+
+test('the expansion name reaches the judge only when real titles carry it, and the picture reaches the rewriter',async()=>{
+ const db=await database();
+ try{
+   const weak=[0,1].map(i=>contentInput.parse({url:`https://www.youtube.com/watch?v=weak0000${i}xx`,title:`MrBeast reaction ${i}`}));
+   const fan=contentInput.parse({url:'https://www.youtube.com/watch?v=fanfan0000x',title:'MrBeast Surprises Fan With A PS5'});
+   const provider:SourceAdapter={name:'remake-fixture',capabilities:{transcripts:false,comments:false,embeds:false,accessible_media:false},
+     async search(q){return {results:q==='MrBeast surprises fan with a PS5'?[fan]:weak,next_cursor:null,status:{provider:'remake-fixture',status:'ok',message:'TEST'}};}};
+   const target={titles:['MrBeast Surprises Fan With A PS5'],channel:'MrBeast',spoken:[],wording:[{request:'subscriber',creators:['fan']}]};
+   const planner:Planner={async plan(q){return {kind:'videos',searches:[{query:q,target:'videos'}],criteria:[],model:'test',target};}};
+   const screener:Screener={async screen(_q,cs){return {screened:cs.length,promising:new Set(),decisions:cs.map(c=>({url:c.item.url,model:'jev',promoted:false,
+     choice:'uncertain' as const,confidence:0.5,probabilities:{promising:0.1,uncertain:0.2,mismatch:0.7}}))};}};
+   let seen:any,given:any;
+   const judge:Judge={async judge(_q,cs,context){seen=context;return {model:'j',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,relevance:6,reason:'r',momentKeys:[]}]))};}};
+   const run=(name:string)=>runDiscovery(db,{...baseConfig,REQUIREMENTS_ENABLED:true},searchInput.parse({q:'mr beast giving ps5 to his subscriber'}),[provider],
+     {planner,judge,screener,linkRewriter:async(_q,_r,_ran,_found,t)=>{given=t;return {searches:['MrBeast surprises fan with a PS5'],name};}},async()=>{});
+   const out=await run('MrBeast');
+   assert.deepEqual(given,target,'the rewriter sees the picture');
+   assert.deepEqual(seen?.identified,['MrBeast'],'a name the titles carry reaches the judge');
+   assert.equal((out.trace as any).named,'MrBeast');
+   await run('Jimmy Donaldson');
+   assert.equal(seen?.identified,undefined,'a name no title carries is dropped');
  }finally{await db.close();}
 });

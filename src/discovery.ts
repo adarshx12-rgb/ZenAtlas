@@ -475,8 +475,13 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
    const rewriter = 'linkRewriter' in deps ? deps.linkRewriter : makeLinkRewriter(db, config);
    const creators = creatorNames(contract), terms = requirementTerms(contract, input.q);
    const found = picks.slice(0, 10).map(l => `${l.item.title}${l.item.creator ? ` — ${l.item.creator}` : ''}`);
-   const rewritten = rewriter ? await rewriter(input.q, hardEach(contract).map(r => ({id: r.id, text: r.text})), ran.map(s => s.query), found).catch(() => [] as string[]) : [];
-   const wanted = [...rewritten, ...creators.slice(0, 1).map(name => creatorSearch(name, terms))];
+   const none = {searches: [] as string[], name: null};
+   const remade = rewriter ? await rewriter(input.q, hardEach(contract).map(r => ({id: r.id, text: r.text})), ran.map(s => s.query), found, plan.target)
+     .catch(() => none) : none;
+   // A name counts only when the titles the search really found carry it (src/identify.ts); it is a lead for the judge.
+   const titles = picks.slice(0, 10).map(l => ({title: l.item.title, description: l.item.description ?? null, creator: l.item.creator ?? null}));
+   if (remade.name && nameLike(remade.name) && grounded(remade.name, titles)) names = [remade.name];
+   const wanted = [...remade.searches, ...creators.slice(0, 1).map(name => creatorSearch(name, terms))];
    const searches = uniqueSearches(wanted.map(query => ({query, target: 'videos' as const})), wanted.length, ran.map(s => s.query));
    const before = leads.length, expansionRound = rounds + 1;
    if (searches.length) {
@@ -518,7 +523,7 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
    picks = [...strongFirst.filter(l => basePotential(l.item.url) >= 0.5), ...picks, ...strongFirst.filter(l => basePotential(l.item.url) < 0.5)];
    notes.push({provider: 'link_expansion', status: 'ok', message: `Looked again for matching videos: ${searches.length} new search${searches.length === 1 ? '' : 'es'}`
      + `${scanned ? ` and ${scanned.items} uploads from ${scanned.channel}` : ''}, ${fresh.length} new candidate${fresh.length === 1 ? '' : 's'}.`});
-   process.stdout.write(`${JSON.stringify({event: 'link_expansion', tier: config.TIER, searches: searches.map(s => s.query), fresh: fresh.length,
+   process.stdout.write(`${JSON.stringify({event: 'link_expansion', tier: config.TIER, searches: searches.map(s => s.query), named: !!names.length, fresh: fresh.length,
      strong: fresh.filter(l => basePotential(l.item.url) >= 0.5).length, uploads: scanned})}
 `);
  }
