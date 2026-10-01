@@ -26,6 +26,7 @@ import { judgeRequirements, preferencesOf } from './search-contract.js';
 import { hardEach, type RequirementsContract } from './requirements.js';
 import { accessKind, accessLabel, fullCopyAccess } from './access.js';
 import { linkedFrom, type LinkSource } from './corroboration.js';
+import { earlyScenePicks } from './scene-early.js';
 import { traceFields } from './search-trace.js';
 
 export const VIEWER_ANALYSIS_VERSION = 'viewer-comments-v1';
@@ -39,14 +40,17 @@ export interface Discussion { title: string; url: string; snippet: string|null }
 // council: the judge council's Checker and Chair (src/council.ts); null turns it off, absent builds it from settings when
 // JUDGE_ARCHITECTURE is council. strong: the cascade's Strong judge (src/cascade.ts); absent builds it unless a council is given.
 // captions: fetches captions during a moment search (src/captions.ts); null turns it off, absent builds it from settings.
-export interface SignalDeps { sceneLive?:boolean; youtube?: YouTubeClient; judge?: Judge; council?: CouncilSeats|null; strong?: Judge|null; captions?: CaptionFetcher|null; pages?: PageCheck; videoEvidence?:VideoEvidenceAdapter; discussions?: (query: string) => Promise<Discussion[]> }
+// requestScenes: how scene analysis is requested (src/retained-evidence.ts); replaceable like captions.
+export interface SignalDeps { sceneLive?:boolean; requestScenes?: typeof requestSceneAnalysis; youtube?: YouTubeClient; judge?: Judge; council?: CouncilSeats|null; strong?: Judge|null; captions?: CaptionFetcher|null; pages?: PageCheck; videoEvidence?:VideoEvidenceAdapter; discussions?: (query: string) => Promise<Discussion[]> }
 // What the search plan wanted, and which kind of search found each result (by result id).
 // underrated is retained for callers; obscurity is a badge, never a ranking boost.
 // contract: the search's shared requirements; findings: evidence already gathered for these candidates (exploration).
 // screens: the screener's decision per canonical URL, the start of each candidate's link potential (src/link-potential.ts).
 // linkSources: the pages the search has read, for finding which other sites link to a candidate (src/corroboration.ts).
 export interface SignalContext extends JudgeContext { targets: Map<string,SearchTarget>; underrated?: boolean;
- contract?: RequirementsContract; findings?: Finding[]; screens?: Map<string,ScreenSignal>; linkSources?: () => Promise<LinkSource[]> }
+ contract?: RequirementsContract; findings?: Finding[]; screens?: Map<string,ScreenSignal>; linkSources?: () => Promise<LinkSource[]>;
+ // watch: the planner says only watching can settle this request (src/planner.ts); it gates early scene analysis only.
+ watch?: boolean }
 export const UNDERRATED_BADGE = 'Underrated find';
 // Uncertain verdicts remain in the trace, never as filler in the main results.
 const UNVERIFIED_SCORE = 5;
@@ -288,8 +292,25 @@ export async function applySignals(db: DB, config: Config, query: string, result
    return got.imported ? {provider: 'captions_now', status: 'ok', message: `Captions were fetched for ${got.imported} of ${got.tried} promising video${got.tried === 1 ? '' : 's'} during this search.`}
      : {provider: 'captions_now', status: 'partial', message: 'Captions unavailable right now; videos were judged on titles, descriptions and comments.'};
  };
+ // Early scene analysis (docs/superpowers/specs/2026-10-01-early-scenes-design.md): for requests only watching can settle,
+ // the screener's most promising videos start scene analysis once the early captions are in (long videos then get
+ // transcript windows), while judging runs. Judging never waits for it; the post-judge pick fills the slots left.
+ const requestScenes = deps.requestScenes ?? requestSceneAnalysis;
+ const sceneRequirements = (context?.contract ? judgeRequirements(context.contract) : [])
+   .filter(r => !['format', 'date', 'duration', 'authority', 'completeness'].includes(r.kind ?? ''));
+ const earlyPicks = deps.sceneLive && config.SCENE_EARLY && config.SCENE_AUTO_QUEUE && config.SCENE_SEARCH_LIMIT && context?.watch
+   ? earlyScenePicks(results, context.screens, link, config.SCENE_SEARCH_LIMIT, config.JEV_SCREEN_CONFIDENCE) : [];
+ const earlyDeadline = new Date(Date.now() + config.SCENE_VERIFY_MS).toISOString();
+ const captionsDone = linkCaptionsTask();
+ const earlyScenes: Promise<SceneRequest[]> = earlyPicks.length ? captionsDone.catch(() => null).then(async () => {
+   const requests = await requestScenes(db, config, earlyPicks.map(r => ({...r, duration: r.duration ?? extra.get(r.id)?.details?.duration ?? null})), query,
+     {early: true, interactive: true, deadline: earlyDeadline, ...(sceneRequirements.length ? {requirements: sceneRequirements} : {})});
+   process.stdout.write(`${JSON.stringify({event: 'scene_early', ...traceFields(), picked: earlyPicks.length, requested: requests.length, ms: Date.now() - began})}
+`);
+   return requests;
+ }).catch(() => [] as SceneRequest[]) : Promise.resolve([]);
  const [youtubeStatus, reddit, pageStatus, , captionsNow] = await Promise.all([youtubeRun.finally(() => mark('comments')), redditTask(), pageTask(), adapterTask(),
-   linkCaptionsTask().finally(() => mark('captions'))]);
+   captionsDone.finally(() => mark('captions'))]);
  mark('evidence');
  for (const status of [youtubeStatus, reddit.status, pageStatus, captionsNow]) if (status) providers.push(status);
  const transcriptOptions={terms:linkTerms,maxChars:config.LINK_TRANSCRIPT_CHARS};
@@ -390,14 +411,19 @@ export async function applySignals(db: DB, config: Config, query: string, result
    // Start watching while the remaining evidence checks and ranking run. Every subscribed search will receive the
    // later result revision; no model call is held open here waiting for the Python worker.
    if(deps.sceneLive&&config.SCENE_AUTO_QUEUE&&config.SCENE_SEARCH_LIMIT){
-     sceneCandidates=candidates.filter(c=>c.kind==='video'&&!c.scenes?.length&&byKey.has(c.key)&&byKey.get(c.key)!.relevance>=3&&
-       !byKey.get(c.key)!.intentChecks?.some(ch=>ch.status==='mismatch')).sort((a,b)=>byKey.get(b.key)!.relevance-byKey.get(a.key)!.relevance).slice(0,config.SCENE_SEARCH_LIMIT);
+     // Videos already sent early keep their slots; the judged pick fills only what is left of SCENE_SEARCH_LIMIT.
+     const early=await earlyScenes,taken=new Set(early.map(j=>j.content_id));
+     const judged=candidates.filter(c=>c.kind==='video'&&!c.scenes?.length&&byKey.has(c.key)&&byKey.get(c.key)!.relevance>=3&&!taken.has(idOf.get(c.key)!)&&
+       !byKey.get(c.key)!.intentChecks?.some(ch=>ch.status==='mismatch')).sort((a,b)=>byKey.get(b.key)!.relevance-byKey.get(a.key)!.relevance)
+       .slice(0,Math.max(0,config.SCENE_SEARCH_LIMIT-early.length));
+     sceneCandidates=[...candidates.filter(c=>taken.has(idOf.get(c.key)!)),...judged];
      sceneContext=judgeContext??{kind:'videos',criteria:[],...(requirements?{requirements}:{})};
-     sceneDeadline=new Date(Date.now()+config.SCENE_VERIFY_MS).toISOString();
-     const watching=sceneCandidates.map(c=>{const id=idOf.get(c.key)!,r=pool.find(r=>r.id===id)!;return {...r,duration:r.duration??extra.get(id)?.details?.duration??null,
+     sceneDeadline=early.length?earlyDeadline:new Date(Date.now()+config.SCENE_VERIFY_MS).toISOString();
+     const watching=judged.map(c=>{const id=idOf.get(c.key)!,r=pool.find(r=>r.id===id)!;return {...r,duration:r.duration??extra.get(id)?.details?.duration??null,
        judgement:{relevance:byKey.get(c.key)!.relevance,reason:'Pending scene inspection',model:'pending'}};});
-     sceneRequests=await requestSceneAnalysis(db,config,watching,query,{interactive:true,deadline:sceneDeadline,
-       requirements:requirements?.filter(r=>!['format','date','duration','authority','completeness'].includes(r.kind??''))}).catch(()=>[]);
+     const late=watching.length?await requestScenes(db,config,watching,query,{interactive:true,deadline:sceneDeadline,
+       requirements:requirements?.filter(r=>!['format','date','duration','authority','completeness'].includes(r.kind??''))}).catch(()=>[]):[];
+     sceneRequests=[...early,...late];
    }
    // The second stage re-checks verdicts across all batches: the cascade sends only uncertain ones to one Strong judge;
    // the council (JUDGE_ARCHITECTURE=council) re-checks the top ones, with a Chair where the two disagree.

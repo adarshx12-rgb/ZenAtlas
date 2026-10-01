@@ -539,7 +539,7 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
  const targets = new Map(found.map(r => [r.id, webUrls.has(leadUrl.get(r.id)!) ? 'web' as const : 'videos' as const]));
  const signals = await applySignals(db, {...config, JUDGE_CANDIDATES: found.length}, input.q, found, {...signalDeps, judge, pages: {check: checkPage}},
    {kind: plan.kind, criteria: plan.criteria, targets, underrated: deep, anime: anime.anime, screens, ...(contract ? {contract, findings: gapFindings} : {}),
-     ...(names.length ? {identified: names} : {}), linkSources: readPages});
+     ...(names.length ? {identified: names} : {}), ...(plan.watch ? {watch: true} : {}), linkSources: readPages});
  mark('judged');
  // Semantic-only candidates were admitted for judging. If that check fails, they must not
  // displace supported keyword matches merely because the model had been configured.

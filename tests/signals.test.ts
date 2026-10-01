@@ -390,3 +390,57 @@ test('a YouTube block-page title from a search engine is replaced by the video\'
    assert.equal(row.title,'Cat knocks glass off table in slow motion');assert.equal(row.description,'Slow-mo cat');
  }finally{await db.close();}
 });
+
+const tube=(n:number)=>({...fakeResult(n),canonical_url:`https://www.youtube.com/watch?v=video${String(n).padStart(6,'0')}`,source_name:'youtube.com'});
+const sceneSetup=(watch:boolean|undefined,opts:{throwEarly?:boolean;early?:boolean;live?:boolean}={})=>{
+ const results=[tube(1),tube(2),tube(3)];
+ const order:string[]=[];const calls:{early:boolean;ids:string[]}[]=[];
+ const screens=new Map(results.map((r,i)=>[r.canonical_url,{choice:i===0?'promising' as const:'uncertain' as const,confidence:0.95,
+   probabilities:{promising:i===0?0.95:0.2,uncertain:i===0?0.03:0.7,mismatch:0.02}}]));
+ const judge:Judge={async judge(_q,cs){order.push('judge');return {model:'test',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,relevance:7,reason:'Specific evidence',momentKeys:[]}]))};}};
+ const requestScenes=async(_db:any,_c:any,rs:any[],_q:string,o:any)=>{order.push(o.early?'early':'late');calls.push({early:!!o.early,ids:rs.map((r:any)=>r.id)});
+   if(o.early&&opts.throwEarly) throw new Error('scene queue down');
+   return rs.map((r:any)=>({content_id:r.id,job_id:crypto.randomUUID(),created:true}));};
+ const config={...testConfig,SCENE_AUTO_QUEUE:true,SCENE_SEARCH_LIMIT:2,GEMINI_API_KEY:'x',...(opts.early===false?{SCENE_EARLY:false}:{})} as any;
+ const run=(db:any)=>applySignals(db,config,'cat knocks glass off table',results,{judge,sceneLive:opts.live??true,requestScenes} as any,
+   {kind:'videos',criteria:[],targets:new Map(),screens,...(watch!==undefined?{watch}:{})} as any);
+ return {results,order,calls,run};
+};
+
+test('a watch request starts scene analysis on the confident pick before judging, and the post-judge pick only fills the slot left',async()=>{
+ const db=await database();
+ try{
+   const s=sceneSetup(true);
+   const out=await s.run(db);
+   assert.deepEqual(s.calls[0],{early:true,ids:[s.results[0].id]});
+   assert.ok(s.order.indexOf('early')<s.order.indexOf('judge'),s.order.join(','));
+   const late=s.calls.filter(c=>!c.early);
+   assert.ok(late.every(c=>c.ids.length<=1&&!c.ids.includes(s.results[0].id)),JSON.stringify(late));
+   assert.ok(out.sceneReview?.entries.some(e=>e.content_id===s.results[0].id),'the early pick is reviewed with the rest');
+   assert.ok((out.sceneReview?.entries.length??0)<=2);
+ }finally{await db.close();}
+});
+
+test('no early start without a watch request, with the switch off, or outside live searches',async()=>{
+ const db=await database();
+ try{
+   for(const s of [sceneSetup(false),sceneSetup(undefined),sceneSetup(true,{early:false})]){
+     await s.run(db);
+     assert.ok(!s.calls.some(c=>c.early),JSON.stringify(s.calls));
+     assert.ok(s.calls.some(c=>!c.early&&c.ids.length===2),'the post-judge pick keeps both slots');
+   }
+   const offline=sceneSetup(true,{live:false});
+   await offline.run(db);
+   assert.ok(!offline.calls.some(c=>c.early));
+ }finally{await db.close();}
+});
+
+test('a failed early request leaves judging and the post-judge pick working',async()=>{
+ const db=await database();
+ try{
+   const s=sceneSetup(true,{throwEarly:true});
+   const out=await s.run(db);
+   assert.equal(out.results.length,3);
+   assert.ok(s.calls.some(c=>!c.early&&c.ids.length===2),JSON.stringify(s.calls));
+ }finally{await db.close();}
+});

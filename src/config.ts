@@ -183,6 +183,8 @@ export const configSchema = z.object({
   SCENE_SHORTLIST: number(3, 0, 10),
   SCENE_SEARCH_LIMIT: number(2, 0, 3), SCENE_VERIFY_MS: number(90000, 1000, 300000),
   SCENE_AUTO_DAILY_JOBS: number(20, 0, 10000),
+  // Watch requests start scene analysis right after screening (src/scene-early.ts); false waits for judging as before.
+  SCENE_EARLY: z.enum(['true','false']).default('true').transform(v => v === 'true'),
   // Transcript-guided scene analysis (src/scene-window.ts): videos at least SCENE_WINDOW_MIN_SECONDS long whose transcript
   // Jev ties to the moment (confidence >= SCENE_WINDOW_CONFIDENCE) are analysed around that chunk, +-SCENE_WINDOW_PAD_SECONDS.
   SCENE_WINDOW_MIN_SECONDS: number(600, 60, 7200), SCENE_WINDOW_PAD_SECONDS: number(60, 0, 600),
