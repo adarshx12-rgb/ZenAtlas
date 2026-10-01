@@ -9,15 +9,17 @@ export const configSchema = z.object({
   SESSION_SECRET: z.string().min(32).refine(v => !v.startsWith('replace-'), 'Replace the session secret'),
   ADMIN_TOKEN: z.string().min(32).refine(v => !v.startsWith('replace-'), 'Replace the admin token'),
   SEARXNG_BASE_URL: optional, SEARXNG_TOKEN: optional,
-  SEARXNG_ENGINES: z.string().default('youtube,dailymotion,odysee,bing videos,google videos,duckduckgo videos,brave.videos'),
-  SEARXNG_SOURCE_ENGINES: z.string().default('google,bing'),
-  SEARXNG_WEB_ENGINES: z.string().default('google,bing,brave,yahoo'),
+  SEARXNG_ENGINES: z.string().default('youtube,dailymotion,bing videos,duckduckgo videos,brave.videos,peertube'),
+  SEARXNG_SOURCE_ENGINES: z.string().default('bing,duckduckgo web'),
+  SEARXNG_WEB_ENGINES: z.string().default('duckduckgo web,bing,yahoo,github,stackoverflow'),
   // Image search (see src/images.ts). Reddit and Pinterest have no SearXNG engine, but these
   // four index both, so their images still come back.
-  SEARXNG_IMAGE_ENGINES: z.string().default('bing images,google images,duckduckgo images,brave.images'),
+  SEARXNG_IMAGE_ENGINES: z.string().default('bing images,duckduckgo images,brave.images,pixabay images,unsplash,pexels,flickr,wikicommons.images,stocksnap,ipernity,artstation'),
   // Extra engines that only deep dives use, chosen because ordinary searches rarely reach their sources.
-  SEARXNG_DEEP_ENGINES: z.string().default('bilibili,acfun,privacywall videos,sepiasearch,wikicommons.videos'),
-  SEARXNG_DEEP_WEB_ENGINES: z.string().default('yep,resulthunter,privacywall,hackernews'),
+  SEARXNG_DEEP_ENGINES: z.string().default('bilibili,acfun,sepiasearch,wikicommons.videos'),
+  // Research and book engines the Docs tab asks with the plain query (arXiv and Semantic Scholar have their own sources).
+  SEARXNG_DOC_ENGINES: z.string().default('crossref,pubmed,europepmc,openalex,openairepublications,openlibrary,wikibooks'),
+  SEARXNG_DEEP_WEB_ENGINES: z.string().default('yep,resulthunter,hackernews,vuhuv,360search,bing news,duckduckgo news,wikinews'),
   SEARXNG_DAILY_BUDGET: number(2000, 0, 100000),
   // Shared per-engine pacing and a deadline including time queued behind other searches.
   SEARXNG_MIN_INTERVAL_MS: number(1000, 0, 10000), SEARXNG_SEARCH_TIMEOUT_MS: number(15000, 100, 60000),

@@ -85,20 +85,28 @@ export async function findDocuments(db: DB, config: Config, query: string, deps:
    ['document_sites', async () => ({docs: await searxng(`${query} (${VIEWER_SITES.map(s => `site:${s}`).join(' OR ')})`)})],
    ['repositories', async () => ({sites: await searxng(`${query} (${REPOSITORY_SITES.map(s => `site:${s}`).join(' OR ')})`)})],
  ];
- async function searxng(q: string): Promise<SourceRow[]> {
+ // Research engines get the plain query: site: filters only work on general web engines. A direct PDF is a document;
+ // a journal or record page is a place for the hunt to look, as with DOAJ.
+ const researchEngines = config.SEARXNG_DOC_ENGINES.split(',').map(e => e.trim()).filter(Boolean);
+ if (config.SEARXNG_BASE_URL && researchEngines.length) sources.push(['research', async () => {
+   const rows = await searxng(query, researchEngines, 'searxng_research');
+   return {docs: rows.filter(r => r.pdf).map(r => ({...r, url: r.pdf!})), sites: rows.filter(r => !r.pdf)};
+ }]);
+ async function searxng(q: string, engines = config.SEARXNG_WEB_ENGINES.split(','), engine = 'searxng'): Promise<(SourceRow & {pdf?: string})[]> {
    if (!config.SEARXNG_BASE_URL) return [];
    if (!await deps.budget(db, 'discovery:searxng', config.SEARXNG_DAILY_BUDGET)) throw new Error('budget_exhausted');
-   const data = await searchSearXNG(config, {query: q, engines: config.SEARXNG_WEB_ENGINES.split(','), safeSearch: '2',
+   const data = await searchSearXNG(config, {query: q, engines, safeSearch: '2',
      deadline: Date.now() + config.DOC_SOURCES_TIMEOUT_MS}, deps.json);
    if (data.engines.failed.length === data.engines.asked.length && !data.results.length) throw new Error('unavailable');
    const seen = new Set<string>();
    return data.results.flatMap(raw => {
-     const parsed = z.looseObject({url: z.string()}).safeParse(raw);
+     const parsed = z.looseObject({url: z.string(), pdf_url: z.string().optional()}).safeParse(raw);
      if (!parsed.success) return [];
      const r = parsed.data;
      if (seen.has(r.url)) return [];
      seen.add(r.url);
-     return [{url: r.url, title: r.title, snippet: r.content, published: r.publishedDate, engine: 'searxng'}];
+     const pdf = r.pdf_url?.startsWith('https://') ? r.pdf_url : undefined;
+     return [{url: r.url, title: r.title, snippet: r.content, published: r.publishedDate, engine, ...(pdf ? {pdf} : {})}];
    }).slice(0, 20);
  }
 

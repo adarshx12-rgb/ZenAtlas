@@ -63,7 +63,7 @@ test('free-document sources: each API becomes documents or places to look, and o
    if (!(host in answers)) throw new Error(`unexpected ${url}`);
    return answers[host] as any;
  };
- const out = await findDocuments({} as any, {...testConfig, SEARXNG_BASE_URL: 'http://searxng.test'}, 'climate change report',
+ const out = await findDocuments({} as any, {...testConfig, SEARXNG_BASE_URL: 'http://searxng.test', SEARXNG_DOC_ENGINES: ''}, 'climate change report',
    {json: fetch, text: async url => ({url, contentType: 'application/atom+xml', text: await fetch(url)}), budget: async () => true});
  assert.ok(out.docs.some(d => d.url === 'https://arxiv.org/pdf/2012.10386v1' && d.title === 'Future Climate Change Projections'));
  assert.ok(out.docs.some(d => d.url === 'https://zenodo.org/records/18017460/files/D1.2%20Diagnosis.pdf?download=1'), 'the file name shows its type');
@@ -105,4 +105,21 @@ test('free-document sources have their own short time limit, so one slow source 
  const record=async(_url:string,o:{timeoutMs:number})=>{limits.add(o.timeoutMs);throw new Error('offline');};
  await findDocuments({} as any,{...testConfig,PROVIDER_TIMEOUT_MS:12000},'gen x soft club',{json:record as any,text:record as any,budget:async()=>true});
  assert.deepEqual([...limits],[5000],'measured 2026-09-27: Zenodo stalled 12 s on one query while it answers others in about a second');
+});
+
+test('research engines in SearXNG are asked the plain query: a direct PDF is a document, a journal or record page is a place to look',async()=>{
+ const asked:URL[]=[];
+ const json=async(url:string)=>{const u=new URL(url);if(u.hostname!=='searxng.test')throw new Error('offline');asked.push(u);
+   const e=u.searchParams.get('engines');
+   return e==='crossref'?{results:[{url:'https://doi.org/10.1/leaf',title:'Leaf paper',content:'Abstract'}]}
+     :e==='pubmed'?{results:[{url:'https://europepmc.org/article/PMC1',title:'Open paper',pdf_url:'https://europepmc.org/articles/PMC1?pdf=render'}]}:{results:[]};};
+ const out=await findDocuments({} as any,{...testConfig,SEARXNG_BASE_URL:'http://searxng.test',SEARXNG_DOC_ENGINES:'crossref,pubmed'},'photosynthesis light reactions',
+   {json:json as any,text:async()=>{throw new Error('offline')},budget:async()=>true});
+ const research=asked.filter(u=>['crossref','pubmed'].includes(u.searchParams.get('engines')!));
+ assert.deepEqual(research.map(u=>u.searchParams.get('q')),['photosynthesis light reactions','photosynthesis light reactions'],'no site: filters, which research engines do not understand');
+ assert.deepEqual(out.docs.filter(d=>d.engine==='searxng_research').map(d=>[d.url,d.title]),[['https://europepmc.org/articles/PMC1?pdf=render','Open paper']]);
+ assert.deepEqual(out.sites.filter(d=>d.engine==='searxng_research').map(d=>d.url),['https://doi.org/10.1/leaf']);
+ assert.equal(out.providers.find(p=>p.provider==='research')?.status,'ok');
+ const none=await findDocuments({} as any,{...testConfig,SEARXNG_BASE_URL:'http://searxng.test',SEARXNG_DOC_ENGINES:''},'x y',{json:json as any,text:async()=>{throw new Error('offline')},budget:async()=>true});
+ assert.ok(!none.providers.some(p=>p.provider==='research'),'no research engines configured, no research source');
 });

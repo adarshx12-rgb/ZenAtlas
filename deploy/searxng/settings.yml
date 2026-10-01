@@ -38,6 +38,37 @@ use_default_settings:
       - resulthunter
       - privacywall
       - hackernews
+      # Added 2026-10-02 after one test search each on a trial instance of this image; Google was dropped from the .env
+      # lists because it answered almost every request with a CAPTCHA (28 blocks in 5 days). Left out: findfiles (files
+      # from open directories, including .exe downloads), wiby, reloado, encyclosearch, searchch and picjumbo (off-topic),
+      # duckduckgo (CAPTCHA; duckduckgo web works), fireball, zapmeta, fastbot, searchmysite (access denied), vimeo,
+      # reuters, library of congress, 500px, 360search videos (errors), and engines that do not load without extra
+      # setup (startpage, dogpile, swisscows, marginalia, metacrawler, deviantart, core.ac.uk, yahoo news, openclipart).
+      - peertube
+      - duckduckgo web
+      - github
+      - stackoverflow
+      - vuhuv
+      - 360search
+      - bing news
+      - duckduckgo news
+      - wikinews
+      - pixabay images
+      - unsplash
+      - pexels
+      - flickr
+      - wikicommons.images
+      - stocksnap
+      - ipernity
+      - artstation
+      # Docs tab research engines (SEARXNG_DOC_ENGINES), asked with the plain query.
+      - crossref
+      - pubmed
+      - europepmc
+      - openalex
+      - openairepublications
+      - openlibrary
+      - wikibooks
 search:
   safe_search: 1
   formats:
@@ -52,6 +83,54 @@ outgoing:
   request_timeout: 8.0
   max_request_timeout: 12.0
 engines:
+  - name: peertube
+    disabled: false
+  - name: duckduckgo web
+    disabled: false
+  - name: github
+    disabled: false
+  - name: stackoverflow
+    disabled: false
+  - name: vuhuv
+    disabled: false
+  - name: 360search
+    disabled: false
+  - name: bing news
+    disabled: false
+  - name: duckduckgo news
+    disabled: false
+  - name: wikinews
+    disabled: false
+  - name: pixabay images
+    disabled: false
+  - name: unsplash
+    disabled: false
+  - name: pexels
+    disabled: false
+  - name: flickr
+    disabled: false
+  - name: wikicommons.images
+    disabled: false
+  - name: stocksnap
+    disabled: false
+  - name: ipernity
+    disabled: false
+  - name: artstation
+    disabled: false
+  - name: crossref
+    disabled: false
+  - name: pubmed
+    disabled: false
+  - name: europepmc
+    disabled: false
+  - name: openalex
+    disabled: false
+  - name: openairepublications
+    disabled: false
+  - name: openlibrary
+    disabled: false
+  - name: wikibooks
+    disabled: false
   - name: youtube
     disabled: false
   - name: google
