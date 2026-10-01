@@ -117,3 +117,15 @@ test('cancelled subscriptions and revoked scene permission cannot publish a veri
    assert.equal(response.verification?.items[0].status,'unavailable');assert.equal(response.results.length,0);
  }finally{await db.close();}
 });
+
+test('an early request needs no judgement; without the early option an unjudged video is not sent',async()=>{
+ const db=await database();try{
+   const f=await setup(db);
+   const unjudged={...f.initial.results.find(r=>r.id===f.item.id)!,judgement:null} as any;
+   const config={...testConfig,SCENE_AUTO_QUEUE:true,GEMINI_API_KEY:'fixture'};
+   const options={interactive:true,deadline:new Date(Date.now()+90000).toISOString(),window:async()=>null};
+   assert.deepEqual(await requestSceneAnalysis(db,config,[unjudged],'lighthouse',options),[]);
+   const [early]=await requestSceneAnalysis(db,config,[unjudged],'lighthouse',{...options,early:true});
+   assert.equal(early.job_id,f.sceneJob.id);
+ }finally{await db.close();}
+});

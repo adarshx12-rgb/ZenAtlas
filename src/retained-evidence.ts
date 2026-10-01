@@ -88,11 +88,13 @@ export async function queueSceneShortlist(db:DB,config:Config,results:Result[],q
 export interface SceneRequest {content_id:string;job_id:string;created:boolean}
 export async function requestSceneAnalysis(db:DB,config:Config,results:Result[],query:string,options:{
  minRelevance?:number;interactive?:boolean;requirements?:{id:string;text:string}[];deadline?:string;
+ // early: picked from the screener before any judgement exists (src/scene-early.ts), so no relevance minimum applies.
+ early?:boolean;
  window?:(query:string,segments:{start:number;end:number;text:string}[],duration:number)=>Promise<SceneWindow|null>
 } = {}):Promise<SceneRequest[]> {
  if(!config.SCENE_AUTO_QUEUE || !config.GEMINI_API_KEY) return [];
  const requests:SceneRequest[]=[];
- await Promise.all(results.filter(r=>(r.judgement?.relevance??0)>=(options.minRelevance??3))
+ await Promise.all(results.filter(r=>options.early||(r.judgement?.relevance??0)>=(options.minRelevance??3))
    .slice(0,options.interactive?config.SCENE_SEARCH_LIMIT:config.SCENE_SHORTLIST).map(async result=>{
    // Chosen before the transaction: Jev takes a few seconds, and nothing here needs the row locks.
    const segments=(result.duration??0)>90?(await db.query(`SELECT id::text AS id,start_seconds AS start,end_seconds AS "end",text
