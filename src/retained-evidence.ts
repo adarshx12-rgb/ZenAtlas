@@ -110,11 +110,14 @@ export async function requestSceneAnalysis(db:DB,config:Config,results:Result[],
      if(!row) return;
      let version=(await tx.query("SELECT * FROM media_versions WHERE content_id=$1 AND status='current'",[row.id])).rows[0];
      const id=youtubeId(row.canonical_url);
-     if(!version && id && row.duration>0 && row.duration<=2700) {
+     // An early request can arrive before the search has written the video's length to the catalogue (it signals details
+     // ready first), so the length the search already knows stands in for a missing one.
+     const duration=row.duration>0?row.duration:(result.duration??0);
+     if(!version && id && duration>0 && duration<=2700) {
        version=(await tx.query(`INSERT INTO media_versions(content_id,version_key,media_kind,media_reference,fingerprint,
          duration_seconds,duration_source,timeline_offset_seconds,offset_basis,provenance)
          VALUES($1,$2,'youtube',$3,$4,$5,'content_metadata',0,'Canonical YouTube timeline.',
-         '{"method":"discovery_shortlist","duration":"youtube_metadata"}') RETURNING *`,[row.id,`youtube:${id}`,row.canonical_url,id,row.duration])).rows[0];
+         '{"method":"discovery_shortlist","duration":"youtube_metadata"}') RETURNING *`,[row.id,`youtube:${id}`,row.canonical_url,id,duration])).rows[0];
      }
      if(!version) return;
      // An analysed video is queued again only for a window no earlier analysis inspected.

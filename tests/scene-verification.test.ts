@@ -129,3 +129,18 @@ test('an early request needs no judgement; without the early option an unjudged 
    assert.equal(early.job_id,f.sceneJob.id);
  }finally{await db.close();}
 });
+
+test('an early request uses the length the search knows when the catalogue has not stored it yet',async()=>{
+ const db=await database();try{
+   await db.query(`INSERT INTO sources(domain,display_name,status,policy,provenance) VALUES('www.youtube.com','YouTube','active',
+     '{"metadata":true,"video_analysis":true,"retention_days":30}','{"fixture":true}')`);
+   const {ingest}=await import('../src/catalogue.js');const {contentInput}=await import('../src/types.js');
+   const stored=(await ingest(db,contentInput.parse({url:'https://www.youtube.com/watch?v=earlyrace01',title:'Falcon Heavy side boosters land together'}),{fixture:true}))!;
+   assert.equal((await db.query('SELECT duration FROM content WHERE id=$1',[stored.id])).rows[0].duration,null,'the race: no length stored yet');
+   const config={...testConfig,SCENE_AUTO_QUEUE:true,GEMINI_API_KEY:'fixture'};
+   const [request]=await requestSceneAnalysis(db,config,[{...stored,duration:240,judgement:null} as any],'falcon heavy boosters land',
+     {early:true,interactive:true,deadline:new Date(Date.now()+90000).toISOString(),window:async()=>null});
+   assert.ok(request?.created,'the scene job is created from the known length');
+   assert.equal((await db.query('SELECT duration_seconds FROM media_versions WHERE content_id=$1',[stored.id])).rows[0]?.duration_seconds,240);
+ }finally{await db.close();}
+});
