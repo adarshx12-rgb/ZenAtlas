@@ -6,7 +6,7 @@ import {enqueue} from '../src/queue.js';
 import {reviewScenesOnce,sceneProgress,type SceneReviewPlan} from '../src/scene-verification.js';
 import type {DB} from '../src/db.js';
 import type {Judge} from '../src/judge.js';
-import {requestSceneAnalysis} from '../src/retained-evidence.js';
+import {requestSceneAnalysis,finishedScenes} from '../src/retained-evidence.js';
 
 const observation='A red lighthouse flashes above stormy waves.';
 async function setup(db:DB,offset=0) {
@@ -142,5 +142,18 @@ test('an early request uses the length the search knows when the catalogue has n
      {early:true,interactive:true,deadline:new Date(Date.now()+90000).toISOString(),window:async()=>null});
    assert.ok(request?.created,'the scene job is created from the known length');
    assert.equal((await db.query('SELECT duration_seconds FROM media_versions WHERE content_id=$1',[stored.id])).rows[0]?.duration_seconds,240);
+ }finally{await db.close();}
+});
+
+test('finished scene evidence is returned only once its job has completed with scenes',async()=>{
+ const db=await database();try{
+   const f=await setup(db);
+   const requests=[{content_id:f.item.id,job_id:f.sceneJob.id,created:false}];
+   assert.equal((await finishedScenes(db,requests,'lighthouse')).size,0,'still queued');
+   await f.finish();
+   const ready=await finishedScenes(db,requests,'lighthouse');
+   assert.equal(ready.get(f.item.id)?.scenes[0]?.summary,observation);
+   await db.query("UPDATE jobs SET status='complete',result='{\"status\":\"failed\"}' WHERE id=$1",[f.sceneJob.id]);
+   assert.equal((await finishedScenes(db,requests,'lighthouse')).size,0,'a failed analysis gives nothing');
  }finally{await db.close();}
 });

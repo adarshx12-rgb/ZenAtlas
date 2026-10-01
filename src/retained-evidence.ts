@@ -86,6 +86,16 @@ export async function queueSceneShortlist(db:DB,config:Config,results:Result[],q
 }
 
 export interface SceneRequest {content_id:string;job_id:string;created:boolean}
+// Scene evidence for the requests whose analysis has already completed, by content id; nothing for queued, running or
+// failed jobs. Used to judge early scene picks with what they show before the results are ranked (src/signals.ts).
+export async function finishedScenes(db:DB,requests:SceneRequest[],query:string){
+ if(!requests.length) return new Map<string,Awaited<ReturnType<typeof retainedEvidence>> extends Map<string,infer E>?E:never>();
+ const done=new Set((await db.query(`SELECT id::text FROM jobs WHERE id=ANY($1::uuid[]) AND status='complete' AND result->>'status' IN ('complete','cached')`,
+   [requests.map(r=>r.job_id)])).rows.map(r=>r.id));
+ const ids=requests.filter(r=>done.has(r.job_id)).map(r=>r.content_id);
+ const evidence=ids.length?await retainedEvidence(db,ids,query):new Map();
+ return new Map([...evidence].filter(([,e])=>e.scenes.length));
+}
 export async function requestSceneAnalysis(db:DB,config:Config,results:Result[],query:string,options:{
  minRelevance?:number;interactive?:boolean;requirements?:{id:string;text:string}[];deadline?:string;
  // early: picked from the screener before any judgement exists (src/scene-early.ts), so no relevance minimum applies.
