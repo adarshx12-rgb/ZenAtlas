@@ -426,3 +426,21 @@ test('a search that adds a word to one already run is a refinement, not a duplic
  assert.ok(!nearDuplicate('Free Solo documentary National Geographic','Free Solo documentary National Geographic 2018'));
  assert.ok(nearDuplicate('climbed El Capitan without ropes','climbed El Capitan without ropes without ropes'));
 });
+
+test('the planner flags requests only watching can settle',async()=>{
+ let system='';
+ const client:any={models:['m'],async json(_b:string,s:string){system=s;return {model:'m',value:{kind:'videos',watch:true,
+   searches:[{query:'cat knocks glass off table slow motion',target:'videos'}],criteria:[]}};}};
+ const plan=await new ModelPlanner(client,{...testConfig,REQUIREMENTS_ENABLED:false}).plan('cat pushing glass of table slow mo');
+ assert.match(system,/only watching/i);
+ assert.equal(plan.watch,true);
+});
+
+test('a missing or malformed watching flag is not a yes and costs the plan nothing',async()=>{
+ for(const bad of [undefined,'yes',null]){
+   const client:any={models:['m'],async json(){return {model:'m',value:{kind:'videos',watch:bad,searches:[{query:'necktie knot tutorial',target:'videos'}],criteria:[]}};}};
+   const plan=await new ModelPlanner(client,{...testConfig,REQUIREMENTS_ENABLED:false}).plan('tie a tie');
+   assert.equal(plan.watch,undefined);
+   assert.ok(plan.searches.some(s=>s.query==='necktie knot tutorial'));
+ }
+});

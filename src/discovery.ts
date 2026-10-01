@@ -625,7 +625,7 @@ function traceOf(input: SearchInput, plan: SearchPlan, searches: PlannedSearch[]
  const verdicts = new Map(judged.map(j => [j.id, j]));
  const shown = new Map(results.map((r, i) => [r.canonical_url, {rank: i + 1, badges: r.badges ?? []}]));
  return {query: input.q, depth: input.depth === 'deep' && !input.source ? 'deep' : 'quick',
-   plan: {kind: plan.kind, criteria: plan.criteria, model: plan.model, ...(plan.target ? {target: plan.target} : {})},
+   plan: {kind: plan.kind, criteria: plan.criteria, model: plan.model, ...(plan.target ? {target: plan.target} : {}), ...(plan.watch !== undefined ? {watch: plan.watch} : {})},
    searches: searches.map(s => ({query: s.query, target: s.target, round: roundOf.get(`${s.target}:${s.query.toLowerCase()}`) ?? 0})),
    rounds, providers,
    pool: found.map(r => { const v = verdicts.get(r.id), place = shown.get(r.canonical_url);

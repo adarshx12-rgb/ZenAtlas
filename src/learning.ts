@@ -37,7 +37,7 @@ export interface SearchTrace {
  trace_id?: string;
  exploration?: ExplorationTrace;
  query: string; depth: 'quick'|'deep';
- plan: {kind: string; criteria: string[]; model: string|null; target?: AnswerPicture};
+ plan: {kind: string; criteria: string[]; model: string|null; target?: AnswerPicture; watch?: boolean};
  searches: {query: string; target: string; round: number}[];
  rounds: number; providers: ProviderStatus[]; pool: TraceEntry[];
  // Milliseconds from the start when each stage finished; evidence holds the evidence steps inside judging.
