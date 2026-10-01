@@ -392,13 +392,17 @@ test('a YouTube block-page title from a search engine is replaced by the video\'
 });
 
 const tube=(n:number)=>({...fakeResult(n),canonical_url:`https://www.youtube.com/watch?v=video${String(n).padStart(6,'0')}`,source_name:'youtube.com'});
-const sceneSetup=(watch:boolean|undefined,opts:{throwEarly?:boolean;early?:boolean;live?:boolean;judgeMs?:number;finished?:boolean}={})=>{
+const sceneSetup=(watch:boolean|undefined,opts:{throwEarly?:boolean;early?:boolean;live?:boolean;judgeMs?:number;finished?:boolean;strayKey?:boolean;failRejudge?:boolean}={})=>{
  const results=[tube(1),tube(2),tube(3)];
  const order:string[]=[];const calls:{early:boolean;ids:string[]}[]=[];
  const screens=new Map(results.map((r,i)=>[r.canonical_url,{choice:i===0?'promising' as const:'uncertain' as const,confidence:0.95,
    probabilities:{promising:i===0?0.95:0.2,uncertain:i===0?0.03:0.7,mismatch:0.02}}]));
  const seen:any[][]=[];
- const judge:Judge={async judge(_q,cs){order.push('judge');seen.push(cs);if(opts.judgeMs)await new Promise(r=>setTimeout(r,opts.judgeMs));return {model:'test',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,relevance:c.scenes?.length?9:7,reason:c.scenes?.length?'Watched: the cat pushes the glass':'Specific evidence',momentKeys:[]}]))};}};
+ const judge:Judge={async judge(_q,cs){order.push('judge');seen.push(cs);if(opts.judgeMs)await new Promise(r=>setTimeout(r,opts.judgeMs));
+   const watched=cs.some(c=>c.scenes?.length);if(watched&&opts.failRejudge) throw new Error('judge down');
+   const verdicts=new Map(cs.map(c=>[c.key,{key:c.key,relevance:c.scenes?.length?9:7,reason:c.scenes?.length?'Watched: the cat pushes the glass':'Specific evidence',momentKeys:[]}]));
+   if(watched&&opts.strayKey) verdicts.set('r2',{key:'r2',relevance:1,reason:'stray',momentKeys:[]});
+   return {model:'test',verdicts,jev:new Map(cs.map(c=>[c.key,{phase:c.scenes?.length?'after scenes':'before scenes'}]))};}};
  const deadlines:{early:boolean;at:number;deadline:number}[]=[];
  const requestScenes=async(_db:any,_c:any,rs:any[],_q:string,o:any)=>{order.push(o.early?'early':'late');calls.push({early:!!o.early,ids:rs.map((r:any)=>r.id)});
    deadlines.push({early:!!o.early,at:Date.now(),deadline:Date.parse(o.deadline)});
@@ -479,5 +483,26 @@ test('an unfinished early scene job leaves the first ranking as it was',async()=
    const out=await s.run(db);
    assert.ok(!s.seen.some(batch=>batch.some((c:any)=>c.scenes?.length)));
    assert.ok(out.results.every(r=>r.judgement?.relevance===7));
+ }finally{await db.close();}
+});
+
+test('the re-judge with scenes replaces the Jev record the cascade reads, and a stray key changes nothing',async()=>{
+ const db=await database();
+ try{
+   const s=sceneSetup(true,{finished:true,strayKey:true});
+   const out=await s.run(db);
+   assert.deepEqual(out.jev.get(s.results[0].id),{phase:'after scenes'});
+   assert.equal(out.results.find(r=>r.id===s.results[1].id)?.judgement?.relevance,7,'r2 keeps its own verdict');
+ }finally{await db.close();}
+});
+
+test('a failed re-judge leaves the result without scene evidence it was never judged on',async()=>{
+ const db=await database();
+ try{
+   const s=sceneSetup(true,{finished:true,failRejudge:true});
+   const out=await s.run(db);
+   const first=out.results.find(r=>r.id===s.results[0].id)!;
+   assert.equal(first.judgement?.relevance,7);
+   assert.equal(first.evidence_coverage?.analysed_scenes??0,0);
  }finally{await db.close();}
 });

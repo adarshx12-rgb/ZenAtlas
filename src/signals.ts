@@ -434,14 +434,19 @@ export async function applySignals(db: DB, config: Config, query: string, result
    const watched=earlyRequests.length?await (deps.finishedScenes??finishedScenes)(db,earlyRequests,query).catch(()=>new Map()):new Map();
    if(watched.size){
      const again:JudgeCandidate[]=[];
-     candidates.forEach((c,i)=>{const id=idOf.get(c.key)!,e=watched.get(id);if(!e)return;
-       retained.set(id,{...(retained.get(id)??{transcripts:[]}),scenes:e.scenes});
-       candidates[i]={...c,scenes:e.scenes.map((s:{start_seconds:number;end_seconds:number;summary:string;inspected_ranges:number[][]})=>
-         ({start:s.start_seconds,end:s.end_seconds,description:s.summary,inspected_ranges:s.inspected_ranges}))};
-       again.push(candidates[i]);});
-     const verdicts=again.length?await judge.judge(query,again,judgeContext,screenshots).catch(()=>null):null;
-     for(const [key,v] of verdicts?.verdicts??[]){byKey.set(key,v);modelOf.set(key,verdicts!.model);}
-     process.stdout.write(`${JSON.stringify({event:'scene_early_in_time',...traceFields(),watched:again.length,judged:verdicts?.verdicts.size??0})}
+     for(const c of candidates){const e=watched.get(idOf.get(c.key)!);if(e)again.push({...c,scenes:e.scenes.map((s:{start_seconds:number;end_seconds:number;summary:string;inspected_ranges:number[][]})=>
+       ({start:s.start_seconds,end:s.end_seconds,description:s.summary,inspected_ranges:s.inspected_ranges}))});}
+     const out=again.length?await judge.judge(query,again,judgeContext,screenshots).catch(()=>null):null;
+     // Through collect, so the cascade reads the Jev records made with the scenes and stray keys are ignored. A video
+     // takes the scenes as its evidence only when it got a verdict made with them.
+     if(out){
+       collect([{status:'fulfilled',value:{batch:again,out}}]);
+       for(const c of again) if(out.verdicts.has(c.key)){
+         const id=idOf.get(c.key)!;candidates[candidates.findIndex(x=>x.key===c.key)]=c;
+         retained.set(id,{...(retained.get(id)??{transcripts:[]}),scenes:watched.get(id)!.scenes});
+       }
+     }
+     process.stdout.write(`${JSON.stringify({event:'scene_early_in_time',...traceFields(),watched:again.length,judged:out?.verdicts.size??0})}
 `);
    }
    // The second stage re-checks verdicts across all batches: the cascade sends only uncertain ones to one Strong judge;

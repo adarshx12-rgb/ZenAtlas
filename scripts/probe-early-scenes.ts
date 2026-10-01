@@ -38,6 +38,8 @@ const searchedAt = timings?.expanded ?? 0;
 console.error(JSON.stringify({q, watch: (out.trace.plan as {watch?: boolean}).watch ?? null, results_ready_s: secs(ready), shown: out.results.length,
  old_start_s: secs(searchedAt + (evidence.judge ?? 0)),
  early: lines.find(l => l.event === 'scene_early') ?? null,
+ in_time: lines.find(l => l.event === 'scene_early_in_time') ?? null,
+ watched_in_first_results: out.results.filter(r => (r.evidence_coverage?.analysed_scenes ?? 0) > 0).map(r => ({title: r.title.slice(0, 60), relevance: r.judgement?.relevance ?? null})),
  scene_jobs: rows.map(r => ({created_s: secs(new Date(r.created_at).getTime() - started.getTime()),
    finished_s: ['complete', 'failed'].includes(r.status) ? secs(new Date(r.updated_at).getTime() - started.getTime()) : null, status: r.status, result: r.result}))}, null, 1));
 await db.close();
