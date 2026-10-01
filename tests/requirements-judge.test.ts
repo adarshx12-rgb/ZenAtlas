@@ -70,3 +70,15 @@ test('the subject can never be "not asked", and unknown or mismatch still hold a
  assert.ok((await judgeWith([check('subject','supported'),check('intent','unknown'),check('relationship','not_asked'),check('format','not_asked')])).v.relevance<=5);
  assert.ok((await judgeWith([check('subject','supported'),check('intent','supported'),check('relationship','mismatch'),check('format','not_asked')])).v.relevance<=4);
 });
+
+test('a video is a video: a format check naming the candidate\'s own kind is grounded by that kind, not a quote',async()=>{
+ const video:JudgeCandidate={key:'r1',kind:'video',site:'www.youtube.com',url:'https://www.youtube.com/watch?v=abcdefghijk',title:'Watch two boosters coming home at the same time',
+   channel:'SpaceX',official:true,duration:'1:00',live:null,description:null,comments:[],moments:[],discussions:[]};
+ const run=async(format:any)=>{const client={models:['m'],async json(){return {model:'m',value:{verdicts:[{key:'r1',relevance:8,reason:'r',moment_keys:[],lesser_known:false,intent_checks:[
+   {dimension:'subject',status:'supported',field:'title',quote:'two boosters coming home'},{dimension:'intent',status:'supported',field:'title',quote:'at the same time'},
+   {dimension:'relationship',status:'supported',field:'title',quote:'two boosters coming home at the same time'},format]}]}};}} as unknown as ModelClient;
+   return (await new ModelJudge(client,testConfig).judge('falcon heavy boosters landing video',[video],{kind:'videos',criteria:[]})).verdicts.get('r1')!.relevance;};
+ assert.ok(await run({dimension:'format',status:'supported',field:'facts',quote:'video'})>5,'a video cited as "video"');
+ assert.ok(await run({dimension:'format',status:'supported',field:'facts',quote:'website'})<=5,'a video claimed to be a website is not grounded');
+ assert.ok(await run({dimension:'format',status:'supported',field:'facts',quote:'a 2018 documentary video'})<=5,'only the bare kind, not extra claims');
+});

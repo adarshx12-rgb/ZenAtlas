@@ -73,10 +73,15 @@ const normaliseQuote=(text:string)=>text.normalize('NFKC').replace(/\s+/g,' ').t
 function quoted(quote:string,text:string):boolean {
  return normaliseQuote(text).includes(normaliseQuote(quote));
 }
+// What a candidate is (a video, a web page) is known for certain, so a format check that only names that kind needs no
+// quote: the judge cited "video" from the wrong field and correct videos were held at 5 (Falcon Heavy, 2026-10-01).
+const KIND_WORDS:Record<JudgeCandidate['kind'],string[]>={video:['video','a video','video clip','clip','footage'],website:['website','web page','page','site','article']};
+export const kindFormat=(candidate:JudgeCandidate,check:{dimension:string;status:string;quote:string})=>
+ check.dimension==='format' && check.status==='supported' && KIND_WORDS[candidate.kind].includes(normaliseQuote(check.quote).replace(/[^a-z ]/g,'').trim());
 export function groundedIntent(candidate:JudgeCandidate,checks:IntentCheck[]|undefined):boolean {
  if(!checks || checks.length!==intentDimensions.length || !intentDimensions.every(d=>checks.some(c=>c.dimension===d))) return false;
  // A dimension the request does not constrain holds nothing back; the subject is always asked, so it must be supported.
- return checks.every(check=>check.status==='not_asked'?check.dimension!=='subject':groundedQuote(candidate,check));
+ return checks.every(check=>check.status==='not_asked'?check.dimension!=='subject':kindFormat(candidate,check)||groundedQuote(candidate,check));
 }
 // A supported check counts only when its quote appears in the named field of this candidate's own evidence.
 export function groundedCheck(candidate:JudgeCandidate,check:{status:string;field:string;quote:string;evidence_id?:string}):boolean {
@@ -247,7 +252,7 @@ export class ModelJudge implements Judge {
      const candidate = byKey.get(v.key);
      if (!candidate || result.has(v.key)) continue;
      const allowed = new Set(candidate.moments.map(m => m.key));
-     const intentChecks = v.intent_checks?.map(ch => ch.status !== 'unknown' && ch.status !== 'not_asked' && !groundedCheck(candidate, ch) ? {...ch, status: 'unknown' as const} : ch);
+     const intentChecks = v.intent_checks?.map(ch => ch.status !== 'unknown' && ch.status !== 'not_asked' && !kindFormat(candidate, ch) && !groundedCheck(candidate, ch) ? {...ch, status: 'unknown' as const} : ch);
      const ceiling=verdictCeiling(candidate,intentChecks);
      const matches=ceiling>UNVERIFIED;
      const uncertainty=ceiling===TANGENTIAL?(v.relevance>ceiling?' Misses part of the request.':''):!matches?' Match not verified from the evidence.'
