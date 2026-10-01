@@ -95,3 +95,21 @@ test('the Strong judge gets transcript-heavy candidates in smaller calls within 
  await cascadeReview('q',candidates,scored,undefined,undefined,undefined,strongSeat({a:6,b:6,c:6,d:6},seen),opts);
  assert.deepEqual(seen.map(b=>b.length),[4],'without a budget the old batches of five stand');
 });
+
+test('the Strong judge starts on flagged verdicts alongside inspections, and checks an inspected one after its re-judge',async()=>{
+ const grounded={requirementChecks:[{id:'R1',status:'supported' as const,field:'page',quote:'ran both databases in production'}]};
+ const events:string[]=[],seen:JudgeCandidate[][]=[];
+ const strong:Judge={async judge(_q,cs){events.push(`strong:${cs.map(c=>c.key).join(',')}`);seen.push(cs);
+   return {model:'strong',verdicts:new Map(cs.map(c=>[c.key,v(c.key,c.key==='a'?8:6,grounded)]))};}};
+ const rejudge:Judge={async judge(_q,cs){return {model:'scorer',verdicts:new Map(cs.map(c=>[c.key,v(c.key,5,grounded)]))};}};
+ const lines:any[]=[];
+ const context={kind:'websites' as const,criteria:[],requirements:[{id:'R1',text:'ran in production',evidence:'page text'}]};
+ const out=await cascadeReview('q',[cand('a',false),cand('b')],new Map([['a',v('a',9,grounded)],['b',v('b',5,grounded)]]),undefined,context,undefined,strong,
+   {...opts,log:l=>lines.push(l),inspection:{judge:rejudge,inspect:async c=>{await new Promise(r=>setTimeout(r,300));events.push('inspected:a');return {...cand('a'),key:c.key,url:c.url};}}});
+ assert.equal(events[0],'strong:b','the Strong judge does not wait for the inspection');
+ assert.ok(events.indexOf('inspected:a')<events.indexOf('strong:a'),events.join(' '));
+ assert.equal(out.verdicts.get('a')?.relevance,8);
+ assert.equal(out.verdicts.get('b')?.relevance,6);
+ assert.equal(lines.length,1);
+ assert.equal(lines[0].inspections,1);assert.equal(lines[0].escalated,2);assert.equal(lines[0].answered,2);
+});

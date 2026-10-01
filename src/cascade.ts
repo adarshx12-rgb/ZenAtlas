@@ -97,7 +97,7 @@ export async function cascadeReview(query: string, candidates: JudgeCandidate[],
  context: JudgeContext|undefined, screenshots: Map<string, Buffer>|undefined, strong: Judge|undefined, options: CascadeOptions) {
  const verdicts = new Map(scored), records = new Map<string, CascadeRecord>(), providers: ProviderStatus[] = [];
  const log = options.log ?? (line => process.stdout.write(`${JSON.stringify(line)}\n`));
- const required = context?.requirements?.length ?? 0, flagged: JudgeCandidate[] = [], reasons: Record<string, number> = {};
+ const required = context?.requirements?.length ?? 0, reasons: Record<string, number> = {};
  const current = new Map(candidates.map(c => [c.key, c]));
  const reading = new Map(jev), traceId = options.traceId ?? traceFields().trace_id ?? randomUUID();
  const routing = {...options, requirements: context?.requirements};
@@ -109,38 +109,25 @@ export async function cascadeReview(query: string, candidates: JudgeCandidate[],
    const v = verdicts.get(c.key);
    return v && flagsFor(c, v, reading.get(c.key) as JevRecord|undefined, required, routing).includes('needs_evidence');
  }).slice(0, options.inspectionLimit ?? 3);
- let inspections = 0, refreshed = 0;
- if (options.inspection) await Promise.all(needing.map(async c => {
-   inspections++;
-   const abort = new AbortController();
-   let timer: NodeJS.Timeout|undefined;
-   try {
-     const next = await Promise.race([options.inspection!.inspect(c, missingRequirements(c, verdicts.get(c.key)!, context?.requirements), abort.signal),
-       new Promise<null>(resolve => { timer = setTimeout(() => { abort.abort(); resolve(null); }, options.inspectionMs ?? 8000); })]);
-     if (!next || next.key !== c.key || next.url !== c.url || evidenceFingerprint(next) === evidenceFingerprint(c)) return;
-     current.set(c.key, next); refreshed++;
-     const out = await options.inspection!.judge.judge(query, [next], context, screenshots);
-     const v = out.verdicts.get(c.key);
-     if (v) verdicts.set(c.key, enforceRequirements(next, v, context?.requirements));
-     reading.delete(c.key);
-     if (out.jev?.has(c.key)) reading.set(c.key, out.jev.get(c.key));
-   } catch { /* Inspection failure leaves a possible lead, not a confident rejection. */ }
-   finally { clearTimeout(timer); abort.abort(); }
- }));
- for (const c of current.values()) {
+ let inspections = 0, refreshed = 0, answered = 0, escalated = 0, model: string|null = null;
+ const started = Date.now();
+ const strongContext: JudgeContext = {kind: context?.kind ?? 'mixed', ...context, criteria: [...(context?.criteria ?? []), STRONG_NOTE]};
+ // A candidate's final routing: a record, its reasons, and either a cap (it still needs evidence), a place in a Strong
+ // batch (flagged), or nothing (its score stands).
+ const route = (c: JudgeCandidate): JudgeCandidate|null => {
    const v = verdicts.get(c.key);
-   if (!v) continue;
+   if (!v) return null;
    const flags = flagsFor(c, v, reading.get(c.key) as JevRecord|undefined, required, routing);
    const missing = missingRequirements(c, v, context?.requirements);
    records.set(c.key, {scorer: v.relevance, flags, missing, inspected: c !== candidates.find(x => x.key === c.key)});
-   if (flags.includes('needs_evidence')) verdicts.set(c.key, {...v, relevance: Math.min(v.relevance, 5)});
-   else if (flags.length) flagged.push({...c, review_focus: {flags, requirements: missing.length ? missing : (context?.requirements ?? []).map(r => r.id)}});
    for (const f of flags) reasons[f] = (reasons[f] ?? 0) + 1;
- }
- let answered = 0, model: string|null = null;
- const started = Date.now();
- if (flagged.length && strong) {
-   const strongContext: JudgeContext = {kind: context?.kind ?? 'mixed', ...context, criteria: [...(context?.criteria ?? []), STRONG_NOTE]};
+   if (flags.includes('needs_evidence')) { verdicts.set(c.key, {...v, relevance: Math.min(v.relevance, 5)}); return null; }
+   if (!flags.length) return null;
+   escalated++;
+   return {...c, review_focus: {flags, requirements: missing.length ? missing : (context?.requirements ?? []).map(r => r.id)}};
+ };
+ const review = async (flagged: JudgeCandidate[]) => {
+   if (!flagged.length || !strong) return;
    const done = await Promise.allSettled(judgeBatches(flagged, STRONG_BATCH, options.batchChars ?? Infinity)
      .map(batch => strong.judge(query, batch, strongContext, screenshots)));
    for (const d of done) if (d.status === 'fulfilled') {
@@ -149,9 +136,34 @@ export async function cascadeReview(query: string, candidates: JudgeCandidate[],
        const final = enforceRequirements(current.get(key)!, v, context?.requirements);
        verdicts.set(key, final); record.strong = final.relevance; record.model = d.value.model; answered++; }
    }
-   if (answered < flagged.length) providers.push({provider: 'cascade', status: 'partial', message: 'Some uncertain results could not get a second check; they keep the first score.'});
- }
- log({event: 'cascade', version: 'evidence-v2', trace_id: traceId, tier: options.tier, judged: records.size, escalated: flagged.length, answered, inspections, refreshed, reasons, strong: model, strong_ms: flagged.length && strong ? Date.now() - started : 0,
+ };
+ // Candidates needing no inspection are routed now and the Strong judge starts on them while inspections run; an
+ // inspected candidate is routed after its re-judge and gets its own Strong check if it is still uncertain.
+ const waiting = new Set(options.inspection ? needing.map(c => c.key) : []);
+ const now = review(candidates.filter(c => !waiting.has(c.key)).flatMap(c => { const r = route(c); return r ? [r] : []; }));
+ const later = options.inspection ? Promise.all(needing.map(async c => {
+   inspections++;
+   const abort = new AbortController();
+   let timer: NodeJS.Timeout|undefined;
+   try {
+     const next = await Promise.race([options.inspection!.inspect(c, missingRequirements(c, verdicts.get(c.key)!, context?.requirements), abort.signal),
+       new Promise<null>(resolve => { timer = setTimeout(() => { abort.abort(); resolve(null); }, options.inspectionMs ?? 8000); })]);
+     if (next && next.key === c.key && next.url === c.url && evidenceFingerprint(next) !== evidenceFingerprint(c)) {
+       current.set(c.key, next); refreshed++;
+       const out = await options.inspection!.judge.judge(query, [next], context, screenshots);
+       const v = out.verdicts.get(c.key);
+       if (v) verdicts.set(c.key, enforceRequirements(next, v, context?.requirements));
+       reading.delete(c.key);
+       if (out.jev?.has(c.key)) reading.set(c.key, out.jev.get(c.key));
+     }
+   } catch { /* Inspection failure leaves a possible lead, not a confident rejection. */ }
+   finally { clearTimeout(timer); abort.abort(); }
+   const r = route(current.get(c.key)!);
+   if (r) await review([r]);
+ })) : Promise.resolve([]);
+ await Promise.all([now, later]);
+ if (strong && answered < escalated) providers.push({provider: 'cascade', status: 'partial', message: 'Some uncertain results could not get a second check; they keep the first score.'});
+ log({event: 'cascade', version: 'evidence-v2', trace_id: traceId, tier: options.tier, judged: records.size, escalated, answered, inspections, refreshed, reasons, strong: model, strong_ms: escalated && strong ? Date.now() - started : 0,
    candidates: [...records].map(([key, record]) => ({key, evidence_hash: evidenceFingerprint(current.get(key)!), ...record}))});
  return {verdicts, records, providers, candidates: [...current.values()], jev: reading};
 }
