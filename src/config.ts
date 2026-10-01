@@ -243,6 +243,8 @@ export const configSchema = z.object({
   // An assist must not hold up a search, so it is dropped when it does not answer within this; well under
   // JUDGE_TIMEOUT_MS, because a free model can hang for a minute.
   PLANNER_ASSIST_TIMEOUT_MS: number(6000, 500, 30000),
+  // Hours the same request keeps its plan and requirements contract (0 plans every search afresh).
+  PLAN_CACHE_HOURS: number(24, 0, 168),
   // Watchdog (src/watchdog-main.ts). Empty API URL: derived from HOST and PORT. The webhook receives a JSON POST
   // ({text, content}, which Slack and Discord accept) whenever a dependency's status changes.
   WATCHDOG_API_URL: z.union([z.literal(''), z.string().url()]).default(''),

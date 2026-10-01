@@ -41,3 +41,10 @@ test('the judge is told never to reveal the name lead or linked sites in the rea
  await new ModelJudge(client,testConfig).judge('roswell',[{...candidate,linked_from:['news.example.org']}],{kind:'videos',criteria:[],identified:['Roswell']});
  assert.match(system,/never mention[^.]*(Likely refers to|linked_from)/i);
 });
+
+test('the judge is told how creators word the request, so "fan" can satisfy "subscriber"',async()=>{
+ let text='';
+ const client={models:['m'],async json(_b:string,_s:string,t:string){text=t;return {model:'m',value:{verdicts:[{key:'r1',relevance:7,reason:'r',moment_keys:[],lesser_known:false}]}};}} as unknown as ModelClient;
+ await new ModelJudge(client,testConfig).judge('mr beast giving ps5 to his subscriber',[candidate],{kind:'videos',criteria:[],wording:[{request:'subscriber',creators:['fan','viewer']}]} as any);
+ assert.match(text,/subscriber/);assert.match(text,/"fan"/);assert.match(text,/same thing unless the request insists/i);
+});

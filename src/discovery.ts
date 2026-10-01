@@ -8,7 +8,7 @@ import { rankDiscovery, type DiscoveryCandidate } from './ranking.js';
 import { ingest } from './catalogue.js';
 import { UpstreamError } from './http.js';
 import { applySignals, discussionsFor, logFailure, type Discussion, type Judged, type SignalDeps } from './signals.js';
-import { makePlanner, fallbackPlan, uniqueSearches, type PlannedSearch, type Planner, type SearchPlan, type SearchTarget } from './planner.js';
+import { makePlanner, cachedPlanner, fallbackPlan, uniqueSearches, type PlannedSearch, type Planner, type SearchPlan, type SearchTarget } from './planner.js';
 import { AniListClient, type AnimeClient, type AnimeMatch } from './anilist.js';
 import { queryKey } from './search.js';
 import { configuredArchives, specialistSearches } from './specialists.js';
@@ -131,7 +131,10 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
  const mark = (stage: string) => { timings[stage] = Date.now() - began; };
  const providers = adapters ?? configuredProviders(config);
  const archives = deep ? deps.archives ?? configuredArchives(config, input.q) : [];
- const planner = input.source ? undefined : deps.planner ?? makePlanner(db, config);
+ // The same request keeps its plan for PLAN_CACHE_HOURS (src/planner.ts cachedPlanner), keyed by tier, planner models and plan size.
+ const made = input.source || deps.planner ? undefined : makePlanner(db, config);
+ const planner = input.source ? undefined : deps.planner ?? (made && cachedPlanner(made, {hours: config.PLAN_CACHE_HOURS,
+   key: [config.TIER, config.PLANNER_MODELS, config.REQUIREMENTS_ENABLED, config.PLAN_SEARCHES, config.DEEP_PLAN_SEARCHES].join('|')}));
  const anilist = input.source ? undefined : deps.anilist ?? (config.ANILIST_ENABLED ? new AniListClient(db, config) : undefined);
  const limit = deep ? config.DEEP_RESULTS : config.DISCOVERY_RESULTS;
  const deadline = deep ? Date.now() + config.DEEP_SEARCH_SECONDS*1000 : Infinity;
@@ -540,7 +543,8 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
  const targets = new Map(found.map(r => [r.id, webUrls.has(leadUrl.get(r.id)!) ? 'web' as const : 'videos' as const]));
  const signals = await applySignals(db, {...config, JUDGE_CANDIDATES: found.length}, input.q, found, {...signalDeps, judge, pages: {check: checkPage}},
    {kind: plan.kind, criteria: plan.criteria, targets, underrated: deep, anime: anime.anime, screens, ...(contract ? {contract, findings: gapFindings} : {}),
-     ...(names.length ? {identified: names} : {}), ...(plan.watch ? {watch: true} : {}), linkSources: readPages});
+     ...(names.length ? {identified: names} : {}), ...(plan.watch ? {watch: true} : {}),
+     ...(plan.target?.wording.length ? {wording: plan.target.wording} : {}), linkSources: readPages});
  mark('judged');
  // Semantic-only candidates were admitted for judging. If that check fails, they must not
  // displace supported keyword matches merely because the model had been configured.

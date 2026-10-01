@@ -209,6 +209,30 @@ export class EnsemblePlanner implements Planner {
  }
 }
 
+// The same request reuses its plan for a while (PLAN_CACHE_HOURS), so its searches and requirements contract do not change
+// between searches: the same query once required "MrBeast buys a PS5 for a subscriber" and once "gives a PS5 to a fan or
+// subscriber". Shared by every search in the process; key separates tiers, planner models and deep plans. Failures and
+// follow-up searches are never kept.
+const plans = new Map<string, {plan: SearchPlan; expires: number}>();
+const PLAN_CACHE_MAX = 1000;
+export function clearPlanCache() { plans.clear(); }
+export function cachedPlanner(inner: Planner, options: {hours: number; key: string}): Planner {
+ if (options.hours <= 0) return inner;
+ return {
+   async plan(query, o = {}) {
+     const key = [options.key, o.deep ? `deep:${(o.avoid ?? []).join('|').toLowerCase()}` : 'quick', o.anime?.id ?? '',
+       query.normalize('NFC').toLowerCase().replace(/\s+/g, ' ').trim()].join(' ');
+     const hit = plans.get(key);
+     if (hit && hit.expires > Date.now()) return hit.plan;
+     const plan = await inner.plan(query, o);
+     if (plans.size >= PLAN_CACHE_MAX) plans.delete(plans.keys().next().value!);
+     plans.set(key, {plan, expires: Date.now() + options.hours * 3600_000});
+     return plan;
+   },
+   ...(inner.followUps ? {followUps: inner.followUps.bind(inner)} : {}),
+ };
+}
+
 export const plannerModels = (config: Config): string[] => [...new Set(config.PLANNER_MODELS.split(',').map(m => m.trim()).filter(Boolean))];
 
 // PLANNER_MODELS decides what plans a search: the first leads, the rest assist, and each spends its own daily budget

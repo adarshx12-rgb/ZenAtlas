@@ -2,7 +2,7 @@ import { z } from 'zod';
 import type { DB } from './db.js';
 import type { Config } from './config.js';
 import { fetchJSON, UpstreamError } from './http.js';
-import { ModelClient, type InlineImage } from './model-client.js';
+import { ModelClient, SEED, type InlineImage } from './model-client.js';
 import { traceFields } from './search-trace.js';
 
 const response = z.object({choices: z.array(z.object({
@@ -37,6 +37,8 @@ export class OpenAICompatibleClient extends ModelClient {
        ...(this.config.OPENROUTER_SITE_NAME ? {'X-Title': this.config.OPENROUTER_SITE_NAME} : {})},
      body: {model, messages: [{role: 'system', content: system}, {role: 'user', content: images.length ? parts : text}],
        response_format: {type: 'json_schema', json_schema: {name: 'reply', schema: strict(schema), strict: true}},
+       // Repeatable answers: the same evidence should get the same verdict, not a fresh sample each call.
+       temperature: 0, seed: SEED,
        max_tokens: this.maxTokens, usage: {include: true}}}));
    // A 200 carrying an error object, or anything else that is not a completion, is not an answer this app can use.
    if (!raw.success) throw new UpstreamError('malformed_response');

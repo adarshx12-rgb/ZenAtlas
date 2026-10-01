@@ -40,6 +40,8 @@ export interface JudgeCandidate {
 // identified: what the first search results say the request refers to (src/identify.ts): a lead, never proof.
 export interface JudgeContext { kind: 'videos'|'websites'|'mixed'; criteria: string[]; anime?: AnimeMatch|null; search_date?: string; preferences?: string[];
  identified?: string[];
+ // wording: how creators and viewers word ideas of the request (the planner's picture, src/planner.ts): "subscriber" may be "fan".
+ wording?: {request: string; creators: string[]}[];
  requirements?: {id: string; text: string; evidence: string; kind?: string; evidence_kind?: 'content'|'visual'|'provenance'; source_quote?: string;
    polarity?: 'exclude'}[] }
 export interface RequirementVerdict { id: string; status: 'supported'|'unknown'|'mismatch'; field: string; quote: string; evidence_id?: string;
@@ -228,6 +230,7 @@ export class ModelJudge implements Judge {
      ...(context?.preferences?.length ? [`Preferences: ${JSON.stringify(context.preferences)}`] : []),
      ...(context?.search_date ? [`Search date: ${context.search_date}`] : []),
      ...(context?.anime ? [`Known anime match: ${JSON.stringify(animeSummary(context.anime, query))}`] : []),
+     ...(context?.wording?.length ? [`Creators may word the request differently: ${JSON.stringify(context.wording)}. Treat these as the same thing unless the request insists on the exact word.`] : []),
      ...(context?.identified?.length ? [`Likely refers to: ${JSON.stringify(context.identified)} (named in search results; a lead, not proof)`] : []),
      'Candidates follow, one JSON object per line.', '<candidates>', ...listed.map(c => JSON.stringify(c)), '</candidates>'].join('\n');
    const evidenceNote = 'For visual evidence use field visual, evidence_id equal to the supplied candidate.visual.id, and quote a concise observation of the actual pixels. Never fabricate a text quote from an image. Other fields use an empty evidence_id. A visual observation cannot establish licence, authorship, non-AI provenance, freshness, or an unseen video event. Both support and mismatch require evidence. Missing evidence is unknown. For each requirement return next_action: none for a resolved check, inspect when evidence is absent or insufficient, reason only when the supplied evidence may suffice but interpreting it is difficult. A reason request must cite that supplied evidence. Deterministic facts override model guesses. review_focus names requirements needing independent resolution.';

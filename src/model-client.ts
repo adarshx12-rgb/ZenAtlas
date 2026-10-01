@@ -4,6 +4,10 @@ import { fetchJSON, UpstreamError } from './http.js';
 import { takeBudget } from './budgets.js';
 import { providerHealth } from './health.js';
 
+// Every model call asks for repeatable answers: temperature 0 and this fixed seed (models that ignore the seed still
+// answer at temperature 0), so the same evidence gets the same verdict instead of a fresh sample each call.
+export const SEED = 7;
+
 // Overload, rate limiting and timeouts are usually specific to one model, so the next configured model is tried. So is a
 // model the provider no longer offers (404), which would otherwise switch AI off for every search despite working fallbacks.
 const retryable = (error: unknown) => error instanceof UpstreamError &&

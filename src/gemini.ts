@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { UpstreamError } from './http.js';
-import { ModelClient, type InlineImage } from './model-client.js';
+import { ModelClient, type InlineImage, SEED } from './model-client.js';
 
 export const ORIGIN = 'https://generativelanguage.googleapis.com';
 export type { InlineImage };
@@ -25,7 +25,7 @@ export class GeminiClient extends ModelClient {
    const raw = response.parse(await this.transport(url.href, {method: 'POST', trustedOrigin: ORIGIN,
      headers: {'x-goog-api-key': this.config.GEMINI_API_KEY}, timeoutMs: this.config.JUDGE_TIMEOUT_MS, redirects: 0,
      body: {systemInstruction: {parts: [{text: system}]}, contents: [{role: 'user', parts}],
-       generationConfig: {responseMimeType: 'application/json', responseJsonSchema: schema, maxOutputTokens: 8192,
+       generationConfig: {responseMimeType: 'application/json', responseJsonSchema: schema, maxOutputTokens: 8192, temperature: 0, seed: SEED,
          ...(images.length ? {mediaResolution: 'MEDIA_RESOLUTION_MEDIUM'} : {}),
          ...(this.config.JUDGE_THINKING_LEVEL === 'model_default' ? {} : {thinkingConfig: {thinkingLevel: this.config.JUDGE_THINKING_LEVEL}})}}}));
    if (raw.promptFeedback?.blockReason) throw new UpstreamError('model_blocked');

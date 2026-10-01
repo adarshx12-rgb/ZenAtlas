@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {database,testConfig} from './helpers.js';
-import {fallbackPlan,normalisePlan,nearDuplicate,uniqueSearches,GeminiPlanner,EnsemblePlanner,ModelPlanner,makePlanner,type Planner,type PlannedSearch,type SearchPlan} from '../src/planner.js';
+import {fallbackPlan,normalisePlan,nearDuplicate,uniqueSearches,cachedPlanner,GeminiPlanner,EnsemblePlanner,ModelPlanner,makePlanner,type Planner,type PlannedSearch,type SearchPlan} from '../src/planner.js';
 import {OpenAICompatibleClient} from '../src/openai-compatible.js';
 import {robotsAllows,extractPage,PageChecker,type PageCheck,type PageEvidence} from '../src/pages.js';
 import {rankDiscovery} from '../src/ranking.js';
@@ -443,4 +443,31 @@ test('a missing or malformed watching flag is not a yes and costs the plan nothi
    assert.equal(plan.watch,undefined);
    assert.ok(plan.searches.some(s=>s.query==='necktie knot tutorial'));
  }
+});
+
+test('the Gemini client asks for repeatable answers too',async()=>{
+ const db=await database();
+ try{
+   let sent:any;
+   const transport=async(_url:string,options:any)=>{sent=options;return {candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify(
+     {kind:'videos',searches:[],criteria:[]})}]}}]};};
+   await new GeminiPlanner(db,{...testConfig,GEMINI_API_KEY:'k',GEMINI_MODEL:'steady-model'},transport as any).plan('cat glass');
+   assert.equal(sent.body.generationConfig.temperature,0);
+   assert.equal(typeof sent.body.generationConfig.seed,'number');
+ }finally{await db.close();}
+});
+
+test('the same request reuses its plan, so its requirements do not change between searches',async()=>{
+ let calls=0;
+ const inner:Planner={async plan(q,o){calls++;if(q==='fails')throw new Error('down');return {kind:'videos',searches:[{query:`${q} ${calls}`,target:'videos'}],criteria:[],model:'m',draft:{n:calls}} as any;}};
+ const planner=cachedPlanner(inner,{hours:24,key:'ssj3'});
+ const a=await planner.plan('Mr Beast  gives PS5'),b=await planner.plan('mr beast gives ps5');
+ assert.deepEqual(b,a);assert.equal(calls,1,'same request, same plan');
+ await planner.plan('mr beast gives ps5',{deep:true,avoid:['x']});
+ assert.equal(calls,2,'a deep plan is its own');
+ await assert.rejects(planner.plan('fails'));await assert.rejects(planner.plan('fails'));
+ assert.equal(calls,4,'a failure is not remembered');
+ const off=cachedPlanner(inner,{hours:0,key:'ssj3'});
+ await off.plan('mr beast gives ps5');await off.plan('mr beast gives ps5');
+ assert.equal(calls,6,'switched off, every search plans afresh');
 });

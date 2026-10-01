@@ -390,7 +390,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
    const wanted = context?.kind === 'websites' ? 'mixed' as const : context?.kind ?? 'videos';
    const screenshots = new Map([...previews].flatMap(([id, image]) => keys.has(id) ? [[keys.get(id)!, image] as const] : []));
    // Smaller batches in parallel answer faster, and a failed batch only leaves its own results unjudged.
-   const judgeContext = context ? {kind: wanted, criteria: context.criteria, anime: context.anime, ...(context.identified?.length ? {identified: context.identified} : {}), ...(contract ? {search_date: contract.search_date} : {}), ...(requirements ? {requirements} : {}), ...(contract && preferencesOf(contract).length ? {preferences: preferencesOf(contract)} : {})} : undefined;
+   const judgeContext = context ? {kind: wanted, criteria: context.criteria, anime: context.anime, ...(context.identified?.length ? {identified: context.identified} : {}), ...(context.wording?.length ? {wording: context.wording} : {}), ...(contract ? {search_date: contract.search_date} : {}), ...(requirements ? {requirements} : {}), ...(contract && preferencesOf(contract).length ? {preferences: preferencesOf(contract)} : {})} : undefined;
    const judgeAll = (list: JudgeCandidate[], size: number) => Promise.allSettled(
      judgeBatches(list, size, config.LINK_BATCH_CHARS).map(batch =>
        judge.judge(query, batch, judgeContext, screenshots).then(out => ({batch, out}))));

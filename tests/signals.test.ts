@@ -506,3 +506,13 @@ test('a failed re-judge leaves the result without scene evidence it was never ju
    assert.equal(first.evidence_coverage?.analysed_scenes??0,0);
  }finally{await db.close();}
 });
+
+test('the planner wording reaches the judge context',async()=>{
+ const db=await database();
+ try{
+   let seen:any;
+   const judge:Judge={async judge(_q,cs,context){seen=context;return {model:'test',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,relevance:7,reason:'r',momentKeys:[]}]))};}};
+   await applySignals(db,testConfig,'q',[tube(1)],{judge},{kind:'videos',criteria:[],targets:new Map(),wording:[{request:'subscriber',creators:['fan']}]} as any);
+   assert.deepEqual(seen?.wording,[{request:'subscriber',creators:['fan']}]);
+ }finally{await db.close();}
+});
