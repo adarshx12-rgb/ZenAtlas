@@ -1,5 +1,6 @@
 import type { ContentInput, Result } from './types.js';
-export const RANKING_VERSION = 'relevance-v8-requirements';
+// v9: intent dimensions the request does not constrain are "not_asked" (no longer unknown); remembered verdicts from v8 are not reused.
+export const RANKING_VERSION = 'relevance-v9-not-asked';
 // RRF combines ordinal ranks, never incomparable raw lexical/cosine scores.
 export function reciprocalRankFusion(lists: string[][], k = 60, weights: number[] = []): Map<string,number> {
  const scores = new Map<string,number>();

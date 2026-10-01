@@ -539,3 +539,14 @@ test('a repeat search reuses remembered verdicts for unchanged evidence, and re-
    assert.equal(judged.length,2,'another request does not share verdicts');
  }finally{await db.close();}
 });
+
+test('a match whose unconstrained dimensions are "not asked" is shown in the main list',async()=>{
+ const db=await database();
+ try{
+   const checks=[{dimension:'subject',status:'supported',field:'title',quote:'Result 1'},{dimension:'intent',status:'supported',field:'title',quote:'Result 1'},
+     {dimension:'relationship',status:'not_asked',field:'title',quote:''},{dimension:'format',status:'not_asked',field:'title',quote:''}];
+   const judge:Judge={async judge(_q,cs){return {model:'test',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,relevance:7,reason:'r',momentKeys:[],intentChecks:checks as any}]))};}};
+   const out=await applySignals(db,testConfig,'result one',[fakeResult(1)],{judge,strong:null} as any,{kind:'videos',criteria:[],targets:new Map()});
+   assert.equal(out.results.length,1);
+ }finally{await db.close();}
+});

@@ -27,7 +27,7 @@ export function applySceneVerdict(result:Result,c:JudgeCandidate,v:Verdict,model
  const subjects=new Set((plan.contract?.requirements??[]).filter(r=>r.kind==='subject').map(r=>r.id));
  const wrongSubject=!!verdict.intentChecks?.some(ch=>ch.status==='mismatch'&&ch.dimension==='subject')||!!decision?.contradicted.some(id=>subjects.has(id));
  const verified=!contradicted&&verdict.relevance>5&&(!decision||decision.status==='verified')&&
-   (!verdict.intentChecks||verdict.intentChecks.every(ch=>ch.status==='supported'));
+   (!verdict.intentChecks||verdict.intentChecks.every(ch=>ch.status==='supported'||ch.status==='not_asked'));
  const used=scenes.filter(s=>verdict.requirementChecks?.some(ch=>ch.status==='supported'&&ch.field==='scenes'&&s.summary.includes(ch.quote)));
  const updated:Result={...result,judgement:{relevance:verified?verdict.relevance:Math.min(verdict.relevance,contradicted?4:5),reason:verdict.reason,model,
    intent_checks:verdict.intentChecks},badges:(result.badges??[]).filter(b=>b!=='Closest match'),

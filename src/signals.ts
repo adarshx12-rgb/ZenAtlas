@@ -544,7 +544,8 @@ export async function applySignals(db: DB, config: Config, query: string, result
    const access = contract?.deliverable.completeness === 'full' ? accessKind(r.canonical_url) : null;
    if (access && fullCopyAccess(access) && decision?.requirements.some(q => q.status === 'supported' &&
      contract!.requirements.find(x => x.id === q.id)?.kind === 'completeness')) badges.push(accessLabel(access)!);
-   const weak = !v || v.relevance <= UNVERIFIED_SCORE || !!v.intentChecks?.some(c=>c.status!=='supported');
+   // A dimension the request does not constrain (not_asked) holds nothing back.
+   const weak = !v || v.relevance <= UNVERIFIED_SCORE || !!v.intentChecks?.some(c=>c.status!=='supported'&&c.status!=='not_asked');
    // Without a judge (lexical mode) nothing can be verified, so results stay listed with their uncertainties unless
    // inspected evidence contradicts them.
    const dropped = decision ? (judge ? decision.status !== 'verified' || weak : decision.status === 'excluded') : !!judge && weak;

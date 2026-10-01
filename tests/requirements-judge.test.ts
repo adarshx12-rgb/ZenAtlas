@@ -48,3 +48,25 @@ test('the judge is told how creators word the request, so "fan" can satisfy "sub
  await new ModelJudge(client,testConfig).judge('mr beast giving ps5 to his subscriber',[candidate],{kind:'videos',criteria:[],wording:[{request:'subscriber',creators:['fan','viewer']}]} as any);
  assert.match(text,/subscriber/);assert.match(text,/"fan"/);assert.match(text,/same thing unless the request insists/i);
 });
+
+const judgeWith=async(checks:any[],relevance=8)=>{
+ let seen:any;
+ const client={models:['m'],async json(_b:string,system:string,_t:string,schema:any){seen={system,schema};
+   return {model:'m',value:{verdicts:[{key:'r1',relevance,reason:'r',moment_keys:[],lesser_known:false,intent_checks:checks}]}};}} as unknown as ModelClient;
+ const out=await new ModelJudge(client,testConfig).judge('roswell incident article',[candidate],{kind:'mixed',criteria:[]});
+ return {v:out.verdicts.get('r1')!,seen};
+};
+const check=(dimension:string,status:string)=>status==='not_asked'?{dimension,status,field:'title',quote:''}:{dimension,status,field:'page',quote:'debris near Roswell'};
+
+test('a dimension the request does not constrain is "not asked" and does not hold a supported match back',async()=>{
+ const {v,seen}=await judgeWith([check('subject','supported'),check('intent','supported'),check('relationship','not_asked'),check('format','not_asked')]);
+ assert.ok(v.relevance>5,`kept above the show line, got ${v.relevance}`);
+ assert.match(seen.system,/not_asked/);assert.match(seen.system,/never add properties the request did not name/i);
+ assert.ok(JSON.stringify(seen.schema).includes('not_asked'));
+});
+
+test('the subject can never be "not asked", and unknown or mismatch still hold a result back',async()=>{
+ assert.ok((await judgeWith([check('subject','not_asked'),check('intent','supported'),check('relationship','not_asked'),check('format','not_asked')])).v.relevance<=5);
+ assert.ok((await judgeWith([check('subject','supported'),check('intent','unknown'),check('relationship','not_asked'),check('format','not_asked')])).v.relevance<=5);
+ assert.ok((await judgeWith([check('subject','supported'),check('intent','supported'),check('relationship','mismatch'),check('format','not_asked')])).v.relevance<=4);
+});
