@@ -45,7 +45,7 @@ const picture = z.object({titles: z.array(z.string().trim().max(200)).max(5), ch
 export type AnswerPicture = z.infer<typeof picture>;
 // Requests only watching can settle start scene analysis early (spec 2026-10-01-early-scenes). The flag never reaches the
 // judge: marking such requirements evidence_kind "visual" would make it hide every video nobody has watched yet.
-const WATCH = `Also return watch: true when the request asks for something only watching the video can confirm (an action, a moment, a scene, what is shown or heard), false when titles, descriptions or transcripts can settle it.`;
+const WATCH = `Also return watch: true only when the request asks for a specific action, moment or scene inside a video that only watching can confirm (what happens, what is shown or heard); false for tutorials, explainers, talks, songs, and films or shows wanted as a whole, and whenever titles, descriptions or transcripts can settle it.`;
 const CRITERIA = `Finally list 1 to 5 short, checkable criteria that a result must meet to satisfy the request. Preserve all essential properties and the requested format. When the request combines properties, such as a subject with a specific event, reveal or reaction, a result needs all of them. Do not add requirements the user did not ask for, such as licences, maintenance, popularity or a particular platform.`;
 const SYSTEM_INSTRUCTION = `You plan web searches for a search engine that helps video creators find material quickly and accurately.
 ${KIND}
