@@ -516,3 +516,26 @@ test('the planner wording reaches the judge context',async()=>{
    assert.deepEqual(seen?.wording,[{request:'subscriber',creators:['fan']}]);
  }finally{await db.close();}
 });
+
+test('a repeat search reuses remembered verdicts for unchanged evidence, and re-judges what changed',async()=>{
+ const db=await database();
+ try{
+   const results=[tube(1),tube(2)];
+   let judged:string[]=[];
+   const judge:Judge={async judge(_q,cs){judged.push(...cs.map(c=>c.title));return {model:'test',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,relevance:c.title==='Result 1'?8:7,reason:'r',momentKeys:[]}]))};}};
+   const config={...testConfig,VERDICT_CACHE_HOURS:24};
+   const run=(rs:any[])=>applySignals(db,config,'cat knocks glass',rs,{judge,strong:null} as any,{kind:'videos',criteria:[],targets:new Map()});
+   const first=await run(results);
+   assert.deepEqual(judged.sort(),['Result 1','Result 2']);
+   judged=[];
+   const again=await run(results);
+   assert.deepEqual(judged,[],'nothing is judged twice');
+   assert.deepEqual(again.results.map(r=>[r.title,r.judgement?.relevance]),first.results.map(r=>[r.title,r.judgement?.relevance]));
+   judged=[];
+   await run([{...results[0],description:'Now with a description the judge has not seen'},results[1]]);
+   assert.deepEqual(judged,['Result 1'],'changed evidence is judged afresh');
+   judged=[];
+   await applySignals(db,config,'dog knocks glass',results,{judge,strong:null} as any,{kind:'videos',criteria:[],targets:new Map()});
+   assert.equal(judged.length,2,'another request does not share verdicts');
+ }finally{await db.close();}
+});

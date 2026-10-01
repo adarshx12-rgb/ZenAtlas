@@ -2,13 +2,13 @@ import type { DB } from './db.js';
 import type { Config } from './config.js';
 import { searchInput, type Moment, type ProviderStatus, type Result } from './types.js';
 import { SearXNG } from './providers.js';
-import { discoveryQuery, sameWord, STOPWORDS, tokens } from './ranking.js';
+import { discoveryQuery, RANKING_VERSION, sameWord, STOPWORDS, tokens } from './ranking.js';
 import { UpstreamError } from './http.js';
 import { takeBudget } from './budgets.js';
 import { YouTubeData, blockPageTitle, youtubeId, type VideoDetails, type ViewerComment, type YouTubeClient } from './youtube.js';
 import { makeJudge, visualReference, type Judge, type JudgeCandidate, type JudgeContext, type JudgeResult, type Verdict } from './judge.js';
 import { councilReview, makeCouncil, type CouncilSeats } from './council.js';
-import { cascadeOptions, cascadeReview, makeStrongJudge } from './cascade.js';
+import { cascadeOptions, cascadeReview, evidenceFingerprint, makeStrongJudge } from './cascade.js';
 import { rankBoost } from './canonical.js';
 import { PageChecker, type PageCheck, type PageEvidence } from './pages.js';
 import type { SearchTarget } from './planner.js';
@@ -26,6 +26,7 @@ import { judgeRequirements, preferencesOf } from './search-contract.js';
 import { hardEach, type RequirementsContract } from './requirements.js';
 import { accessKind, accessLabel, fullCopyAccess } from './access.js';
 import { linkedFrom, type LinkSource } from './corroboration.js';
+import { verdictKey, recallVerdicts, rememberVerdicts, portable, restore } from './verdict-cache.js';
 import { earlyScenePicks } from './scene-early.js';
 import { traceFields } from './search-trace.js';
 
@@ -405,7 +406,16 @@ export async function applySignals(db: DB, config: Config, query: string, result
        }
      }
    };
-   const settled = await judgeAll(candidates, Math.min(config.JUDGE_BATCH_SIZE,12));
+   // Verdict memory (src/verdict-cache.ts): a candidate whose request, judge setup and evidence match a remembered verdict
+   // reuses it and skips both judges; only the rest are judged and, after the second stage, remembered.
+   const setup = [config.JUDGE_MODELS, config.CASCADE_STRONG_MODELS, config.JUDGE_ARCHITECTURE].join('|');
+   const memoryKey = (c: JudgeCandidate) => verdictKey({tier: config.TIER, version: RANKING_VERSION, models: setup, request: query,
+     contract: JSON.stringify(judgeContext?.requirements ?? judgeContext?.criteria ?? []), url: c.url ?? c.key, fingerprint: evidenceFingerprint(c)});
+   const remembered = config.VERDICT_CACHE_HOURS > 0 ? await recallVerdicts(db, candidates.map(memoryKey)).catch(() => new Map()) : new Map();
+   const reused = new Set<string>();
+   for (const c of candidates) { const hit = remembered.get(memoryKey(c));
+     if (hit) { byKey.set(c.key, restore(hit.verdict, c.key)); modelOf.set(c.key, hit.model); reused.add(c.key); } }
+   const settled = await judgeAll(candidates.filter(c => !reused.has(c.key)), Math.min(config.JUDGE_BATCH_SIZE,12));
    mark('judge');
    collect(settled);
    // Lighter fallback models often skip candidates in long batches; the skipped ones are asked once more in short batches.
@@ -443,7 +453,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
      if(out){
        collect([{status:'fulfilled',value:{batch:again,out}}]);
        for(const c of again) if(out.verdicts.has(c.key)){
-         const id=idOf.get(c.key)!;candidates[candidates.findIndex(x=>x.key===c.key)]=c;
+         const id=idOf.get(c.key)!;candidates[candidates.findIndex(x=>x.key===c.key)]=c;reused.delete(c.key);
          retained.set(id,{...(retained.get(id)??{transcripts:[]}),scenes:watched.get(id)!.scenes});
        }
      }
@@ -456,7 +466,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
    const strong = 'strong' in deps ? deps.strong : 'council' in deps ? null : makeStrongJudge(db, config);
    if (strong && byKey.size) {
      const jevByKey = new Map([...keys].flatMap(([id, key]) => jevRecords.has(id) ? [[key, jevRecords.get(id)] as const] : []));
-     const reviewed = await cascadeReview(query, candidates, byKey, jevByKey, judgeContext, screenshots, strong, {...cascadeOptions(config),
+     const reviewed = await cascadeReview(query, candidates.filter(c => !reused.has(c.key)), byKey, jevByKey, judgeContext, screenshots, strong, {...cascadeOptions(config),
        inspection: {judge, inspect: async (c, _missing, signal) => {
          const id = idOf.get(c.key)!, r = pool.find(r => r.id === id)!;
          if (youtubeId(c.url ?? '') && !c.transcripts?.length) {
@@ -484,14 +494,18 @@ export async function applySignals(db: DB, config: Config, query: string, result
      for (const [key, record] of reviewed.records) if (record.model) modelOf.set(key, record.model);
      providers.push(...reviewed.providers);
    } else if (council && byKey.size) {
-     const reviewed = await councilReview(query, candidates, byKey, judgeContext, screenshots, council,
+     const reviewed = await councilReview(query, candidates.filter(c => !reused.has(c.key)), byKey, judgeContext, screenshots, council,
        {top: config.COUNCIL_CHECK_TOP, disagreement: config.COUNCIL_VIDEO_DISAGREEMENT, chairTop: config.COUNCIL_VIDEO_CHAIR_TOP});
      for (const [key, v] of reviewed.verdicts) byKey.set(key, v);
      providers.push(...reviewed.providers);
    }
    mark('review');
+   // Remember the verdicts made in this search (reused ones keep their stored copy).
+   await rememberVerdicts(db, candidates.flatMap(c => !reused.has(c.key) && byKey.has(c.key)
+     ? [{key: memoryKey(c), verdict: portable(byKey.get(c.key)!), model: modelOf.get(c.key) ?? 'unknown'}] : []), config.VERDICT_CACHE_HOURS).catch(() => {});
    const failed = settled.flatMap(s => s.status === 'rejected' ? [s.reason] : []);
-   if (failed.length < settled.length) {
+   // Remembered verdicts count as judged: a search answered entirely from memory is not a judge failure.
+   if (failed.length < settled.length || reused.size) {
      verdicts = new Map(pool.flatMap(r => { const v = byKey.get(keys.get(r.id)!); return v ? [[r.id, v] as const] : []; }));
      providers.push(byKey.size < candidates.length ? {provider: 'judge', status: 'partial', message: 'Some results could not be checked by AI and were excluded.'}
        : {provider: 'judge', status: 'ok', message: 'Results were checked for relevance by AI.'});
