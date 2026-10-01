@@ -31,6 +31,7 @@ import { unauthorized } from './access.js';
 import { contentInput } from './types.js';
 import { YouTubeData, youtubeId, type VideoDetails, type YouTubeClient } from './youtube.js';
 import { acceptName } from './identify.js';
+import { collapseDuplicates } from './duplicates.js';
 
 // today: the search date contracts resolve relative dates against (tests pin it). gapChooser: Jev's gap decisions.
 export interface DiscoveryDeps extends SignalDeps { planner?: Planner; anilist?: AnimeClient; archives?: SourceAdapter[]; screener?: Screener; explorer?: Explorer;
@@ -544,15 +545,19 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
  // Semantic-only candidates were admitted for judging. If that check fails, they must not
  // displace supported keyword matches merely because the model had been configured.
  const lexical = new Set(rankDiscovery(input.q, leads, leads.length).map(l => l.item.url));
- const results = signals.results.filter(r => (r.judgement || lexical.has(r.canonical_url)) && matchesFilters(r, input))
-   .slice(0, limit + earlier.results.length);
+ // A copy of a result already listed (the same page, post or upload twice) gives its slot to the next one (src/duplicates.ts).
+ const tidy = collapseDuplicates(signals.results.filter(r => (r.judgement || lexical.has(r.canonical_url)) && matchesFilters(r, input)),
+   r => ({url: r.canonical_url, title: r.title}));
+ if (tidy.dropped.length) process.stdout.write(`${JSON.stringify({event: 'duplicates', ...traceFields(), dropped: tidy.dropped.length})}
+`);
+ const results = tidy.kept.slice(0, limit + earlier.results.length);
  const kept = new Set(results.map(r => r.canonical_url));
  for (const [id] of signals.previews) if (!results.some(r => r.id === id)) signals.previews.delete(id);
  const unmet = contract ? unmetRequirements(contract, results, signals.findings) : [];
  const byUrl = new Map(found.map(r => [r.canonical_url, r.id]));
  const traced = traceOf(input, plan, searches, rounds, [...statuses, ...signals.providers], leads, found, leadUrl, signals.judged, results, roundOf);
  // Each candidate's link potential, to tune the evidence order from real searches.
- const base = {...traced, ...(names[0] ? {named: names[0]} : {}), pool: traced.pool.map(p => { const id = byUrl.get(p.url); return id && signals.links.has(id) ? {...p, link: signals.links.get(id)} : p; })};
+ const base = {...traced, ...(names[0] ? {named: names[0]} : {}), ...(tidy.dropped.length ? {duplicates: tidy.dropped} : {}), pool: traced.pool.map(p => { const id = byUrl.get(p.url); return id && signals.links.has(id) ? {...p, link: signals.links.get(id)} : p; })};
  return {results, closest:signals.closest.filter(r=>matchesFilters(r,input)), ingested: found, previews: signals.previews, searches,
    dropped: [...new Set([...found, ...earlier.results].filter(r => !kept.has(r.canonical_url)).map(r => r.canonical_url))], providers: [...statuses, ...signals.providers],
    contract, unmet,sceneReview:signals.sceneReview,

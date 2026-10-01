@@ -14,6 +14,7 @@ import type { RequirementsContract } from './requirements.js';
 import type { GapTrace } from './gaps.js';
 import { tierConfig, type Tier } from './tiers.js';
 import type { AnswerPicture } from './planner.js';
+import type { Duplicate } from './duplicates.js';
 
 // Learning loop, step 1. Every discovery search leaves a trace; a critic model audits it once results are shown,
 // testing any source it says was missed with a real search; once a week a reviewer re-checks a sample of audits.
@@ -47,6 +48,8 @@ export interface SearchTrace {
  tier?: Tier;
  // A name the expansion round grounded in real titles (src/link-expansion.ts).
  named?: string;
+ // Copies of results already listed, dropped before display (src/duplicates.ts).
+ duplicates?: Duplicate[];
 }
 // The critic's model client: anything answering the ModelClient json() call.
 export interface CriticClient { models: string[]; json(bucket: string, system: string, text: string, schema: object): Promise<{model: string; value: unknown}> }

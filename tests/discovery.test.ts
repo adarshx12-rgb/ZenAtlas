@@ -583,3 +583,20 @@ test('the expansion name reaches the judge only when real titles carry it, and t
    assert.equal(seen?.identified,undefined,'a name no title carries is dropped');
  }finally{await db.close();}
 });
+
+test('a copy of a result already shown is dropped before the list is cut, so the next result takes its place',async()=>{
+ const db=await database();
+ try{
+   const items=[contentInput.parse({url:'https://www.bgremover.video/',title:'Free Video Background Remover No Watermark | BGRemover'}),
+     contentInput.parse({url:'https://www.bgremover.video/en',title:'Free Video Background Remover No Watermark | BGRemover'}),
+     contentInput.parse({url:'https://other.example.org/tool',title:'Remove video backgrounds online for free'})];
+   const provider:SourceAdapter={name:'dup-fixture',capabilities:{transcripts:false,comments:false,embeds:false,accessible_media:false},
+     async search(){return {results:items,next_cursor:null,status:{provider:'dup-fixture',status:'ok',message:'TEST'}};}};
+   const judge:Judge={async judge(_q,cs){return {model:'j',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,relevance:8,reason:'r',momentKeys:[]}]))};}};
+   const out=await runDiscovery(db,{...testConfig,DISCOVERY_RESULTS:2},searchInput.parse({q:'free video background remover'}),[provider],{judge},async()=>{});
+   const urls=out.results.map(r=>r.canonical_url);
+   assert.equal(urls.filter(u=>u.startsWith('https://www.bgremover.video')).length,1,urls.join(' '));
+   assert.ok(urls.includes('https://other.example.org/tool'),'the freed slot is filled');
+   assert.equal((out.trace as any).duplicates?.length,1);
+ }finally{await db.close();}
+});
