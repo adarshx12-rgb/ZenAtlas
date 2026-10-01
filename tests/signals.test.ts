@@ -392,19 +392,21 @@ test('a YouTube block-page title from a search engine is replaced by the video\'
 });
 
 const tube=(n:number)=>({...fakeResult(n),canonical_url:`https://www.youtube.com/watch?v=video${String(n).padStart(6,'0')}`,source_name:'youtube.com'});
-const sceneSetup=(watch:boolean|undefined,opts:{throwEarly?:boolean;early?:boolean;live?:boolean}={})=>{
+const sceneSetup=(watch:boolean|undefined,opts:{throwEarly?:boolean;early?:boolean;live?:boolean;judgeMs?:number}={})=>{
  const results=[tube(1),tube(2),tube(3)];
  const order:string[]=[];const calls:{early:boolean;ids:string[]}[]=[];
  const screens=new Map(results.map((r,i)=>[r.canonical_url,{choice:i===0?'promising' as const:'uncertain' as const,confidence:0.95,
    probabilities:{promising:i===0?0.95:0.2,uncertain:i===0?0.03:0.7,mismatch:0.02}}]));
- const judge:Judge={async judge(_q,cs){order.push('judge');return {model:'test',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,relevance:7,reason:'Specific evidence',momentKeys:[]}]))};}};
+ const judge:Judge={async judge(_q,cs){order.push('judge');if(opts.judgeMs)await new Promise(r=>setTimeout(r,opts.judgeMs));return {model:'test',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,relevance:7,reason:'Specific evidence',momentKeys:[]}]))};}};
+ const deadlines:{early:boolean;at:number;deadline:number}[]=[];
  const requestScenes=async(_db:any,_c:any,rs:any[],_q:string,o:any)=>{order.push(o.early?'early':'late');calls.push({early:!!o.early,ids:rs.map((r:any)=>r.id)});
+   deadlines.push({early:!!o.early,at:Date.now(),deadline:Date.parse(o.deadline)});
    if(o.early&&opts.throwEarly) throw new Error('scene queue down');
    return rs.map((r:any)=>({content_id:r.id,job_id:crypto.randomUUID(),created:true}));};
  const config={...testConfig,SCENE_AUTO_QUEUE:true,SCENE_SEARCH_LIMIT:2,GEMINI_API_KEY:'x',...(opts.early===false?{SCENE_EARLY:false}:{})} as any;
  const run=(db:any)=>applySignals(db,config,'cat knocks glass off table',results,{judge,sceneLive:opts.live??true,requestScenes} as any,
    {kind:'videos',criteria:[],targets:new Map(),screens,...(watch!==undefined?{watch}:{})} as any);
- return {results,order,calls,run};
+ return {results,order,calls,run,deadlines};
 };
 
 test('a watch request starts scene analysis on the confident pick before judging, and the post-judge pick only fills the slot left',async()=>{
@@ -442,5 +444,16 @@ test('a failed early request leaves judging and the post-judge pick working',asy
    const out=await s.run(db);
    assert.equal(out.results.length,3);
    assert.ok(s.calls.some(c=>!c.early&&c.ids.length===2),JSON.stringify(s.calls));
+ }finally{await db.close();}
+});
+
+test('each scene request gets the full verification window from when it is made, and the review waits for the latest',async()=>{
+ const db=await database();
+ try{
+   const s=sceneSetup(true,{judgeMs:1500});
+   const out=await s.run(db);
+   const verify=testConfig.SCENE_VERIFY_MS;
+   for(const d of s.deadlines) assert.ok(d.deadline>=d.at+verify-1000,`a ${d.early?'early':'late'} request got less than the full window`);
+   assert.equal(Date.parse(out.sceneReview!.deadline),Math.max(...s.deadlines.map(d=>d.deadline)));
  }finally{await db.close();}
 });

@@ -300,9 +300,11 @@ export async function applySignals(db: DB, config: Config, query: string, result
    .filter(r => !['format', 'date', 'duration', 'authority', 'completeness'].includes(r.kind ?? ''));
  const earlyPicks = deps.sceneLive && config.SCENE_EARLY && config.SCENE_AUTO_QUEUE && config.SCENE_SEARCH_LIMIT && context?.watch
    ? earlyScenePicks(results, context.screens, link, config.SCENE_SEARCH_LIMIT, config.JEV_SCREEN_CONFIDENCE) : [];
- const earlyDeadline = new Date(Date.now() + config.SCENE_VERIFY_MS).toISOString();
+ // Each request gets the full verification window from when it is made; the review waits for the latest one.
+ let earlyDeadline = '';
  const captionsDone = linkCaptionsTask();
  const earlyScenes: Promise<SceneRequest[]> = earlyPicks.length ? captionsDone.catch(() => null).then(async () => {
+   earlyDeadline = new Date(Date.now() + config.SCENE_VERIFY_MS).toISOString();
    const requests = await requestScenes(db, config, earlyPicks.map(r => ({...r, duration: r.duration ?? extra.get(r.id)?.details?.duration ?? null})), query,
      {early: true, interactive: true, deadline: earlyDeadline, ...(sceneRequirements.length ? {requirements: sceneRequirements} : {})});
    process.stdout.write(`${JSON.stringify({event: 'scene_early', ...traceFields(), picked: earlyPicks.length, requested: requests.length, ms: Date.now() - began})}
@@ -418,12 +420,13 @@ export async function applySignals(db: DB, config: Config, query: string, result
        .slice(0,Math.max(0,config.SCENE_SEARCH_LIMIT-early.length));
      sceneCandidates=[...candidates.filter(c=>taken.has(idOf.get(c.key)!)),...judged];
      sceneContext=judgeContext??{kind:'videos',criteria:[],...(requirements?{requirements}:{})};
-     sceneDeadline=early.length?earlyDeadline:new Date(Date.now()+config.SCENE_VERIFY_MS).toISOString();
+     const lateDeadline=new Date(Date.now()+config.SCENE_VERIFY_MS).toISOString();
      const watching=judged.map(c=>{const id=idOf.get(c.key)!,r=pool.find(r=>r.id===id)!;return {...r,duration:r.duration??extra.get(id)?.details?.duration??null,
        judgement:{relevance:byKey.get(c.key)!.relevance,reason:'Pending scene inspection',model:'pending'}};});
-     const late=watching.length?await requestScenes(db,config,watching,query,{interactive:true,deadline:sceneDeadline,
+     const late=watching.length?await requestScenes(db,config,watching,query,{interactive:true,deadline:lateDeadline,
        requirements:requirements?.filter(r=>!['format','date','duration','authority','completeness'].includes(r.kind??''))}).catch(()=>[]):[];
      sceneRequests=[...early,...late];
+     sceneDeadline=late.length||!early.length?lateDeadline:earlyDeadline;
    }
    // The second stage re-checks verdicts across all batches: the cascade sends only uncertain ones to one Strong judge;
    // the council (JUDGE_ARCHITECTURE=council) re-checks the top ones, with a Chair where the two disagree.
