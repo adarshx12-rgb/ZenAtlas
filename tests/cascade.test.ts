@@ -113,3 +113,14 @@ test('the Strong judge starts on flagged verdicts alongside inspections, and che
  assert.equal(lines.length,1);
  assert.equal(lines[0].inspections,1);assert.equal(lines[0].escalated,2);assert.equal(lines[0].answered,2);
 });
+
+test('inspected candidates that stay uncertain share one Strong batch',async()=>{
+ const grounded={requirementChecks:[{id:'R1',status:'supported' as const,field:'page',quote:'ran both databases in production'}]};
+ const calls:string[][]=[];
+ const strong:Judge={async judge(_q,cs){calls.push(cs.map(c=>c.key));return {model:'strong',verdicts:new Map(cs.map(c=>[c.key,v(c.key,6,grounded)]))};}};
+ const rejudge:Judge={async judge(_q,cs){return {model:'scorer',verdicts:new Map(cs.map(c=>[c.key,v(c.key,5,grounded)]))};}};
+ const context={kind:'websites' as const,criteria:[],requirements:[{id:'R1',text:'ran in production',evidence:'page text'}]};
+ await cascadeReview('q',[cand('a',false),cand('b'),cand('c',false)],new Map([['a',v('a',9,grounded)],['b',v('b',5,grounded)],['c',v('c',9,grounded)]]),undefined,context,undefined,strong,
+   {...opts,inspection:{judge:rejudge,inspect:async c=>({...cand(c.key),key:c.key,url:c.url})}});
+ assert.deepEqual(calls.map(c=>[...c].sort().join(',')),['b','a,c']);
+});

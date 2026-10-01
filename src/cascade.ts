@@ -137,9 +137,9 @@ export async function cascadeReview(query: string, candidates: JudgeCandidate[],
        verdicts.set(key, final); record.strong = final.relevance; record.model = d.value.model; answered++; }
    }
  };
- // Candidates needing no inspection are routed now and the Strong judge starts on them while inspections run; an
- // inspected candidate is routed after its re-judge and gets its own Strong check if it is still uncertain.
- const waiting = new Set(options.inspection ? needing.map(c => c.key) : []);
+ // Candidates needing no inspection are routed now and the Strong judge starts on them while inspections run; inspected
+ // candidates are routed after their re-judge, and those still uncertain share one Strong batch once all are read.
+ const waiting = new Set(options.inspection ? needing.map(c => c.key) : []), reread: JudgeCandidate[] = [];
  const now = review(candidates.filter(c => !waiting.has(c.key)).flatMap(c => { const r = route(c); return r ? [r] : []; }));
  const later = options.inspection ? Promise.all(needing.map(async c => {
    inspections++;
@@ -159,9 +159,9 @@ export async function cascadeReview(query: string, candidates: JudgeCandidate[],
    } catch { /* Inspection failure leaves a possible lead, not a confident rejection. */ }
    finally { clearTimeout(timer); abort.abort(); }
    const r = route(current.get(c.key)!);
-   if (r) await review([r]);
+   if (r) reread.push(r);
  })) : Promise.resolve([]);
- await Promise.all([now, later]);
+ await Promise.all([now, later.then(() => review(reread))]);
  if (strong && answered < escalated) providers.push({provider: 'cascade', status: 'partial', message: 'Some uncertain results could not get a second check; they keep the first score.'});
  log({event: 'cascade', version: 'evidence-v2', trace_id: traceId, tier: options.tier, judged: records.size, escalated, answered, inspections, refreshed, reasons, strong: model, strong_ms: escalated && strong ? Date.now() - started : 0,
    candidates: [...records].map(([key, record]) => ({key, evidence_hash: evidenceFingerprint(current.get(key)!), ...record}))});
