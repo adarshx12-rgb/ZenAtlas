@@ -161,7 +161,6 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
  const leadUrl = new Map<string,string>();
  const notes: ProviderStatus[] = [];
  const outcomes: Outcome[] = [];
- let fallbacks = 0, braveSearches = 0;
  let stage: DiscoveryProgress['stage'] = 'searching';
  // Publish stages, not provisional rankings. Every source gets to finish before selection.
  const report = () => progress({results: [], providers: notes, stage});
@@ -240,26 +239,17 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
      return {provider, page: null, failure: 'unavailable'};
    }
  };
- // With Brave configured, Brave answers every search and page. SearXNG's niche engines run beside it on first pages of
- // deep dives; its standard engines fill in for a search only once Brave has failed or found too little for it.
- const brave = providers.find((p): p is BraveSearch => p instanceof BraveSearch);
+ // Every configured provider starts independently. All answers join the same pool before screening and judging.
  const run = async (searches: Search[]) => {
    const jobs = searches.flatMap(search => providers.flatMap((provider): (() => Promise<(Outcome|null)[]>)[] => {
      if (provider instanceof SearXNG) {
-       const adapter = provider.forTarget(search.target, brave ? 'extra' : search.engines);
-       if (brave && (search.page !== 1 || search.engines === 'standard')) return [];
+       const adapter = provider.forTarget(search.target, search.engines);
        return adapter.engines.length ? [async () => [await ask(provider, adapter, search)]] : [];
      }
-     if (provider === brave) return search.engines === 'extra' ? [] : [async () => {
-       const answer = await ask(provider, brave.forTarget(search.target), search, String(search.page - 1));
-       const searxng = providers.find(p => p instanceof SearXNG) as SearXNG|undefined;
-       if (!answer || !searxng || (answer.page && answer.page.results.length >= config.BRAVE_MIN_RESULTS)) return [answer];
-       fallbacks++;
-       return [answer, await ask(searxng, searxng.forTarget(search.target, 'standard'), search)];
-     }];
+     if (provider instanceof BraveSearch) return search.engines === 'extra' ? []
+       : [async () => [await ask(provider, provider.forTarget(search.target), search, String(search.page - 1))]];
      return search.page === 1 && search.engines !== 'extra' ? [async () => [await ask(provider, provider, search)]] : [];
    }));
-   if (brave) braveSearches += searches.filter(s => s.engines !== 'extra').length;
    outcomes.push(...(await Promise.all(jobs.map(job => job()))).flat().flatMap(o => o ? [o] : []));
  };
 
@@ -541,13 +531,7 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
  // Every page read so far, for finding which other sites link to a candidate (src/corroboration.ts).
  const readPages = async () => (await Promise.all([...cachedPages].map(async ([url, page]) => ({url, page: await page}))))
    .filter(p => p.page.status === 'checked').map(p => ({url: p.url, links: p.page.links, text: p.page.text}));
- const statuses = [...[...providers, ...archives].map(p => {
-   const own = outcomes.filter(o => o.provider === p);
-   if (!brave || !(p instanceof SearXNG)) return summarise(p.name, own);
-   if (!own.length) return {provider: p.name, status: 'ok' as const, message: 'Not needed: Brave answered every search.'};
-   const status = summarise(p.name, own);
-   return fallbacks ? {...status, message: `${status.message} Filled in for ${fallbacks} of ${braveSearches} searches where Brave failed or found too little.`} : status;
- }), ...notes];
+ const statuses = [...[...providers, ...archives].map(p => summarise(p.name, outcomes.filter(o => o.provider === p))), ...notes];
  const searches = uniqueRan(ran);
 
  stage = 'checking'; await report();

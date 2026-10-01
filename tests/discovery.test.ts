@@ -276,7 +276,7 @@ test('SearXNG sends each engine one request at a time, even from searches runnin
  assert.equal(peak,1);assert.equal(asked.length,6);
  assert.ok(pages.every(p=>p.status.status==='ok'));
  const late=await adapter.search('ee',searchInput.parse({q:'ee'}),'1',{deadline:Date.now()-1});
- assert.deepEqual([asked.length,late.results.length,late.engines?.asked,late.status.status],[6,0,[],'ok'],'no engine is asked after the deadline');
+ assert.deepEqual([asked.length,late.results.length,late.status.status],[6,0,'partial'],'expired engines are reported without sending requests');
  const wide=adapter.forTarget('web','all');
  assert.deepEqual(new SearXNG({...testConfig,SEARXNG_WEB_ENGINES:'bing, yep',SEARXNG_DEEP_WEB_ENGINES:'yep,hackernews'}).forTarget('web','all').engines,
    ['bing','yep','hackernews'],'deep dives add their own engines once');
@@ -303,7 +303,7 @@ test('Brave searches videos through its video index with usable metadata, and pa
  assert.equal(new URL(asked[1]).pathname,'/res/v1/web/search','web searches keep the web index');
 });
 
-test('with Brave configured, SearXNG standard engines only fill in where Brave fails or finds too little, without waiting on each other',async()=>{
+test('Brave and SearXNG start together even with plentiful Brave results and merge quick and deep discoveries',async()=>{
  const db=await database();
  try{
    const config={...testConfig,BRAVE_SEARCH_API_KEY:'k',BRAVE_MIN_RESULTS:3,SEARXNG_BASE_URL:'http://mix.example:8080',
@@ -319,25 +319,32 @@ test('with Brave configured, SearXNG standard engines only fill in where Brave f
      return {results:rows(`${p.get('engines')}-${p.get('pageno')}`,2)};});
    const planner=(queries:string[]):Planner=>({async plan(){return {kind:'videos',searches:queries.map(query=>({query,target:'videos' as const})),criteria:[],model:'t'};}});
 
-   // Quick: Brave answers well, so SearXNG is not asked at all.
-   const quick=await runDiscovery(db,config,searchInput.parse({q:'yeti footage'}),[brave,searxng],{planner:planner(['yeti footage'])},async()=>{});
-   assert.equal(sxAsked.length,0,'a good Brave answer needs no SearXNG');
-   assert.ok(quick.results.length>0);
-   assert.deepEqual(quick.providers.find(p=>p.provider==='searxng'),{provider:'searxng',status:'ok',message:'Not needed: Brave answered every search.'});
+   braveGate=new Promise<void>(r=>{releaseBrave=r;});
+   const quickTask=runDiscovery(db,config,searchInput.parse({q:'yeti footage'}),[brave,searxng],{planner:planner(['yeti footage'])},async()=>{});
+   try {
+     for(let i=0;i<100&&!sxAsked.length;i++)await new Promise(r=>setTimeout(r,10));
+     assert.deepEqual(sxAsked,['std:1:yeti footage'],'SearXNG starts before Brave answers');
+   } finally {releaseBrave();}
+   const quick=await quickTask;
+   assert.ok(quick.results.some(r=>r.canonical_url.includes('brave-')));
+   assert.ok(quick.results.some(r=>r.canonical_url.includes('std-')),'both providers contribute');
+   assert.equal(quick.providers.find(p=>p.provider==='searxng')?.status,'ok');
 
-   // Quick: a thin and a failed Brave answer each bring in SearXNG's standard engines for that search only.
+   // A failure in one provider cannot discard the other's results.
    sxAsked.splice(0);
    const mixed=await runDiscovery(db,config,searchInput.parse({q:'yeti thin'}),[brave,searxng],{planner:planner(['yeti thin','yeti broken','yeti fine'])},async()=>{});
-   assert.deepEqual(sxAsked.sort(),['std:1:yeti broken','std:1:yeti thin']);
-   assert.match(mixed.providers.find(p=>p.provider==='searxng')!.message,/Filled in for 2 of 3 searches where Brave failed or found too little\.$/);
+   assert.deepEqual(sxAsked.sort(),['std:1:yeti broken','std:1:yeti fine','std:1:yeti thin']);
+   assert.ok(mixed.results.some(r=>r.canonical_url.includes('std-')));
+   assert.equal(mixed.providers.find(p=>p.provider==='brave')?.status,'partial');
 
-   // Deep: niche engines start alongside Brave (before it answers); Brave pages by offset; niche engines only take first pages.
+   // Deep: standard and niche engines start alongside Brave and retain their requested pagination.
    sxAsked.splice(0);braveAsked.splice(0);braveGate=new Promise<void>(r=>{releaseBrave=r;});
    const deep=runDiscovery(db,config,searchInput.parse({q:'yeti footage',depth:'deep'}),[brave,searxng],{planner:planner(['yeti expedition'])},async()=>{});
    for(let i=0;i<50&&!sxAsked.length;i++)await new Promise(r=>setTimeout(r,10));
    assert.ok(sxAsked.some(k=>k.startsWith('niche:1:')),'niche engines do not wait for Brave');
    releaseBrave();await deep;
-   assert.deepEqual(sxAsked.filter(k=>!k.startsWith('niche:1:')),[],'no standard engines or later niche pages while Brave answers well');
+   for(const key of ['std:1:yeti footage','std:2:yeti footage','niche:1:yeti footage','niche:2:yeti footage',
+     'std:1:yeti expedition','std:2:yeti expedition'])assert.ok(sxAsked.includes(key),`SearXNG asked ${key}`);
    for(const key of ['yeti footage:0','yeti footage:1','yeti expedition:0','yeti expedition:1'])assert.ok(braveAsked.includes(key),`Brave asked ${key}`);
  }finally{await db.close();}
 });

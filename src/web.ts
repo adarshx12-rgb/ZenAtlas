@@ -6,7 +6,7 @@ import type { ProviderStatus } from './types.js';
 import { fetchJSON } from './http.js';
 import { takeBudget } from './budgets.js';
 import { publicURL } from './urls.js';
-import { engineStatus } from './providers.js';
+import { searchSearXNG } from './providers.js';
 import { accessKind, accessLabel } from './access.js';
 import { previewToken } from './doc-preview.js';
 import { verifyDocuments, type VerifiedDoc } from './doc-review.js';
@@ -22,7 +22,7 @@ import { walledSite, walledToken } from './walled.js';
 import type { PeekResponse } from './http.js';
 
 // Web and document search are discovery-only, like image search: results come straight from the engines and never
-// enter the catalogue. Brave answers first; SearXNG fills in when Brave is missing, fails or finds too little.
+// enter the catalogue. Brave and SearXNG start together, then their deduplicated results are reviewed together.
 // Shadow libraries (data/access-sources.json) are dropped here as everywhere else. Documents are then verified (spam,
 // dead links and pages posing as files removed), and a document hunt starts (src/doc-hunt.ts): on the first page Jev looks
 // inside the websites the search found, then everything found is reviewed. The page polls /api/docs/hunt with its token.
@@ -153,7 +153,8 @@ async function searchWebImpl(db: DB, config: Config, input: WebSearchInput,
    }
  };
 
- if (config.BRAVE_SEARCH_API_KEY) {
+ let braveRows: Row[] = [], searxngRows: Row[] = [];
+ const askBrave = async () => { if (config.BRAVE_SEARCH_API_KEY) {
    if (!await deps.budget(db, 'discovery:brave', config.BRAVE_DAILY_BUDGET)) {
      providers.push({provider: 'brave', status: 'budget_exhausted', message: 'The daily Brave budget has been reached.'});
    } else {
@@ -174,37 +175,37 @@ async function searchWebImpl(db: DB, config: Config, input: WebSearchInput,
        return r.success ? [{url: r.data.url, title: r.data.title, snippet: r.data.description, published: r.data.page_age, engine: 'brave'}] : [];
      }) : []);
      // Taken in turn, so the extra search's best results sit beside the main query's instead of below all of them.
-     keep(Array.from({length: Math.max(0, ...lists.map(l => l.length))}, (_, i) => lists.flatMap(l => l[i] ? [l[i]] : [])).flat());
+     braveRows = Array.from({length: Math.max(0, ...lists.map(l => l.length))}, (_, i) => lists.flatMap(l => l[i] ? [l[i]] : [])).flat();
      const main = answers[0];
-     if (main.status === 'fulfilled' && main.value) more = main.value.query?.more_results_available === true;
+     if (main.status === 'fulfilled' && main.value) more ||= main.value.query?.more_results_available === true;
      if (answers.some(a => a.status === 'fulfilled' && a.value)) providers.push({provider: 'brave', status: 'ok', message: 'Brave search completed.'});
      else providers.push({provider: 'brave', status: 'unavailable', message: 'Brave did not answer; other engines were asked.'});
    }
- }
+ }};
 
- if (config.SEARXNG_BASE_URL && results.length < config.BRAVE_MIN_RESULTS) {
+ const askSearXNG = async () => { if (config.SEARXNG_BASE_URL) {
    const engines = [...new Set(config.SEARXNG_WEB_ENGINES.split(',').map(e => e.trim()).filter(Boolean))];
    if (!await deps.budget(db, 'discovery:searxng', config.SEARXNG_DAILY_BUDGET)) {
      providers.push({provider: 'searxng', status: 'budget_exhausted', message: 'The daily discovery budget has been reached.'});
    } else try {
-     const url = new URL('/search', config.SEARXNG_BASE_URL);
-     url.search = new URLSearchParams({q: query, format: 'json', pageno: String(input.page), safesearch: docs ? '2' : '1', engines: engines.join(','),
-       timeout_limit: String(Math.max(1, config.PROVIDER_TIMEOUT_MS / 1000 - 2)), ...(input.language ? {language: input.language} : {})}).toString();
-     const data = z.object({results: z.array(z.unknown()).max(1000), unresponsive_engines: z.array(z.unknown()).optional()})
-       .parse(await deps.transport(url.href, {trustedOrigin: url.origin, token: config.SEARXNG_TOKEN, timeoutMs: config.PROVIDER_TIMEOUT_MS, redirects: 0}));
-     const before = results.length;
-     keep(data.results.flatMap(raw => {
+     const data = await searchSearXNG(config, {query, engines, page: String(input.page), safeSearch: docs ? '2' : '1', language: input.language, maxResultsPerEngine: 100}, deps.transport);
+     searxngRows = data.results.flatMap(raw => {
        const r = z.looseObject({url: z.string()}).safeParse(raw);
        return r.success ? [{url: r.data.url, title: r.data.title, snippet: r.data.content, published: r.data.publishedDate,
          engine: typeof r.data.engine === 'string' ? r.data.engine.slice(0, 60) : 'searxng'}] : [];
-     }));
-     more ||= results.length > before;
-     const failed = (data.unresponsive_engines ?? []).flatMap(e => Array.isArray(e) && e[0] ? [{engine: String(e[0]), reason: 'did not answer'}] : []);
-     providers.push(engineStatus('searxng', engines, failed));
+     });
+     providers.push(data.status);
    } catch {
      providers.push({provider: 'searxng', status: 'unavailable', message: 'Web search engines are unavailable right now.'});
    }
- }
+ }};
+ await Promise.all([askBrave(), askSearXNG()]);
+ // Stable interleaving keeps either provider's discoveries near the front regardless of response time.
+ keep(Array.from({length: Math.max(braveRows.length, searxngRows.length)}, (_, i) =>
+   [braveRows[i], searxngRows[i]].filter((r): r is Row => !!r)).flat());
+ const braveUrls = new Set(braveRows.flatMap(r => { try { return [publicURL(directFile(r.url)).href]; } catch { return []; } }));
+ more ||= results.some(r => !braveUrls.has(r.url));
+ providers.sort((a, b) => a.provider.localeCompare(b.provider));
 
  if (!providers.length) providers.push({provider: 'web', status: 'disabled', message: 'Web search is not configured on this instance.'});
  const said = rewrite?.changed ? {rewrite: {corrected: rewrite.corrected}} : {};

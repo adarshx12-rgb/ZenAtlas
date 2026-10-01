@@ -19,6 +19,10 @@ export const configSchema = z.object({
   SEARXNG_DEEP_ENGINES: z.string().default('bilibili,acfun,privacywall videos,sepiasearch,wikicommons.videos'),
   SEARXNG_DEEP_WEB_ENGINES: z.string().default('yep,resulthunter,privacywall,hackernews'),
   SEARXNG_DAILY_BUDGET: number(2000, 0, 100000),
+  // Shared per-engine pacing and a deadline including time queued behind other searches.
+  SEARXNG_MIN_INTERVAL_MS: number(1000, 0, 10000), SEARXNG_SEARCH_TIMEOUT_MS: number(15000, 100, 60000),
+  SEARXNG_BLOCK_COOLDOWN_SECONDS: number(86400, 60, 1296000),
+  SEARXNG_RATE_COOLDOWN_SECONDS: number(3600, 60, 86400),
   // Docs tab previews (src/doc-preview.ts). The converter is LibreOffice's soffice; empty previews PDFs only.
   DOC_PREVIEW_CONVERTER: optional, DOC_PREVIEW_CACHE_DIR: optional,
   DOC_PREVIEW_MAX_MB: number(25, 1, 200), DOC_PREVIEW_CACHE_MB: number(500, 10, 100000), DOC_PREVIEW_DAILY_BUDGET: number(500, 0, 100000),
@@ -159,7 +163,7 @@ export const configSchema = z.object({
   // Brave is a metered API, so it has its own daily limit rather than sharing DISCOVERY_DAILY_BUDGET, which also caps
   // discovery jobs, Reddit lookups and scheduled collections.
   BRAVE_DAILY_BUDGET: number(250, 0, 100000),
-  // With Brave configured it answers every search; SearXNG's standard engines fill in only when Brave fails or returns fewer results than this.
+  // Retained for compatibility with existing environments; parallel retrieval no longer uses this threshold.
   BRAVE_MIN_RESULTS: number(10, 1, 20), COVERAGE_MIN_RESULTS: number(5, 1, 100),
   COVERAGE_MIN_SOURCES: number(1, 1, 20),
   COVERAGE_MIN_SCORE: z.coerce.number().min(0).max(1).default(0.03),

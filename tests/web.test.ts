@@ -4,7 +4,7 @@ import {testConfig} from './helpers.js';
 import {searchWeb, webSearchInput, documentType} from '../src/web.js';
 import {UpstreamError} from '../src/http.js';
 
-const config={...testConfig,BRAVE_SEARCH_API_KEY:'brave-key',SEARXNG_BASE_URL:'http://searxng.test',BRAVE_MIN_RESULTS:2};
+const config={...testConfig,BRAVE_SEARCH_API_KEY:'brave-key',SEARXNG_BASE_URL:'http://searxng.test',SEARXNG_WEB_ENGINES:'bing'};
 const brave=(...rows:{url:string;title?:string;description?:string}[])=>({web:{results:rows.map(r=>({title:'Title',description:'About it',...r}))},
  query:{more_results_available:true}});
 const searxng=(...rows:{url:string;title?:string;content?:string}[])=>({results:rows.map(r=>({title:'Title',content:'About it',engine:'bing',...r}))});
@@ -18,26 +18,42 @@ function deps(answers:Record<string,unknown>,budget=true){
    sources:async()=>({docs:[],sites:[],providers:[]}),
    transport:async(url:string)=>{
    asked.push(url);const host=new URL(url).hostname;
-   if(!(host in answers))throw new Error(`unexpected ${url}`);
+   if(!(host in answers)){if(host==='searxng.test')return {results:[]};throw new Error(`unexpected ${url}`);}
    const answer=answers[host];if(answer instanceof Error)throw answer;return answer;
  }}};
 }
 
-test('web search asks Brave first and returns pages with host, snippet and access label',async()=>{
+test('web search asks both providers even with enough Brave results and returns host, snippet and access label',async()=>{
  const {asked,deps:d}=deps({'api.search.brave.com':brave({url:'https://example.org/guide',title:'<strong>Guide</strong>'},{url:'https://arxiv.org/abs/2401.00001',description:'I&#x27;m &amp; it&#39;s &#8212; done'})});
  const out=await searchWeb({} as any,config,webSearchInput.parse({q:'transformer guide'}),d);
- assert.equal(asked.length,1,'enough Brave results means no SearXNG call');
+ assert.equal(asked.length,2,'both providers run despite a full Brave answer');
  assert.deepEqual(out.results.map(r=>[r.url,r.title,r.source_name,r.snippet,r.access]),
    [['https://example.org/guide','Guide','example.org','About it',null],['https://arxiv.org/abs/2401.00001','Title','arxiv.org',"I'm & it's — done",'Open access']]);
  assert.equal(out.next_cursor,'2');
 });
 
-test('shadow libraries are never served, and SearXNG fills in when Brave finds too little',async()=>{
+test('parallel provider results are deduplicated and shadow libraries are never served',async()=>{
  const {asked,deps:d}=deps({'api.search.brave.com':brave({url:'https://libgen.is/book/index.php?md5=x'},{url:'https://example.org/a'}),
    'searxng.test':searxng({url:'https://example.org/a'},{url:'https://example.net/b'},{url:'https://z-library.sk/book/1'})});
  const out=await searchWeb({} as any,config,webSearchInput.parse({q:'some book'}),d);
  assert.equal(asked.length,2);
  assert.deepEqual(out.results.map(r=>r.url),['https://example.org/a','https://example.net/b']);
+});
+
+test('SearXNG web results start while Brave is pending and both survive the combined review input',async()=>{
+ const c={...config,SEARXNG_BASE_URL:'http://parallel-web.test'};
+ let release!:()=>void;const gate=new Promise<void>(r=>{release=r;});let searxStarted=false;
+ const d=deps({}).deps;
+ const searching=searchWeb({} as any,c,webSearchInput.parse({q:'useful sources'}),{...d,review:false,transport:async(url:string)=>{
+   if(new URL(url).hostname==='api.search.brave.com'){await gate;return brave({url:'https://example.org/brave'},{url:'https://example.org/shared'});}
+   searxStarted=true;return searxng({url:'https://example.org/searxng'},{url:'https://example.org/shared'});
+ }});
+ try{
+   for(let i=0;i<50&&!searxStarted;i++)await new Promise(r=>setTimeout(r,5));
+   assert.ok(searxStarted);
+ }finally{release();}
+ const out=await searching;
+ assert.deepEqual(out.results.map(r=>r.url),['https://example.org/brave','https://example.org/searxng','https://example.org/shared']);
 });
 
 test('Brave failing or over budget falls back to SearXNG; nothing configured says so',async()=>{
@@ -125,12 +141,14 @@ test('results from login-walled sites carry a signed preview token; other result
 });
 
 test('a rewritten query: Brave searches the corrected text and one extra search on the first page, results interleaved',async()=>{
- const asked:string[]=[];const sourced:string[]=[];const reviewed:string[]=[];
+ const asked:string[]=[];const searxAsked:string[]=[];const sourced:string[]=[];const reviewed:string[]=[];
  const d={budget:async()=>true,sources:async(_db:unknown,_c:unknown,q:string)=>{sourced.push(q);return {docs:[],sites:[],providers:[]};},
    review:(q:string)=>{reviewed.push(q);return 'review-token';},
    rewrite:async(q:string)=>({query:q,corrected:'Gen X Soft Club design style catalogue',changed:true,topic:'Gen X Soft Club',topic_kind:'internet aesthetic',
      searches:['"Gen X Soft Club" aesthetic examples','Gen X Soft Club aesthetic archive']}),
-   transport:async(url:string)=>{asked.push(new URL(url).searchParams.get('q')!);
+   transport:async(url:string)=>{const u=new URL(url);
+     if(u.hostname!=='api.search.brave.com'){searxAsked.push(u.searchParams.get('q')!);return {results:[]};}
+     asked.push(u.searchParams.get('q')!);
      return new URL(url).searchParams.get('q')!.startsWith('"')?brave({url:'https://cari.institute/aesthetics/gen-x-soft-club'},{url:'https://www.are.na/cari/gen-x'})
        :brave({url:'https://aesthetics.fandom.com/wiki/Gen_X_Soft_Club'},{url:'https://example.org/generations'});}};
  const out=await searchWeb({} as any,config,webSearchInput.parse({q:'Gen X Soft Clubl design style catalouge'}),d as any);
@@ -146,6 +164,7 @@ test('a rewritten query: Brave searches the corrected text and one extra search 
  const exact=await searchWeb({} as any,config,webSearchInput.parse({q:'Gen X Soft Clubl design style catalouge',exact:'1'}),d as any);
  assert.deepEqual(asked,['Gen X Soft Clubl design style catalouge'],'exact: the query as typed, not rewritten');
  assert.equal(exact.rewrite,undefined);
+ assert.deepEqual(searxAsked,['Gen X Soft Club design style catalogue','Gen X Soft Club design style catalogue','Gen X Soft Clubl design style catalouge']);
 });
 
 test('documents: both searches carry the file-type filter; the sources and the hunt get the corrected query and the rewrite',async()=>{
@@ -156,9 +175,10 @@ test('documents: both searches carry the file-type filter; the sources and the h
  const out=await searchWeb({} as any,config,webSearchInput.parse({q:'pyhton asyncio tutorial',kind:'docs'}),{...base,rewrite:async()=>rewrite,
    sources:async(_db:unknown,_c:unknown,q:string)=>{sourced.push(q);return {docs:[],sites:[],providers:[]};}} as any);
  const queries=asked.map(u=>new URL(u).searchParams.get('q')!);
- assert.equal(queries.length,2);
+ assert.equal(queries.length,3);
  assert.ok(queries[0].startsWith('python asyncio tutorial (filetype:pdf'));
  assert.ok(queries[1].startsWith('"asyncio" python tutorial (filetype:pdf'));
+ assert.equal(queries[2],queries[0],'SearXNG also receives the corrected file-type query');
  assert.deepEqual(sourced,['python asyncio tutorial']);
  assert.equal(hunts[0].query,'python asyncio tutorial');
  assert.deepEqual(out.rewrite,{corrected:'python asyncio tutorial'});
@@ -168,7 +188,9 @@ test('an unchanged query with extra searches still searches both, and says nothi
  const asked:string[]=[];
  const out=await searchWeb({} as any,config,webSearchInput.parse({q:'rtx 5090 teardown'}),{budget:async()=>true,review:false,
    rewrite:async(q:string)=>({query:q,corrected:q,changed:false,topic:'RTX 5090',topic_kind:'graphics card',searches:['"RTX 5090" teardown','RTX 5090 disassembly']}),
-   transport:async(url:string)=>{asked.push(new URL(url).searchParams.get('q')!);return brave({url:`https://example.org/${asked.length}`},{url:`https://example.org/x${asked.length}`});}} as any);
- assert.deepEqual(asked,['rtx 5090 teardown','"RTX 5090" teardown']);
+   transport:async(url:string)=>{asked.push(new URL(url).searchParams.get('q')!);
+     if(new URL(url).hostname!=='api.search.brave.com')return searxng({url:'https://example.org/searx'});
+     return brave({url:`https://example.org/${asked.length}`},{url:`https://example.org/x${asked.length}`});}} as any);
+ assert.deepEqual(asked,['rtx 5090 teardown','"RTX 5090" teardown','rtx 5090 teardown']);
  assert.equal(out.rewrite,undefined);
 });

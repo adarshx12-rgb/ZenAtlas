@@ -1,11 +1,11 @@
 # Web search
 
-The Web tab shows what Brave (then SearXNG) finds at once, and then checks every result for relevance and accuracy in
+The Web tab searches Brave and SearXNG together, then checks every result for relevance and accuracy in
 the background, removing pages that do not match and ranking the rest, each with a reason.
 
 ## 1. Search (inside the `/api/web` request)
 
-`src/web.ts`: Brave first; SearXNG fills in when Brave is missing, fails or finds fewer than `BRAVE_MIN_RESULTS`. Shadow
+`src/web.ts`: Brave and SearXNG run in parallel. Their results are interleaved, deduplicated and reviewed together. SearXNG uses the shared per-engine pacing, cooldowns and queue deadlines described in [discovery quality](DISCOVERY_QUALITY.md). Shadow
 libraries (`data/access-sources.json`) are dropped. The response lists the results at once and carries a `review` token.
 
 ## 2. Review (in the background, polled at `/api/web/review?token=…`)

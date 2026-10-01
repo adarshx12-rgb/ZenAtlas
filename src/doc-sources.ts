@@ -5,6 +5,7 @@ import type { ProviderStatus } from './types.js';
 import { fetchJSON, fetchText } from './http.js';
 import { takeBudget } from './budgets.js';
 import { VIEWER_SITES } from './doc-viewers.js';
+import { searchSearXNG } from './providers.js';
 
 // Free-document sources the Docs tab searches directly, beside Brave and SearXNG: open research (arXiv, Semantic
 // Scholar, Zenodo, DOAJ), free books and texts (Google Books full view, Internet Archive), user-upload document viewers
@@ -87,12 +88,18 @@ export async function findDocuments(db: DB, config: Config, query: string, deps:
  async function searxng(q: string): Promise<SourceRow[]> {
    if (!config.SEARXNG_BASE_URL) return [];
    if (!await deps.budget(db, 'discovery:searxng', config.SEARXNG_DAILY_BUDGET)) throw new Error('budget_exhausted');
-   const url = new URL('/search', config.SEARXNG_BASE_URL);
-   url.search = new URLSearchParams({q, format: 'json', safesearch: '2', engines: config.SEARXNG_WEB_ENGINES,
-     timeout_limit: String(Math.max(1, config.DOC_SOURCES_TIMEOUT_MS / 1000 - 1))}).toString();
-   const data = z.object({results: z.array(z.looseObject({url: z.string()})).max(1000)})
-     .parse(await deps.json(url.href, {trustedOrigin: url.origin, token: config.SEARXNG_TOKEN, timeoutMs: config.DOC_SOURCES_TIMEOUT_MS, redirects: 0}));
-   return data.results.slice(0, 20).map(r => ({url: r.url, title: r.title, snippet: r.content, published: r.publishedDate, engine: 'searxng'}));
+   const data = await searchSearXNG(config, {query: q, engines: config.SEARXNG_WEB_ENGINES.split(','), safeSearch: '2',
+     deadline: Date.now() + config.DOC_SOURCES_TIMEOUT_MS}, deps.json);
+   if (data.engines.failed.length === data.engines.asked.length && !data.results.length) throw new Error('unavailable');
+   const seen = new Set<string>();
+   return data.results.flatMap(raw => {
+     const parsed = z.looseObject({url: z.string()}).safeParse(raw);
+     if (!parsed.success) return [];
+     const r = parsed.data;
+     if (seen.has(r.url)) return [];
+     seen.add(r.url);
+     return [{url: r.url, title: r.title, snippet: r.content, published: r.publishedDate, engine: 'searxng'}];
+   }).slice(0, 20);
  }
 
  await Promise.all(sources.map(async ([name, run]) => {

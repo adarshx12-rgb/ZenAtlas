@@ -88,8 +88,8 @@ export function configuredProviders(config:Config,purpose:'content'|'sources'='c
 const engineList = (engines: string) => [...new Set(engines.split(',').map(e => e.trim()).filter(Boolean))];
 const engineName = (engine: string) => engine.replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 function failureReason(reason: string) {
- return /captcha/i.test(reason) ? 'blocked by a CAPTCHA' : /too many requests|rate limit/i.test(reason) ? 'rate-limited'
-   : /timeout/i.test(reason) ? 'timed out' : /access denied|forbidden/i.test(reason) ? 'access denied' : 'returned an error';
+ return /captcha/i.test(reason) ? 'blocked by a CAPTCHA' : /too many requests|rate.?limit|429/i.test(reason) ? 'rate-limited'
+   : /timeout|timed out/i.test(reason) ? 'timed out' : /access denied|forbidden|\b40[23]\b/i.test(reason) ? 'access denied' : 'returned an error';
 }
 // A metasearch where most engines answered is a normal search: the status names the engines that did not, without flagging it.
 export function engineStatus(provider: string, asked: string[], failed: EngineFailure[]): ProviderStatus {
@@ -99,14 +99,100 @@ export function engineStatus(provider: string, asked: string[], failed: EngineFa
    message: `${answered} of ${asked.length} search engines answered; ${failed.map(f => `${engineName(f.engine)} (${f.reason})`).join(', ')} did not.`};
 }
 
-// One request at a time per engine, so parallel searches do not set off upstream rate limits and CAPTCHAs.
+// Shared by video, web, document and image searches in this process. SearXNG itself also enforces upstream suspensions.
 const lanes = new Map<string,Promise<void>>();
+const nextRequests = new Map<string,number>();
+const cooldowns = new Map<string,{until: number; reason: string}>();
 function inLane<T>(key: string, task: () => Promise<T>): Promise<T> {
  const run = (lanes.get(key) ?? Promise.resolve()).then(task);
  const done = run.then(() => {}, () => {});
  lanes.set(key, done);
  void done.then(() => { if (lanes.get(key) === done) lanes.delete(key); });
  return run;
+}
+
+interface SearXNGPage {results: unknown[]; engines: {asked: string[]; failed: EngineFailure[]}; status: ProviderStatus}
+interface SearXNGOptions {
+ engines: string[]; query: string; page?: string; language?: string; safeSearch?: '1'|'2'; deadline?: number;
+ onPage?: (page: SearXNGPage) => void; maxResultsPerEngine?: number;
+}
+const failedPage = (engine: string, reason: string): SearXNGPage => {
+ const failed = [{engine, reason}];
+ return {results: [], engines: {asked: [engine], failed}, status: engineStatus('searxng', [engine], failed)};
+};
+const sleep = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
+
+// No immediate retries after an upstream refusal. Queued queries recheck the cooldown before sending anything.
+// A deadline includes lane waiting and pacing, not just HTTP time, so busy/blocked engines cannot hold up Brave.
+export async function searchSearXNG(config: Config, options: SearXNGOptions, transport = fetchJSON): Promise<SearXNGPage> {
+ const engines = [...new Set(options.engines.map(e => e.trim()).filter(Boolean))];
+ if (!engines.length) throw new UpstreamError('not_configured');
+ const endpoint = new URL('/search', config.SEARXNG_BASE_URL);
+ const deadline = Math.min(options.deadline ?? Infinity, Date.now() + config.SEARXNG_SEARCH_TIMEOUT_MS);
+ const pages = await Promise.all(engines.map(async engine => {
+   const key = `${endpoint.href}|${engine}`;
+   const blocked = () => {
+     const pause = cooldowns.get(key);
+     if (pause && pause.until > Date.now()) return failedPage(engine, `${pause.reason}; cooling down until ${new Date(pause.until).toISOString()}`);
+     if (pause) cooldowns.delete(key);
+     return null;
+   };
+   const cached = blocked();
+   if (cached) return cached;
+   const expired = () => failedPage(engine, 'search deadline reached');
+   if (Date.now() >= deadline) return expired();
+   const work = inLane(key, async (): Promise<SearXNGPage> => {
+     const paused = blocked();
+     if (paused) return paused;
+     const wait = Math.max(0, (nextRequests.get(key) ?? 0) - Date.now());
+     if (Date.now() + wait >= deadline) return expired();
+     if (wait) await sleep(wait);
+     if (Date.now() >= deadline) return expired();
+     const timeout = Math.max(1, Math.min(config.PROVIDER_TIMEOUT_MS, deadline - Date.now()));
+     const url = new URL(endpoint);
+     url.search = new URLSearchParams({q: options.query, format: 'json', pageno: options.page ?? '1',
+       safesearch: options.safeSearch ?? '1', engines: engine,
+       timeout_limit: String(Math.max(0.1, timeout / 1000 - 2)),
+       ...(options.language ? {language: options.language} : {})}).toString();
+     let reason: string | undefined;
+     let rows: unknown[] = [];
+     try {
+       const parsed = z.object({results: z.array(z.unknown()).max(1000), unresponsive_engines: z.array(z.unknown()).optional()})
+         .parse(await transport(url.href, {trustedOrigin: url.origin, token: config.SEARXNG_TOKEN, timeoutMs: timeout, redirects: 0}));
+       rows = parsed.results.slice(0, options.maxResultsPerEngine ?? 1000);
+       const failure = parsed.unresponsive_engines?.find(e => Array.isArray(e) && e[0] === engine)
+         ?? parsed.unresponsive_engines?.[0];
+       if (failure) reason = failureReason(Array.isArray(failure) ? String(failure[1] ?? '') : String(failure));
+     } catch (error) {
+       reason = error instanceof UpstreamError
+         ? error.status === 403 || error.status === 402 ? 'access denied'
+           : error.code === 'rate_limited' || error.status === 429 ? 'rate-limited'
+           : error.code === 'timeout' ? 'timed out' : 'returned an error'
+         : 'returned an error';
+     }
+     nextRequests.set(key, Date.now() + config.SEARXNG_MIN_INTERVAL_MS);
+     if (reason) {
+       const seconds = /CAPTCHA|access denied/.test(reason) ? config.SEARXNG_BLOCK_COOLDOWN_SECONDS
+         : reason === 'rate-limited' ? config.SEARXNG_RATE_COOLDOWN_SECONDS : 30;
+       cooldowns.set(key, {reason, until: Date.now() + seconds * 1000});
+     }
+     const failed = reason ? [{engine, reason}] : [];
+     return {results: rows, engines: {asked: [engine], failed}, status: engineStatus('searxng', [engine], failed)};
+   });
+   // Expired queued tasks stay inert when their lane finally becomes free.
+   let timer: NodeJS.Timeout | undefined;
+   try {
+     const page = await Promise.race([work, new Promise<SearXNGPage>(resolve => {
+       timer = setTimeout(() => resolve(expired()), Math.max(0, deadline - Date.now()));
+     })]);
+     options.onPage?.(page);
+     return page;
+   } finally { clearTimeout(timer); }
+ }));
+ const failed = pages.flatMap(p => p.engines.failed);
+ const results = Array.from({length: Math.max(0, ...pages.map(p => p.results.length))}, (_, i) =>
+   pages.flatMap(p => i < p.results.length ? [p.results[i]] : [])).flat();
+ return {results, engines: {asked: engines, failed}, status: engineStatus('searxng', engines, failed)};
 }
 
 export class SearXNG implements SourceAdapter {
@@ -126,41 +212,14 @@ export class SearXNG implements SourceAdapter {
    if (!/^\d{1,2}$/.test(cursor)) throw new Error('invalid_provider_cursor');
    const engines = this.engines;
    if (!engines.length) throw new UpstreamError('not_configured');
-   const settled = await Promise.allSettled(engines.map(async engine => {
-     const page = await inLane(`${this.config.SEARXNG_BASE_URL}|${engine}`, () =>
-       Date.now() > (options.deadline ?? Infinity) ? Promise.resolve(null) : this.searchEngine(engine, query, filters, cursor));
-     if (page) options.onPage?.(page);
-     return page;
-   }));
-   const pages = settled.flatMap(s => s.status === 'fulfilled' && s.value ? [s.value] : []);
-   const rejected = settled.flatMap(s => s.status === 'rejected' ? [s.reason] : []);
-   if (!pages.length && rejected.length) throw rejected[0];
-   const asked = engines.filter((_, i) => settled[i].status === 'rejected' || (settled[i] as PromiseFulfilledResult<DiscoveryPage|null>).value);
-   const failed = settled.flatMap((s, i) => s.status === 'fulfilled' ? s.value?.engines!.failed ?? [] : [{engine: engines[i], reason: 'returned an error'}]);
-   const results = pages.flatMap(p => p.results);
-   return {results, next_cursor: results.length ? String(Number(cursor)+1) : null,
-     engines: {asked, failed}, status: engineStatus(this.name, asked, failed)};
+   const page = await searchSearXNG(this.config, {query, engines, page: cursor, language: filters.language, deadline: options.deadline, maxResultsPerEngine: SEARXNG_CANDIDATES,
+     onPage: page => options.onPage?.(this.normalise(page, cursor))}, this.transport);
+   return this.normalise(page, cursor);
  }
- private async searchEngine(engine: string, query: string, filters: SearchInput, cursor: string): Promise<DiscoveryPage> {
-   const url = new URL('/search', this.config.SEARXNG_BASE_URL);
-   // No categories: SearXNG adds every engine of a named category to an explicit engine list.
-   url.search = new URLSearchParams({q: query, format:'json', pageno:cursor, safesearch:'1', engines:engine,
-     // Let SearXNG return partial results before this client's own deadline aborts the whole request.
-     timeout_limit:String(Math.max(1, this.config.PROVIDER_TIMEOUT_MS/1000 - 2)),
-     ...(filters.language ? {language:filters.language} : {})}).toString();
-   let payload: any;
-   for (let attempt = 0; attempt < 2; attempt++) {
-     try {
-       payload = await this.transport(url.href, { trustedOrigin:url.origin, token:this.config.SEARXNG_TOKEN,
-         timeoutMs: this.config.PROVIDER_TIMEOUT_MS, redirects:0 }); break;
-     } catch (error) {
-       if (attempt || error instanceof UpstreamError && ['unsafe_url','rate_limited','malformed_response','unsupported_content'].includes(error.code)) throw error;
-       await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 100));
-     }
-   }
-   const parsed = z.object({results:z.array(z.unknown()).max(1000), unresponsive_engines:z.array(z.unknown()).optional()}).parse(payload);
+ private normalise(page: SearXNGPage, cursor: string): DiscoveryPage {
    const results = [];
-   for (const raw of parsed.results.slice(0, SEARXNG_CANDIDATES)) {
+   // Each engine gets the same candidate allowance, both in streamed pages and the combined response.
+   for (const raw of page.results.slice(0, SEARXNG_CANDIDATES * page.engines.asked.length)) {
      try {
        const row = z.looseObject({url:z.string(),title:z.string()}).parse(raw);
        results.push(contentInput.parse({url:canonicalize(row.url),title:row.title,description:text(row.content,10000),
@@ -168,10 +227,8 @@ export class SearXNG implements SourceAdapter {
          thumbnail:mediaURL(row.thumbnail || row.thumbnail_src || row.img_src)}));
      } catch { /* A malformed entry must not discard other providers' valid results. */ }
    }
-   const unresponsive = parsed.unresponsive_engines?.[0];
-   const failed = unresponsive ? [{engine, reason: failureReason(Array.isArray(unresponsive) ? String(unresponsive[1] ?? '') : '')}] : [];
    return {results,next_cursor:results.length ? String(Number(cursor)+1) : null,
-     engines:{asked:[engine],failed}, status:engineStatus(this.name,[engine],failed)};
+     engines: page.engines, status: page.status};
  }
 }
 

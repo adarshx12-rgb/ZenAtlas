@@ -6,7 +6,7 @@ import type { ProviderStatus } from './types.js';
 import { fetchJSON, UpstreamError } from './http.js';
 import { takeBudget } from './budgets.js';
 import { publicURL } from './urls.js';
-import { engineStatus } from './providers.js';
+import { searchSearXNG } from './providers.js';
 import { tierSchema } from './tiers.js';
 import { rewriteQuery } from './query-rewrite.js';
 import { aiGenerated, excludesAI, openverseQuery, openverseResults, wantsLicense, type ImageLicense } from './image-signals.js';
@@ -123,27 +123,15 @@ async function engineImages(db: DB, config: Config, input: ImageSearchInput): Pr
      providers: [{provider: 'searxng', status: 'budget_exhausted', message: 'The daily discovery budget has been reached.'}]};
  }
 
- // One request for every engine, unlike video discovery's per-engine lanes: there is no
- // streaming to feed here, and SearXNG applies timeout_limit per engine, so a slow engine
- // drops out of this response instead of holding it up.
- const url = new URL('/search', config.SEARXNG_BASE_URL);
- url.search = new URLSearchParams({
-   q: input.q, format: 'json', pageno: String(input.page), safesearch: '1', engines: engines.join(','),
-   timeout_limit: String(Math.max(1, config.PROVIDER_TIMEOUT_MS / 1000 - 2)),
-   ...(input.language ? {language: input.language} : {}),
- }).toString();
-
- let payload: unknown;
+ let parsed: Awaited<ReturnType<typeof searchSearXNG>>;
  try {
-   payload = await fetchJSON(url.href, {trustedOrigin: url.origin, token: config.SEARXNG_TOKEN,
-     timeoutMs: config.PROVIDER_TIMEOUT_MS, redirects: 0});
+   parsed = await searchSearXNG(config, {query: input.q, engines, page: String(input.page), language: input.language});
  } catch (error) {
    if (!(error instanceof UpstreamError)) throw error;
    return {query: input.q, results: [], next_cursor: null,
      providers: [{provider: 'searxng', status: 'unavailable', message: 'Image search is unavailable right now.'}]};
  }
 
- const parsed = z.object({results: z.array(z.unknown()).max(1000), unresponsive_engines: z.array(z.unknown()).optional()}).parse(payload);
  const results: ImageResult[] = [];
  const seen = new Set<string>();
  for (const raw of parsed.results) {
@@ -167,10 +155,6 @@ async function engineImages(db: DB, config: Config, input: ImageSearchInput): Pr
    } catch { /* One malformed entry must not discard the rest. */ }
  }
 
- const failed = (parsed.unresponsive_engines ?? []).flatMap(entry => {
-   const name = Array.isArray(entry) ? String(entry[0] ?? '') : '';
-   return name ? [{engine: name, reason: 'did not answer'}] : [];
- });
  return {query: input.q, results, next_cursor: results.length ? String(input.page + 1) : null,
-   providers: [engineStatus('searxng', engines, failed)]};
+   providers: [parsed.status]};
 }
