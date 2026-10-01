@@ -212,7 +212,7 @@ export async function applySignals(db: DB, config: Config, query: string, result
          await db.query('UPDATE content SET title=$2,description=$3 WHERE id=$1', [r.id, r.title, r.description]).catch(() => {});
        }
      }
-     detailsReady();
+     detailsReady(); mark('details');
      let failed = 0;
      await mapLimit(eligible, 5, async r => {
        const d = details.get(youtubeId(r.canonical_url)!);
@@ -311,7 +311,8 @@ export async function applySignals(db: DB, config: Config, query: string, result
 `);
    return requests;
  }).catch(() => [] as SceneRequest[]) : Promise.resolve([]);
- const [youtubeStatus, reddit, pageStatus, , captionsNow] = await Promise.all([youtubeRun.finally(() => mark('comments')), redditTask(), pageTask(), adapterTask(),
+ const [youtubeStatus, reddit, pageStatus, , captionsNow] = await Promise.all([youtubeRun.finally(() => mark('comments')), redditTask().finally(() => mark('reddit')),
+   pageTask().finally(() => mark('pages')), adapterTask().finally(() => mark('video_evidence')),
    captionsDone.finally(() => mark('captions'))]);
  mark('evidence');
  for (const status of [youtubeStatus, reddit.status, pageStatus, captionsNow]) if (status) providers.push(status);
