@@ -124,3 +124,18 @@ test('inspected candidates that stay uncertain share one Strong batch',async()=>
    {...opts,inspection:{judge:rejudge,inspect:async c=>({...cand(c.key),key:c.key,url:c.url})}});
  assert.deepEqual(calls.map(c=>[...c].sort().join(',')),['b','a,c']);
 });
+
+test('a title-backed match the gate allowed at 6 gets the Strong judge when it cannot be inspected, instead of a silent cap',async()=>{
+ const req=[{id:'R1',text:'MrBeast gives a PS5',evidence:'title or video',kind:'subject'}];
+ const c:JudgeCandidate={key:'a',kind:'video',site:'www.youtube.com',url:'https://www.youtube.com/watch?v=ZiuTKGIDL5k',title:'MrBeast surprises fan with a PS5',
+   channel:'MrBeast',official:false,duration:'5:00',live:null,description:null,comments:[],moments:[],discussions:[]};
+ const titled=(relevance:number)=>v('a',relevance,{requirementChecks:[{id:'R1',status:'supported',field:'title',quote:'MrBeast surprises fan with a PS5'}]});
+ const seen:JudgeCandidate[][]=[];
+ const strong:Judge={async judge(_q,cs){seen.push(cs);return {model:'strong',verdicts:new Map(cs.map(x=>[x.key,titled(8)]))};}};
+ const out=await cascadeReview('q',[c],new Map([['a',titled(7)]]),undefined,{kind:'videos',criteria:[],requirements:req},undefined,strong,{...opts,inspectionLimit:0});
+ assert.equal(seen.length,1,'the Strong judge sees it');
+ assert.equal(out.verdicts.get('a')?.relevance,6,'title-only support still stops at the metadata level');
+ const low=await cascadeReview('q',[c],new Map([['a',v('a',5)]]),undefined,{kind:'videos',criteria:[],requirements:req},undefined,strong,{...opts,inspectionLimit:0});
+ assert.equal(seen.length,1,'a verdict the gate already holds at 5 is capped without a Strong call, as before');
+ assert.equal(low.verdicts.get('a')?.relevance,5);
+});

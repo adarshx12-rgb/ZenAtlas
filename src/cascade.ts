@@ -14,7 +14,7 @@ import { judgeBatches } from './transcript-passages.js';
 // flagged when it is uncertain, and one Strong judge re-judges only the flagged ones. Its verdict is final: no Chair.
 // Confidence (Jev's or a model's) only routes work here; quotes are the only evidence.
 
-export type Flag = 'borderline'|'conflicts_with_evidence'|'unbacked'|'jev_reject_unbacked'|'settle_audit'|'reject_audit'|'needs_evidence'|'interpretation';
+export type Flag = 'borderline'|'conflicts_with_evidence'|'unbacked'|'jev_reject_unbacked'|'settle_audit'|'reject_audit'|'needs_evidence'|'interpretation' | 'uninspected';
 export interface CascadeRecord { scorer: number; strong?: number; flags: Flag[]; missing?: string[]; inspected?: boolean; model?: string }
 // border: Scorer relevance range the Strong judge re-checks (keep is relevance > 4). auditRate: share of Jev-settled
 // verdicts still re-checked, to keep measuring settle precision. confidence: Jev's JEV_JUDGE_CONFIDENCE.
@@ -117,7 +117,11 @@ export async function cascadeReview(query: string, candidates: JudgeCandidate[],
  const route = (c: JudgeCandidate): JudgeCandidate|null => {
    const v = verdicts.get(c.key);
    if (!v) return null;
-   const flags = flagsFor(c, v, reading.get(c.key) as JevRecord|undefined, required, routing);
+   let flags = flagsFor(c, v, reading.get(c.key) as JevRecord|undefined, required, routing);
+   // The requirement gate already allows this verdict at 6 or more on title or snippet support. When no inspection can add
+   // evidence (none left, or it found nothing), a second opinion decides instead of a silent cap at 5: the gate and this
+   // cap used to contradict each other, hiding title-backed matches the Strong judge never saw.
+   if (flags.includes('needs_evidence') && v.relevance > 5) flags = [...flags.filter(f => f !== 'needs_evidence'), 'uninspected'];
    const missing = missingRequirements(c, v, context?.requirements);
    records.set(c.key, {scorer: v.relevance, flags, missing, inspected: c !== candidates.find(x => x.key === c.key)});
    for (const f of flags) reasons[f] = (reasons[f] ?? 0) + 1;
