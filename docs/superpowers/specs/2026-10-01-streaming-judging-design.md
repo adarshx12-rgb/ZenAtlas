@@ -50,3 +50,11 @@ Unit: Strong starts before inspections finish and verdicts match the sequential 
 all; batches flush when full and after the pause; the inspection limit is shared across batches; every existing judging,
 cascade, scene and signals test stays green with streaming on, and with `JUDGE_STREAMING=false`. Live: 3 searches (video,
 web, moment) on main and branch with captions off, comparing stage marks and total time; branch not worse on results.
+
+## Outcome (2026-10-01)
+
+Built and measured, then mostly dropped. Live runs, judging part (main vs streaming): Falcon Heavy 47 s vs 64 s, web search
+38 s vs 18 s, snow leopard 46 s vs 48 s; the same branch with streaming off vs on for the web search: 12.7 s vs 18.7 s.
+Evidence usually arrives within 3-9 s, so there is little to overlap, and splitting judging into waves ran one Strong review
+per wave (7 instead of 1), adding pauses and calls. Kept: the Strong judge running alongside inspections (design 1) and the
+per-task evidence timing marks. Dropped: per-candidate readiness and streaming dispatch (designs 2-4, 6).
