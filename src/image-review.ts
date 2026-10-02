@@ -13,6 +13,8 @@ import { makeScreener, screeningOrder, type Screener } from './screener.js';
 import { contentInput } from './types.js';
 import { missingRequirements } from './cascade.js';
 import { PageChecker, pageTools, type PageCheck } from './pages.js';
+import { collapseDuplicates, differenceHash } from './image-duplicates.js';
+import { isCopy } from './image-sources.js';
 
 // The Images tab's review, run in the background like the Web tab's: the judge sees each image's thumbnail (the judge
 // models take images) with its title and host as context, and removes what the image does not show. The cascade's Strong
@@ -24,7 +26,8 @@ export interface ImageReviewState { status: 'running'|'complete'; results: Revie
 export interface ImageReviewDeps extends ContractDeps { judge?: Judge; strong?: Judge|null; screener?: Screener; pages?: PageCheck; thumbnail?: (url: string) => Promise<{contentType: string; data: Buffer}>; log?: (line: Record<string, unknown>) => void }
 
 // The top of a results page is what gets judged; the rest keeps its search order after the judged ones.
-const REVIEW_POOL = 24, BATCH = 6, THUMB_MAX = 400 * 1024;
+// DUPLICATE_SPARE more thumbnails are fetched so that pictures collapsed as copies are replaced in the pool.
+const REVIEW_POOL = 24, DUPLICATE_SPARE = 12, BATCH = 6, THUMB_MAX = 400 * 1024;
 export function imageMime(data: Buffer): ImageMime|null {
  if (data[0] === 0xff && data[1] === 0xd8 && data[2] === 0xff) return 'image/jpeg';
  if (data.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10]))) return 'image/png';
@@ -49,19 +52,28 @@ export async function reviewImages(db: DB, config: Config, query: string, images
      ordered = screeningOrder(leads, screened.promising).map(c => c.image);
    } catch { providers.push({provider: 'jev_screener', status: 'unavailable', message: 'Images were checked in search order.'}); }
  }
- const pool = ordered.slice(0, REVIEW_POOL), rest = ordered.slice(REVIEW_POOL);
  const fetchThumb = deps.thumbnail ?? (url => fetchImage(url, {timeoutMs: 4000, maxBytes: THUMB_MAX}));
- const shots = new Map<string, Buffer>();
- const visuals = new Map<string, NonNullable<JudgeCandidate['visual']>>();
- const load = async (url: string, key: string, signal?: AbortSignal) => {
+ const thumb = async (url: string) => {
    const got = await fetchThumb(url).catch(() => null);
    const mime = got && imageMime(got.data);
-   if (!got || !mime || got.data.length > THUMB_MAX || signal?.aborted) return false;
-   shots.set(key, got.data); visuals.set(key, visualReference(got.data, mime)); return true;
+   return got && mime && got.data.length <= THUMB_MAX ? {data: got.data, mime} : null;
  };
- await Promise.all(pool.map(async (image, i) => {
-   await load(image.thumbnail, `i${i + 1}`);
- }));
+ // Copies of one picture are collapsed before judging, so the pool holds REVIEW_POOL different pictures where it can.
+ const window = ordered.slice(0, REVIEW_POOL + DUPLICATE_SPARE);
+ const thumbs = await Promise.all(window.map(image => thumb(image.thumbnail)));
+ const hashes = await Promise.all(thumbs.map(t => t ? differenceHash(t.data) : null));
+ const {kept: unique, dropped: duplicates} = collapseDuplicates(window.map((image, i) => ({...image, thumb: thumbs[i]})), hashes);
+ const pool = unique.slice(0, REVIEW_POOL).map(({thumb: _, ...image}) => image);
+ const rest = [...unique.slice(REVIEW_POOL).map(({thumb: _, ...image}) => image), ...ordered.slice(window.length)];
+ const shots = new Map<string, Buffer>();
+ const visuals = new Map<string, NonNullable<JudgeCandidate['visual']>>();
+ const keep = (key: string, got: {data: Buffer; mime: ImageMime}) => { shots.set(key, got.data); visuals.set(key, visualReference(got.data, got.mime)); };
+ unique.slice(0, REVIEW_POOL).forEach((image, i) => { if (image.thumb) keep(`i${i + 1}`, image.thumb); });
+ const load = async (url: string, key: string, signal?: AbortSignal) => {
+   const got = await thumb(url);
+   if (!got || signal?.aborted) return false;
+   keep(key, got); return true;
+ };
  const candidates: JudgeCandidate[] = pool.map((image, i) => {
    const key = `i${i + 1}`, seen = shots.has(key);
    return {key, kind: 'website', site: image.source_name, url: image.page_url, title: image.title, channel: null, official: false, duration: null, live: null,
@@ -83,7 +95,7 @@ export async function reviewImages(db: DB, config: Config, query: string, images
  const jev = new Map(done.flatMap(d => d.status === 'fulfilled' ? [...d.value.jev ?? []] : []));
  if (!verdicts.size) {
    providers.push({provider: 'judge', status: 'unavailable', message: 'Images could not be checked right now; they are shown in search order.'});
-   return {results: images as ReviewedImage[], removed: 0, providers};
+   return {results: [...pool, ...rest] as ReviewedImage[], removed: 0, providers};
  }
  const strong = 'strong' in deps ? deps.strong : makeStrongJudge(db, config);
  let provenancePages = deps.pages;
@@ -106,10 +118,12 @@ export async function reviewImages(db: DB, config: Config, query: string, images
    }}}) : null;
  if (final) providers.push(...final.providers);
  const scored = pool.map((image, i) => ({image, i, v: (final?.verdicts ?? verdicts).get(`i${i + 1}`), seen: shots.has(`i${i + 1}`)}));
- const kept = scored.filter(s => s.v && s.v.relevance > TANGENTIAL).sort((a, b) => b.v!.relevance - a.v!.relevance || a.i - b.i);
+ // Equal scores put the original publisher before stock and repin copies.
+ const kept = scored.filter(s => s.v && s.v.relevance > TANGENTIAL)
+   .sort((a, b) => b.v!.relevance - a.v!.relevance || Number(isCopy(a.image)) - Number(isCopy(b.image)) || a.i - b.i);
  const unjudged = scored.filter(s => !s.v), removed = scored.length - kept.length - unjudged.length;
  providers.push({provider: 'judge', status: 'ok', message: `${pool.length} images were checked by looking at them (${shots.size} seen); ${removed} did not match.`});
- (deps.log ?? (line => process.stdout.write(`${JSON.stringify(line)}\n`)))({event: 'image_review', tier: config.TIER, judged: pool.length, seen: shots.size, removed});
+ (deps.log ?? (line => process.stdout.write(`${JSON.stringify(line)}\n`)))({event: 'image_review', tier: config.TIER, judged: pool.length, seen: shots.size, removed, duplicates});
  const out = (s: typeof scored[number]): ReviewedImage => {
    const candidate = (final?.candidates ?? candidates)[s.i];
    const missing = s.v ? missingRequirements(candidate, s.v, context.requirements) : context.requirements!.map(r => r.id);

@@ -13,6 +13,8 @@ services:
     volumes:
       - ./deploy/searxng/settings.yml:/etc/searxng/settings.yml:ro
       - ./deploy/searxng/engines/bing_videos.py:/usr/local/searxng/searx/engines/bing_videos.py:ro
+      # Yandex's family filter on (the shipped module turns it off).
+      - ./deploy/searxng/engines/yandex.py:/usr/local/searxng/searx/engines/yandex.py:ro
       - searxng-cache:/var/cache/searxng
 volumes:
   searxng-cache:

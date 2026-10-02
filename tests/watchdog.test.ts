@@ -216,7 +216,7 @@ test('SearXNG checks find engines the instance lacks, engines failing in searche
  const db=await database();
  try{
    const config={...testConfig,SEARXNG_BASE_URL:'http://127.0.0.1:8080',SEARXNG_ENGINES:'youtube,dailymotion,odysee',SEARXNG_SOURCE_ENGINES:'google',
-     SEARXNG_WEB_ENGINES:'google,bing',SEARXNG_DEEP_ENGINES:'acfun',SEARXNG_DEEP_WEB_ENGINES:'',SEARXNG_IMAGE_ENGINES:'',SEARXNG_DOC_ENGINES:''};
+     SEARXNG_WEB_ENGINES:'google,bing',SEARXNG_DEEP_ENGINES:'acfun',SEARXNG_DEEP_WEB_ENGINES:'',SEARXNG_IMAGE_ENGINES:'',SEARXNG_IMAGE_FOCUS_ENGINES:'',SEARXNG_IMAGE_FALLBACK_ENGINES:'',SEARXNG_IMAGE_STRICT_ENGINES:'',SEARXNG_DOC_ENGINES:''};
    const instance={version:'2026.9.16+f725cc793',engines:[...['youtube','dailymotion','odysee','google','bing'].map(name=>({name,enabled:true})),{name:'acfun',enabled:false}]};
    const transport=async(url:string,options:any)=>{
      if(new URL(url).hostname==='hub.docker.com')return {results:[{name:'latest'},{name:'2026.11.20-abc1234'},{name:'2026.11.19-def5678'}]};
@@ -257,7 +257,7 @@ test('a failure streak stops counting once nothing has called that engine or pro
  const db=await database();
  try{
    const config={...testConfig,SEARXNG_BASE_URL:'http://127.0.0.1:8080',SEARXNG_ENGINES:'youtube,dailymotion,odysee',SEARXNG_SOURCE_ENGINES:'google',
-     SEARXNG_WEB_ENGINES:'google,bing',SEARXNG_DEEP_ENGINES:'acfun',SEARXNG_DEEP_WEB_ENGINES:'',SEARXNG_IMAGE_ENGINES:'',SEARXNG_DOC_ENGINES:''};
+     SEARXNG_WEB_ENGINES:'google,bing',SEARXNG_DEEP_ENGINES:'acfun',SEARXNG_DEEP_WEB_ENGINES:'',SEARXNG_IMAGE_ENGINES:'',SEARXNG_IMAGE_FOCUS_ENGINES:'',SEARXNG_IMAGE_FALLBACK_ENGINES:'',SEARXNG_IMAGE_STRICT_ENGINES:'',SEARXNG_DOC_ENGINES:''};
    const e=env(db,{config});
    // acfun only runs in deep dives, so its last failures can be days old by the time anyone looks.
    for(let i=0;i<9;i++)await providerHealth(db,'searxng:acfun',false);

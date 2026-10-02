@@ -25,7 +25,6 @@ use_default_settings:
       - bing images
       - google images
       - duckduckgo images
-      - brave.images
       # Deep dives only (SEARXNG_DEEP_ENGINES, SEARXNG_DEEP_WEB_ENGINES): sources ordinary searches rarely reach.
       # Checked with four test queries on 2026-09-17. Left out: niconico, vimeo, tusksearch (HTTP errors), mojeek,
       # fireball, tootfinder (access denied), seznam, mwmbl (timeouts), ina, mediathekviewweb, lemmy communities
@@ -60,7 +59,19 @@ use_default_settings:
       - wikicommons.images
       - stocksnap
       - ipernity
-      - artstation
+      # Images, added 2026-10-03 after three test searches each (plus overlap with Brave and a safe-search check) on a
+      # trial instance of this image. yandex images runs a patched module (engines/yandex.py) with Yandex's family filter
+      # on; unpatched it returned adult sites. yandex is kept only because yandex images inherits its network. Left out:
+      # luxxle and resulthunter images (89-100% the same results as the Brave API), baidu and vuhuv images (adult results
+      # despite safe search), quark and naver images (no safe search; shopping and stock-agency results), qwant and startpage
+      # images (CAPTCHA), privacywall and dogpile images (access denied), sogou, mojeek and tonline images (no results),
+      # tusksearch, swisscows, startpagina, library of congress, public domain image archive, 500px, 1x and giphy (errors),
+      # imgur (few results), artic and searchrockit (off-topic), artstation (off-topic concept art) and brave.images (errors;
+      # the app asks the Brave API directly).
+      - yandex images
+      - yandex
+      - pinterest
+      - deviantart
       # Docs tab research engines (SEARXNG_DOC_ENGINES), asked with the plain query.
       - crossref
       - pubmed
@@ -115,8 +126,6 @@ engines:
     disabled: false
   - name: ipernity
     disabled: false
-  - name: artstation
-    disabled: false
   - name: crossref
     disabled: false
   - name: pubmed
@@ -159,5 +168,10 @@ engines:
     disabled: false
   - name: duckduckgo images
     disabled: false
-  - name: brave.images
+  - name: yandex images
     disabled: false
+  - name: pinterest
+    disabled: false
+  - name: deviantart
+    disabled: false
+    inactive: false

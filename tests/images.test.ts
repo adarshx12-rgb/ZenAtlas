@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 import {aiGenerated,excludesAI,wantsLicense,openverseResults,licenseLabel,openverseQuery} from '../src/image-signals.js';
 import {reviewImages} from '../src/image-review.js';
 import type {Judge} from '../src/judge.js';
-import type {ImageResult} from '../src/images.js';
+import {braveImageResults,searchImages,type ImageResult} from '../src/images.js';
+import {collapseDuplicates,differenceHash} from '../src/image-duplicates.js';
+import {interleaveImages,mergeShares,bySource,captionMatch,rankSearxng} from '../src/image-sources.js';
 import {testConfig} from './helpers.js';
 
 test('AI-generated images are recognised from their source, not their pixels',()=>{
@@ -64,4 +66,94 @@ test('Openverse is asked for the subject, not the whole sentence',()=>{
  assert.equal(openverseQuery('free to use photo of mount everest with license and attribution',null),'mount everest');
  assert.equal(openverseQuery('creative commons pictures of a red panda','Red panda'),'Red panda');
  assert.equal(openverseQuery('royalty-free images of tokyo at night',null),'tokyo at night');
+});
+
+test('Brave image results carry the full image, its page and size; unusable rows are left out',()=>{
+ const out=braveImageResults({results:[
+  {title:'Red Panda',url:'https://faunafocus.com/portfolio/red-panda/',thumbnail:{src:'https://imgs.search.brave.com/x'},properties:{url:'https://faunafocus.com/p.jpg',width:700,height:218}},
+  {title:'no image',url:'https://a.example/'},
+  {title:'private',url:'https://b.example/',properties:{url:'http://127.0.0.1/p.jpg'}}]});
+ assert.equal(out.length,1);
+ assert.equal(out[0]!.image_url,'https://faunafocus.com/p.jpg');
+ assert.equal(out[0]!.thumbnail,'https://imgs.search.brave.com/x');
+ assert.equal(out[0]!.source_name,'faunafocus.com');
+ assert.equal(out[0]!.width,700);
+ assert.equal(out[0]!.engine,'brave');
+ assert.equal(braveImageResults({nonsense:true}).length,0);
+});
+
+test('Brave and engine images are taken in turn, without repeats',()=>{
+ const out=interleaveImages([img('a','A'),img('b','B'),img('c','C')],[img('b','B2'),img('d','D')]);
+ assert.deepEqual(out.map(r=>r.id),['a','b','d','c']);
+});
+
+const at=(id:string,page:string,extra:Partial<ImageResult>={})=>img(id,id,{page_url:page,...extra});
+
+test('a page is 60% Brave and 40% SearXNG, spread through it; a short side leaves its places to the other',()=>{
+ const brave=Array.from({length:30},(_,i)=>img(`b${i}`,'B',{engine:'brave'})), searx=Array.from({length:30},(_,i)=>img(`s${i}`,'S'));
+ const page=mergeShares(brave,searx,60,10);
+ assert.equal(page.length,10);
+ assert.equal(page.filter(r=>r.engine==='brave').length,6);
+ assert.deepEqual(page.slice(0,4).map(r=>r.id[0]),['b','s','b','s']);
+ assert.equal(mergeShares(brave.slice(0,2),searx,60,10).filter(r=>r.engine==='brave').length,2);
+ assert.equal(mergeShares(brave,searx.slice(0,1),60,10).filter(r=>r.engine==='brave').length,9);
+ assert.equal(mergeShares([],searx,60,10).length,10);
+ assert.equal(mergeShares([img('x','X')],[img('x','X'),img('y','Y')],60,10).length,2,'an image both found is counted once');
+});
+
+test('the focus site leads, originals follow, stock and repin copies go last',()=>{
+ const out=bySource([at('pin','https://www.pinterest.com/pin/1'),at('blog','https://blog.example/a'),at('stock','https://www.istockphoto.com/p/1'),
+  at('ps','https://picsart.com/i/1'),at('ps2','https://x.example/a',{image_url:'https://cdn-cms-uploads.picsart.com/a.jpg'})],'picsart.com');
+ assert.deepEqual(out.map(r=>r.id),['ps','ps2','blog','pin','stock']);
+ assert.deepEqual(bySource([at('pin','https://in.pinterest.com/pin/1'),at('blog','https://blog.example/a')]).map(r=>r.id),['blog','pin']);
+});
+
+test('copies of one picture collapse to the original publisher; different pictures stay',async()=>{
+ const sharp=(await import('sharp')).default;
+ const picture=(flip:boolean,size:number,q:number)=>sharp(Buffer.from(Array.from({length:64*64*3},(_,i)=>{const p=Math.floor(i/3),x=p%64,y=Math.floor(p/64);
+  return flip?((63-x)*4+y)%256:(x*4+y)%256;})),{raw:{width:64,height:64,channels:3}}).resize(size,size).jpeg({quality:q}).toBuffer();
+ const hashes=await Promise.all((await Promise.all([picture(false,64,90),picture(false,40,50),picture(true,64,90)])).map(differenceHash));
+ assert.ok(hashes.every(h=>h!=null));
+ const {kept,dropped}=collapseDuplicates([at('stock','https://www.alamy.com/x'),at('own','https://photographer.example/x'),at('other','https://b.example/y')],hashes);
+ assert.deepEqual(kept.map(r=>r.id),['own','other']);
+ assert.equal(dropped,1);
+ assert.equal(await differenceHash(Buffer.from('not an image')),null);
+});
+
+test('Brave runs both planned searches, the second phrased like a caption, and the page mixes them',async()=>{
+ const asked:string[]=[];
+ const transport=(async(url:string)=>{const q=new URL(url).searchParams.get('q')!;asked.push(q);
+  return {results:[1,2].map(n=>({title:`${q} ${n}`,url:`https://p${n}.example/${encodeURIComponent(q)}`,properties:{url:`https://i${n}.example/${encodeURIComponent(q)}.jpg`}}))};}) as any;
+ const out=await searchImages({} as any,{...testConfig,SEARXNG_BASE_URL:'',BRAVE_SEARCH_API_KEY:'k',OPENVERSE_ENABLED:false} as any,
+  {q:'red panda',limit:48,page:1} as any,{rewrite:async()=>({query:'red panda',corrected:'red panda',changed:false,topic:'Red panda',topic_kind:null,searches:['red panda eating bamboo in a tree','x']}),
+  review:false,budget:async()=>true,transport});
+ assert.deepEqual(asked.sort(),['red panda','red panda eating bamboo in a tree']);
+ assert.equal(out.results.length,4);
+ assert.notEqual(out.results[0]!.title.split(' ').length,out.results[1]!.title.split(' ').length,'the two searches are interleaved');
+});
+
+test('among equally relevant images the original publisher comes before stock and repin copies',async()=>{
+ const judge:Judge={async judge(_q,cs){return {model:'m',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,relevance:8,reason:'r',momentKeys:[]}]))};}};
+ const out=await reviewImages({} as any,testConfig,'q',[at('pin','https://www.pinterest.com/pin/1'),at('own','https://blog.example/a')],
+  {judge,strong:null,thumbnail:async()=>({contentType:'image/jpeg',data:Buffer.from([0xff,0xd8,0xff,0xe0])}),log:()=>{}});
+ assert.deepEqual(out.results.map(r=>r.id),['own','pin']);
+});
+
+test('captions are matched on the query\'s distinctive words, stems included',()=>{
+ assert.equal(captionMatch('vintage travel poster','Vintage Travel Posters of Italy'),1);
+ assert.equal(captionMatch('pop art graphics design','Pop art patterns'),0.5);
+ assert.equal(captionMatch('retro art style','Anything'),0,'"art" and "style" are generic, "retro" is not there');
+ assert.equal(captionMatch('art style','Anything'),1,'a query of only generic words asks nothing of the caption');
+});
+
+test('SearXNG images: focus site first, then engine quality and caption; strict engines and the focus site need the whole query',()=>{
+ const out=rankSearxng([
+  img('y','Red panda eating bamboo',{engine:'yandex images'}),
+  img('b','Red panda eating bamboo',{engine:'bing images'}),
+  img('f1','Red panda eating bamboo leaves',{engine:'flickr'}),
+  img('f2','Calgary zoo visit',{engine:'flickr'}),
+  img('p1','Red panda eating bamboo',{engine:'bing images',page_url:'https://picsart.com/i/1'}),
+  img('p2','Cute sticker',{engine:'bing images',page_url:'https://picsart.com/i/2'}),
+  img('b2','Pandas',{engine:'bing images'})],'red panda eating bamboo','picsart.com',new Set(['flickr']));
+ assert.deepEqual(out.map(r=>r.id),['p1','b','b2','y','f1']);
 });

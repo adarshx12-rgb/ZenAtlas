@@ -254,7 +254,7 @@ const runningCode: Check = {name: 'running_code', label: 'Running code', categor
    return warning('restart_needed', `${list(stale.map(s => `${s.process} (${list(s.changed)})`))} changed after start, so the running ${stale.length === 1 ? 'process uses' : 'processes use'} the old version. Restart when no search is running: pm2 restart ${stale.map(s => s.process).join(' ')}.`, {stale});
  }};
 
-const SEARXNG_SETTINGS = ['SEARXNG_ENGINES', 'SEARXNG_SOURCE_ENGINES', 'SEARXNG_WEB_ENGINES', 'SEARXNG_DEEP_ENGINES', 'SEARXNG_DEEP_WEB_ENGINES', 'SEARXNG_IMAGE_ENGINES', 'SEARXNG_DOC_ENGINES'] as const;
+const SEARXNG_SETTINGS = ['SEARXNG_ENGINES', 'SEARXNG_SOURCE_ENGINES', 'SEARXNG_WEB_ENGINES', 'SEARXNG_DEEP_ENGINES', 'SEARXNG_DEEP_WEB_ENGINES', 'SEARXNG_IMAGE_ENGINES', 'SEARXNG_IMAGE_FOCUS_ENGINES', 'SEARXNG_IMAGE_FALLBACK_ENGINES', 'SEARXNG_IMAGE_STRICT_ENGINES', 'SEARXNG_DOC_ENGINES'] as const;
 const engineNames = (value: string) => value.split(',').map(e => e.trim()).filter(Boolean);
 // Each engine the settings ask for, with the settings that name it.
 function configuredEngines(config: Config) {

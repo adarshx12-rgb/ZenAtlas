@@ -14,7 +14,14 @@ export const configSchema = z.object({
   SEARXNG_WEB_ENGINES: z.string().default('duckduckgo web,bing,yahoo,github,stackoverflow'),
   // Image search (see src/images.ts). Reddit and Pinterest have no SearXNG engine, but these
   // four index both, so their images still come back.
-  SEARXNG_IMAGE_ENGINES: z.string().default('bing images,duckduckgo images,brave.images,pixabay images,unsplash,pexels,flickr,wikicommons.images,stocksnap,ipernity,artstation'),
+  // Chosen by judged quality (output/searxng-image-quality-*.json, 2026-10-03, 8 queries x each engine's top 6): bing 96%
+  // judged good, pinterest 81%, yandex 77%. deviantart (56%), wikicommons (49%) and ipernity (43%) were dropped. The strict
+  // engines count only when an image's caption has every word of the query (flickr: 53% good overall, 80% then).
+  SEARXNG_IMAGE_ENGINES: z.string().default('bing images,pinterest,yandex images'),
+  SEARXNG_IMAGE_STRICT_ENGINES: z.string().default('flickr'),
+  // Asked only when SearXNG has fewer than SEARXNG_IMAGE_MIN usable images: duckduckgo images cools down after a few searches.
+  SEARXNG_IMAGE_FALLBACK_ENGINES: z.string().default('duckduckgo images'),
+  SEARXNG_IMAGE_MIN: number(5, 0, 48),
   // Extra engines that only deep dives use, chosen because ordinary searches rarely reach their sources.
   SEARXNG_DEEP_ENGINES: z.string().default('bilibili,acfun,sepiasearch,wikicommons.videos'),
   // Research and book engines the Docs tab asks with the plain query (arXiv and Semantic Scholar have their own sources).
@@ -100,6 +107,12 @@ export const configSchema = z.object({
   IMAGE_REVIEW_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
   OPENVERSE_ENABLED: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
   OPENVERSE_DAILY_BUDGET: number(200, 0, 10000),
+  // Brave searches images across the whole web; SearXNG leans on IMAGE_FOCUS_SITE (its results come first in SearXNG's
+  // share, and a second SearXNG search names the site on SEARXNG_IMAGE_FOCUS_ENGINES). IMAGE_BRAVE_SHARE is the percent of
+  // each page Brave fills; either side fills what the other could not. Empty IMAGE_FOCUS_SITE turns the focus off.
+  IMAGE_BRAVE_SHARE: number(60, 0, 100),
+  IMAGE_FOCUS_SITE: z.string().regex(/^([a-z0-9-]+\.)+[a-z]{2,}$|^$/).default('picsart.com'),
+  SEARXNG_IMAGE_FOCUS_ENGINES: z.string().default('bing images,yandex images'),
   REFILL_MAX_SEARCHES: number(2, 1, 3), REFILL_TIMEOUT_MS: number(8000, 1000, 30000), REFILL_DAILY_BUDGET: number(1000, 0, 100000),
   // Cascade: the Strong judge re-judges verdicts scored CASCADE_BORDER_LOW-HIGH, in conflict with Jev's quoted evidence,
   // or above the border without a grounded quote, plus JEV_SETTLED_AUDIT_RATE of Jev's settles. gpt-5.6-terra: 93-99% on
