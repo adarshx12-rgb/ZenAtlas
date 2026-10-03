@@ -346,35 +346,38 @@ function imageTile(item){
  tile.dataset.id=item.id;
  return tile;
 }
-// The Images tab's review, polled until it completes: images the judge did not see matching the request are removed,
-// the rest ordered as it ranked them, each with its reason on hover. A failed or expired poll leaves the images as they are.
-async function followImageReview(token,page,review){
- const settle=()=>{if(controller.current(token.generation))status.textContent=status.textContent.replace(' · checking images…','');};
- for(let polls=0;polls<50;polls++){
+// Badges and hover reasons from the judge, on a tile built from a judged result.
+function markJudged(tile,r){
+ if(r.judgement)tile.title=`${r.verification==='uncertain'?'Possible match':'Why this matches'} (${r.judgement.relevance}/10): ${r.judgement.reason}`;
+ if(r.verification==='uncertain'&&!tile.querySelector('.image-uncertain')){
+  const badge=node('span',r.unseen?'Image not inspected':'Possible match','image-tile-badge image-uncertain');
+  badge.title=(r.unmet_requirements??[]).join('; ')||'Some requested details could not be confirmed.';
+  tile.append(badge);
+ }
+}
+// The Images tab shows judged results only: the search answers with a job, polled here while it searches and then checks
+// the images, and the page is drawn once the judged results are ready. A failed or expired poll says so and offers retry.
+const IMAGE_STAGES={searching:'Searching for images…',checking:'Checking the images…'};
+async function followImageJob(token,page,review,append){
+ for(let polls=0;polls<120;polls++){
   await new Promise(resolve=>setTimeout(resolve,1500));
   if(!controller.current(token.generation))return;
   let snap;
-  try{snap=await api(`/api/images/review?token=${encodeURIComponent(review)}`,{signal:token.signal});}catch{settle();return;}
+  try{snap=await api(`/api/images/review?token=${encodeURIComponent(review)}`,{signal:token.signal});}
+  catch(error){if(controller.current(token.generation)){status.textContent=error.message;retry.hidden=false;}return;}
   if(!controller.current(token.generation))return;
-  if(snap.status!=='complete')continue;
-  const tiles=new Map([...imageGrid.querySelectorAll(`.image-tile[data-page="${page}"]`)].map(t=>[t.dataset.id,t]));
-  const byId=new Map(snap.results.map(r=>[r.id,r]));
-  let before=[...tiles.values()][0]?.previousElementSibling??null;
-  for(const [id,tile] of tiles)if(!byId.has(id))tile.remove();
-  for(const r of snap.results){const tile=tiles.get(r.id);if(!tile)continue;
-   if(r.judgement)tile.title=`${r.verification==='uncertain'?'Possible match':'Why this matches'} (${r.judgement.relevance}/10): ${r.judgement.reason}`;
-   if(r.verification==='uncertain'&&!tile.querySelector('.image-uncertain')){
-    const badge=node('span',r.unseen?'Image not inspected':'Possible match','image-tile-badge image-uncertain');
-    badge.title=(r.unmet_requirements??[]).join('; ')||'Some requested details could not be confirmed.';
-    tile.append(badge);
-   }
-   if(before)before.after(tile);else imageGrid.prepend(tile);before=tile;}
-  for(const p of snap.providers)if(p.status!=='ok')notices.append(node('p',p.message,'notice'));
+  if(snap.status!=='complete'){if(!append)status.textContent=IMAGE_STAGES[snap.stage]??IMAGE_STAGES.searching;continue;}
+  if(!append)imageGrid.replaceChildren();
+  const tiles=[];
+  for(const r of snap.results){const tile=imageTile(r);if(!tile)continue;tile.dataset.page=String(page);markJudged(tile,r);tiles.push(tile);}
+  imageGrid.append(...tiles);
+  notices.replaceChildren(...snap.providers.filter(p=>p.status!=='ok').map(p=>node('p',p.message,'notice')));
+  imageMore.hidden=!snap.next_cursor||!snap.results.length;
   const count=imageGrid.children.length;
   status.textContent=count?`${count} ${count===1?'image':'images'}${levelTag()}${snap.removed?` · ${snap.removed} removed as not matching`:''}`:'No image matched the request. Try another query.';
   return;
  }
- settle();
+ if(controller.current(token.generation)){status.textContent='Checking the images is taking too long. Try again.';retry.hidden=false;}
 }
 
 async function searchImagesPage(token,append){
@@ -387,6 +390,10 @@ async function searchImagesPage(token,append){
  const page=imagePage;
  const data=await api(`/api/images?${query}`,{signal:token.signal});
  if(!controller.current(token.generation))return;
+ if(data.pending&&data.review){
+  if(append)status.textContent=`${imageGrid.children.length} images · loading more…`;
+  await followImageJob(token,page,data.review,append);return;
+ }
  if(!append)imageGrid.replaceChildren();
  const tiles=data.results.map(imageTile).filter(Boolean);
  for(const t of tiles)t.dataset.page=String(page);
@@ -394,8 +401,7 @@ async function searchImagesPage(token,append){
  notices.replaceChildren(...data.providers.filter(p=>p.status!=='ok').map(p=>node('p',p.message,'notice')));
  imageMore.hidden=!data.next_cursor||!data.results.length;
  const count=imageGrid.children.length;
- status.textContent=count?`${count} ${count===1?'image':'images'}${levelTag()}${data.review?' · checking images…':''}`:'No images found. Try another query.';
- if(data.review)void followImageReview(token,page,data.review);
+ status.textContent=count?`${count} ${count===1?'image':'images'}${levelTag()}`:'No images found. Try another query.';
 }
 
 async function runImageSearch(){

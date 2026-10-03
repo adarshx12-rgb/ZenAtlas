@@ -111,6 +111,9 @@ export const configSchema = z.object({
   // share, and a second SearXNG search names the site on SEARXNG_IMAGE_FOCUS_ENGINES). IMAGE_BRAVE_SHARE is the percent of
   // each page Brave fills; either side fills what the other could not. Empty IMAGE_FOCUS_SITE turns the focus off.
   IMAGE_BRAVE_SHARE: number(60, 0, 100),
+  // The judged Images page: IMAGE_POOL images are collected from every search, Jev screens them, and the best IMAGE_JUDGE_POOL
+  // (after duplicates collapse) are judged; the page shows only judged images.
+  IMAGE_POOL: number(120, 24, 200), IMAGE_JUDGE_POOL: number(36, 6, 60),
   IMAGE_FOCUS_SITE: z.string().regex(/^([a-z0-9-]+\.)+[a-z]{2,}$|^$/).default('picsart.com'),
   SEARXNG_IMAGE_FOCUS_ENGINES: z.string().default('bing images,yandex images'),
   REFILL_MAX_SEARCHES: number(2, 1, 3), REFILL_TIMEOUT_MS: number(8000, 1000, 30000), REFILL_DAILY_BUDGET: number(1000, 0, 100000),
@@ -149,6 +152,11 @@ export const configSchema = z.object({
   QUERY_REWRITE_MODEL: z.string().regex(/^[\w.\/:-]{0,100}$/).default('google/gemini-3.5-flash-lite'),
   QUERY_REWRITE_TIMEOUT_MS: number(2500, 200, 10000),
   QUERY_REWRITE_DAILY_BUDGET: number(3000, 0, 100000),
+  // Images tab planner (src/image-plan.ts): pictures the answer, then writes two searches; it spends QUERY_REWRITE_DAILY_BUDGET.
+  // Benchmark 2026-10-03 (output/image-plan-bench-*.json; 10 requests, the lead search's top 12 Brave images judged):
+  // flash-lite 73% judged good, gpt-6-luna 48% (its searches dropped the subject's name), the light rewrite 52%.
+  IMAGE_PLAN_MODEL: z.string().regex(/^[\w.\/:-]{0,100}$/).default('google/gemini-3.5-flash-lite'),
+  IMAGE_PLAN_TIMEOUT_MS: number(15000, 1000, 60000),
   // Model tiers (src/tiers.ts). TIER is set per search by tierConfig, never in .env. SSJ1_* are the lower-cost models
   // SSJ1 puts first; SSJ3's own models follow them as backups (chosen 2026-09-27, see docs/superpowers/specs).
   TIER: z.enum(['ssj3', 'ssj1']).default('ssj3'),

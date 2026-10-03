@@ -14,7 +14,7 @@ import { contentInput } from './types.js';
 import { missingRequirements } from './cascade.js';
 import { PageChecker, pageTools, type PageCheck } from './pages.js';
 import { collapseDuplicates, differenceHash } from './image-duplicates.js';
-import { isCopy } from './image-sources.js';
+import { pageOrder, strongFirst } from './image-sources.js';
 
 // The Images tab's review, run in the background like the Web tab's: the judge sees each image's thumbnail (the judge
 // models take images) with its title and host as context, and removes what the image does not show. The cascade's Strong
@@ -22,12 +22,14 @@ import { isCopy } from './image-sources.js';
 
 export type ReviewedImage = ImageResult & {judgement?: {relevance: number; reason: string}; unseen?: true;
  verification?: 'verified'|'uncertain'; unmet_requirements?: string[]; ai_status?: 'source_marked'|'unknown'};
-export interface ImageReviewState { status: 'running'|'complete'; results: ReviewedImage[]; removed: number; providers: ProviderStatus[] }
+// stage: where the job is, for the page's progress line. next_cursor and rewrite arrive with the results.
+export interface ImageReviewState { status: 'running'|'complete'; stage: 'searching'|'checking'|'done'; results: ReviewedImage[]; removed: number;
+ providers: ProviderStatus[]; next_cursor: string|null; rewrite?: {corrected: string} }
 export interface ImageReviewDeps extends ContractDeps { judge?: Judge; strong?: Judge|null; screener?: Screener; pages?: PageCheck; thumbnail?: (url: string) => Promise<{contentType: string; data: Buffer}>; log?: (line: Record<string, unknown>) => void }
 
-// The top of a results page is what gets judged; the rest keeps its search order after the judged ones.
-// DUPLICATE_SPARE more thumbnails are fetched so that pictures collapsed as copies are replaced in the pool.
-const REVIEW_POOL = 24, DUPLICATE_SPARE = 12, BATCH = 6, THUMB_MAX = 400 * 1024;
+// The best config.IMAGE_JUDGE_POOL images (after screening) are judged. DUPLICATE_SPARE more thumbnails are fetched so
+// that pictures collapsed as copies are replaced in the judged pool.
+const DUPLICATE_SPARE = 12, BATCH = 6, THUMB_MAX = 400 * 1024;
 export function imageMime(data: Buffer): ImageMime|null {
  if (data[0] === 0xff && data[1] === 0xd8 && data[2] === 0xff) return 'image/jpeg';
  if (data.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10]))) return 'image/png';
@@ -37,11 +39,14 @@ export function imageMime(data: Buffer): ImageMime|null {
 }
 const CRITERIA = ['An image whose visible content shows what the request describes. Judge from the image itself (its screenshot); the title and host are context, not proof',
  'Text, labels or a chart inside the image count when they are readable in the image',
- 'Watermarked stock previews, illustrations and AI-generated images match only when the request allows them'];
+ 'Watermarked stock previews, illustrations and AI-generated images match only when the request allows them',
+ 'An image of a different work, person, place or thing than the request names does not match, even when it looks similar'];
 
-export async function reviewImages(db: DB, config: Config, query: string, images: ImageResult[], deps: ImageReviewDeps & {judge: Judge}):
+// onlyJudged: the page shows judged images only, so images beyond the judged pool are left out rather than appended.
+export async function reviewImages(db: DB, config: Config, query: string, images: ImageResult[], deps: ImageReviewDeps & {judge: Judge; onlyJudged?: boolean}):
  Promise<{results: ReviewedImage[]; removed: number; providers: ProviderStatus[]}> {
  const providers: ProviderStatus[] = [];
+ const REVIEW_POOL = config.IMAGE_JUDGE_POOL;
  const contract = await planContract(db, config, query, 'images', deps);
  const screener = 'screener' in deps ? deps.screener : makeScreener(db, config);
  let ordered = images;
@@ -52,6 +57,8 @@ export async function reviewImages(db: DB, config: Config, query: string, images
      ordered = screeningOrder(leads, screened.promising).map(c => c.image);
    } catch { providers.push({provider: 'jev_screener', status: 'unavailable', message: 'Images were checked in search order.'}); }
  }
+ // Weak sources (stock previews, repins, shops, wallpaper farms, tiny pictures) are judged only where originals run short.
+ ordered = strongFirst(ordered, query);
  const fetchThumb = deps.thumbnail ?? (url => fetchImage(url, {timeoutMs: 4000, maxBytes: THUMB_MAX}));
  const thumb = async (url: string) => {
    const got = await fetchThumb(url).catch(() => null);
@@ -118,12 +125,11 @@ export async function reviewImages(db: DB, config: Config, query: string, images
    }}}) : null;
  if (final) providers.push(...final.providers);
  const scored = pool.map((image, i) => ({image, i, v: (final?.verdicts ?? verdicts).get(`i${i + 1}`), seen: shots.has(`i${i + 1}`)}));
- // Equal scores put the original publisher before stock and repin copies.
- const kept = scored.filter(s => s.v && s.v.relevance > TANGENTIAL)
-   .sort((a, b) => b.v!.relevance - a.v!.relevance || Number(isCopy(a.image)) - Number(isCopy(b.image)) || a.i - b.i);
+ // Weak sources rank below originals that match as well or nearly as well, and no site fills the page (pageOrder).
+ const kept = pageOrder(scored.filter(s => s.v && s.v.relevance > TANGENTIAL).map(s => ({...s, relevance: s.v!.relevance})), query);
  const unjudged = scored.filter(s => !s.v), removed = scored.length - kept.length - unjudged.length;
  providers.push({provider: 'judge', status: 'ok', message: `${pool.length} images were checked by looking at them (${shots.size} seen); ${removed} did not match.`});
- (deps.log ?? (line => process.stdout.write(`${JSON.stringify(line)}\n`)))({event: 'image_review', tier: config.TIER, judged: pool.length, seen: shots.size, removed, duplicates});
+ (deps.log ?? (line => process.stdout.write(`${JSON.stringify(line)}\n`)))({event: 'image_review', tier: config.TIER, collected: images.length, judged: pool.length, seen: shots.size, removed, duplicates});
  const out = (s: typeof scored[number]): ReviewedImage => {
    const candidate = (final?.candidates ?? candidates)[s.i];
    const missing = s.v ? missingRequirements(candidate, s.v, context.requirements) : context.requirements!.map(r => r.id);
@@ -131,37 +137,53 @@ export async function reviewImages(db: DB, config: Config, query: string, images
      verification: missing.length || !s.seen || (s.v?.relevance ?? 0) <= 5 ? 'uncertain' : 'verified',
      unmet_requirements: context.requirements!.filter(r => missing.includes(r.id)).map(r => r.text), ai_status: s.image.ai_generated ? 'source_marked' : 'unknown'};
  };
- return {results: [...kept.map(out), ...unjudged.map(out), ...rest.map(image => ({...image, verification: 'uncertain' as const,
-   unseen: true as const, ai_status: image.ai_generated ? 'source_marked' as const : 'unknown' as const}))], removed, providers};
+ return {results: [...kept.map(out), ...unjudged.map(out), ...(deps.onlyJudged ? [] : rest.map(image => ({...image, verification: 'uncertain' as const,
+   unseen: true as const, ai_status: image.ai_generated ? 'source_marked' as const : 'unknown' as const})))], removed, providers};
 }
 
-// Reviews wait here by token for the page to poll, for ten minutes.
+// Jobs wait here by token for the page to poll, for ten minutes.
 const reviews = new Map<string, {state: ImageReviewState; expires: number}>();
-const REVIEW_MS = 10 * 60_000, MAX_REVIEWS = 200, MAX_RUNNING = 4;
+const REVIEW_MS = 10 * 60_000, MAX_REVIEWS = 200, MAX_RUNNING = 6;
 let running = 0;
 export function imageReviewState(token: string): ImageReviewState|null {
  const review = reviews.get(token);
  return review && review.expires >= Date.now() ? review.state : null;
 }
 
-export function startImageReview(db: DB, config: Config, query: string, images: ImageResult[], deps: ImageReviewDeps = {}): string|null {
- if (!config.IMAGE_REVIEW_ENABLED || !images.length) return null;
+// The Images job: collect (plan, searches, pool), then review, and only then show results. null when there is no judge,
+// so the search answers with the collected images itself. When the server is busy or the review fails, the collected
+// images are shown in search order with a notice: a search always ends with results when any were found.
+export function startImageJob(db: DB, config: Config, query: string, limit: number,
+ collect: () => Promise<{plan: {corrected: string; changed: boolean}; images: ImageResult[]; providers: ProviderStatus[]; next_cursor: string|null}>,
+ deps: ImageReviewDeps = {}): string|null {
+ if (!config.IMAGE_REVIEW_ENABLED) return null;
  const judge = 'judge' in deps ? deps.judge : makeJudge(db, config);
  if (!judge) return null;
  const now = Date.now();
  for (const [token, r] of reviews) if (r.expires < now || reviews.size >= MAX_REVIEWS) reviews.delete(token);
  const token = randomUUID();
- const state: ImageReviewState = {status: 'running', results: images, removed: 0, providers: []};
+ const state: ImageReviewState = {status: 'running', stage: 'searching', results: [], removed: 0, providers: [], next_cursor: null};
  reviews.set(token, {state, expires: now + REVIEW_MS});
- if (running >= MAX_RUNNING) {
-   state.status = 'complete';
-   state.providers.push({provider: 'image_review', status: 'unavailable', message: 'The server is busy; images were not checked.'});
-   return token;
- }
+ const busy = running >= MAX_RUNNING;
  running++;
- void reviewImages(db, config, query, images, {...deps, judge})
-   .then(out => Object.assign(state, {results: out.results, removed: out.removed, providers: out.providers}))
-   .catch(() => state.providers.push({provider: 'image_review', status: 'unavailable', message: 'Image checking stopped early; images are shown in search order.'}))
-   .finally(() => { running--; state.status = 'complete'; });
+ void (async () => {
+   const found = await collect();
+   Object.assign(state, {providers: found.providers, next_cursor: found.next_cursor, ...(found.plan.changed ? {rewrite: {corrected: found.plan.corrected}} : {})});
+   if (!found.images.length) return;
+   if (busy) {
+     state.results = found.images.slice(0, limit);
+     state.providers.push({provider: 'image_review', status: 'unavailable', message: 'The server is busy; images were not checked.'});
+     return;
+   }
+   state.stage = 'checking';
+   try {
+     const out = await reviewImages(db, config, found.plan.corrected, found.images, {...deps, judge, onlyJudged: true});
+     Object.assign(state, {results: out.results.slice(0, limit), removed: out.removed, providers: [...found.providers, ...out.providers]});
+   } catch {
+     state.results = found.images.slice(0, limit);
+     state.providers.push({provider: 'image_review', status: 'unavailable', message: 'Image checking stopped early; images are shown in search order.'});
+   }
+ })().catch(() => state.providers.push({provider: 'image_search', status: 'unavailable', message: 'Image search failed; try again.'}))
+   .finally(() => { running--; state.status = 'complete'; state.stage = 'done'; });
  return token;
 }

@@ -1,11 +1,12 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {aiGenerated,excludesAI,wantsLicense,openverseResults,licenseLabel,openverseQuery} from '../src/image-signals.js';
-import {reviewImages} from '../src/image-review.js';
+import {reviewImages,startImageJob,imageReviewState} from '../src/image-review.js';
 import type {Judge} from '../src/judge.js';
 import {braveImageResults,searchImages,type ImageResult} from '../src/images.js';
 import {collapseDuplicates,differenceHash} from '../src/image-duplicates.js';
-import {interleaveImages,mergeShares,bySource,captionMatch,rankSearxng} from '../src/image-sources.js';
+import {novelty,rankSearches,planImages,clearImagePlanCache} from '../src/image-plan.js';
+import {interleaveImages,mergeShares,bySource,captionMatch,rankSearxng,weakSource,pageOrder} from '../src/image-sources.js';
 import {testConfig} from './helpers.js';
 
 test('AI-generated images are recognised from their source, not their pixels',()=>{
@@ -108,6 +109,27 @@ test('the focus site leads, originals follow, stock and repin copies go last',()
  assert.deepEqual(bySource([at('pin','https://in.pinterest.com/pin/1'),at('blog','https://blog.example/a')]).map(r=>r.id),['blog','pin']);
 });
 
+test('stock previews, repins, shops, wallpaper farms and tiny pictures are weak sources unless the request asks for them',()=>{
+ const big={width:1200,height:800};
+ assert.ok(weakSource(at('a','https://www.dreamstime.com/x',big),'red panda eating bamboo'));
+ assert.ok(!weakSource(at('a','https://www.dreamstime.com/x',big),'red panda stock photo'));
+ assert.ok(weakSource(at('a','https://www.redbubble.com/i/poster/x',big),'bauhaus poster design'));
+ assert.ok(!weakSource(at('a','https://www.redbubble.com/i/poster/x',big),'buy bauhaus poster'));
+ assert.ok(weakSource(at('a','https://wallpapers.com/x',big),'monogatari series art style'));
+ assert.ok(!weakSource(at('a','https://wallpapers.com/x',big),'monogatari wallpaper'));
+ assert.ok(weakSource(at('a','https://www.artofit.org/x',big),'bauhaus poster'));
+ assert.ok(weakSource(at('a','https://www.reddit.com/r/anime/x',{width:140,height:78}),'monogatari'));
+ assert.ok(!weakSource(at('a','https://www.wwf.org.uk/x',big),'red panda eating bamboo'));
+});
+
+test('judged images: a weak source ranks below originals scoring within two points, and no site fills the page',()=>{
+ const row=(id:string,page:string,relevance:number,i:number)=>({image:at(id,page,{width:1200,height:800}),relevance,i});
+ const out=pageOrder([row('stock','https://www.alamy.com/a',9,0),row('wwf','https://www.wwf.org.uk/a',8,1),row('blog','https://blog.example/a',6,2)],'red panda');
+ assert.deepEqual(out.map(r=>r.image.id),['wwf','stock','blog']);
+ const many=pageOrder([1,2,3,4,5].map(n=>row(`c${n}`,`https://carbuzz.com/${n}`,9,n)).concat(row('other','https://www.motortrend.com/a',7,9)),'cybertruck');
+ assert.deepEqual(many.map(r=>r.image.id),['c1','c2','c3','other','c4','c5']);
+});
+
 test('copies of one picture collapse to the original publisher; different pictures stay',async()=>{
  const sharp=(await import('sharp')).default;
  const picture=(flip:boolean,size:number,q:number)=>sharp(Buffer.from(Array.from({length:64*64*3},(_,i)=>{const p=Math.floor(i/3),x=p%64,y=Math.floor(p/64);
@@ -120,16 +142,16 @@ test('copies of one picture collapse to the original publisher; different pictur
  assert.equal(await differenceHash(Buffer.from('not an image')),null);
 });
 
-test('Brave runs both planned searches, the second phrased like a caption, and the page mixes them',async()=>{
+test('Brave runs the request and every redesign, and the pool mixes their results',async()=>{
  const asked:string[]=[];
  const transport=(async(url:string)=>{const q=new URL(url).searchParams.get('q')!;asked.push(q);
   return {results:[1,2].map(n=>({title:`${q} ${n}`,url:`https://p${n}.example/${encodeURIComponent(q)}`,properties:{url:`https://i${n}.example/${encodeURIComponent(q)}.jpg`}}))};}) as any;
  const out=await searchImages({} as any,{...testConfig,SEARXNG_BASE_URL:'',BRAVE_SEARCH_API_KEY:'k',OPENVERSE_ENABLED:false} as any,
-  {q:'red panda',limit:48,page:1} as any,{rewrite:async()=>({query:'red panda',corrected:'red panda',changed:false,topic:'Red panda',topic_kind:null,searches:['red panda eating bamboo in a tree','x']}),
-  review:false,budget:async()=>true,transport});
- assert.deepEqual(asked.sort(),['red panda','red panda eating bamboo in a tree']);
- assert.equal(out.results.length,4);
- assert.notEqual(out.results[0]!.title.split(' ').length,out.results[1]!.title.split(' ').length,'the two searches are interleaved');
+  {q:'red panda',limit:48,page:1} as any,{plan:async()=>({query:'red panda',corrected:'red panda',changed:false,topic:'Red panda',
+   searches:['red panda eating bamboo in a tree','Ailurus fulgens feeding'],look_for:[]}),review:false,budget:async()=>true,transport});
+ assert.deepEqual(asked.sort(),['Ailurus fulgens feeding','red panda','red panda eating bamboo in a tree']);
+ assert.equal(out.results.length,6);
+ assert.deepEqual(out.results.slice(0,3).map(r=>r.title.split(' ').slice(0,3).join(' ')),['red panda 1','red panda eating','Ailurus fulgens feeding'],'one from each search in turn');
 });
 
 test('among equally relevant images the original publisher comes before stock and repin copies',async()=>{
@@ -156,4 +178,56 @@ test('SearXNG images: focus site first, then engine quality and caption; strict 
   img('p2','Cute sticker',{engine:'bing images',page_url:'https://picsart.com/i/2'}),
   img('b2','Pandas',{engine:'bing images'})],'red panda eating bamboo','picsart.com',new Set(['flickr']));
  assert.deepEqual(out.map(r=>r.id),['p1','b','b2','y','f1']);
+});
+
+test('planned image searches that only repeat or pad the request are dropped; the one adding most leads',()=>{
+ assert.equal(novelty('monogatari series art style','Monogatari series art style anime visuals'),0);
+ assert.deepEqual(rankSearches('monogatari series art style',['Monogatari series art style anime visuals','Monogatari Shaft Akiyuki Shinbo visual style','shaft studio monogatari']),
+  ['Monogatari Shaft Akiyuki Shinbo visual style','shaft studio monogatari']);
+ assert.deepEqual(rankSearches('1984 film poster',['film poster design','1984 movie poster original']),['1984 movie poster original'],'a search dropping the year is refused');
+});
+
+test('the image planner keeps the request\'s meaning and falls back to the typed query on failure',async()=>{
+ const config={...testConfig,QUERY_REWRITE_ENABLED:true,IMAGE_PLAN_TIMEOUT_MS:1000} as any;
+ clearImagePlanCache();
+ const plan=await planImages({} as any,config,'monogatri art style',{log:()=>{},model:async()=>({shows:['x'],captions:['y'],corrected:'monogatari art style',topic:'Monogatari',
+  searches:['monogatari art style hd','Akiyuki Shinbo Shaft head tilt'],look_for:['stark geometric backgrounds','text card frames']})});
+ assert.equal(plan.corrected,'monogatari art style');
+ assert.deepEqual(plan.searches,['Akiyuki Shinbo Shaft head tilt']);
+ assert.deepEqual(plan.look_for,['stark geometric backgrounds','text card frames']);
+ const drifted=await planImages({} as any,config,'cat drawing',{log:()=>{},model:async()=>({corrected:'dog painting',topic:null,searches:['dog oil painting'],look_for:[]})});
+ assert.equal(drifted.corrected,'cat drawing');
+ assert.deepEqual(drifted.searches,[],'a plan that changed the request is not searched');
+ const failed=await planImages({} as any,config,'red fox',{log:()=>{},model:async()=>{throw new Error('down');}});
+ assert.deepEqual(failed.searches,[]);
+});
+
+test('a redesign Jev reads as asking for something else is not searched; without Jev the redesigns stand',async()=>{
+ const config={...testConfig,QUERY_REWRITE_ENABLED:true,IMAGE_PLAN_TIMEOUT_MS:1000} as any;
+ const model=async()=>({corrected:'monogatari series art style',topic:'Monogatari',look_for:[],
+  searches:['bakemonogatari visual style shaft studio','demon slayer art style wallpaper','Akiyuki Shinbo head tilt']});
+ clearImagePlanCache();
+ const checked=await planImages({} as any,config,'monogatari series art style',{log:()=>{},model,intent:async(_q,list)=>list.map(s=>!s.includes('demon'))});
+ assert.deepEqual(checked.searches.sort(),['Akiyuki Shinbo head tilt','bakemonogatari visual style shaft studio']);
+ clearImagePlanCache();
+ const unchecked=await planImages({} as any,config,'monogatari series art style',{log:()=>{},model,intent:async()=>null});
+ assert.equal(unchecked.searches.length,3);
+});
+
+test('the Images job searches, then checks, and shows only judged images, best first',async()=>{
+ const judge:Judge={async judge(_q,cs){return {model:'m',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,relevance:c.title.startsWith('good')?9:2,reason:'r',momentKeys:[]}]))};}};
+ let release!:()=>void;const gate=new Promise<void>(r=>release=r);
+ const images=Array.from({length:40},(_,i)=>img(`x${i}`,i%2?`good ${i}`:`bad ${i}`));
+ const token=startImageJob({} as any,{...testConfig,IMAGE_REVIEW_ENABLED:true,IMAGE_JUDGE_POOL:12} as any,'q',48,async()=>{await gate;
+  return {plan:{corrected:'q',changed:false},images,providers:[],next_cursor:'2'};},
+  {judge,strong:null,screener:undefined,thumbnail:async()=>({contentType:'image/jpeg',data:Buffer.from([0xff,0xd8,0xff,0xe0])}),log:()=>{}})!;
+ assert.equal(imageReviewState(token)!.stage,'searching');
+ assert.equal(imageReviewState(token)!.results.length,0,'nothing is shown before judging');
+ release();
+ for(let i=0;i<50&&imageReviewState(token)!.status!=='complete';i++)await new Promise(r=>setTimeout(r,20));
+ const done=imageReviewState(token)!;
+ assert.equal(done.status,'complete');
+ assert.equal(done.results.length,6,'only the judged pool, and only what matched');
+ assert.ok(done.results.every(r=>r.judgement?.relevance===9));
+ assert.equal(done.next_cursor,'2');
 });

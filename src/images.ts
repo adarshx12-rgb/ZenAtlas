@@ -9,8 +9,9 @@ import { publicURL } from './urls.js';
 import { searchSearXNG } from './providers.js';
 import { tierSchema } from './tiers.js';
 import { rewriteQuery } from './query-rewrite.js';
+import { planImages, rankSearches, type ImagePlan } from './image-plan.js';
 import { aiGenerated, excludesAI, openverseQuery, openverseResults, wantsLicense, type ImageLicense } from './image-signals.js';
-import { startImageReview } from './image-review.js';
+import { startImageJob } from './image-review.js';
 import { bySource, interleaveImages, mergeShares, onSite, rankSearxng, siteWord } from './image-sources.js';
 import { withSearchTrace, traceFields } from './search-trace.js';
 
@@ -42,11 +43,12 @@ export interface ImageResult {
 }
 export interface ImageSearchResponse {
  query: string; results: ImageResult[]; providers: ProviderStatus[]; next_cursor: string | null;
- // The background review's token (src/image-review.ts), polled at /api/images/review.
- review?: string; rewrite?: {corrected: string};
+ // The job's token (src/image-review.ts), polled at /api/images/review; pending: the results come only from there.
+ review?: string; pending?: true; rewrite?: {corrected: string};
 }
 export interface ImageSearchDeps {
- rewrite?: typeof rewriteQuery; review?: false | ((query: string, images: ImageResult[]) => string | null);
+ plan?: (query: string) => Promise<ImagePlan>; rewrite?: typeof rewriteQuery;
+ review?: false | ((query: string, collect: () => Promise<CollectedImages>) => string | null);
  budget?: typeof takeBudget; transport?: typeof fetchJSON;
 }
 
@@ -64,7 +66,7 @@ async function openverse(db: DB, config: Config, q: string, page: number): Promi
  }
 }
 
-// Brave's image index: the whole web, each planned search in turn (the second only within budget). Its image API has no
+// Brave's image index: the whole web, every planned search (each after the first only within budget). Its image API has no
 // offset, so Brave answers the first page only.
 async function braveImages(db: DB, config: Config, queries: string[], input: ImageSearchInput, deps: ImageSearchDeps): Promise<{results: ImageResult[]; status: ProviderStatus|null}> {
  if (!config.BRAVE_SEARCH_API_KEY || input.page > 1) return {results: [], status: null};
@@ -83,7 +85,7 @@ async function braveImages(db: DB, config: Config, queries: string[], input: Ima
  const answers = await Promise.allSettled(queries.map((q, i) => ask(q, i === 0)));
  const lists = answers.flatMap(a => a.status === 'fulfilled' && a.value ? [a.value] : []);
  if (!lists.length) return {results: [], status: {provider: 'brave', status: 'unavailable', message: 'Brave did not answer; other engines were asked.'}};
- return {results: bySource(interleaveImages(...lists)), status: {provider: 'brave', status: 'ok', message: 'Brave image search completed.'}};
+ return {results: bySource(interleaveImages(...lists), '', queries[0]), status: {provider: 'brave', status: 'ok', message: 'Brave image search completed.'}};
 }
 export function braveImageResults(payload: unknown): ImageResult[] {
  const rows = z.object({results: z.array(z.unknown()).max(200)}).safeParse(payload);
@@ -104,20 +106,24 @@ export function braveImageResults(payload: unknown): ImageResult[] {
 }
 
 // SearXNG brings a few good images rather than many: engines chosen by judged quality, the strict ones and the focus site
-// kept only when their caption names the whole query, best first. A second search names the focus site; the fallback
-// engines are asked only when fewer than SEARXNG_IMAGE_MIN images are usable. The status shown is the main search's.
-async function searxngImages(db: DB, config: Config, q: string, input: ImageSearchInput): Promise<ImageSearchResponse> {
+// kept only when their caption names the whole request, best first. Each planned search runs on the main engines; one more
+// names the focus site. The fallback engines are asked only when fewer than SEARXNG_IMAGE_MIN images are usable. The status
+// shown is the first search's.
+async function searxngImages(db: DB, config: Config, queries: string[], input: ImageSearchInput): Promise<ImageSearchResponse> {
+ const q = queries[0]!;
  const focus = config.IMAGE_FOCUS_SITE;
  const strict = engineList(config.SEARXNG_IMAGE_STRICT_ENGINES);
+ const engines = [...new Set([...engineList(config.SEARXNG_IMAGE_ENGINES), ...strict])];
  const focusEngines = focus ? engineList(config.SEARXNG_IMAGE_FOCUS_ENGINES) : [];
- const [main, site] = await Promise.all([engineImages(db, config, {...input, q}, [...new Set([...engineList(config.SEARXNG_IMAGE_ENGINES), ...strict])]),
+ const [mains, site] = await Promise.all([Promise.all(queries.map(query => engineImages(db, config, {...input, q: query}, engines))),
    focusEngines.length ? engineImages(db, config, {...input, q: `${siteWord(focus)} ${q}`}, focusEngines) : null]);
  // Only the focus site's images count from the search that names it; the rest of that search is about the site, not the query.
  const rank = (list: ImageResult[]) => rankSearxng(interleaveImages(list), q, focus, new Set(strict));
- let results = rank([...main.results, ...(site?.results ?? []).filter(r => onSite(r, focus))]);
+ let results = rank([...interleaveImages(...mains.map(m => m.results)), ...(site?.results ?? []).filter(r => onSite(r, focus))]);
  const fallback = engineList(config.SEARXNG_IMAGE_FALLBACK_ENGINES);
  if (fallback.length && results.length < config.SEARXNG_IMAGE_MIN) results = rank([...results, ...(await engineImages(db, config, {...input, q}, fallback)).results]);
- return {...main, results, next_cursor: main.next_cursor ?? site?.next_cursor ?? null};
+ const main = mains[0]!;
+ return {...main, results, next_cursor: mains.find(m => m.next_cursor)?.next_cursor ?? site?.next_cursor ?? null};
 }
 
 // Optional upstream metadata is best effort: an unusable value drops the field, not the result.
@@ -145,29 +151,53 @@ function displayTitle(title: unknown, host: string) {
  return looksLikeFile ? host : text.slice(0, 300);
 }
 
-export const searchImages = (...args: Parameters<typeof searchImagesImpl>) => withSearchTrace(async () => Object.assign(await searchImagesImpl(...args), traceFields()));
-async function searchImagesImpl(db: DB, config: Config, input: ImageSearchInput, deps: ImageSearchDeps = {}): Promise<ImageSearchResponse> {
- // What was meant rather than what was typed, plus a second search phrased the way captions describe the picture.
- const rewrite = await (deps.rewrite ?? rewriteQuery)(db, config, input.q, 'images').catch(() => null);
- const q = rewrite?.corrected ?? input.q;
- const plan = [q, ...(rewrite?.searches ?? []).slice(0, 1)];
- // Brave (the whole web), SearXNG (the focus site first) and Openverse (licensed images) are asked in parallel.
- const [found, brave, extra] = await Promise.all([searxngImages(db, config, q, input), braveImages(db, config, plan, input, deps),
-   openverse(db, config, openverseQuery(q, rewrite?.topic ?? null), input.page)]);
+// The image planner's picture of the answer (src/image-plan.ts); when it has no searches to offer, the light rewrite's,
+// kept only when they add to the request.
+async function imagePlan(db: DB, config: Config, query: string, deps: ImageSearchDeps): Promise<ImagePlan> {
+ const planned = await (deps.plan ?? (q => planImages(db, config, q)))(query).catch(() => null);
+ if (planned?.searches.length) return planned;
+ const r = await (deps.rewrite ?? rewriteQuery)(db, config, query, 'images').catch(() => null);
+ return r ? {query, corrected: r.corrected, changed: r.changed, topic: r.topic, searches: rankSearches(r.corrected, r.searches), look_for: planned?.look_for ?? []}
+   : planned ?? {query, corrected: query, changed: false, topic: null, searches: [], look_for: []};
+}
+
+// Everything the request's searches found, before any checking: Brave's share first in each stretch of the pool, licensed
+// images after (first when the request is about licences), AI-marked images left out when the request excludes them.
+export interface CollectedImages { plan: ImagePlan; images: ImageResult[]; providers: ProviderStatus[]; next_cursor: string|null }
+export async function collectImages(db: DB, config: Config, input: ImageSearchInput, deps: ImageSearchDeps = {}, size = input.limit): Promise<CollectedImages> {
+ const plan = await imagePlan(db, config, input.q, deps);
+ const q = plan.corrected;
+ // The request as typed (corrected) runs first, so a redesign can only add to what is found.
+ const queries = [q, ...plan.searches];
+ const [found, brave, extra] = await Promise.all([searxngImages(db, config, queries, input), braveImages(db, config, queries, {...input, limit: Math.max(input.limit, 50)}, deps),
+   openverse(db, config, openverseQuery(q, plan.topic), input.page)]);
  const providers = [...(brave.status ? [brave.status] : []), ...found.providers, ...(extra.status ? [extra.status] : [])];
  const noAI = excludesAI(input.q);
  let unmarked = 0;
  const usable = (list: ImageResult[]) => list.map(r => aiGenerated(r.page_url, r.title) ? {...r, ai_generated: true as const} : r)
    .filter(r => !(noAI && r.ai_generated && ++unmarked));
- const engines = mergeShares(usable(brave.results), usable(found.results), config.IMAGE_BRAVE_SHARE, input.limit);
+ const engines = mergeShares(usable(brave.results), usable(found.results), config.IMAGE_BRAVE_SHARE, size);
  const seen = new Set(engines.map(r => r.image_url));
  const fresh = usable(extra.results).filter(r => !seen.has(r.image_url));
- // A request about licences puts licensed images first; otherwise they follow the engines' results.
- const results = (wantsLicense(input.q) ? [...fresh, ...engines] : [...engines, ...fresh]).slice(0, input.limit);
+ const images = (wantsLicense(input.q) ? [...fresh, ...engines] : [...engines, ...fresh]).slice(0, size);
  if (unmarked) providers.push({provider: 'ai_filter', status: 'ok', message: `${unmarked} images their source marks as AI-generated were left out.`});
- const review = deps.review === false ? null : (deps.review ?? ((query, list) => startImageReview(db, config, query, list)))(q, results);
- return {...found, results, providers, next_cursor: found.next_cursor ?? (results.length ? String(input.page + 1) : null),
-   ...(review ? {review} : {}), ...(rewrite?.changed ? {rewrite: {corrected: rewrite.corrected}} : {})};
+ return {plan, images, providers, next_cursor: found.next_cursor ?? (images.length ? String(input.page + 1) : null)};
+}
+
+// With the review on, the page gets only judged results: the search answers at once with a token, and the job behind it
+// redesigns the request, collects a pool from every search, has Jev screen it, collapses duplicates and judges the best
+// (src/image-review.ts). /api/images/review reports its stage until the judged page is ready. Without a judge, the
+// collected images are returned as found.
+export const searchImages = (...args: Parameters<typeof searchImagesImpl>) => withSearchTrace(async () => Object.assign(await searchImagesImpl(...args), traceFields()));
+async function searchImagesImpl(db: DB, config: Config, input: ImageSearchInput, deps: ImageSearchDeps = {}): Promise<ImageSearchResponse> {
+ if (deps.review !== false) {
+   const start = deps.review ?? ((query: string, collect: () => Promise<CollectedImages>) => startImageJob(db, config, query, input.limit, collect));
+   const token = start(input.q, () => collectImages(db, config, input, deps, config.IMAGE_POOL));
+   if (token) return {query: input.q, results: [], providers: [], next_cursor: null, review: token, pending: true};
+ }
+ const found = await collectImages(db, config, input, deps);
+ return {query: found.plan.corrected, results: found.images, providers: found.providers, next_cursor: found.next_cursor,
+   ...(found.plan.changed ? {rewrite: {corrected: found.plan.corrected}} : {})};
 }
 
 export async function engineImages(db: DB, config: Config, input: ImageSearchInput, engines: string[]): Promise<ImageSearchResponse> {
