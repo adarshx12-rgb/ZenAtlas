@@ -19,7 +19,19 @@ const eligible = `s.status='active' AND s.health_status<>'down' AND split_part(s
 
 // Sound matches count half as much as an exact list, so exact evidence still outranks them.
 export const PHONETIC_WEIGHT = 0.5;
+// A transcript moment shows the caption lines within this many seconds of its focus, cut at a word to EXCERPT_CHARS.
+const FOCUS_CONTEXT_SECONDS = 10, EXCERPT_CHARS = 400;
+// A keyword or evidence match at the strong-match score (COVERAGE_MIN_SCORE) or above keeps its full rank; a weaker one
+// earns the share of it its score reaches, never less than a tenth.
+const strengthOf = (min: number) => (rows: {id:string;score:number|string}[]) =>
+ new Map(rows.map(r => [r.id, Math.max(0.1, Math.min(1, Number(r.score) / min))]));
+export function excerpt(text: string): string {
+ if (text.length <= EXCERPT_CHARS) return text;
+ const cut = text.slice(0, EXCERPT_CHARS), space = cut.lastIndexOf(' ');
+ return `${(space > EXCERPT_CHARS / 2 ? cut.slice(0, space) : cut).trimEnd()}…`;
+}
 export async function retrieve(db: DB, config: Config, input: SearchInput, owner: string) {
+ const strength = strengthOf(config.COVERAGE_MIN_SCORE);
  const args = [input.q,input.language??null,input.source??null,input.after??null,input.evidence];
  const lexical = (await db.query(`SELECT c.id,ts_rank_cd(c.search_vector,websearch_to_tsquery('english',$1),32) AS score
    FROM content c JOIN sources s ON s.id=c.source_id WHERE ${eligible}
@@ -73,12 +85,16 @@ export async function retrieve(db: DB, config: Config, input: SearchInput, owner
    FROM content c JOIN sources s ON s.id=c.source_id WHERE c.id=ANY($1::uuid[])`,[ids,owner])).rows;
  // A transcript window spans minutes, so its start is a poor timestamp. Focus on the window's segment sharing the
  // most query terms (any term, so windows found semantically or across segments still focus); none shares one → no focus.
- const moments = (await db.query(`SELECT m.*,f.start_seconds AS focus_start,f.end_seconds AS focus_end FROM moments m
+ // The card quotes the focused line with its neighbours (focus_text), never the whole window, which can span the video.
+ const moments = (await db.query(`SELECT m.*,f.start_seconds AS focus_start,f.end_seconds AS focus_end,x.focus_text FROM moments m
    CROSS JOIN (SELECT nullif(replace(plainto_tsquery('english',$2)::text,' & ',' | '),'')::tsquery AS terms) q
    LEFT JOIN LATERAL (SELECT t.start_seconds,t.end_seconds FROM transcript_segments t
      WHERE m.evidence_type='transcript_supported' AND t.id=ANY(m.evidence_refs)
      AND (to_tsvector('english',t.text) @@ q.terms OR (cardinality($5::text[])>0 AND t.sound_keys @> $5::text[]))
      ORDER BY coalesce(ts_rank(to_tsvector('english',t.text),q.terms),0) DESC,t.start_seconds LIMIT 1) f ON true
+   LEFT JOIN LATERAL (SELECT string_agg(t.text,' ' ORDER BY t.start_seconds) AS focus_text FROM transcript_segments t
+     WHERE f.start_seconds IS NOT NULL AND t.id=ANY(m.evidence_refs)
+     AND t.end_seconds>=f.start_seconds-${FOCUS_CONTEXT_SECONDS} AND t.start_seconds<=f.end_seconds+${FOCUS_CONTEXT_SECONDS}) x ON true
    WHERE m.content_id=ANY($1::uuid[]) AND m.status='active' AND ($4='any' OR m.evidence_type=$4)
    AND (m.search_vector @@ websearch_to_tsquery('english',$2) OR m.id=ANY($3::uuid[])
      OR (cardinality($5::text[])>0 AND m.evidence_type='transcript_supported' AND m.sound_keys @> $5::text[]
@@ -89,7 +105,7 @@ export async function retrieve(db: DB, config: Config, input: SearchInput, owner
    AND (v.search_vector @@ websearch_to_tsquery('english',$2) OR v.id=ANY($3::uuid[]))`,[ids,input.q,semantic.flatMap(r=>r.scene_ids??[]),input.evidence])).rows;
  const results = rows.map(row=>{
    const found: Moment[] = [...moments.filter(m=>m.content_id===row.id).map(m=>({id:m.id,
-     start_seconds:m.start_seconds,end_seconds:m.end_seconds,summary:m.summary,evidence_type:m.evidence_type,
+     start_seconds:m.start_seconds,end_seconds:m.end_seconds,summary:excerpt(m.focus_text??m.summary),evidence_type:m.evidence_type,
      analysis_version:m.analysis_version,inspected_ranges:m.inspected_ranges,evidence_refs:m.evidence_refs,
      ...(m.focus_start===null?{}:{focus:[m.focus_start,m.focus_end] as [number,number]})})),
      ...scenes.filter(v=>v.content_id===row.id).map(sceneMoment)]
@@ -102,6 +118,7 @@ export async function retrieve(db: DB, config: Config, input: SearchInput, owner
  });
  const strongIds = new Set([...lexical,...momentMatches].filter(r=>r.score >= config.COVERAGE_MIN_SCORE).map(r=>r.id));
  const strongSources = new Set(rows.filter(r=>strongIds.has(r.id)).map(r=>r.source_id)).size;
- return {results:rank(results,[lexical.map(r=>r.id),momentMatches.map(r=>r.id),semantic.map(r=>r.id),phonetic.map(r=>r.id)],[1,1,1,PHONETIC_WEIGHT]),
+ return {results:rank(results,[lexical.map(r=>r.id),momentMatches.map(r=>r.id),semantic.map(r=>r.id),phonetic.map(r=>r.id)],[1,1,1,PHONETIC_WEIGHT],
+   [strength(lexical),strength(momentMatches)]),
    strong:strongIds.size,strongSources,providers};
 }

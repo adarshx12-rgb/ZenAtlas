@@ -85,7 +85,8 @@ function card(item){
    const [from,to]=moment.focus??[moment.start_seconds,moment.end_seconds];
    passage.append(node('strong',`${duration(from)} – ${duration(to)} · ${moment.evidence_type.replaceAll('_',' ')}${moment.scene?` · ${moment.scene.model}`:''}`));
    if(moment.focus)passage.append(node('div',`Best match within the transcript passage ${duration(moment.start_seconds)} – ${duration(moment.end_seconds)}`,'meta'));
-   passage.append(node('p',moment.summary));
+   // Older search snapshots stored whole transcript windows; quote only the start.
+   passage.append(node('p',moment.summary.length>400?`${moment.summary.slice(0,400).replace(/\s+\S*$/,'')}…`:moment.summary));
   }
   if(moment.scene){
    for(const tag of moment.scene.tags)passage.append(node('span',tag,'badge'));

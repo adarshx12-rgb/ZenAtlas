@@ -10,6 +10,7 @@ import { takeBudget } from './budgets.js';
 import { configuredProviders } from './providers.js';
 import { configuredArchives } from './specialists.js';
 import { contractSchema } from './requirements.js';
+import { CATALOGUE_REVIEW_LIMIT } from './catalogue-review.js';
 
 // How long a search reports that discovery is still running before calling it delayed: the checks and AI ranking
 // can take up to three minutes after a deep dive's search time.
@@ -83,6 +84,9 @@ export class SearchService {
      || local.strongSources<this.config.COVERAGE_MIN_SOURCES)) {
      const discovery = await this.discover(input,owner);
      job = discovery.job; providers.push(...discovery.providers);
+   } else if (input.mode !== 'catalogue' && local.results.length) {
+     // Enough catalogue matches to skip discovery are still only keyword hits: the judge checks them (src/catalogue-review.ts).
+     job = await this.reviewCatalogue(input,local.results);
    }
    return this.page(await this.save(owner,input,local.results,job,providers),0);
  }
@@ -151,6 +155,20 @@ export class SearchService {
    RETURNING *`,[key,JSON.stringify(input),this.config.DISCOVERY_CACHE_SECONDS])).rows[0];
    return {job,providers:[]};
  }
+ // One review per normalized query/filter set, reused like a discovery job; no discovery budget is spent.
+ private async reviewCatalogue(input: SearchInput, results: Result[]) {
+   const key = `catalogue-review:${queryKey(input)}`;
+   const payload = JSON.stringify({input, results: results.slice(0, CATALOGUE_REVIEW_LIMIT)});
+   return (await this.db.query(`INSERT INTO jobs(kind,dedupe_key,payload) VALUES('catalogue_review',$1,$2)
+   ON CONFLICT(dedupe_key) DO UPDATE SET
+     status=CASE WHEN jobs.status IN ('complete','failed') AND jobs.updated_at<now()-($3*interval '1 second') THEN 'queued' ELSE jobs.status END,
+     attempts=CASE WHEN jobs.status IN ('complete','failed') AND jobs.updated_at<now()-($3*interval '1 second') THEN 0 ELSE jobs.attempts END,
+     result=CASE WHEN jobs.status IN ('complete','failed') AND jobs.updated_at<now()-($3*interval '1 second') THEN NULL ELSE jobs.result END,
+     payload=CASE WHEN jobs.status IN ('complete','failed') AND jobs.updated_at<now()-($3*interval '1 second') THEN EXCLUDED.payload ELSE jobs.payload END,
+     run_after=CASE WHEN jobs.status IN ('complete','failed') AND jobs.updated_at<now()-($3*interval '1 second') THEN now() ELSE jobs.run_after END,
+     updated_at=CASE WHEN jobs.status IN ('complete','failed') AND jobs.updated_at<now()-($3*interval '1 second') THEN now() ELSE jobs.updated_at END
+   RETURNING *`,[key,payload,this.config.DISCOVERY_CACHE_SECONDS])).rows[0];
+ }
  private async save(owner: string, input: SearchInput, results: Result[], job: any, providers: ProviderStatus[]) {
    return (await this.db.query(`INSERT INTO searches(owner,query,filters,ranking_version,results,job_id,provider_status,expires_at)
      VALUES($1,$2,$3,$4,$5,$6,$7,now()+($8*interval '1 second')) RETURNING *`,
@@ -158,7 +176,7 @@ export class SearchService {
        JSON.stringify(providers),this.config.SEARCH_TTL_SECONDS])).rows[0];
  }
  private async refresh(initial: any): Promise<{snapshot: any; job: any}> {
-   const job = initial.job_id ? (await this.db.query('SELECT status,result,lease_token FROM jobs WHERE id=$1',[initial.job_id])).rows[0] : null;
+   const job = initial.job_id ? (await this.db.query('SELECT kind,status,result,lease_token FROM jobs WHERE id=$1',[initial.job_id])).rows[0] : null;
    if(initial.applied_run&&initial.applied_run!==job?.lease_token)return {snapshot:initial,job:null};
    const revision=job?.result?.revision??0;
    if (!job?.result || initial.discovery_applied&&revision<=(initial.applied_revision??0) || initial.cancelled) return {snapshot:initial,job};
@@ -214,8 +232,11 @@ export class SearchService {
    const window = CHECKING_WINDOW_MS + (depth==='deep' ? this.config.DEEP_SEARCH_SECONDS*1000 : 0);
    const waiting = running && Date.now()-new Date(snapshot.created_at).getTime()<=window;
    const providers: ProviderStatus[] = [...snapshot.provider_status];
-   if (job?.status==='failed') providers.push({provider:'discovery',status:'unavailable',message:'External discovery failed. Catalogue results are still available.'});
-   if (running && !waiting) providers.push({provider:'discovery',status:'unavailable',message:'Discovery is delayed. Try again later.'});
+   const review = job?.kind==='catalogue_review';
+   if (job?.status==='failed') providers.push(review?{provider:'judge',status:'unavailable',message:'Relevance checking failed; catalogue results are shown unchecked.'}
+     :{provider:'discovery',status:'unavailable',message:'External discovery failed. Catalogue results are still available.'});
+   if (running && !waiting) providers.push(review?{provider:'judge',status:'unavailable',message:'Relevance checking is delayed; catalogue results are shown unchecked.'}
+     :{provider:'discovery',status:'unavailable',message:'Discovery is delayed. Try again later.'});
    const all: Result[] = snapshot.results;
    const slice = all.slice(offset,offset+filters.limit);
    const found = all.filter(r=>r.origin!=='catalogue');
@@ -223,7 +244,7 @@ export class SearchService {
    const more = offset+filters.limit<all.length;
    return {query:snapshot.query,search_id:snapshot.id,status:snapshot.cancelled?'cancelled':waiting?'discovering':
      providers.some(p=>['partial','unavailable','budget_exhausted','disabled'].includes(p.status))?'partial':'complete',
-     depth,stage:waiting?(job.status==='queued'?'queued':job.result?.stage??'searching'):null,
+     depth,stage:waiting?(job.status==='queued'?'queued':job.result?.stage??(review?'checking':'searching')):null,
      results:slice.flatMap(r=>shown.get(r.id)??[]),has_more:more,next_cursor:more?encodeCursor(this.config,snapshot.id,offset+filters.limit):null,
      discovered:found.flatMap(r=>shown.get(r.id)??[]),catalogue_total:all.length-found.length,
      ranked:all.flatMap(r=>shown.get(r.id)??[]),

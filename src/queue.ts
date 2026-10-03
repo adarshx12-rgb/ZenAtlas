@@ -17,7 +17,7 @@ export async function claim(db: DB, lane: 'main'|'critic'|'scenes' = 'main') {
  return (await db.query(`UPDATE jobs SET status='running',attempts=attempts+1,lease_token=$1,
  lease_until=now()+interval '90 seconds',updated_at=now() WHERE id=(SELECT id FROM jobs
  WHERE ${kinds} AND ((status='queued' AND run_after<=now()) OR (status='running' AND lease_until<now())) AND attempts<3
- ORDER BY kind<>'discovery',run_after,id FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING *`,[randomUUID()])).rows[0]??null;
+ ORDER BY kind NOT IN ('discovery','catalogue_review'),run_after,id FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING *`,[randomUUID()])).rows[0]??null;
 }
 // Publishes partial results to the searches waiting on a running job, and renews its lease while it makes progress.
 export async function progress(db: DB, job: any, result: unknown) {

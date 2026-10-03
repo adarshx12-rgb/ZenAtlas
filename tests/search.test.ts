@@ -46,6 +46,7 @@ test('PostgreSQL catalogue/API, ownership, filters, evidence and stable paginati
    assert.equal(moments.results[0].evidence,'transcript_supported');assert.equal(moments.results[0].moments[0].end_seconds,65);
    // The window starts at 0s, but the timestamp points at the segment inside it that matches the query.
    assert.deepEqual(moments.results[0].moments[0].focus,[50,65]);
+   assert.equal(moments.results[0].moments[0].summary,'The bright bedroom has a balcony.','the card quotes the focused line, not the whole window');
    assert.deepEqual((await service.start({q:'kitchen cabinets',mode:'catalogue'},'alice')).results[0].moments[0].focus,[0,10]);
    assert.deepEqual((await service.start({q:'bright bedroom kitchen',mode:'catalogue'},'alice')).results[0].moments[0].focus,[50,65],
      'a window matched as a whole still focuses on the segment sharing the most query terms');
@@ -125,6 +126,31 @@ test('discovery persists once, reuses durable jobs and preserves results through
    const unknown=await ingest(db,contentInput.parse({url:'https://new.example.org/watch/1',title:'Candidate footage'}),{mock:true});
    assert.ok(unknown);assert.equal((await db.query("SELECT status FROM sources WHERE domain='new.example.org'")).rows[0].status,'candidate');
    assert.equal((await db.query('SELECT * FROM content')).rows.length,2);
+ }finally{await db.close();}
+});
+
+test('catalogue matches that skip discovery are judged, and the ones the judge rejects leave the page',async()=>{
+ const db=await database();
+ try{
+   const video=await fixture(db,'Video background removal model for footage','Removes backgrounds from video clips frame by frame');
+   await fixture(db,'Background removal model for photos','Removes the background from images and videos');
+   // Two catalogue matches from one source are enough to skip discovery here.
+   const config={...testConfig,COVERAGE_MIN_RESULTS:1,COVERAGE_MIN_SOURCES:1};
+   const service=new SearchService(db,config);
+   const started=await service.start({q:'video background removal model'},'alice');
+   assert.equal(started.status,'discovering');assert.equal(started.stage,'queued');
+   assert.equal((await db.query("SELECT kind FROM jobs WHERE id=$1",[started.discovery_job_id])).rows[0].kind,'catalogue_review');
+   assert.equal((await db.query("SELECT 1 FROM jobs WHERE kind='discovery'")).rows.length,0,'no discovery budget is spent');
+   const judge={async judge(_q:string,cs:any[]){return {model:'m',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,
+     relevance:c.title.includes('photos')?2:9,reason:c.title.includes('photos')?'Images, not video':'Video background removal',momentKeys:[]}]))};}};
+   await workOnce(db,config,undefined,undefined,{judge});
+   const done=await service.poll(started.search_id,'alice');
+   assert.equal(done.status,'complete');
+   assert.deepEqual(done.results.map(r=>r.id),[video.id],'the image tool the judge rejected is gone');
+   assert.equal(done.results[0].judgement?.relevance,9);
+   const again=await service.start({q:'video background removal model'},'bob');
+   assert.equal(again.discovery_job_id,started.discovery_job_id,'a repeat search reuses the review');
+   assert.deepEqual(again.results.map(r=>r.id),[video.id]);
  }finally{await db.close();}
 });
 

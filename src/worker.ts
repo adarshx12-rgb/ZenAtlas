@@ -16,6 +16,7 @@ import { providerHealth } from './health.js';
 import { saveTrace } from './learning.js';
 import { captionCommand, captionJob, pythonCaptions, type CaptionFetcher } from './captions.js';
 import {sceneProgress} from './scene-verification.js';
+import {reviewCatalogue} from './catalogue-review.js';
 
 export { providerHealth };
 export async function workOnce(db:DB,config:Config,adapters?:SourceAdapter[],probe?:typeof probeURL,deps?:DiscoveryDeps,captions?:CaptionFetcher) {
@@ -48,6 +49,9 @@ export async function workOnce(db:DB,config:Config,adapters?:SourceAdapter[],pro
          ...(outcome.contract?{contract:outcome.contract,unmet:outcome.unmet??[]}:{})});
        if(outcome.sceneReview)await enqueue(tx,'scene_review',`scene-review:${job.id}:${job.lease_token}`,{discovery_job_id:job.id,run_id:job.lease_token});
      });
+   } else if(job.kind==='catalogue_review') {
+     const input=searchInput.parse(job.payload.input);
+     await complete(db,job,await reviewCatalogue(db,tierConfig(config,input.tier),input,job.payload.results,deps));
    } else if(job.kind==='youtube_captions') {
      const outcome=await captionJob(db,config,job,captions??pythonCaptions(captionCommand(config),{proxy:config.YOUTUBE_CAPTIONS_PROXY,supadataKey:config.SUPADATA_API_KEY}));
      if(outcome) {

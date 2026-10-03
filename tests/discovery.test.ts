@@ -490,9 +490,10 @@ test('auto mode also runs discovery when strong catalogue matches come from too 
    await fixture(db);
    const config={...testConfig,SEARXNG_BASE_URL:'http://localhost:8080',COVERAGE_MIN_RESULTS:1,COVERAGE_MIN_SCORE:0};
    const single=await new SearchService(db,config).start({q:'bedroom',mode:'auto'},'alice');
-   assert.equal(single.discovery_job_id,null,'one strong match from one site is enough by default');
+   const kind=async(id:string|null)=>(await db.query('SELECT kind FROM jobs WHERE id=$1',[id])).rows[0]?.kind;
+   assert.equal(await kind(single.discovery_job_id),'catalogue_review','one strong match from one site is enough by default: judged, not discovered');
    const diverse=await new SearchService(db,{...config,COVERAGE_MIN_SOURCES:2}).start({q:'bedroom',mode:'auto'},'alice');
-   assert.notEqual(diverse.discovery_job_id,null);
+   assert.equal(await kind(diverse.discovery_job_id),'discovery');
  }finally{await db.close();}
 });
 

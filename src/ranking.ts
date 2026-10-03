@@ -1,14 +1,17 @@
 import type { ContentInput, Result } from './types.js';
 // v9: intent dimensions the request does not constrain are "not_asked" (no longer unknown); remembered verdicts from v8 are not reused.
 export const RANKING_VERSION = 'relevance-v9-not-asked';
-// RRF combines ordinal ranks, never incomparable raw lexical/cosine scores.
-export function reciprocalRankFusion(lists: string[][], k = 60, weights: number[] = []): Map<string,number> {
+// RRF combines ordinal ranks, never incomparable raw lexical/cosine scores. strength (optional, per list): how much of
+// its rank an item's own match earns, 0-1. Leading a near-empty list on one stray word ("in this video" in a transcript)
+// is then worth no more than its weak match, not as much as leading the keyword list on the title.
+export function reciprocalRankFusion(lists: string[][], k = 60, weights: number[] = [], strength: (Map<string,number>|undefined)[] = []): Map<string,number> {
  const scores = new Map<string,number>();
- for (const [l,list] of lists.entries()) for (const [i,id] of [...new Set(list)].entries()) scores.set(id,(scores.get(id)??0)+(weights[l]??1)/(k+i+1));
+ for (const [l,list] of lists.entries()) for (const [i,id] of [...new Set(list)].entries())
+   scores.set(id,(scores.get(id)??0)+(weights[l]??1)*(strength[l]?.get(id)??1)/(k+i+1));
  return scores;
 }
-export function rank(rows: (Result & {reliability:number;personal:number})[], lists:string[][], weights: number[] = []): Result[] {
- const scores = reciprocalRankFusion(lists, 60, weights);
+export function rank(rows: (Result & {reliability:number;personal:number})[], lists:string[][], weights: number[] = [], strength: (Map<string,number>|undefined)[] = []): Result[] {
+ const scores = reciprocalRankFusion(lists, 60, weights, strength);
  const remaining = rows.map(r=>({row:r,score:(scores.get(r.id)??0)*(1+0.05*r.reliability+0.03*Math.sign(r.personal))}));
  const counts = new Map<string,number>(); const result: Result[] = [];
  while (remaining.length) {
