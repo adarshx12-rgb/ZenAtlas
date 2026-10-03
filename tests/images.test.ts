@@ -5,7 +5,7 @@ import {reviewImages,startImageJob,imageReviewState} from '../src/image-review.j
 import type {Judge} from '../src/judge.js';
 import {braveImageResults,searchImages,type ImageResult} from '../src/images.js';
 import {collapseDuplicates,differenceHash} from '../src/image-duplicates.js';
-import {novelty,rankSearches,planImages,clearImagePlanCache} from '../src/image-plan.js';
+import {novelty,rankSearches,simpleSearch,planImages,clearImagePlanCache} from '../src/image-plan.js';
 import {interleaveImages,mergeShares,bySource,captionMatch,rankSearxng,weakSource,pageOrder} from '../src/image-sources.js';
 import {testConfig} from './helpers.js';
 
@@ -191,27 +191,37 @@ test('the image planner keeps the request\'s meaning and falls back to the typed
  const config={...testConfig,QUERY_REWRITE_ENABLED:true,IMAGE_PLAN_TIMEOUT_MS:1000} as any;
  clearImagePlanCache();
  const plan=await planImages({} as any,config,'monogatri art style',{log:()=>{},model:async()=>({shows:['x'],captions:['y'],corrected:'monogatari art style',topic:'Monogatari',
-  searches:['monogatari art style hd','Akiyuki Shinbo Shaft head tilt'],look_for:['stark geometric backgrounds','text card frames']})});
+  simple:'monogatari art',alternate:'Akiyuki Shinbo Shaft head tilt',look_for:['stark geometric backgrounds','text card frames']})});
  assert.equal(plan.corrected,'monogatari art style');
- assert.deepEqual(plan.searches,['Akiyuki Shinbo Shaft head tilt']);
+ assert.deepEqual(plan.searches,['monogatari art','Akiyuki Shinbo Shaft head tilt'],'simple version first, then the alternate terminology');
  assert.deepEqual(plan.look_for,['stark geometric backgrounds','text card frames']);
- const drifted=await planImages({} as any,config,'cat drawing',{log:()=>{},model:async()=>({corrected:'dog painting',topic:null,searches:['dog oil painting'],look_for:[]})});
+ const drifted=await planImages({} as any,config,'cat drawing',{log:()=>{},model:async()=>({corrected:'dog painting',topic:null,simple:'dog',alternate:'dog oil painting',look_for:[]})});
  assert.equal(drifted.corrected,'cat drawing');
  assert.deepEqual(drifted.searches,[],'a plan that changed the request is not searched');
  const failed=await planImages({} as any,config,'red fox',{log:()=>{},model:async()=>{throw new Error('down');}});
  assert.deepEqual(failed.searches,[]);
 });
 
-test('a redesign Jev reads as asking for something else is not searched; without Jev the redesigns stand',async()=>{
+test('an alternate Jev reads as asking for something else is not searched; the simple version is never sent to Jev',async()=>{
  const config={...testConfig,QUERY_REWRITE_ENABLED:true,IMAGE_PLAN_TIMEOUT_MS:1000} as any;
- const model=async()=>({corrected:'monogatari series art style',topic:'Monogatari',look_for:[],
-  searches:['bakemonogatari visual style shaft studio','demon slayer art style wallpaper','Akiyuki Shinbo head tilt']});
+ const model=async()=>({corrected:'lonely astronaut standing in red desert',topic:null,look_for:[],
+  simple:'astronaut red desert',alternate:'astronaut alone Mars landscape'});
  clearImagePlanCache();
- const checked=await planImages({} as any,config,'monogatari series art style',{log:()=>{},model,intent:async(_q,list)=>list.map(s=>!s.includes('demon'))});
- assert.deepEqual(checked.searches.sort(),['Akiyuki Shinbo head tilt','bakemonogatari visual style shaft studio']);
+ let asked:string[]=[];
+ const kept=await planImages({} as any,config,'lonely astronaut standing in red desert',{log:()=>{},model,intent:async(_q,list)=>{asked=list;return list.map(()=>true);}});
+ assert.deepEqual(kept.searches,['astronaut red desert','astronaut alone Mars landscape']);
+ assert.deepEqual(asked,['astronaut alone Mars landscape']);
  clearImagePlanCache();
- const unchecked=await planImages({} as any,config,'monogatari series art style',{log:()=>{},model,intent:async()=>null});
- assert.equal(unchecked.searches.length,3);
+ const refused=await planImages({} as any,config,'lonely astronaut standing in red desert',{log:()=>{},model,intent:async(_q,list)=>list.map(()=>false)});
+ assert.deepEqual(refused.searches,['astronaut red desert']);
+});
+
+test('the simple version uses only the request\'s own words, fewer of them, and keeps its numbers',()=>{
+ assert.equal(simpleSearch('lonely astronaut standing in red desert','astronaut red desert'),'astronaut red desert');
+ assert.equal(simpleSearch('lonely astronaut standing in red desert','astronaut Mars'),null,'a new word is not a simplification');
+ assert.equal(simpleSearch('red fox','red fox'),null,'nothing shorter to search');
+ assert.equal(simpleSearch('1984 film poster','film poster'),null,'a dropped year is refused');
+ assert.equal(simpleSearch('1984 film poster','1984 poster'),'1984 poster');
 });
 
 test('the Images job searches, then checks, and shows only judged images, best first',async()=>{

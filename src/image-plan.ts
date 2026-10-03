@@ -14,7 +14,7 @@ import { decisionCost } from './search-trace.js';
 
 export interface ImagePlan {
  query: string; corrected: string; changed: boolean; topic: string|null;
- // Up to three redesigns of the request that keep its meaning (Jev checks each), the one adding most first.
+ // Redesigns run after the request itself: its simple version, then one search in alternate terminology (Jev checks it).
  searches: string[];
  // Visual traits a matching image shows. The benchmarked prompt asks for them, but they do not reach the judge: given
  // as hints (A/B 2026-10-03) they made its scores noisier and lowered good images (monogatari 17 to 13 of 24).
@@ -31,15 +31,17 @@ First picture the images that best answer the request, as they appear online:
 Then return:
 - corrected: the request with spelling and typing mistakes fixed. Keep every word's meaning, every name, number and year; do not add, drop or reorder ideas. If nothing needs fixing, return it unchanged.
 - topic: the specific named thing the request is about, exactly as it is properly written, or null.
-- searches: exactly three image searches of at most eight words, each a redesign of the request written from your picture: the first in the words such captions use, the second naming the specific creators, studios, techniques or terms experts use, the third in the plain words the best sources on it would use. Every search must ask for exactly what the request asks: the same subject and every constraint it names (style, medium, action, setting, time, exclusions), never a related or broader thing. None may just repeat, reorder or pad the request with generic words. Keep every name, number and year of the request.
+- simple: the request cut to its core, 2 to 4 of its own words: the main subject and the words that matter most, with filler, adjectives of mood and verbs like "standing" dropped. Use only words from the request, never new ones. Keep every name, number and year.
+- alternate: one image search of at most eight words asking for the same images in other terminology, written from your picture: synonyms, the proper name of the subject or setting, the creators, studios, techniques or terms experts use, or the words such captions use. It must ask for exactly what the request asks (the same subject and every constraint it names), never a related or broader thing, and must not just repeat, reorder or pad the request's words. Keep every name, number and year of the request.
 - look_for: 1 to 4 short visual traits a matching image shows, taken from your picture.
+Example: request "lonely astronaut standing in red desert" → simple "astronaut red desert", alternate "astronaut alone Mars landscape".
 Never plan searches for sexual or adult content.`;
-const SCHEMA = {type: 'object', required: ['shows', 'captions', 'corrected', 'topic', 'searches', 'look_for'], properties: {
+const SCHEMA = {type: 'object', required: ['shows', 'captions', 'corrected', 'topic', 'simple', 'alternate', 'look_for'], properties: {
  shows: {type: 'array', items: {type: 'string'}}, captions: {type: 'array', items: {type: 'string'}},
- corrected: {type: 'string'}, topic: {type: ['string', 'null']},
- searches: {type: 'array', items: {type: 'string'}, minItems: 3, maxItems: 3}, look_for: {type: 'array', items: {type: 'string'}}}};
+ corrected: {type: 'string'}, topic: {type: ['string', 'null']}, simple: {type: 'string'}, alternate: {type: 'string'},
+ look_for: {type: 'array', items: {type: 'string'}}}};
 const reply = z.object({corrected: z.string().trim().min(1).max(400), topic: z.string().trim().max(120).nullable(),
- searches: z.array(z.string().trim().max(200)).max(5), look_for: z.array(z.string().trim().max(120)).max(6)});
+ simple: z.string().trim().max(200).catch(''), alternate: z.string().trim().max(200).catch(''), look_for: z.array(z.string().trim().max(120)).max(6)});
 
 const words = (s: string): string[] => s.normalize('NFKD').toLowerCase().replace(/[̀-ͯ'’]/g, '').match(/[\p{L}\p{N}]+/gu) ?? [];
 const numbers = (s: string): string[] => s.match(/\d+/g) ?? [];
@@ -50,6 +52,13 @@ const FILLER = new Set(['the', 'and', 'with', 'for', 'of', 'in', 'a', 'an', 'art
 export function novelty(request: string, search: string) {
  const asked = words(request).map(w => w.slice(0, 5));
  return new Set(words(search).filter(w => !FILLER.has(w) && !asked.includes(w.slice(0, 5)))).size;
+}
+// The simple version: fewer words than the request, every one of them the request's own (by five-letter stem), every
+// number kept. It is meant to be broader, so it skips the novelty and intent checks the alternate passes.
+export function simpleSearch(request: string, simple: string): string|null {
+ const asked = words(request).map(w => w.slice(0, 5)), own = words(simple);
+ if (!own.length || own.length >= asked.length || !own.every(w => asked.includes(w.slice(0, 5)))) return null;
+ return numbers(request).every(n => numbers(simple).includes(n)) ? simple.replace(/\s+/g, ' ').trim() : null;
 }
 // Searches that add something, most first; one that only repeats or pads the request is dropped.
 export function rankSearches(request: string, searches: string[]): string[] {
@@ -85,16 +94,18 @@ export async function planImages(db: DB, config: Config, query: string, deps: Pl
    const value = reply.parse(raw);
    const kept = keepsMeaning(query, value.corrected);
    const corrected = kept ? value.corrected.replace(/\s+/g, ' ') : query;
-   const ranked = kept ? rankSearches(corrected, value.searches).slice(0, 3) : [];
-   // A redesign Jev reads as asking for something else is dropped; when Jev cannot answer, the redesigns stand.
+   // Original (run by the caller) + simple version + alternate terminology.
+   const simple = kept ? simpleSearch(corrected, value.simple) : null;
+   const ranked = kept ? rankSearches(corrected, [value.alternate]).slice(0, 1) : [];
+   // An alternate Jev reads as asking for something else is dropped; when Jev cannot answer, it stands.
    const keeps = ranked.length ? await (deps.intent ?? ((q, list) => jevKeepsIntent(db, config, q, list)))(corrected, ranked).catch(() => null) : null;
-   const searches = keeps ? ranked.filter((_, i) => keeps[i] !== false) : ranked;
+   const searches = [...(simple ? [simple] : []), ...(keeps ? ranked.filter((_, i) => keeps[i] !== false) : ranked)];
    const plan: ImagePlan = {query, corrected, changed: corrected !== query, topic: kept ? value.topic || null : null,
      searches, look_for: kept ? value.look_for.filter(Boolean).slice(0, 4) : []};
    if (cache.size >= CACHE_MAX) cache.delete(cache.keys().next().value!);
    cache.set(key, {plan, expires: Date.now() + CACHE_MS});
    // One line per plan for tuning: never the query.
-   log({event: 'image_plan', tier: config.TIER, outcome: kept ? 'planned' : 'drifted', changed: plan.changed, searches: plan.searches.length,
+   log({event: 'image_plan', tier: config.TIER, outcome: kept ? 'planned' : 'drifted', changed: plan.changed, searches: plan.searches.length, simple: !!simple,
      intent_dropped: ranked.length - searches.length, intent_checked: !!keeps, ms: Date.now() - started});
    return plan;
  } catch {
