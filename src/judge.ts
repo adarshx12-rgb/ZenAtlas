@@ -70,8 +70,16 @@ type IntentCheck=z.infer<typeof intentCheck>;
 const normaliseQuote=(text:string)=>text.normalize('NFKC').replace(/\s+/g,' ').trim().toLowerCase();
 // Preserve order and negation: word overlap can turn a reversed relationship into apparently valid evidence.
 // Models must quote the visible excerpt of a truncated title, never complete the missing words.
+// A quote joined from excerpts with "..." (as the Strong judge quoted BEN2's transcript, 2026-10-04) counts when every
+// excerpt appears, in order, in the same text; each must be long enough to mean something on its own.
 function quoted(quote:string,text:string):boolean {
- return normaliseQuote(text).includes(normaliseQuote(quote));
+ const haystack=normaliseQuote(text), wanted=normaliseQuote(quote);
+ if(haystack.includes(wanted)) return true;
+ const parts=wanted.split(/\s*(?:\.\.\.|…)\s*/).filter(Boolean);
+ if(!parts.length || parts.some(p=>p.length<8)) return false;
+ let at=0;
+ for(const part of parts){const found=haystack.indexOf(part,at);if(found<0)return false;at=found+part.length;}
+ return true;
 }
 // What a candidate is (a video, a web page) is known for certain, so a format check that only names that kind needs no
 // quote: the judge cited "video" from the wrong field and correct videos were held at 5 (Falcon Heavy, 2026-10-01).

@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {groundedIntent,ModelJudge,type JudgeCandidate} from '../src/judge.js';
+import {groundedIntent,groundedCheck,ModelJudge,type JudgeCandidate} from '../src/judge.js';
 import type {ModelClient} from '../src/model-client.js';
 import {testConfig,database} from './helpers.js';
 import {applySignals} from '../src/signals.js';
@@ -156,8 +156,21 @@ test('auto mode does not spend a discovery job when the catalogue already covers
    const service=new SearchService(db,{...testConfig,SEARXNG_BASE_URL:'http://localhost:8080',GEMINI_API_KEY:'fixture-key',
      COVERAGE_MIN_RESULTS:1,COVERAGE_MIN_SOURCES:1,COVERAGE_MIN_SCORE:0});
    const started=await service.start({q:'ghost story'},'precision-test');
-   const row=(await db.query('SELECT job_id FROM searches WHERE id=$1',[started.search_id])).rows[0];
-   assert.equal(row.job_id,null);
+   // No discovery job is spent; the catalogue matches are only queued for judging (src/catalogue-review.ts).
+   assert.equal((await db.query("SELECT 1 FROM jobs WHERE kind='discovery'")).rows.length,0);
+   assert.equal((await db.query('SELECT j.kind FROM searches s JOIN jobs j ON j.id=s.job_id WHERE s.id=$1',[started.search_id])).rows[0].kind,'catalogue_review');
    assert.equal(started.results.length,2);
  }finally{await db.close();}
+});
+
+test('a quote stitched from excerpts with "..." is grounded only when every excerpt is in the same text, in order',()=>{
+ const c={key:'r1',kind:'video',site:'www.youtube.com',title:'BEN2 - Install Locally',channel:null,official:false,duration:null,live:null,
+  description:null,comments:[],moments:[],discussions:[],
+  transcripts:[{start:0,end:60,text:'we are going to install it locally and then we will see how it works. Now we can also remove background in video with the help of this Ben 2 model'}]} as JudgeCandidate;
+ const check=(quote:string)=>groundedCheck(c,{status:'supported',field:'transcripts',quote});
+ assert.equal(check('we are going to install it locally ... remove background in video with the help of this Ben 2 model'),true);
+ assert.equal(check('remove background in video … we are going to install it locally'),false,'excerpts out of order');
+ assert.equal(check('install it locally ... remove background in images'),false,'an excerpt not in the transcript');
+ assert.equal(check('we ... video'),false,'excerpts too short to mean anything');
+ assert.equal(groundedCheck({...c,title:'Lightweight model (runs ...'} as JudgeCandidate,{status:'supported',field:'title',quote:'Lightweight model (runs ...'}),true,'a title that itself ends in "..." still matches exactly');
 });
