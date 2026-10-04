@@ -36,6 +36,12 @@
   {"id": "nature-snow-leopard", "field": "nature", "tab": "images", "kind": "surface", "q": "snow leopard in ladakh photo"},
   {"id": "arch-brutalist", "field": "architecture", "tab": "images", "kind": "surface", "q": "brutalist architecture interior concrete stairs"},
   {"id": "med-heart-diagram", "field": "medicine", "tab": "images", "kind": "surface", "q": "labeled diagram of the human heart"},
-  {"id": "art-astronaut", "field": "design", "tab": "images", "kind": "surface", "q": "lonely astronaut standing in red desert"}
+  {"id": "art-astronaut", "field": "design", "tab": "images", "kind": "surface", "q": "lonely astronaut standing in red desert"},
+  {"id": "sci-tardigrade", "field": "science", "tab": "images", "kind": "deep", "q": "electron microscope image of a tardigrade"},
+  {"id": "car-mustang-67", "field": "cars_repair", "tab": "images", "kind": "surface", "q": "1967 ford mustang fastback side view"},
+  {"id": "hist-partition-map", "field": "history", "tab": "images", "kind": "deep", "q": "1947 map of the partition of india"},
+  {"id": "eng-disc-brake", "field": "engineering", "tab": "images", "kind": "deep", "q": "exploded view diagram of a car disc brake"},
+  {"id": "food-biryani", "field": "cooking", "tab": "images", "kind": "surface", "q": "hyderabadi biryani in a handi, top view"},
+  {"id": "sport-kohli-drive", "field": "sports", "tab": "images", "kind": "surface", "q": "virat kohli playing a cover drive"}
  ]
 }

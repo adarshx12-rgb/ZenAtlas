@@ -14,6 +14,7 @@ import { aiGenerated, excludesAI, openverseQuery, openverseResults, wantsLicense
 import { startImageJob } from './image-review.js';
 import { bySource, interleaveImages, mergeShares, onSite, rankSearxng, siteWord } from './image-sources.js';
 import { withSearchTrace, traceFields } from './search-trace.js';
+import { routeFields, type FieldRoute } from './field-routing.js';
 
 const engineList = (engines: string) => [...new Set(engines.split(',').map(e => e.trim()).filter(Boolean))];
 
@@ -50,7 +51,10 @@ export interface ImageSearchDeps {
  plan?: (query: string) => Promise<ImagePlan>; rewrite?: typeof rewriteQuery;
  review?: false | ((query: string, collect: () => Promise<CollectedImages>) => string | null);
  budget?: typeof takeBudget; transport?: typeof fetchJSON;
+ route?: (query: string) => Promise<FieldRoute>;
 }
+// Routed specialist sites (src/field-routing.ts): each site's best few images, and at most this many in all.
+const FIELD_IMAGES_PER_SITE = 5, FIELD_IMAGES = 10;
 
 // Openverse (openly licensed images with their licence), asked beside the engines when enabled and within budget.
 async function openverse(db: DB, config: Config, q: string, page: number): Promise<{results: ImageResult[]; status: ProviderStatus|null}> {
@@ -76,17 +80,33 @@ async function braveImages(db: DB, config: Config, queries: string[], input: Ima
  }
  const ask = async (q: string, first: boolean) => {
    if (!first && !await budget(db, 'discovery:brave', config.BRAVE_DAILY_BUDGET)) return null;
-   const url = new URL('https://api.search.brave.com/res/v1/images/search');
-   url.search = new URLSearchParams({q, count: String(Math.min(100, input.limit)), safesearch: 'strict',
-     ...(input.language ? {search_lang: input.language.split('-')[0]!} : {})}).toString();
-   return braveImageResults(await (deps.transport ?? fetchJSON)(url.href, {trustedOrigin: url.origin,
-     headers: {'X-Subscription-Token': config.BRAVE_SEARCH_API_KEY}, timeoutMs: config.PROVIDER_TIMEOUT_MS, redirects: 0}));
+   return braveImageSearch(config, q, input, deps);
  };
  const answers = await Promise.allSettled(queries.map((q, i) => ask(q, i === 0)));
  const lists = answers.flatMap(a => a.status === 'fulfilled' && a.value ? [a.value] : []);
  if (!lists.length) return {results: [], status: {provider: 'brave', status: 'unavailable', message: 'Brave did not answer; other engines were asked.'}};
  return {results: bySource(interleaveImages(...lists), '', queries[0]), status: {provider: 'brave', status: 'ok', message: 'Brave image search completed.'}};
 }
+async function braveImageSearch(config: Config, q: string, input: ImageSearchInput, deps: ImageSearchDeps) {
+ const url = new URL('https://api.search.brave.com/res/v1/images/search');
+ url.search = new URLSearchParams({q, count: String(Math.min(100, input.limit)), safesearch: 'strict',
+   ...(input.language ? {search_lang: input.language.split('-')[0]!} : {})}).toString();
+ return braveImageResults(await (deps.transport ?? fetchJSON)(url.href, {trustedOrigin: url.origin,
+   headers: {'X-Subscription-Token': config.BRAVE_SEARCH_API_KEY}, timeoutMs: config.PROVIDER_TIMEOUT_MS, redirects: 0}));
+}
+
+// One Brave image search per routed site, kept to that site's pages and images; the sites' best few, taken in turn.
+async function routedImages(db: DB, config: Config, q: string, sites: string[], input: ImageSearchInput, deps: ImageSearchDeps): Promise<ImageResult[]> {
+ if (!config.BRAVE_SEARCH_API_KEY || !sites.length) return [];
+ const budget = deps.budget ?? takeBudget;
+ const lists = await Promise.all(sites.map(async site => {
+   if (!await budget(db, 'discovery:brave', config.BRAVE_DAILY_BUDGET)) return [];
+   return (await braveImageSearch(config, `${q} site:${site}`, input, deps).catch(() => [] as ImageResult[]))
+     .filter(r => onSite(r, site)).slice(0, FIELD_IMAGES_PER_SITE);
+ }));
+ return interleaveImages(...lists).slice(0, FIELD_IMAGES);
+}
+
 export function braveImageResults(payload: unknown): ImageResult[] {
  const rows = z.object({results: z.array(z.unknown()).max(200)}).safeParse(payload);
  const results: ImageResult[] = [];
@@ -163,14 +183,18 @@ async function imagePlan(db: DB, config: Config, query: string, deps: ImageSearc
 
 // Everything the request's searches found, before any checking: Brave's share first in each stretch of the pool, licensed
 // images after (first when the request is about licences), AI-marked images left out when the request excludes them.
-export interface CollectedImages { plan: ImagePlan; images: ImageResult[]; providers: ProviderStatus[]; next_cursor: string|null }
+// field: the request's field when it was routed, so the judge's verdicts can teach its picture sites; routed: the image URLs
+// that came from its specialist sites (for evaluation).
+export interface CollectedImages { plan: ImagePlan; images: ImageResult[]; providers: ProviderStatus[]; next_cursor: string|null; field?: string|null; routed?: string[] }
 export async function collectImages(db: DB, config: Config, input: ImageSearchInput, deps: ImageSearchDeps = {}, size = input.limit): Promise<CollectedImages> {
- const plan = await imagePlan(db, config, input.q, deps);
+ // Alongside the plan, the request's field and its specialist picture sites, on the first page.
+ const [plan, route] = await Promise.all([imagePlan(db, config, input.q, deps),
+   input.page === 1 ? (deps.route ?? (q => routeFields(db, config, q, 'images')))(input.q).catch(() => null) : null]);
  const q = plan.corrected;
  // The request as typed (corrected) runs first, so a redesign can only add to what is found.
  const queries = [q, ...plan.searches];
- const [found, brave, extra] = await Promise.all([searxngImages(db, config, queries, input), braveImages(db, config, queries, {...input, limit: Math.max(input.limit, 50)}, deps),
-   openverse(db, config, openverseQuery(q, plan.topic), input.page)]);
+ const [found, brave, extra, routed] = await Promise.all([searxngImages(db, config, queries, input), braveImages(db, config, queries, {...input, limit: Math.max(input.limit, 50)}, deps),
+   openverse(db, config, openverseQuery(q, plan.topic), input.page), routedImages(db, config, q, route?.sites ?? [], {...input, limit: 20}, deps)]);
  const providers = [...(brave.status ? [brave.status] : []), ...found.providers, ...(extra.status ? [extra.status] : [])];
  const noAI = excludesAI(input.q);
  let unmarked = 0;
@@ -179,9 +203,18 @@ export async function collectImages(db: DB, config: Config, input: ImageSearchIn
  const engines = mergeShares(usable(brave.results), usable(found.results), config.IMAGE_BRAVE_SHARE, size);
  const seen = new Set(engines.map(r => r.image_url));
  const fresh = usable(extra.results).filter(r => !seen.has(r.image_url));
- const images = (wantsLicense(input.q) ? [...fresh, ...engines] : [...engines, ...fresh]).slice(0, size);
+ let images = (wantsLicense(input.q) ? [...fresh, ...engines] : [...engines, ...fresh]).slice(0, size);
+ // Routed sites' images sit just inside the end of the judged pool: they add to the open web's best instead of displacing
+ // them, and a site that found nothing leaves its places to the open web.
+ const taken = new Set(images.map(r => r.image_url));
+ const sited = usable(routed).filter(r => !taken.has(r.image_url));
+ if (sited.length) {
+   const at = Math.min(images.length, Math.max(0, config.IMAGE_JUDGE_POOL - sited.length));
+   images = [...images.slice(0, at), ...sited, ...images.slice(at)].slice(0, Math.max(size, at + sited.length));
+ }
  if (unmarked) providers.push({provider: 'ai_filter', status: 'ok', message: `${unmarked} images their source marks as AI-generated were left out.`});
- return {plan, images, providers, next_cursor: found.next_cursor ?? (images.length ? String(input.page + 1) : null)};
+ return {plan, images, providers, next_cursor: found.next_cursor ?? (images.length ? String(input.page + 1) : null), field: route?.field ?? null,
+   routed: sited.map(r => r.image_url)};
 }
 
 // With the review on, the page gets only judged results: the search answers at once with a token, and the job behind it

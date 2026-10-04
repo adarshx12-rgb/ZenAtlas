@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import {aiGenerated,excludesAI,wantsLicense,openverseResults,licenseLabel,openverseQuery} from '../src/image-signals.js';
 import {reviewImages,startImageJob,imageReviewState} from '../src/image-review.js';
 import type {Judge} from '../src/judge.js';
-import {braveImageResults,searchImages,type ImageResult} from '../src/images.js';
+import {braveImageResults,collectImages,searchImages,type ImageResult} from '../src/images.js';
 import {collapseDuplicates,differenceHash} from '../src/image-duplicates.js';
 import {novelty,rankSearches,simpleSearch,planImages,clearImagePlanCache} from '../src/image-plan.js';
 import {interleaveImages,mergeShares,bySource,captionMatch,rankSearxng,weakSource,pageOrder} from '../src/image-sources.js';
-import {testConfig} from './helpers.js';
+import {database,testConfig} from './helpers.js';
 
 test('AI-generated images are recognised from their source, not their pixels',()=>{
  assert.ok(aiGenerated('https://www.freepik.com/premium-ai-image/red-bicycle_160236855.htm','Red bicycle'));
@@ -240,4 +240,39 @@ test('the Images job searches, then checks, and shows only judged images, best f
  assert.equal(done.results.length,6,'only the judged pool, and only what matched');
  assert.ok(done.results.every(r=>r.judgement?.relevance===9));
  assert.equal(done.next_cursor,'2');
+});
+
+test('each routed site is one Brave image search kept to that site; its best few join the judged pool, not in place of the open web',async()=>{
+ const asked:string[]=[];
+ const transport=(async(url:string)=>{const q=new URL(url).searchParams.get('q')!;asked.push(q);
+  const site=q.match(/site:(\S+)/)?.[1];
+  return {results:Array.from({length:8},(_,n)=>{const host=site&&n<7?site:'elsewhere.example';
+   return {title:`${q} ${n}`,url:`https://${host}/p${n}/${encodeURIComponent(q)}`,properties:{url:`https://${host}/i${n}/${encodeURIComponent(q)}.jpg`}};})};}) as any;
+ const config={...testConfig,SEARXNG_BASE_URL:'',BRAVE_SEARCH_API_KEY:'k',OPENVERSE_ENABLED:false,IMAGE_JUDGE_POOL:12} as any;
+ const plan=async()=>({query:'snow leopard',corrected:'snow leopard',changed:false,topic:null,searches:[],look_for:[]});
+ const found=await collectImages({} as any,config,{q:'snow leopard',limit:48,page:1} as any,{plan,budget:async()=>true,transport,
+  route:async()=>({field:'nature',sites:['wild.example','zoo.example'],learned:[]})},40);
+ assert.deepEqual(asked.sort(),['snow leopard','snow leopard site:wild.example','snow leopard site:zoo.example']);
+ assert.equal(found.field,'nature');
+ const hosts=found.images.map(r=>new URL(r.page_url).hostname);
+ assert.equal(hosts.filter(h=>h==='wild.example').length,5,'a site\'s best five; its off-site results are dropped');
+ assert.equal(hosts.filter(h=>h==='zoo.example').length,5);
+ assert.deepEqual(hosts.slice(0,2),['elsewhere.example','elsewhere.example'],'the open web keeps the front of the pool');
+ assert.ok(hosts.slice(0,12).some(h=>h.endsWith('.example')&&h!=='elsewhere.example'),'routed images sit inside the judged pool');
+ // Later pages and site-scoped requests are not routed.
+ asked.length=0;
+ await collectImages({} as any,config,{q:'snow leopard',limit:48,page:2} as any,{plan,budget:async()=>true,transport,
+  route:async()=>({field:'nature',sites:['wild.example'],learned:[]})},40);
+ assert.deepEqual(asked,[]);
+});
+
+test('the image judge\'s verdicts teach the field\'s picture sites',async()=>{
+ const db=await database();
+ try{
+   const judge:Judge={async judge(_q,cs){return {model:'m',verdicts:new Map(cs.map(c=>[c.key,{key:c.key,relevance:c.url?.includes('good')?9:2,reason:'r',momentKeys:[]}]))};}};
+   await reviewImages(db,testConfig,'q',[at('a','https://good.example/a'),at('b','https://bad.example/b')],
+    {judge,strong:null,screener:undefined,thumbnail:async()=>({contentType:'image/jpeg',data:Buffer.from([0xff,0xd8,0xff,0xe0])}),log:()=>{},field:'nature'});
+   assert.deepEqual((await db.query("SELECT field,domain,good,poor FROM field_sources ORDER BY domain")).rows,
+    [{field:'images_nature',domain:'bad.example',good:0,poor:1},{field:'images_nature',domain:'good.example',good:1,poor:0}]);
+ }finally{await db.close();}
 });

@@ -47,6 +47,9 @@ function modelDeps(db: DB, config: Config): RouteDeps['model'] {
  return async (query, tab) => (await client.json('field_route', SYSTEM, JSON.stringify({request: query, tab}), SCHEMA)).value;
 }
 
+// The field's key in field_sources. Images learn apart: a site whose articles answer a field need not hold its pictures.
+export const learningField = (field: string|null, tab: RouteTab) => field && tab === 'images' ? `images_${field}` : field;
+
 // The sites learned for a field: judged good at least twice and more often good than poor, best first.
 export async function learnedSites(db: DB, field: string, limit: number): Promise<string[]> {
  return (await db.query(`SELECT domain FROM field_sources WHERE field=$1 AND good>=2 AND good>poor
@@ -69,7 +72,7 @@ export async function routeFields(db: DB, config: Config, query: string, tab: Ro
    const raw = await Promise.race([model(query, tab), new Promise<never>((_, reject) => { timer = setTimeout(() => reject(new Error('timeout')), config.QUERY_REWRITE_TIMEOUT_MS); })]);
    const value = reply.parse(raw);
    const field = (FIELDS as readonly string[]).includes(value.field) && value.field !== 'other' ? value.field : null;
-   const learned = field ? await learnedSites(db, field, config.FIELD_ROUTING_SITES).catch(() => []) : [];
+   const learned = field ? await learnedSites(db, learningField(field, tab)!, config.FIELD_ROUTING_SITES).catch(() => []) : [];
    const named = value.sites.map(cleanSite).filter((s): s is string => !!s);
    const sites = [...new Set([...learned, ...named])].slice(0, config.FIELD_ROUTING_SITES);
    const route = {field, sites, learned: learned.filter(s => sites.includes(s))};

@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {database,testConfig} from './helpers.js';
-import {cleanSite,routeFields,learnFieldSources,clearRouteCache} from '../src/field-routing.js';
+import {cleanSite,routeFields,learnFieldSources,clearRouteCache,learningField} from '../src/field-routing.js';
 
 const config={...testConfig,FIELD_ROUTING_ENABLED:true,FIELD_ROUTING_SITES:2,QUERY_REWRITE_TIMEOUT_MS:1000} as any;
 
@@ -40,5 +40,17 @@ test('routing is off by default, skips site-scoped requests, and a failing model
    assert.deepEqual(await routeFields(db,config,'repo rate today','web',{log:()=>{},model:async()=>{throw new Error('down');}}),{field:null,sites:[],learned:[]});
    assert.deepEqual(await routeFields(db,config,'some other thing','web',{log:()=>{},model:async()=>({field:'not-a-field',sites:['rbi.org.in']})}),
      {field:null,sites:['rbi.org.in'],learned:[]},'an unknown field still searches its sites but teaches nothing');
+ }finally{await db.close();}
+});
+
+test('images learn their sites apart from the other tabs: a good article site is not a good picture archive',async()=>{
+ const db=await database();
+ try{
+   clearRouteCache();
+   for(let i=0;i<2;i++) await learnFieldSources(db,learningField('nature','web'),[{url:'https://articles.example/a',relevance:9}]);
+   for(let i=0;i<2;i++) await learnFieldSources(db,learningField('nature','images'),[{url:'https://pictures.example/a',relevance:9}]);
+   const route=await routeFields(db,config,'snow leopard photo','images',{log:()=>{},model:async()=>({field:'nature',sites:['wild.example']})});
+   assert.deepEqual(route,{field:'nature',sites:['pictures.example','wild.example'],learned:['pictures.example']});
+   assert.equal(learningField(null,'images'),null);
  }finally{await db.close();}
 });

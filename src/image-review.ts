@@ -1,3 +1,4 @@
+import { learnFailed, learnFieldSources, learningField } from './field-routing.js';
 import { randomUUID } from 'node:crypto';
 import type { DB } from './db.js';
 import type { Config } from './config.js';
@@ -25,7 +26,9 @@ export type ReviewedImage = ImageResult & {judgement?: {relevance: number; reaso
 // stage: where the job is, for the page's progress line. next_cursor and rewrite arrive with the results.
 export interface ImageReviewState { status: 'running'|'complete'; stage: 'searching'|'checking'|'done'; results: ReviewedImage[]; removed: number;
  providers: ProviderStatus[]; next_cursor: string|null; rewrite?: {corrected: string} }
-export interface ImageReviewDeps extends ContractDeps { judge?: Judge; strong?: Judge|null; screener?: Screener; pages?: PageCheck; thumbnail?: (url: string) => Promise<{contentType: string; data: Buffer}>; log?: (line: Record<string, unknown>) => void }
+export interface ImageReviewDeps extends ContractDeps { judge?: Judge; strong?: Judge|null; screener?: Screener; pages?: PageCheck; thumbnail?: (url: string) => Promise<{contentType: string; data: Buffer}>; log?: (line: Record<string, unknown>) => void;
+ // field: the request's field (src/field-routing.ts); the verdicts teach which sites hold its pictures.
+ field?: string|null }
 
 // The best config.IMAGE_JUDGE_POOL images (after screening) are judged. DUPLICATE_SPARE more thumbnails are fetched so
 // that pictures collapsed as copies are replaced in the judged pool.
@@ -125,6 +128,7 @@ export async function reviewImages(db: DB, config: Config, query: string, images
    }}}) : null;
  if (final) providers.push(...final.providers);
  const scored = pool.map((image, i) => ({image, i, v: (final?.verdicts ?? verdicts).get(`i${i + 1}`), seen: shots.has(`i${i + 1}`)}));
+ await learnFieldSources(db, learningField(deps.field ?? null, 'images'), scored.map(s => ({url: s.image.page_url, relevance: s.v?.relevance}))).catch(learnFailed);
  // Weak sources rank below originals that match as well or nearly as well, and no site fills the page (pageOrder).
  const kept = pageOrder(scored.filter(s => s.v && s.v.relevance > TANGENTIAL).map(s => ({...s, relevance: s.v!.relevance})), query);
  const unjudged = scored.filter(s => !s.v), removed = scored.length - kept.length - unjudged.length;
@@ -154,7 +158,7 @@ export function imageReviewState(token: string): ImageReviewState|null {
 // so the search answers with the collected images itself. When the server is busy or the review fails, the collected
 // images are shown in search order with a notice: a search always ends with results when any were found.
 export function startImageJob(db: DB, config: Config, query: string, limit: number,
- collect: () => Promise<{plan: {corrected: string; changed: boolean}; images: ImageResult[]; providers: ProviderStatus[]; next_cursor: string|null}>,
+ collect: () => Promise<{plan: {corrected: string; changed: boolean}; images: ImageResult[]; providers: ProviderStatus[]; next_cursor: string|null; field?: string|null}>,
  deps: ImageReviewDeps = {}): string|null {
  if (!config.IMAGE_REVIEW_ENABLED) return null;
  const judge = 'judge' in deps ? deps.judge : makeJudge(db, config);
@@ -177,7 +181,7 @@ export function startImageJob(db: DB, config: Config, query: string, limit: numb
    }
    state.stage = 'checking';
    try {
-     const out = await reviewImages(db, config, found.plan.corrected, found.images, {...deps, judge, onlyJudged: true});
+     const out = await reviewImages(db, config, found.plan.corrected, found.images, {field: found.field, ...deps, judge, onlyJudged: true});
      Object.assign(state, {results: out.results.slice(0, limit), removed: out.removed, providers: [...found.providers, ...out.providers]});
    } catch {
      state.results = found.images.slice(0, limit);

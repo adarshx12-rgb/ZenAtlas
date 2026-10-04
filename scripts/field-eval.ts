@@ -9,10 +9,11 @@ import { join } from 'node:path';
 import { costOf, linesSince, logOffsets, search, sleep, type Tab } from './suite-client.js';
 
 type Query = {id: string; field: string; tab: Tab; kind: 'surface'|'deep'; q: string};
-type Item = {url: string; title: string; detail: string|null; image: string|null; relevance: number|null};
-type Row = {id: string; field: string; tab: Tab; kind: string; q: string; ms: number; cost_usd: number; error?: string; providers?: unknown; items: Item[]};
+// kept/routed: set by the image judge comparison (scripts/image-judge-eval.ts), whose rows also hold the removed images.
+type Item = {url: string; title: string; detail: string|null; image: string|null; relevance: number|null; kept?: boolean; routed?: boolean};
+type Row = {id: string; field: string; tab: Tab; kind: string; q: string; ms: number; cost_usd: number; error?: string; providers?: unknown; items: Item[]; border?: number};
 type Labels = Record<string, Record<string, 0|1|2>>;
-const DIR = 'output/field-eval', LABELS = 'evaluation/field-labels.json';
+const DIR = process.env.FIELD_EVAL_DIR ?? 'output/field-eval', LABELS = 'evaluation/field-labels.json';
 const queries: Query[] = JSON.parse(readFileSync('evaluation/field-queries.json', 'utf8')).queries;
 const [command = 'score', label, tier = 'ssj3'] = process.argv.slice(2);
 mkdirSync(DIR, {recursive: true});
@@ -93,7 +94,22 @@ document.getElementById('save').onclick=()=>{const a=el('a',{href:URL.createObje
  // queries with no good result, ungraded results, distinct sites, time and model cost.
  const score = (rows: Row[]) => {
    let top5 = 0, good = 0, empty = 0, ungraded = 0, n = 0, ms = 0, cost = 0; const sites = new Set<string>();
-   for (const r of rows) {
+   // Judge comparison rows: what the judge kept against what was graded good, over the whole judged pool.
+   let keptGood = 0, keptGraded = 0, poolGood = 0, border = 0; const routed: number[] = [], open: number[] = [];
+   for (const row of rows) {
+     const g = (i: Item) => labels[row.id]?.[i.url];
+     for (const i of row.items.filter(i => i.kept !== undefined && g(i) !== undefined)) {
+       if (i.kept) { keptGraded++; if (g(i) === 2) keptGood++; }
+       if (g(i) === 2) poolGood++;
+       (i.routed ? routed : open).push(g(i)!);
+     }
+     border += row.border ?? 0;
+   }
+   const mean = (l: number[]) => l.length ? +(l.reduce((a, b) => a + b, 0) / l.length).toFixed(2) : null;
+   const judged = rows.some(r => r.items.some(i => i.kept !== undefined)) ? {precision: keptGraded ? +(keptGood / keptGraded).toFixed(2) : null,
+     recall: poolGood ? +(keptGood / poolGood).toFixed(2) : null, to_strong: border, routed_grade: mean(routed), open_grade: mean(open)} : {};
+   for (const row of rows) {
+     const r = {...row, items: row.items.filter(i => i.kept !== false)};
      const g = (i: Item) => labels[r.id]?.[i.url];
      top5 += [0, 1, 2, 3, 4].reduce((s, k) => s + (r.items[k] ? g(r.items[k]) ?? 0 : 0), 0) / 5;
      const goods = r.items.slice(0, 10).filter(i => g(i) === 2).length;
@@ -102,7 +118,7 @@ document.getElementById('save').onclick=()=>{const a=el('a',{href:URL.createObje
      n++; ms += r.ms; cost += r.cost_usd;
    }
    return {queries: n, top5: +(top5 / Math.max(n, 1)).toFixed(2), good_top10: +(good / Math.max(n, 1)).toFixed(1), no_good: empty,
-     ungraded, sites: sites.size, mean_s: +(ms / Math.max(n, 1) / 1000).toFixed(0), cost_usd: +cost.toFixed(3)};
+     ungraded, sites: sites.size, mean_s: +(ms / Math.max(n, 1) / 1000).toFixed(0), cost_usd: +cost.toFixed(3), ...judged};
  };
  const shared = common();
  console.log(`comparing the ${shared.size} queries every run answered`);
