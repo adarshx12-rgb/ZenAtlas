@@ -4,7 +4,7 @@
 // contract and the same thumbnails. Only the first-stage judge differs; the Strong judge is left out so its re-checks do
 // not hide the difference, and each run counts how many images would have gone to it (scores in the cascade's border band).
 // Runs land in output/image-judge in the field evaluation's format, so grading and scoring use scripts/field-eval.ts:
-// Every judge gets a 60 s limit (the live one is JUDGE_TIMEOUT_MS) so slower models are compared on quality; their time is
+// Every judge gets a 150 s limit (the live one is JUDGE_TIMEOUT_MS) so slower models are compared on quality; their time is
 // recorded. "model@low" asks OpenRouter for low reasoning effort (GLM 5.3 Flash spends 8k tokens reasoning otherwise).
 //   node --env-file=.env --import tsx scripts/image-judge-eval.ts <label> <openrouter model[@effort]> [<label> <model> ...]
 //   FIELD_EVAL_DIR=output/image-judge node --import tsx scripts/field-eval.ts label|score
@@ -18,13 +18,13 @@ import { strongFirst } from '../src/image-sources.js';
 import { makeScreener, screeningOrder } from '../src/screener.js';
 import { contentInput } from '../src/types.js';
 import { planContract, judgeRequirements } from '../src/search-contract.js';
-import { ModelJudge, TANGENTIAL } from '../src/judge.js';
+import { ModelJudge, TANGENTIAL, type Judge } from '../src/judge.js';
 import { OpenAICompatibleClient } from '../src/openai-compatible.js';
 import { fetchImage, fetchJSON } from '../src/http.js';
 
 const DIR = 'output/image-judge', POOLS = join(DIR, 'pools');
 mkdirSync(POOLS, {recursive: true});
-const config = {...readConfig(), JUDGE_TIMEOUT_MS: 60_000}, db = connect(config.DATABASE_URL);
+const config = {...readConfig(), JUDGE_TIMEOUT_MS: 150_000}, db = connect(config.DATABASE_URL);
 const args = process.argv.slice(2);
 if (!args.length || args.length % 2) throw new Error('Give label/model pairs, e.g. flashlite google/gemini-3.5-flash-lite');
 const judges = Array.from({length: args.length / 2}, (_, i) => { const [model, effort] = args[i * 2 + 1]!.split('@'); return {label: args[i * 2]!, model: model!, effort}; });
@@ -78,24 +78,37 @@ for (const query of queries) {
    const started = Date.now();
    let row: any;
    try {
-     const out = await reviewImages(db, config, query.q, p.images, {judge: new ModelJudge(client(judge.model, judge.effort), config),
-       strong: null, screener: undefined, thumbnail, contract: p.contract as any, log: () => {}, onlyJudged: true});
-     const kept = out.results.filter(r => r.judgement && r.judgement.relevance > TANGENTIAL);
-     const removed = p.images.filter(i => !kept.some(k => k.id === i.id));
-     const verdict = new Map(out.results.map(r => [r.id, r.judgement?.relevance ?? null]));
-     const item = (r: ImageResult, isKept: boolean) => ({url: r.page_url, title: r.title, detail: r.source_name, image: r.thumbnail || r.image_url,
-       relevance: verdict.get(r.id) ?? null, kept: isKept, routed: p.routed.includes(r.image_url)});
-     const judged = out.results.filter(r => r.judgement).length;
+     // Every verdict the model gives, by page, and each batch's time: the review drops rejected images from its output.
+     const inner = new ModelJudge(client(judge.model, judge.effort), config);
+     const verdict = new Map<string, number>(), batches: number[] = [];
+     let failed = 0;
+     const recording: Judge = {async judge(q, candidates, context, shots) {
+       const t = Date.now();
+       try {
+         const out = await inner.judge(q, candidates, context, shots);
+         for (const c of candidates) { const v = out.verdicts.get(c.key); if (v && c.url) verdict.set(c.url, v.relevance); }
+         return out;
+       } catch (e) { failed++; throw e; } finally { batches.push(Date.now() - t); }
+     }};
+     // Each image is known by its page plus its id: one page often holds several different pictures.
+     const images = p.images.map(i => ({...i, page_url: `${i.page_url.split('#')[0]}#image-${i.id.slice(0, 10)}`}));
+     await reviewImages(db, config, query.q, images, {judge: recording, strong: null, screener: undefined, thumbnail, contract: p.contract as any, log: () => {}, onlyJudged: true});
+     const item = (r: ImageResult) => ({url: r.page_url, title: r.title, detail: r.source_name, image: r.thumbnail || r.image_url,
+       relevance: verdict.get(r.page_url) ?? null, kept: (verdict.get(r.page_url) ?? 0) > TANGENTIAL, routed: p.routed.includes(r.image_url)});
+     const items = images.map(item);
+     const scores = [...verdict.values()];
      row = {...query, model: judge.model, effort: judge.effort ?? null, ms: Date.now() - started, cost_usd: +costs.reduce((n, c) => n + (c.cost ?? 0), 0).toFixed(5),
-       judged, border: out.results.filter(r => r.judgement && r.judgement.relevance >= config.CASCADE_BORDER_LOW && r.judgement.relevance <= config.CASCADE_BORDER_HIGH).length,
-       items: [...kept.map(r => item(r, true)), ...removed.map(r => item(r, false))]};
+       judged: verdict.size, failed_batches: failed, batch_s: batches.map(b => +(b / 1000).toFixed(1)),
+       border: scores.filter(v => v >= config.CASCADE_BORDER_LOW && v <= config.CASCADE_BORDER_HIGH).length,
+       // Kept first, best first, as the page shows them; then the rest, which the grading page still asks about.
+       items: [...items.filter(i => i.kept).sort((a, b) => b.relevance! - a.relevance!), ...items.filter(i => !i.kept)]};
    } catch (e) { row = {...query, model: judge.model, ms: Date.now() - started, cost_usd: 0, error: String(e), items: []}; }
    const list = rows[judge.label]!;
    const at = list.findIndex(r => r.id === query.id);
    if (at >= 0) list[at] = row; else list.push(row);
    writeFileSync(file(judge.label), JSON.stringify(list, null, 1));
    console.log(`${judge.label.padEnd(10)} ${(row.ms / 1000).toFixed(0).padStart(3)}s $${row.cost_usd.toFixed(4)} kept ${row.items.filter((i: any) => i.kept).length}/${row.judged ?? 0}`
-     + ` border ${row.border ?? '-'} routed ${p.routed.length}  ${query.id}${row.error ? `  ERROR ${row.error.slice(0, 200)}` : ''}`);
+     + ` failed ${row.failed_batches ?? '-'} slowest ${Math.max(0, ...(row.batch_s ?? []))}s border ${row.border ?? '-'} routed ${p.routed.length}  ${query.id}${row.error ? `  ERROR ${row.error.slice(0, 200)}` : ''}`);
  }
 }
 await db.close();

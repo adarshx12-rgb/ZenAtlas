@@ -48,7 +48,13 @@ if (command === 'run') {
  const shared = common();
  const pool = queries.filter(q => shared.has(q.id)).map(query => {
    const seen = new Map<string, Item>();
-   for (const run of runs()) for (const item of run.rows.find(r => r.id === query.id)?.items ?? []) if (item.url && !seen.has(item.url)) seen.set(item.url, item);
+   // Judge comparison runs: only each judge's first 12 kept images (the first screen) are graded.
+   const keptBy = new Set<string>(), compared = runs().some(run => run.rows.some(r => r.items.some(i => i.kept !== undefined)));
+   for (const run of runs()) for (const item of run.rows.find(r => r.id === query.id)?.items ?? []) {
+     if (item.kept && run.rows.find(r => r.id === query.id)!.items.filter(i => i.kept).indexOf(item) < 12) keptBy.add(item.url);
+     if (item.url && !seen.has(item.url)) seen.set(item.url, item);
+   }
+   if (compared) for (const url of seen.keys()) if (!keptBy.has(url)) seen.delete(url);
    // Ungraded results first, so a new run's pages are graded without scrolling past the earlier ones.
    const graded = (i: Item) => Number(given[query.id]?.[i.url] !== undefined);
    return {...query, items: [...seen.values()].sort((a, b) => graded(a) - graded(b))};
