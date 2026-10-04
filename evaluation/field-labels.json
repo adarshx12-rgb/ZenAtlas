@@ -12,12 +12,21 @@
   "https://www.layer3labs.io/guides/best-local-llms": 2,
   "https://medium.com/codex/best-local-llms-for-4gb-6gb-and-8gb-vram-in-2026-by-task-657f3f973b4f": 2,
   "https://github.com/Andyyyy64/whichllm": 2,
-  "https://github.com/msb-msb/awesome-local-ai": 1
+  "https://github.com/msb-msb/awesome-local-ai": 1,
+  "https://runaihome.com/blog/best-local-llm-6gb-vram-2026/": 2,
+  "https://www.reddit.com/r/LocalLLaMA/comments/1pfnpcs/best_agentic_code_llm_to_run_on_laptop_6gb_vram/": 2,
+  "https://localmodel.run/guides/is-6gb-vram-enough": 2,
+  "https://www.sitepoint.com/best-local-llm-models-2026/": 2,
+  "https://huggingface.co/DuoNeural/Qwen2.5-Coder-7B-Instruct-GTAP-v3-IQ2_XXS-GGUF": 1,
+  "https://huggingface.co/DuoNeural/Qwen2.5-Coder-7B-Instruct-CodeInfused-IQ2_M-GGUF": 1,
+  "https://www.reddit.com/r/LocalLLM/comments/1sj9c4c/which_is_the_best_local_llm_in_april_2026_for_a/": 1
  },
  "ai-ben2-paper": {
   "https://openreview.net/pdf?id=Mg5S5Twrfn": 2,
   "https://arxiv.org/pdf/2501.06230": 2,
-  "http://vision.stanford.edu/cs598_spring07/papers/Lecun98.pdf": 0
+  "http://vision.stanford.edu/cs598_spring07/papers/Lecun98.pdf": 0,
+  "https://arxiv.org/pdf/2101.04704": 0,
+  "https://arxiv.org/pdf/2501.06230v1": 1
  },
  "dev-notion-alt": {
   "https://github.com/Akaal-Creatives/LibreDiary": 2,
@@ -35,7 +44,15 @@
   "https://github.com/bmshin94/Alexandrie": 2,
   "https://github.com/DnzzL/notara": 2,
   "https://selfh.st/alternatives/notion/": 2,
-  "https://alternativeto.net/software/notion/?license=opensource&platform=self-hosted": 2
+  "https://alternativeto.net/software/notion/?license=opensource&platform=self-hosted": 2,
+  "https://github.com/MarcusViniciusBispoDosSantos/FBoard": 2,
+  "https://www.xda-developers.com/docmost-self-hosted-notion-alternative/": 2,
+  "https://docmost.com/blog/open-source-notion-alternatives/": 2,
+  "https://www.reddit.com/r/selfhosted/comments/1g144di/what_is_the_best_notion_alternative_really/": 2,
+  "https://github.com/stacks-task-manager/stacks": 2,
+  "https://github.com/readgo/JingTask": 2,
+  "https://github.com/esmworks/leafdesk": 2,
+  "https://www.xda-developers.com/self-hosted-alternative-notion-best-pkm-tool/": 2
  },
  "med-snakebite": {
   "https://clinicalestablishments.mohfw.gov.in/sites/default/files/standard-treatment-guidelines/5341.pdf": 2,
@@ -52,7 +69,8 @@
   "https://gondia.gov.in/en/snakebite-general-precautions/": 2,
   "https://www.who.int/teams/control-of-neglected-tropical-diseases/snakebite-envenoming/treatment": 2,
   "https://cdn.who.int/media/docs/default-source/searo/ntd/4---david-williams-sbe-webinar-24-july-2025.pdf?sfvrsn=e2cc2b93_3": 2,
-  "https://ncdc.mohfw.gov.in/snakebite/": 2
+  "https://ncdc.mohfw.gov.in/snakebite/": 2,
+  "https://www.iomcworld.org/articles/treatment-of-snake-bite-in-india-a-review.pdf": 2
  },
  "med-who-htn": {
   "https://www.aristopharma.co.in/wp-content/uploads/2021/09/2021-WHO-Hypertension-Guidelines-2.pdf": 2,
@@ -64,7 +82,11 @@
   "https://www.researchgate.net/publication/354776744_World_Health_Organization_Guideline_for_the_pharmacological_treatment_of_hypertension_in_adults": 2,
   "https://www.academia.edu/123627979/Hypertension_Pharmacological_Treatment_in_Adults_A_World_Health_Organization_Guideline_Executive_Summary": 2,
   "https://www.scribd.com/document/802614351/chppp": 2,
-  "https://www.researchgate.net/publication/356220827_Hypertension_Pharmacological_Treatment_in_Adults_A_World_Health_Organization_Guideline_Executive_Summary/fulltext/619294573068c54fa5eaea11/Hypertension-Pharmacological-Treatment-in-Adults-A-World-Health-Organization-Guideline-Executive-Summary.pdf": 2
+  "https://www.researchgate.net/publication/356220827_Hypertension_Pharmacological_Treatment_in_Adults_A_World_Health_Organization_Guideline_Executive_Summary/fulltext/619294573068c54fa5eaea11/Hypertension-Pharmacological-Treatment-in-Adults-A-World-Health-Organization-Guideline-Executive-Summary.pdf": 2,
+  "https://www.researchgate.net/profile/Andres-Rosende/publication/359024349_2021_World_Health_Organization_guideline_on_pharmacological_treatment_of_hypertension_Policy_implications_for_the_region_of_the_Americas/links/627bbbefb1ad9f66c8b53ea8/2021-World-Health-Organization-guideline-on-pharmacological-treatment-of-hypertension-Policy-implications-for-the-region-of-the-Americas.pdf?origin=publication_detail": 2,
+  "https://www.researchgate.net/profile/Donald-Dipette/publication/356220827_Hypertension_Pharmacological_Treatment_in_Adults_A_World_Health_Organization_Guideline_Executive_Summary/links/6196a1efd7d1af224b045d84/Hypertension-Pharmacological-Treatment-in-Adults-A-World-Health-Organization-Guideline-Executive-Summary.pdf": 2,
+  "https://www.researchgate.net/profile/Abdallah-El-Alayli-2/publication/354776744_World_Health_Organization_Guideline_for_the_pharmacological_treatment_of_hypertension_in_adults/links/614c0c8e519a1a381f79635a/World-Health-Organization-Guideline-for-the-pharmacological-treatment-of-hypertension-in-adults.pdf": 2,
+  "https://www.paho.org/sites/default/files/2023-05/paho-cme-integration-who-htn-guidelines-hearts-clinical-pathway-st-lucia-dipette-may-2023.pdf": 2
  },
  "law-deposit": {
   "https://www.caunsel.com/guides/legal-notice-landlord-security-deposit-refund-delhi-india": 2,
@@ -82,7 +104,14 @@
   "https://rentniti.com/rental-laws/delhi": 2,
   "https://www.southdelhifloors.com/delhi-rent-control-act/": 2,
   "https://fastracklegalsolutions.com/delhi-rent-control-act/": 2,
-  "https://news.abplive.com/business/delhi-rent-control-act-provisions-eviction-rules-limitation-period-tenant-landlords-1674461": 2
+  "https://news.abplive.com/business/delhi-rent-control-act-provisions-eviction-rules-limitation-period-tenant-landlords-1674461": 2,
+  "https://www.fintolit.com/blog/landlord-not-returning-security-deposit-heres-your-legal-move": 2,
+  "https://www.livemint.com/money/personal-finance/tenant-rights-in-india-how-much-of-security-deposit-can-be-legally-deducted-by-your-landlord-11777987076152.html": 2,
+  "https://lawvaani.com/rent-security-deposit-refund-rights-obligations-legal-framework-landmark-case-laws/": 2,
+  "https://economictimes.indiatimes.com/wealth/legal/will/can-your-landlord-refuse-to-return-your-security-deposit-without-any-damage-know-your-rights-as-a-tenant/articleshow/134261050.cms": 2,
+  "https://www.indiacode.nic.in/bitstream/123456789/19223/1/a1958-59.pdf": 2,
+  "https://districts.ecourts.gov.in/sites/default/files/order%20dated%2009%2011%202020%20of%20Hon'ble%20High%20Court%20of%20Delhi.pdf": 0,
+  "https://www.indiacode.nic.in/handle/123456789/19223": 0
  },
  "fin-repo": {
   "https://www.bajajhousingfinance.in/repo-rate": 2,
@@ -100,7 +129,14 @@
   "https://stableinvestor.com/2021/10/rbi-repo-rate-history-india.html": 2,
   "https://rbidocs.rbi.org.in/rdocs/Bulletin/PDFs/1T_BULL250920266EE353D1A41E4353B7B33B837D76E633.PDF": 2,
   "https://indiainflation.com/rbi/repo-rate": 2,
-  "https://rbidocs.rbi.org.in/rdocs/Wss/PDFs/5T_021020267FE39FE1C60F4BAD97338B18E7570F8B.PDF": 2
+  "https://rbidocs.rbi.org.in/rdocs/Wss/PDFs/5T_021020267FE39FE1C60F4BAD97338B18E7570F8B.PDF": 2,
+  "https://www.bankopedia.co.in/rbi-rates": 2,
+  "https://data.rbi.org.in/": 2,
+  "https://data.rbi.org.in/DBIE/": 2,
+  "https://www.basunivesh.com/rbi-repo-rate-history-from-2000/": 2,
+  "https://www.moneycontrol.com/news/business/markets/rbi-monetary-policy-feb-2026-highlights-mpc-holds-repo-rate-steady-at-5-25-liquidity-stance-in-focus-13814653.html": 1,
+  "https://primeinvestor.in/current-repo-rate/": 2,
+  "https://craytheon.com/charts/rbi-policy-rates/": 2
  },
  "news-chennai-metro": {
   "https://timesofindia.indiatimes.com/city/chennai/chennai-metro-phase-2-stretch-to-open-on-oct-11-trains-will-not-be-driverless-until-mid-2027/articleshow/134600807.cms": 2,
@@ -118,7 +154,10 @@
   "https://www.thehindu.com/news/cities/chennai/opening-of-cmrls-phase-ii-stations-between-porur-and-vadapalani-likely-to-face-delay/article70905368.ece": 2,
   "https://timesofindia.indiatimes.com/city/chennai/chennai-metros-14-64-km-phase-2-stretch-remains-unused-months-after-safety-clearance-heres-what-is-holding-up-the-poonamallee-bypass-vadapalani-corridor/photostory/134502336.cms": 2,
   "https://www.thehindu.com/news/cities/chennai/chennai-metro-rail-phase-ii-ticket-fares-to-remain-unchanged-trip-from-poonamallee-to-vadapalani-to-cost-40/article71523807.ece": 2,
-  "https://www.thehindu.com/news/cities/chennai/67-of-work-completed-oncmrlsphase-ii-stretch-fromkoyambeduto-chennai-trade-centre/article70638937.ece": 2
+  "https://www.thehindu.com/news/cities/chennai/67-of-work-completed-oncmrlsphase-ii-stretch-fromkoyambeduto-chennai-trade-centre/article70638937.ece": 2,
+  "https://metrorailnews.in/chennai-metro-phase-ii-preparing-for-its-launch/": 2,
+  "https://www.financialexpress.com/business/infrastructure-chennai-metro-phase-ii-3-new-lines-128-stations-what-it-means-for-commuters-4350451/": 2,
+  "https://themetrorailguy.com/chennai-metro-phase-2-information-map/": 2
  },
  "hist-1857": {
   "https://claws.co.in/wp-content/uploads/2025/01/IB-263_The-Indian-Revolt-of-1857-1.pdf": 2,
@@ -127,7 +166,11 @@
   "https://www.worldwidejournals.com/global-journal-for-research-analysis-GJRA/recent_issues_pdf/2014/July/July_2014_1565260627_72.pdf": 2,
   "https://www.researchgate.net/publication/356708000_Contested_histories_of_1857_and_the_re_construction_of_the_Indian_nation-state": 2,
   "https://ijsshr.in/v7i6/Doc/101.pdf": 2,
-  "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/067034A32DD1583F4281CE53845FD7BF/S0021875824000343a.pdf/div-class-title-sepoys-slavery-and-the-global-colour-line-the-indian-uprising-of-1857-in-southern-us-newspapers-div.pdf": 2
+  "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/067034A32DD1583F4281CE53845FD7BF/S0021875824000343a.pdf/div-class-title-sepoys-slavery-and-the-global-colour-line-the-indian-uprising-of-1857-in-southern-us-newspapers-div.pdf": 2,
+  "https://www.researchgate.net/profile/Peter-Putnis-2/publication/343986019_The_Indian_Insurgency_of_1857_as_a_Global_Media_Event/links/5f4c5d14458515a88b9391a1/The-Indian-Insurgency-of-1857-as-a-Global-Media-Event.pdf": 2,
+  "https://www.researchgate.net/profile/Seemi-Tahir/publication/321945180_War_of_Independence_1857_and_the_Role_of_Urdu_and_Persian_Newspaper/links/5a3a69f2aca2728e698a9879/War-of-Independence-1857-and-the-Role-of-Urdu-and-Persian-Newspaper.pdf": 2,
+  "https://www.electricscotland.com/history/india/loch2018British.pdf": 2,
+  "https://larrymcelhiney.com/Sepoy/Sepoy_Women.pdf": 1
  },
  "sci-jwst": {
   "https://science.nasa.gov/missions/webb/nasas-webb-detects-thick-atmosphere-around-broiling-lava-world/": 2,
@@ -145,7 +188,11 @@
   "https://science.nasa.gov/missions/webb/nasas-webb-detects-carbon-dioxide-in-exoplanet-atmosphere/": 2,
   "https://www.esa.int/Science_Exploration/Space_Science/Webb/Webb_hints_at_atmosphere_around_rocky_exoplanet": 2,
   "https://www.esa.int/Science_Exploration/Space_Science/Webb/Webb_studies_how_a_planet_survived_the_death_of_its_star": 2,
-  "https://science.nasa.gov/missions/webb/nasas-webb-hints-at-possible-atmosphere-surrounding-rocky-exoplanet/": 2
+  "https://science.nasa.gov/missions/webb/nasas-webb-hints-at-possible-atmosphere-surrounding-rocky-exoplanet/": 2,
+  "https://www.nasa.gov/universe/nasas-webb-reveals-an-exoplanet-atmosphere-as-never-seen-before/": 2,
+  "https://sciencedaily.com/releases/2025/12/251227004146.htm": 2,
+  "https://science.nasa.gov/mission/webb/science-overview/science-explainers/webbs-impact-on-exoplanet-research/": 2,
+  "https://www.sciencedaily.com/releases/2026/05/260521072355.htm": 1
  },
  "game-redstone": {
   "https://minecraft.fandom.com/wiki/Tutorials/Crop_farming": 2,
@@ -162,7 +209,12 @@
   "https://minecraft.wiki/w/Tutorial:Sugar_cane_farming": 1,
   "https://minecraft.wiki/w/Tutorial:Bone_Meal_farming": 1,
   "https://minecraft.wiki/rest.php/v1/page/Tutorial%3ABone_meal_farming/html?redirect=no": 1,
-  "https://minecraft.wiki/w/Tutorial:Cocoa_bean_farming": 1
+  "https://minecraft.wiki/w/Tutorial:Cocoa_bean_farming": 1,
+  "https://www.youtube.com/watch?v=AIO0LqUFUL0": 2,
+  "https://guide.astroworldmc.com/minecraft-redstone-and-farm-guides": 2,
+  "https://lumadock.com/gaming/minecraft/automatic-crop-farm": 2,
+  "https://gaming.stackexchange.com/questions/193712/automated-crop-farming": 2,
+  "https://www.namehero.com/gaming-blog/the-9-unique-minecraft-farm-ideas-to-try/": 1
  },
  "3d-lowpoly-tree": {
   "https://sketchfab.com/3d-models/low-poly-tree-blender-6b0f8dbe685746c6bf21f476f198d6d2": 2,
@@ -178,7 +230,16 @@
   "https://www.cgtrader.com/low-poly-3d-models/tree": 2,
   "https://sketchfab.com/3d-models/low-poly-trees-free-6a2952e0ebdd41fa93cefda6ae0a4102": 2,
   "https://sketchfab.com/3d-models/low-poly-tree-scene-free-89daa5e21f0d4f08a59dba0d566e88bd": 2,
-  "https://free3d.com/3d-models/lowpoly-tree": 2
+  "https://free3d.com/3d-models/lowpoly-tree": 2,
+  "https://studio.tripo3d.ai/3d-model-gallery/low-poly-tree": 2,
+  "https://blendswap.com/blend/2215": 2,
+  "https://sketchfab.com/3d-models/low-poly-trees-51cae4a194344e8bbfbd0a4cff205f76": 2,
+  "https://www.cgtrader.com/free-3d-models/plant/other/realistic-lowpoly-3d-tree": 2,
+  "https://www.blendkit.com/asset-gallery-detail/593a0e84-ecd8-4cc3-8593-a9b0afcee896/": 2,
+  "https://blendswap.com/blend/5671": 2,
+  "https://blendswap.com/blend/20145": 2,
+  "https://sketchfab.com/3d-models/low-poly-tree-pack-free-download-f6c460af62fe4c7db7db9b047dc3628c": 2,
+  "http://www.blendswap.com/blends/view/3983": 2
  },
  "data-traffic": {
   "https://pmc.ncbi.nlm.nih.gov/articles/PMC9309657/": 2,
@@ -195,7 +256,9 @@
   "https://ncbi.nlm.nih.gov/pmc/articles/PMC9309657": 2,
   "https://www.researchgate.net/publication/362006895_DATS_2022_A_Versatile_Indian_Dataset_for_Object_Detection_in_Unstructured_Traffic_Conditions": 2,
   "https://www.researchgate.net/publication/394080558_DriveIndia_An_Object_Detection_Dataset_for_Diverse_Indian_Traffic_Scenes": 2,
-  "https://universe.roboflow.com/yash-pathak-hxg3a/dats_2022-oodua/dataset/2": 2
+  "https://universe.roboflow.com/yash-pathak-hxg3a/dats_2022-oodua/dataset/2": 2,
+  "https://universe.roboflow.com/object-detection-dp5wa/yolo-v8-indian-roads-dataset": 2,
+  "https://www.researchgate.net/figure/Sample-scenes-from-the-DriveIndia-dataset-urban-roads-rural-highways-fog-and-rain_fig1_394080558": 2
  },
  "font-helvetica": {
   "https://fontscope.app/fonts/helvetica": 2,
@@ -211,7 +274,10 @@
   "https://www.dafont.com/coolvetica.font": 2,
   "https://www.dafont.com/helmet-2.font": 2,
   "https://fontalternatives.com/blog/helvetica-alternatives-ranked-2026/": 2,
-  "https://www.designshifu.com/blog/fonts-like-helvetica": 2
+  "https://www.designshifu.com/blog/fonts-like-helvetica": 2,
+  "https://www.fontelio.com/blog/free-helvetica-alternatives/": 2,
+  "https://www.fonthubs.com/en/guide/best-free-fonts-like-helvetica": 2,
+  "https://norkowalczyk.medium.com/lookin-for-helvetica-alternative-eh-7c7a2aa3a534": 2
  },
  "eng-is456": {
   "https://elibrarywcl.wordpress.com/wp-content/uploads/2015/02/plain-and-reinforced-concrete.pdf": 2,
@@ -226,6 +292,12 @@
   "https://sefindia.org/forum/files/is456_2000_nd_1978_980.pdf": 2,
   "https://rdso.indianrailways.gov.in/uploads/BS-44.pdf": 2,
   "https://www.scribd.com/document/975101299/Is-456-With-All-Ammendments-Pages-1": 2,
-  "https://www.scribd.com/document/722611529/IS-456-with-all-ammendments": 2
+  "https://www.scribd.com/document/722611529/IS-456-with-all-ammendments": 2,
+  "https://www.civilengineer.co.in/wp-content/uploads/2015/02/IS-456-2000-Plain-Reinf-Concrete.pdf": 2,
+  "https://www.slideshare.net/slideshow/plain-andreinforcedconcreteis-456-2000/91790874": 2,
+  "https://www.academia.edu/113774975/IS_456_2000_Indian_Standard_PLAIN_AND_RE": 2,
+  "https://www.slideshare.net/slideshow/is-4562000-plain-and-reinforced-concrete/53542630": 2,
+  "https://www.slideshare.net/slideshow/is-code-456-2000/16685648": 2,
+  "https://www.madeeasy.in/uploads/files/1432purl_is_456_2000.pdf": 2
  }
 }

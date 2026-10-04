@@ -84,6 +84,12 @@ export async function routeFields(db: DB, config: Config, query: string, tab: Ro
  } finally { clearTimeout(timer); }
 }
 
+// Learning never fails a search, but a failure is logged: a missing grant once stopped all learning unseen.
+export const learnFailed = (error: unknown) => {
+ process.stdout.write(`${JSON.stringify({event: 'field_learn_failed', error: error instanceof Error ? error.message : String(error)})}
+`);
+};
+
 // What judged results say about each site for the field: relevance 8+ is good, 4 or below poor; 5-7 says nothing.
 export async function learnFieldSources(db: DB, field: string|null, judged: {url: string; relevance: number|null|undefined}[]) {
  if (!field || field === 'other') return;

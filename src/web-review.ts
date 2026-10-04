@@ -1,4 +1,4 @@
-import { learnFieldSources } from './field-routing.js';
+import { learnFailed, learnFieldSources } from './field-routing.js';
 import { randomUUID } from 'node:crypto';
 import type { DB } from './db.js';
 import type { Config } from './config.js';
@@ -24,12 +24,21 @@ export interface WebReviewState { status: 'running'|'complete'; results: WebResu
 export type WebReviewDeps = ContractDeps & {judge?: Judge; pages?: PageCheck; screener?: Screener; council?: CouncilSeats|null; strong?: Judge|null;
  refill?: RefillPlanner|null; fetch?: (searches: string[]) => Promise<WebResult[]>; log?: (line: Record<string, unknown>) => void;
  // field: the request's field (src/field-routing.ts); the review's verdicts teach which sites answer it.
- field?: string|null};
+ // routed: the URLs that came from the field's specialist sites.
+ field?: string|null; routed?: ReadonlySet<string>};
 // New pages a refill may add to the review.
 const REFILL_POOL = 20;
 // A results page holds about 20 results, at most about 40: all are read and judged.
 export const WEB_POOL = 40;
 const READS = 6;
+// Routed specialist pages start at this place at the earliest. Graded by hand (output/field-eval, 2026-10-04), the ones the
+// judge put in the top five were model cards, act listings and court orders it scored high but searchers do not want first.
+const ROUTED_FROM = 5;
+export function holdBackRouted<T extends {url: string}>(results: T[], routed: ReadonlySet<string>): T[] {
+ if (!routed.size) return results;
+ const first = results.filter(r => !routed.has(r.url)).slice(0, ROUTED_FROM);
+ return [...first, ...results.filter(r => !first.includes(r))];
+}
 const CRITERIA = ['A web page that itself answers, explains or provides what the request asks for',
  'When the request is ambiguous, a page that genuinely fits any reasonable reading matches',
  'Home pages, search or listing pages and link farms match only when the request asks for that site',
@@ -94,8 +103,8 @@ export async function reviewWeb(db: DB, config: Config, query: string, results: 
    log({event: 'refill', tier: config.TIER, tab: 'web', complete: decision?.complete ?? null, failed: !decision, searches: decision?.searches.length ?? 0,
      fetched, added, ms: Date.now() - started});
  }
- await learnFieldSources(db, deps.field ?? null, out.trace).catch(() => {});
- return out;
+ await learnFieldSources(db, deps.field ?? null, out.trace).catch(learnFailed);
+ return {...out, results: holdBackRouted(out.results, deps.routed ?? new Set())};
 }
 
 // Reviews wait here by token for the page to poll, for ten minutes.

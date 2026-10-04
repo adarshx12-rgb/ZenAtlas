@@ -12,7 +12,7 @@ import { makePlanner, cachedPlanner, fallbackPlan, uniqueSearches, type PlannedS
 import { AniListClient, type AnimeClient, type AnimeMatch } from './anilist.js';
 import { queryKey } from './search.js';
 import { configuredArchives, specialistSearches } from './specialists.js';
-import { learnFieldSources, routeFields, type FieldRoute } from './field-routing.js';
+import { learnFailed, learnFieldSources, routeFields, type FieldRoute } from './field-routing.js';
 import { PageChecker, type PageEvidence } from './pages.js';
 import { matchesFilters } from './catalogue.js';
 import { makeJudge } from './judge.js';
@@ -557,7 +557,7 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
  mark('judged');
  // The judge's verdicts teach which sites answer this field, rejected candidates included.
  const urlOf = new Map(found.map(r => [r.id, r.canonical_url]));
- await learnFieldSources(db, (await routing)?.field ?? null, signals.judged.flatMap(j => urlOf.has(j.id) ? [{url: urlOf.get(j.id)!, relevance: j.relevance}] : [])).catch(() => {});
+ await learnFieldSources(db, (await routing)?.field ?? null, signals.judged.flatMap(j => urlOf.has(j.id) ? [{url: urlOf.get(j.id)!, relevance: j.relevance}] : [])).catch(learnFailed);
  // Semantic-only candidates were admitted for judging. If that check fails, they must not
  // displace supported keyword matches merely because the model had been configured.
  const lexical = new Set(rankDiscovery(input.q, leads, leads.length).map(l => l.item.url));

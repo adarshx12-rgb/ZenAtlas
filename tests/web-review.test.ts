@@ -65,3 +65,16 @@ test('at most four reviews run at once; a fifth completes at once with the searc
  assert.deepEqual(busy.results.map(r=>r.title),['Page 1']);
  assert.equal(busy.providers[0].status,'unavailable');
 });
+
+test('routed specialist pages never take the first five places on Web, even when the judge scores them highest',async()=>{
+ const scores=Object.fromEntries(Array.from({length:8},(_,i)=>[`Page ${i+1}`,10-i/2]));
+ const list=Array.from({length:8},(_,i)=>result(i+1));
+ const routed=new Set([list[0].url,list[2].url]);
+ const out=await reviewWeb(db,testConfig,'q',list,{judge:scoring(scores),screener:undefined,refill:null,log:()=>{},
+   pages:{check:async()=>page},routed});
+ assert.deepEqual(out.results.map(r=>r.title),['Page 2','Page 4','Page 5','Page 6','Page 7','Page 1','Page 3','Page 8']);
+ // Too few open-web pages: the routed ones follow them.
+ const few=await reviewWeb(db,testConfig,'q',list.slice(0,3),{judge:scoring(scores),screener:undefined,refill:null,log:()=>{},
+   pages:{check:async()=>page},routed});
+ assert.deepEqual(few.results.map(r=>r.title),['Page 2','Page 1','Page 3']);
+});

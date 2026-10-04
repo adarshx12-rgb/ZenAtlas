@@ -235,7 +235,8 @@ async function searchWebImpl(db: DB, config: Config, input: WebSearchInput,
    const fetch = async (searches: string[]) => (await Promise.all(searches.map(q => searchWeb(db, config,
      webSearchInput.parse({q, kind: 'web', page: '1', exact: '1', tier: config.TIER, ...(input.language ? {language: input.language} : {})}),
      {...deps, review: false}).then(r => r.results, () => [] as WebResult[])))).flat();
-   const review = deps.review === false ? null : (deps.review ?? ((q, list) => startWebReview(db, config, q, list, {fetch, field: route?.field ?? null})))(meant, results);
+   const review = deps.review === false ? null : (deps.review ?? ((q, list) => startWebReview(db, config, q, list, {fetch, field: route?.field ?? null,
+     routed: new Set(routedResults.map(r => r.url))})))(meant, results);
    return {query: input.q, results, providers, next_cursor, ...(review ? {review} : {}), ...said};
  }
  const found = await sourcesTask;

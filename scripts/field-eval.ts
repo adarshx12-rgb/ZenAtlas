@@ -48,7 +48,9 @@ if (command === 'run') {
  const pool = queries.filter(q => shared.has(q.id)).map(query => {
    const seen = new Map<string, Item>();
    for (const run of runs()) for (const item of run.rows.find(r => r.id === query.id)?.items ?? []) if (item.url && !seen.has(item.url)) seen.set(item.url, item);
-   return {...query, items: [...seen.values()]};
+   // Ungraded results first, so a new run's pages are graded without scrolling past the earlier ones.
+   const graded = (i: Item) => Number(given[query.id]?.[i.url] !== undefined);
+   return {...query, items: [...seen.values()].sort((a, b) => graded(a) - graded(b))};
  }).filter(q => q.items.length);
  const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Field evaluation grading</title>
 <style>:root{--bg:#fff;--fg:#111;--muted:#666;--line:#ddd;--good:#1a7f37;--ok:#9a6700;--bad:#cf222e}
