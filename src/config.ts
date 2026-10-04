@@ -171,6 +171,10 @@ export const configSchema = z.object({
   SSJ1_MODE_ROUTER_MODEL: z.string().regex(/^[\w.\/:-]{0,100}$/).default('openai/gpt-4.1-nano'),
   SSJ1_QUERY_REWRITE_MODEL: z.string().regex(/^[\w.\/:-]{0,100}$/).default('openai/gpt-4.1-nano'),
   SPECIALIST_SEARCHES: number(3, 0, 6),
+  // Field routing (src/field-routing.ts): each search names its field and up to FIELD_ROUTING_SITES specialist sites to
+  // search alongside the open web; off until the field evaluation (scripts/field-eval.ts) shows it helps.
+  FIELD_ROUTING_ENABLED: z.enum(['true', 'false']).default('false').transform(v => v === 'true'),
+  FIELD_ROUTING_SITES: number(2, 0, 4),
   ARCHIVE_DISCOVERY: z.enum(['true', 'false']).default('true').transform(v => v === 'true'),
   ARCHIVE_COLLECTIONS: z.string().default('prelinger,ephemera').refine(v =>
     v.split(',').length <= 20 && v.split(',').every(s => /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,99}$/.test(s.trim())), 'Use comma-separated archive collection identifiers'),

@@ -12,6 +12,7 @@ import { makePlanner, cachedPlanner, fallbackPlan, uniqueSearches, type PlannedS
 import { AniListClient, type AnimeClient, type AnimeMatch } from './anilist.js';
 import { queryKey } from './search.js';
 import { configuredArchives, specialistSearches } from './specialists.js';
+import { learnFieldSources, routeFields, type FieldRoute } from './field-routing.js';
 import { PageChecker, type PageEvidence } from './pages.js';
 import { matchesFilters } from './catalogue.js';
 import { makeJudge } from './judge.js';
@@ -37,7 +38,9 @@ import { collapseDuplicates } from './duplicates.js';
 export interface DiscoveryDeps extends SignalDeps { planner?: Planner; anilist?: AnimeClient; archives?: SourceAdapter[]; screener?: Screener; explorer?: Explorer;
  gapChooser?: GapChooser; today?: string;
  // linkRewriter: the expansion round's search writer (src/link-expansion.ts); null turns the rewrite off.
- linkRewriter?: LinkRewriter|null }
+ linkRewriter?: LinkRewriter|null;
+ // route: the field router (src/field-routing.ts); tests pass their own.
+ route?: (query: string) => Promise<FieldRoute|null> }
 export interface DiscoveryProgress { results: Result[]; providers: ProviderStatus[]; stage: 'searching'|'following'|'checking' }
 // code: why it failed, such as an engine's "blocked by a CAPTCHA".
 type Health = (provider: string, ok: boolean, code?: string) => Promise<void>;
@@ -257,6 +260,10 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
    outcomes.push(...(await Promise.all(jobs.map(job => job()))).flat().flatMap(o => o ? [o] : []));
  };
 
+ // The request's field and the specialist sites that answer it (src/field-routing.ts), one site: search each, in quick
+ // and deep searches alike; a search scoped to one source is not routed.
+ const routing = input.source ? Promise.resolve(null) : (deps.route ?? (q => routeFields(db, config, q, 'videos')))(input.q).catch(() => null);
+ const routed = routing.then(r => (r?.sites ?? []).map(site => ({query: `${input.q} site:${site}`, target: 'web' as const})));
  let plan: SearchPlan;
  let ran: PlannedSearch[];
  let earlier: Awaited<ReturnType<typeof quickJob>>;
@@ -269,12 +276,13 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
    await Promise.all([
      run(typed.map(s => ({...s, page: 1, engines: 'standard'}))),
      planning.then(({plan}) => run(plan.searches.filter(s => !typed.some(t => sameSearch(t, s))).map(s => ({...s, page: 1, engines: 'standard'})))),
+     routed.then(list => run(list.map(s => ({...s, page: 1, engines: 'standard' as const})))),
    ]);
    const planned = await planning;
    [earlier, anime] = await context;
    plan = planned.plan;
    if (planned.status) notes.push(planned.status);
-   ran = [...typed, ...plan.searches.filter(s => !typed.some(t => sameSearch(t, s)))];
+   ran = uniqueRan([...typed, ...plan.searches.filter(s => !typed.some(t => sameSearch(t, s))), ...await routed]);
  } else {
    [earlier, anime] = await context;
    // What an ordinary search asked; its first result pages are already known unless no quick search ran.
@@ -284,6 +292,7 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
    await Promise.all([
      runArchives(),
      run(specialists.map(s => ({...s, page: 1, engines: 'all'}))),
+     routed.then(list => run(list.filter(s => !specialists.some(t => sameSearch(s, t))).map(s => ({...s, page: 1, engines: 'all' as const})))),
      run(ordinary.flatMap(s => [
        ...(earlier.searches.length ? [{...s, page: 1, engines: 'extra' as const}] : [{...s, page: 1, engines: 'all' as const}]),
        ...pages(2, config.DEEP_PAGES).map(page => ({...s, page, engines: 'all' as const}))])),
@@ -293,7 +302,7 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
    const planned = await planning;
    plan = planned.plan;
    if (planned.status) notes.push(planned.status);
-   ran = uniqueRan([...ordinary, ...specialists, ...plan.searches]);
+   ran = uniqueRan([...ordinary, ...specialists, ...plan.searches, ...await routed]);
  }
  if (anime.status) notes.push(anime.status);
  await arrivals;
@@ -546,6 +555,9 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
      ...(names.length ? {identified: names} : {}), ...(plan.watch ? {watch: true} : {}),
      ...(plan.target?.wording.length ? {wording: plan.target.wording} : {}), linkSources: readPages});
  mark('judged');
+ // The judge's verdicts teach which sites answer this field, rejected candidates included.
+ const urlOf = new Map(found.map(r => [r.id, r.canonical_url]));
+ await learnFieldSources(db, (await routing)?.field ?? null, signals.judged.flatMap(j => urlOf.has(j.id) ? [{url: urlOf.get(j.id)!, relevance: j.relevance}] : [])).catch(() => {});
  // Semantic-only candidates were admitted for judging. If that check fails, they must not
  // displace supported keyword matches merely because the model had been configured.
  const lexical = new Set(rankDiscovery(input.q, leads, leads.length).map(l => l.item.url));

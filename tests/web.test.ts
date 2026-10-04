@@ -194,3 +194,33 @@ test('an unchanged query with extra searches still searches both, and says nothi
  assert.deepEqual(asked,['rtx 5090 teardown','"RTX 5090" teardown','rtx 5090 teardown']);
  assert.equal(out.rewrite,undefined);
 });
+
+test('each routed specialist site is one more Brave search restricted to it, beside the normal ones',async()=>{
+ const asked:string[]=[];
+ await searchWeb({} as any,config,webSearchInput.parse({q:'current RBI repo rate'}),{budget:async()=>true,review:false,
+   rewrite:async(q:string)=>({query:q,corrected:q,changed:false,topic:null,topic_kind:null,searches:[]}),
+   route:async()=>({field:'finance',sites:['rbi.org.in'],learned:[]}),
+   transport:async(url:string)=>{asked.push(new URL(url).searchParams.get('q')!);
+     if(new URL(url).hostname!=='api.search.brave.com')return searxng({url:'https://example.org/searx'});
+     return brave({url:`https://example.org/${asked.length}`});}} as any);
+ assert.deepEqual(asked.sort(),['current RBI repo rate','current RBI repo rate','current RBI repo rate site:rbi.org.in'].sort());
+});
+
+test('routed sites add their best few results inside the end of the review pool, never in place of the open web',async()=>{
+ const rows=(prefix:string,n:number)=>Array.from({length:n},(_,i)=>({url:`https://${prefix}.example/${i}`}));
+ const run=async(main:number,siteN:number)=>(await searchWeb({} as any,config,webSearchInput.parse({q:'jwst news'}),{budget:async()=>true,review:false,
+   rewrite:async(q:string)=>({query:q,corrected:q,changed:false,topic:null,topic_kind:null,searches:[]}),
+   route:async()=>({field:'science',sites:['nasa.gov','esa.int'],learned:[]}),
+   transport:async(url:string)=>{const u=new URL(url),q=u.searchParams.get('q')!;
+     if(u.hostname!=='api.search.brave.com')return searxng(...rows('searx',main));
+     const site=q.match(/site:(\S+)/)?.[1];return brave(...(site?rows(site,siteN):rows('brave',main)));}} as any)).results.map(r=>new URL(r.url).hostname);
+ // A full open web: 5 per site, 10 in all, filling slots 31-40; the open web's first 30 are untouched and the rest follow.
+ const full=await run(20,8);
+ assert.deepEqual(full.slice(0,30).filter(h=>h.endsWith('.gov')||h.endsWith('.int')),[]);
+ assert.deepEqual(full.slice(30,40).sort(),[...Array(5).fill('esa.int.example'),...Array(5).fill('nasa.gov.example')].sort());
+ assert.equal(full.length,50);
+ // A short open web: the routed results simply follow it.
+ const short=await run(3,2);
+ assert.deepEqual(short,['brave.example','searx.example','brave.example','searx.example','brave.example','searx.example',
+   'nasa.gov.example','esa.int.example','nasa.gov.example','esa.int.example']);
+});

@@ -1,3 +1,4 @@
+import { learnFieldSources } from './field-routing.js';
 import { randomUUID } from 'node:crypto';
 import type { DB } from './db.js';
 import type { Config } from './config.js';
@@ -21,11 +22,14 @@ import { planContract, type ContractDeps } from './search-contract.js';
 export interface WebReviewState { status: 'running'|'complete'; results: WebResult[]; removed: number; providers: ProviderStatus[] }
 // refill: the planner's check of what was kept (null turns it off); fetch: runs its searches (web.ts passes the Brave search).
 export type WebReviewDeps = ContractDeps & {judge?: Judge; pages?: PageCheck; screener?: Screener; council?: CouncilSeats|null; strong?: Judge|null;
- refill?: RefillPlanner|null; fetch?: (searches: string[]) => Promise<WebResult[]>; log?: (line: Record<string, unknown>) => void};
+ refill?: RefillPlanner|null; fetch?: (searches: string[]) => Promise<WebResult[]>; log?: (line: Record<string, unknown>) => void;
+ // field: the request's field (src/field-routing.ts); the review's verdicts teach which sites answer it.
+ field?: string|null};
 // New pages a refill may add to the review.
 const REFILL_POOL = 20;
 // A results page holds about 20 results, at most about 40: all are read and judged.
-const WEB_POOL = 40, READS = 6;
+export const WEB_POOL = 40;
+const READS = 6;
 const CRITERIA = ['A web page that itself answers, explains or provides what the request asks for',
  'When the request is ambiguous, a page that genuinely fits any reasonable reading matches',
  'Home pages, search or listing pages and link farms match only when the request asks for that site',
@@ -90,6 +94,7 @@ export async function reviewWeb(db: DB, config: Config, query: string, results: 
    log({event: 'refill', tier: config.TIER, tab: 'web', complete: decision?.complete ?? null, failed: !decision, searches: decision?.searches.length ?? 0,
      fetched, added, ms: Date.now() - started});
  }
+ await learnFieldSources(db, deps.field ?? null, out.trace).catch(() => {});
  return out;
 }
 

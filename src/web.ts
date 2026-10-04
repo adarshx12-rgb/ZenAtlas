@@ -9,14 +9,15 @@ import { publicURL } from './urls.js';
 import { searchSearXNG } from './providers.js';
 import { accessKind, accessLabel } from './access.js';
 import { previewToken } from './doc-preview.js';
-import { verifyDocuments, type VerifiedDoc } from './doc-review.js';
+import { REVIEW_POOL, verifyDocuments, type VerifiedDoc } from './doc-review.js';
 import { discoverSites, startHunt } from './doc-hunt.js';
 import { rewriteQuery, type QueryRewrite } from './query-rewrite.js';
+import { routeFields, type FieldRoute } from './field-routing.js';
 import { tierSchema } from './tiers.js';
 import { findDocuments, type SourceFindings } from './doc-sources.js';
 import { viewerOf } from './doc-viewers.js';
 import { refreshBlocklists, unsafeLink } from './safety.js';
-import { startWebReview } from './web-review.js';
+import { startWebReview, WEB_POOL } from './web-review.js';
 import { withSearchTrace, traceFields } from './search-trace.js';
 import { walledSite, walledToken } from './walled.js';
 import type { PeekResponse } from './http.js';
@@ -35,6 +36,11 @@ type DocumentGroup = keyof typeof DOCUMENT_TYPES;
 const ALL_EXTENSIONS: readonly string[] = Object.values(DOCUMENT_TYPES).flat();
 // Hosts that serve PDFs from extension-less paths such as arxiv.org/pdf/2401.00001.
 const PDF_PATHS: Record<string, RegExp> = {'arxiv.org': /^\/pdf(\/|$)/, 'openreview.net': /^\/pdf\/?$/};
+// Routed specialist sites (src/field-routing.ts): each site's best few results, and at most this many in all.
+const FIELD_ROWS_PER_SITE = 5, FIELD_ROWS = 10;
+// Lists taken in turn: each one's first result, then each one's second, and so on.
+const inTurn = <T>(lists: T[][]) => Array.from({length: Math.max(0, ...lists.map(l => l.length))}, (_, i) =>
+ lists.flatMap(l => l[i] ? [l[i]] : [])).flat();
 
 export const webSearchInput = z.object({
  q: z.string().transform(v => v.normalize('NFC').trim().replace(/\s+/g, ' ')).pipe(z.string().min(2).max(400)),
@@ -105,7 +111,8 @@ type Deps = {transport: typeof fetchJSON; budget: (db: DB, key: string, limit: n
  sources?: (db: DB, config: Config, query: string) => Promise<SourceFindings>;
  // false: no relevance review (the Docs hunt's own web search).
  review?: false | ((query: string, results: WebResult[]) => string | null);
- rewrite?: (query: string, tab: 'web'|'docs') => Promise<QueryRewrite>};
+ rewrite?: (query: string, tab: 'web'|'docs') => Promise<QueryRewrite>;
+ route?: (query: string, tab: 'web'|'docs') => Promise<FieldRoute>};
 
 export const searchWeb = (...args: Parameters<typeof searchWebImpl>) => withSearchTrace(async () => Object.assign(await searchWebImpl(...args), traceFields()));
 async function searchWebImpl(db: DB, config: Config, input: WebSearchInput,
@@ -113,14 +120,19 @@ async function searchWebImpl(db: DB, config: Config, input: WebSearchInput,
  const docs = input.kind === 'docs';
  const wanted: readonly string[] = docs ? (input.doc_type === 'any' ? ALL_EXTENSIONS : DOCUMENT_TYPES[input.doc_type]) : [];
  // What was meant rather than what was typed (src/query-rewrite.ts); "exact" searches the query as typed.
- const rewrite = input.exact ? null : await (deps.rewrite ?? ((q, tab) => rewriteQuery(db, config, q, tab)))(input.q, docs ? 'docs' : 'web');
+ // Alongside it, the request's field and the specialist sites that answer it (src/field-routing.ts), on the first page.
+ const [rewrite, route] = input.exact ? [null, null] : await Promise.all([
+   (deps.rewrite ?? ((q, tab) => rewriteQuery(db, config, q, tab)))(input.q, docs ? 'docs' : 'web'),
+   input.page === 1 ? (deps.route ?? ((q, tab) => routeFields(db, config, q, tab)))(input.q, docs ? 'docs' : 'web').catch(() => null) : null]);
  const meant = rewrite?.corrected ?? input.q;
  // Engines honour filetype: but an OR'd list drifts towards PDF, so the type filter narrows the query too.
  const typed = (q: string) => docs ? `${q} (${wanted.filter(e => e !== 'csv').map(e => `filetype:${e}`).join(' OR ')})` : q;
  const query = typed(meant);
  // The first page also searches Brave with the rewrite's first extra search (the topic in quotes); later pages page
  // through the main query only.
- const braveQueries = [query, ...(input.page === 1 && rewrite?.searches.length ? [typed(rewrite.searches[0])] : [])];
+ // Each routed site is one more Brave search, restricted to that site.
+ const braveQueries = [query, ...(input.page === 1 && rewrite?.searches.length ? [typed(rewrite.searches[0])] : []),
+   ...(route?.sites ?? []).map(site => typed(`${meant} site:${site}`))];
  const providers: ProviderStatus[] = [];
  const results: WebResult[] = [];
  const seen = new Set<string>();
@@ -153,7 +165,8 @@ async function searchWebImpl(db: DB, config: Config, input: WebSearchInput,
    }
  };
 
- let braveRows: Row[] = [], searxngRows: Row[] = [];
+ let braveRows: Row[] = [], searxngRows: Row[] = [], siteRows: Row[] = [];
+ const general = braveQueries.length - (route?.sites.length ?? 0);
  const askBrave = async () => { if (config.BRAVE_SEARCH_API_KEY) {
    if (!await deps.budget(db, 'discovery:brave', config.BRAVE_DAILY_BUDGET)) {
      providers.push({provider: 'brave', status: 'budget_exhausted', message: 'The daily Brave budget has been reached.'});
@@ -174,8 +187,10 @@ async function searchWebImpl(db: DB, config: Config, input: WebSearchInput,
        const r = z.looseObject({url: z.string()}).safeParse(raw);
        return r.success ? [{url: r.data.url, title: r.data.title, snippet: r.data.description, published: r.data.page_age, engine: 'brave'}] : [];
      }) : []);
-     // Taken in turn, so the extra search's best results sit beside the main query's instead of below all of them.
-     braveRows = Array.from({length: Math.max(0, ...lists.map(l => l.length))}, (_, i) => lists.flatMap(l => l[i] ? [l[i]] : [])).flat();
+     // Taken in turn, so the extra search's best results sit beside the main query's instead of below all of them. The
+     // routed sites' lists are kept apart: they get their own share of the review below, never the open web's.
+     braveRows = inTurn(lists.slice(0, general));
+     siteRows = inTurn(lists.slice(general).map(l => l.slice(0, FIELD_ROWS_PER_SITE)));
      const main = answers[0];
      if (main.status === 'fulfilled' && main.value) more ||= main.value.query?.more_results_available === true;
      if (answers.some(a => a.status === 'fulfilled' && a.value)) providers.push({provider: 'brave', status: 'ok', message: 'Brave search completed.'});
@@ -201,9 +216,14 @@ async function searchWebImpl(db: DB, config: Config, input: WebSearchInput,
  }};
  await Promise.all([askBrave(), askSearXNG()]);
  // Stable interleaving keeps either provider's discoveries near the front regardless of response time.
- keep(Array.from({length: Math.max(braveRows.length, searxngRows.length)}, (_, i) =>
-   [braveRows[i], searxngRows[i]].filter((r): r is Row => !!r)).flat());
- const braveUrls = new Set(braveRows.flatMap(r => { try { return [publicURL(directFile(r.url)).href]; } catch { return []; } }));
+ keep(inTurn([braveRows, searxngRows]));
+ // Routed sites' results sit just inside the end of the review pool: they add to the open web's best results instead of
+ // displacing them, and a site that found nothing leaves its slots to the open web.
+ const before = results.length;
+ keep(siteRows.slice(0, FIELD_ROWS));
+ const routedResults = results.splice(before);
+ results.splice(Math.min(before, (docs ? REVIEW_POOL : WEB_POOL) - routedResults.length), 0, ...routedResults);
+ const braveUrls = new Set([...braveRows, ...siteRows].flatMap(r => { try { return [publicURL(directFile(r.url)).href]; } catch { return []; } }));
  more ||= results.some(r => !braveUrls.has(r.url));
  providers.sort((a, b) => a.provider.localeCompare(b.provider));
 
@@ -215,7 +235,7 @@ async function searchWebImpl(db: DB, config: Config, input: WebSearchInput,
    const fetch = async (searches: string[]) => (await Promise.all(searches.map(q => searchWeb(db, config,
      webSearchInput.parse({q, kind: 'web', page: '1', exact: '1', tier: config.TIER, ...(input.language ? {language: input.language} : {})}),
      {...deps, review: false}).then(r => r.results, () => [] as WebResult[])))).flat();
-   const review = deps.review === false ? null : (deps.review ?? ((q, list) => startWebReview(db, config, q, list, {fetch})))(meant, results);
+   const review = deps.review === false ? null : (deps.review ?? ((q, list) => startWebReview(db, config, q, list, {fetch, field: route?.field ?? null})))(meant, results);
    return {query: input.q, results, providers, next_cursor, ...(review ? {review} : {}), ...said};
  }
  const found = await sourcesTask;
