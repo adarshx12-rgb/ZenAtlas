@@ -11,12 +11,16 @@ import {cleanSite, learnFieldSources, learnFailed} from './field-routing.js';
 import {traceFields} from './search-trace.js';
 
 export function answerIntent(query: string) {
- const intent = /\b(compare|comparison|versus|vs\.?|differences?|better than)\b/i.test(query) ? 'comparison'
-  : /\b(find|download|full match|full video|official website|manual|pdf|footage|wallpaper)\b/i.test(query) ? 'resource_finding'
+ // A named resource wins over "vs": "india vs pakistan full match" is a video, not a comparison.
+ const intent = /\b(download|installer|full match|full video|full movie|footage|wallpapers?|official website)\b/i.test(query) ? 'resource_finding'
+  : /\b(compare|comparison|versus|vs\.?|differences?|better than)\b/i.test(query) ? 'comparison'
+  : /\b(find|manual|pdf)\b/i.test(query) ? 'resource_finding'
   : /^(who|when|where|how many|how much)\b/i.test(query) ? 'factual_lookup' : 'explanation';
  return {intent, freshness: /\b(latest|current|currently|today|now|recent|presently)\b/i.test(query) ? 'current' : 'unspecified',
    years: [...new Set(query.match(/\b(?:19|20)\d{2}\b/g) ?? [])]};
 }
+// A summary helps questions; a search for one thing (a file, a match, a site) is answered by the result links.
+export const wantsAnswer = (query: string, page: number) => page === 1 && answerIntent(query).intent !== 'resource_finding';
 export interface AnswerSource {
  id: string; url: string; title: string; published: string|null; fetched_at: string; hash: string;
  passages: {id: string; text: string; start: number; end: number}[];

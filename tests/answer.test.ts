@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {answerIntent, collectAnswerSources, generateAnswer, type AnswerSource, type AnswerDeps} from '../src/answer.js';
+import {answerIntent, wantsAnswer, collectAnswerSources, generateAnswer, type AnswerSource, type AnswerDeps} from '../src/answer.js';
 import {startWebReview, webReviewState, cancelWebAnswer, webReviewSnapshot} from '../src/web-review.js';
 import {PageChecker, type PageEvidence} from '../src/pages.js';
 import type {WebResult} from '../src/web.js';
@@ -143,4 +143,13 @@ test('a slow answer frees its relevance review slot for other searches',async()=
    assert.ok(!next.providers.some(p=>p.provider==='web_review'),'the fifth search is still reviewed');
    assert.equal(next.results[0].judgement?.relevance,9);
  }finally{gates.forEach(g=>g());for(const t of tokens)cancelWebAnswer(t,undefined as any);}
+});
+
+test('only first-page questions get an answer; a search for one resource is left to the result links',()=>{
+ assert.equal(wantsAnswer('How do solar panels generate electricity?',1),true);
+ assert.equal(wantsAnswer('postgres vs mysql for analytics',1),true);
+ assert.equal(wantsAnswer('How do solar panels generate electricity?',2),false);
+ assert.equal(wantsAnswer('india vs pakistan 2011 world cup full match',1),false);
+ assert.equal(wantsAnswer('python installer download',1),false);
+ assert.equal(wantsAnswer('difference between pdf and docx',1),true);
 });

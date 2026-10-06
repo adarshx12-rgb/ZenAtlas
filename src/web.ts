@@ -21,6 +21,7 @@ import { startWebReview, WEB_POOL } from './web-review.js';
 import { withSearchTrace, traceFields } from './search-trace.js';
 import { walledSite, walledToken } from './walled.js';
 import type { PeekResponse } from './http.js';
+import { wantsAnswer } from './answer.js';
 
 // Web and document search are discovery-only, like image search: results come straight from the engines and never
 // enter the catalogue. Brave and SearXNG start together, then their deduplicated results are reviewed together.
@@ -236,7 +237,7 @@ async function searchWebImpl(db: DB, config: Config, input: WebSearchInput,
      webSearchInput.parse({q, kind: 'web', page: '1', exact: '1', tier: config.TIER, ...(input.language ? {language: input.language} : {})}),
      {...deps, review: false}).then(r => r.results, () => [] as WebResult[])))).flat();
    const review = deps.review === false ? null : (deps.review ?? ((q, list) => startWebReview(db, config, q, list, {fetch, field: route?.field ?? null,
-     owner, originalQuery:input.q, answer:input.page===1,
+     owner, originalQuery:input.q, answer:wantsAnswer(input.q,input.page),
      routed: new Set(routedResults.map(r => r.url))})))(meant, results);
    return {query: input.q, results, providers, next_cursor, ...(review ? {review} : {}), ...said};
  }

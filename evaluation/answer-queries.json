@@ -1,0 +1,28 @@
+{
+ "about": "Cited-answer evaluation set (2026-10-07): Web-tab requests of every answer type, to measure how often a checked answer appears, whether its claims are right and backed by the passages shown, and whether it helps. Grades are human (evaluation/answer-labels.json); the verifier's own verdict is never the grade. kind: explanation, factual, comparison, current (freshness matters), niche (specialist or regional knowledge), skip (a resource search that must get no answer).",
+ "queries": [
+  {"id": "exp-solar", "kind": "explanation", "q": "How do solar panels generate electricity?"},
+  {"id": "exp-moon", "kind": "explanation", "q": "why does the moon look bigger near the horizon"},
+  {"id": "exp-upi", "kind": "explanation", "q": "how does UPI work"},
+  {"id": "exp-inflation", "kind": "explanation", "q": "what causes inflation"},
+  {"id": "fact-penicillin", "kind": "factual", "q": "who discovered penicillin"},
+  {"id": "fact-constitution", "kind": "factual", "q": "when did the Indian constitution come into force"},
+  {"id": "fact-bones", "kind": "factual", "q": "how many bones are in the adult human body"},
+  {"id": "cmp-db", "kind": "comparison", "q": "postgres vs mysql for analytics workloads"},
+  {"id": "cmp-hiv", "kind": "comparison", "q": "difference between HIV and AIDS"},
+  {"id": "cmp-sip", "kind": "comparison", "q": "SIP vs lump sum investment in mutual funds"},
+  {"id": "cmp-ev", "kind": "comparison", "q": "LFP vs NMC battery for electric cars"},
+  {"id": "cur-repo", "kind": "current", "q": "current RBI repo rate"},
+  {"id": "cur-python", "kind": "current", "q": "latest stable Python version"},
+  {"id": "cur-iphone", "kind": "current", "q": "iPhone 17 price in India"},
+  {"id": "niche-limitation", "kind": "niche", "q": "limitation period for filing a civil suit for recovery of money in India"},
+  {"id": "niche-metformin", "kind": "niche", "q": "common side effects of metformin"},
+  {"id": "niche-deposit", "kind": "niche", "q": "maximum security deposit for residential rent under the Model Tenancy Act"},
+  {"id": "niche-coffee", "kind": "niche", "q": "how does altitude affect coffee flavour"},
+  {"id": "niche-jaguar", "kind": "niche", "q": "jaguar top speed"},
+  {"id": "niche-rust", "kind": "niche", "q": "what does the borrow checker in Rust prevent"},
+  {"id": "skip-match", "kind": "skip", "q": "india vs pakistan 2011 world cup full match"},
+  {"id": "skip-python", "kind": "skip", "q": "python installer download for windows"},
+  {"id": "skip-tax", "kind": "skip", "q": "income tax india official website"}
+ ]
+}
