@@ -45,13 +45,16 @@ export abstract class ModelClient {
  private key(model: string) { return `${this.provider}:${model}`; }
  // Returns the parsed JSON reply and the model that produced it. Each attempt spends one unit of the named daily budget.
  // Each image follows the text, introduced by its label.
- async json(bucket: string, system: string, text: string, schema: object, images: InlineImage[] = []): Promise<{model: string; value: unknown}> {
+ async json(bucket: string, system: string, text: string, schema: object, images: InlineImage[] = [], signal?: AbortSignal): Promise<{model: string; value: unknown}> {
+   signal?.throwIfAborted();
    const now = Date.now();
    const cooling = (m: string) => (coolingUntil.get(this.key(m)) ?? 0) > now;
    const failures = new Map<string,unknown>();
    try {
-     return await this.attempt([...this.models.filter(m => !cooling(m)), ...this.models.filter(cooling)], failures, bucket, system, text, schema, images);
+     return await this.attempt([...this.models.filter(m => !cooling(m)), ...this.models.filter(cooling)], failures, bucket, system, text, schema, images, signal);
    } catch (error) {
+     // Interactive callers with a deadline own their fallback policy; never leave a delayed retry behind.
+     if (signal) throw error;
      // A per-minute limit clears within the minute, so the models held back only by one are tried once more after a wait.
      const waiting = [...failures].filter(([, e]) => perMinuteLimit(e));
      if (!waiting.length) throw error;
@@ -59,11 +62,14 @@ export abstract class ModelClient {
      return this.attempt(waiting.map(([m]) => m), new Map(), bucket, system, text, schema, images);
    }
  }
- private async attempt(models: string[], failures: Map<string,unknown>, bucket: string, system: string, text: string, schema: object, images: InlineImage[]) {
+ private async attempt(models: string[], failures: Map<string,unknown>, bucket: string, system: string, text: string, schema: object, images: InlineImage[], signal?: AbortSignal) {
    for (const [i, model] of models.entries()) {
+     signal?.throwIfAborted();
      if (!await takeBudget(this.db, bucket, this.config.JUDGE_DAILY_BUDGET)) throw new UpstreamError('budget_exhausted');
      try {
+       signal?.throwIfAborted();
        const value = await this.ask(model, system, text, schema, images, bucket);
+       signal?.throwIfAborted();
        coolingUntil.delete(this.key(model));
        await this.record(model, null);
        return {model, value};

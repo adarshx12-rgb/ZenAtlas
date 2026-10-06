@@ -72,7 +72,10 @@ export async function routeFields(db: DB, config: Config, query: string, tab: Ro
    const raw = await Promise.race([model(query, tab), new Promise<never>((_, reject) => { timer = setTimeout(() => reject(new Error('timeout')), config.QUERY_REWRITE_TIMEOUT_MS); })]);
    const value = reply.parse(raw);
    const field = (FIELDS as readonly string[]).includes(value.field) && value.field !== 'other' ? value.field : null;
-   const learned = field ? await learnedSites(db, learningField(field, tab)!, config.FIELD_ROUTING_SITES).catch(() => []) : [];
+   const relevant = field ? await learnedSites(db, learningField(field, tab)!, config.FIELD_ROUTING_SITES).catch(() => []) : [];
+   // Claim-supported sources have their own history, separate from relevance-only judgements.
+   const cited = field && tab === 'web' ? await learnedSites(db, `answer_${field}`, config.FIELD_ROUTING_SITES).catch(() => []) : [];
+   const learned = [...new Set([...cited, ...relevant])];
    const named = value.sites.map(cleanSite).filter((s): s is string => !!s);
    const sites = [...new Set([...learned, ...named])].slice(0, config.FIELD_ROUTING_SITES);
    const route = {field, sites, learned: learned.filter(s => sites.includes(s))};

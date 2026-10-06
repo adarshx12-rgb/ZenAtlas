@@ -7,6 +7,8 @@ import { publicURL } from './urls.js';
 const AGENT = 'zenatlas';
 const TEXT_CHARS = 800;
 export interface PageEvidence {
+ // Only requested by the answer collector; the short relevance text stays unchanged.
+ evidence?: {text: string; url: string; fetched_at: string};
  status: 'checked'|'robots_disallowed'|'unavailable';
  title: string|null; description: string|null; text: string|null; libraries: string[]; badges: string[];
  rendered?: boolean; screenshot?: Buffer|null;
@@ -24,7 +26,7 @@ export type PageStep = 'rules'|'page';
 export interface PageCheck { check(url: string, onStep?: (step: PageStep) => void): Promise<PageEvidence> }
 // renders: at most this many pages per checker are opened in the browser (default PAGE_RENDERS).
 // links: at most this many outbound links are kept per page (default 8; document hunting reads more).
-export interface PageTools { renderer?: Renderer; extractor?: TextExtractor; renders?: number; links?: number }
+export interface PageTools { renderer?: Renderer; extractor?: TextExtractor; renders?: number; links?: number; evidence?: boolean }
 type Transport = (url: string, options: Parameters<typeof fetchText>[1]) => Promise<TextResponse>;
 type BinaryTransport = (url: string, options: Parameters<typeof fetchPDF>[1]) => Promise<BinaryResponse>;
 
@@ -117,7 +119,7 @@ const badgesFor = (names: string[]) => (['3D', 'Motion', 'Video'] as const).flat
 });
 
 // scripts: script URLs a browser loaded; detected: library names a browser saw running (see render.ts).
-export function extractPage(html: string, seen: {scripts?: string[]; detected?: string[]} = {}): Omit<PageEvidence,'status'> {
+export function extractPage(html: string, seen: {scripts?: string[]; detected?: string[]} = {}, textChars = TEXT_CHARS): Omit<PageEvidence,'status'> {
  const meta = new Map<string,string>();
  for (const tag of html.match(/<meta\b[^>]*>/gi) ?? []) {
    const attrs = Object.fromEntries([...tag.matchAll(/([\w:-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g)].map(m => [m[1].toLowerCase(), m[2] ?? m[3]]));
@@ -130,7 +132,7 @@ export function extractPage(html: string, seen: {scripts?: string[]; detected?: 
    .map(l => l.name);
  const declared = pageMeta(html, meta);
  return {title: clean(/<title\b[^>]*>([\s\S]*?)<\/title>/i.exec(html)?.[1] ?? meta.get('og:title'), 200),
-   description: clean(meta.get('description') ?? meta.get('og:description'), 400), text: clean(visible, TEXT_CHARS),
+   description: clean(meta.get('description') ?? meta.get('og:description'), 400), text: clean(visible, textChars),
    libraries, badges: badgesFor(libraries), ...(declared ? {meta: declared} : {})};
 }
 
@@ -255,7 +257,9 @@ export class PageChecker implements PageCheck {
      const libraries = LIBRARIES.map(l => l.name).filter(name => source.libraries.includes(name) || !!live?.libraries.includes(name));
      // Main-content text (trafilatura) skips menus and banners; the regex text is the fallback.
      const main = await this.tools.extractor?.text(rendered?.html ?? page.text) ?? null;
+     const evidenceText = this.tools.evidence ? clean(main, 24000) ?? extractPage(rendered?.html ?? page.text, {}, 24000).text : null;
      return {status: 'checked', title: live?.title ?? source.title, description: live?.description ?? source.description,
+       ...(evidenceText ? {evidence: {text: evidenceText, url: page.url, fetched_at: new Date().toISOString()}} : {}),
        text: clean(main, TEXT_CHARS) ?? live?.text ?? source.text, libraries, badges: badgesFor(libraries),
        rendered: !!rendered, screenshot: rendered?.screenshot ?? null,
        links: pageReferences(rendered?.html ?? page.text, page.url, this.tools.links),
@@ -275,6 +279,7 @@ export class PageChecker implements PageCheck {
      const created = isoDay(pdf.created);
      if (created) meta.published = created;
      return {status: 'checked', title: clean(pdf.title, 200), description: null, text: clean(pdf.text, TEXT_CHARS),
+       ...(this.tools.evidence && pdf.text ? {evidence: {text: clean(pdf.text,24000)!, url:file.url, fetched_at:new Date().toISOString()}} : {}),
        libraries: [], badges: [], meta, pdf};
    } catch { return {status: 'unavailable', ...empty}; }
  }

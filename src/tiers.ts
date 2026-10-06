@@ -17,6 +17,8 @@ const first = (cheap: string, full: string) => [...new Set([...list(cheap), ...l
 export function tierConfig(config: Config, tier: Tier): Config {
  if (tier === 'ssj3') return config;
  return {...config, TIER: 'ssj1',
+   ANSWER_WRITER_MODELS: first(config.SSJ1_ANSWER_WRITER_MODELS, config.ANSWER_WRITER_MODELS),
+   ANSWER_VERIFIER_MODELS: first(config.SSJ1_ANSWER_VERIFIER_MODELS, config.ANSWER_VERIFIER_MODELS),
    JUDGE_MODELS: first(config.SSJ1_JUDGE_MODELS, config.JUDGE_MODELS),
    CASCADE_STRONG_MODELS: first(config.SSJ1_CASCADE_STRONG_MODELS, config.CASCADE_STRONG_MODELS),
    COUNCIL_CHECKER_MODELS: first(config.SSJ1_COUNCIL_CHECKER_MODELS, config.COUNCIL_CHECKER_MODELS),

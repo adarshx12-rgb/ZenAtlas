@@ -43,6 +43,10 @@ Browse http://127.0.0.1:3000. `GET /health/live` checks the process; `GET /healt
 
 ## External discovery
 
+The Web tab also provides [cited answer summaries](docs/CITED_ANSWERS.md): readable source passages feed a writer and
+an independent citation checker. Results stay visible while the answer is checked. Click a citation to inspect its
+supporting excerpt, or copy the answer with source links. Configure this with `ANSWER_*` in `.env.example`.
+
 **Current discovery behavior:** fast and slow providers finish before candidate selection; quick and deep finds are checked together and ordered by relevance. The browser shows one combined ranking. Deep searches also use topic-specific sources, native archive catalogues and references from checked pages. See [discovery coverage, quality controls and configuration](docs/DISCOVERY_QUALITY.md).
 
 **Optional Jev screening:** uses the existing `OPENROUTER_API_KEY` in the server's `.env` to prioritize promising candidates before evidence collection. Restart the worker after configuration changes. The existing AI judge still decides final relevance. Missing credentials or failed screening preserve the original candidate order; `JEV_SCREENING_ENABLED=false` disables screening. See [screening limits and setup](docs/DISCOVERY_QUALITY.md#jev-candidate-screening).

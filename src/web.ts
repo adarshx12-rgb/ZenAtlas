@@ -116,7 +116,7 @@ type Deps = {transport: typeof fetchJSON; budget: (db: DB, key: string, limit: n
 
 export const searchWeb = (...args: Parameters<typeof searchWebImpl>) => withSearchTrace(async () => Object.assign(await searchWebImpl(...args), traceFields()));
 async function searchWebImpl(db: DB, config: Config, input: WebSearchInput,
- deps: Deps = {transport: fetchJSON, budget: takeBudget}): Promise<WebSearchResponse> {
+ deps: Deps = {transport: fetchJSON, budget: takeBudget}, owner?: string): Promise<WebSearchResponse> {
  const docs = input.kind === 'docs';
  const wanted: readonly string[] = docs ? (input.doc_type === 'any' ? ALL_EXTENSIONS : DOCUMENT_TYPES[input.doc_type]) : [];
  // What was meant rather than what was typed (src/query-rewrite.ts); "exact" searches the query as typed.
@@ -236,6 +236,7 @@ async function searchWebImpl(db: DB, config: Config, input: WebSearchInput,
      webSearchInput.parse({q, kind: 'web', page: '1', exact: '1', tier: config.TIER, ...(input.language ? {language: input.language} : {})}),
      {...deps, review: false}).then(r => r.results, () => [] as WebResult[])))).flat();
    const review = deps.review === false ? null : (deps.review ?? ((q, list) => startWebReview(db, config, q, list, {fetch, field: route?.field ?? null,
+     owner, originalQuery:input.q, answer:input.page===1,
      routed: new Set(routedResults.map(r => r.url))})))(meant, results);
    return {query: input.q, results, providers, next_cursor, ...(review ? {review} : {}), ...said};
  }

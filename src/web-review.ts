@@ -13,15 +13,17 @@ import { cascadeOptions, makeStrongJudge } from './cascade.js';
 import { makeRefillPlanner, mergeReviewed, type RefillPlanner } from './refill.js';
 import type { WebResult } from './web.js';
 import { planContract, type ContractDeps } from './search-contract.js';
+import {answerState, collectAnswerSources, generateAnswer, type CitedAnswer, type AnswerDeps} from './answer.js';
 
 // The Web tab's relevance review, run in the background after /api/web answers with the search results. Every page is
 // read (no browser); Jev analyses each page's text for relevance and accuracy and removes confident failures; every page
 // that passes goes to the LLM judge, which removes what is tangential and orders the rest. The page polls
 // /api/web/review with the token. Unreadable pages are judged on their title and snippet: many good sites block reads.
 
-export interface WebReviewState { status: 'running'|'complete'; results: WebResult[]; removed: number; providers: ProviderStatus[] }
+export interface WebReviewState { status: 'running'|'complete'; results: WebResult[]; removed: number; providers: ProviderStatus[]; answer?: CitedAnswer }
 // refill: the planner's check of what was kept (null turns it off); fetch: runs its searches (web.ts passes the Brave search).
 export type WebReviewDeps = ContractDeps & {judge?: Judge; pages?: PageCheck; screener?: Screener; council?: CouncilSeats|null; strong?: Judge|null;
+ owner?: string; answer?: boolean; answerDeps?: AnswerDeps; originalQuery?: string;
  refill?: RefillPlanner|null; fetch?: (searches: string[]) => Promise<WebResult[]>; log?: (line: Record<string, unknown>) => void;
  // field: the request's field (src/field-routing.ts); the review's verdicts teach which sites answer it.
  // routed: the URLs that came from the field's specialist sites.
@@ -59,13 +61,15 @@ export function webReviewMetrics(trace: ReviewOutcome<unknown>['trace']) {
 
 export async function reviewWeb(db: DB, config: Config, query: string, results: WebResult[], deps: WebReviewDeps & {judge: Judge}) {
  const contract = await planContract(db, config, query, 'web', deps);
- const pages = deps.pages ?? new PageChecker(config, undefined, {...pageTools(config), renders: 0});
+ const pages = deps.pages ?? new PageChecker(config, undefined, {...pageTools(config), renders: 0, evidence: config.ANSWER_ENABLED && deps.answer !== false});
+ const evidence = new Map<string, PageEvidence>();
  const read = async (items: WebResult[]) => {
    const text = new Map<string, PageEvidence>();
    let timer: NodeJS.Timeout|undefined;
    await Promise.race([mapLimit(items, READS, async r => { const page = await pages.check(r.url).catch(() => null); if (page?.status === 'checked') text.set(r.url, page); }),
      new Promise(resolve => { timer = setTimeout(resolve, config.WEB_REVIEW_READ_MS); })]);
    clearTimeout(timer);
+   for (const [url,page] of text) evidence.set(url,page);
    return new Map(text);
  };
  const plan = {noun: 'pages', contract, criteria: CRITERIA, textPool: WEB_POOL, reviewPool: WEB_POOL, read, judge: deps.judge,
@@ -104,16 +108,23 @@ export async function reviewWeb(db: DB, config: Config, query: string, results: 
      fetched, added, ms: Date.now() - started});
  }
  await learnFieldSources(db, deps.field ?? null, out.trace).catch(learnFailed);
- return {...out, results: holdBackRouted(out.results, deps.routed ?? new Set())};
+ return {...out, evidence, results: holdBackRouted(out.results, deps.routed ?? new Set())};
 }
 
 // Reviews wait here by token for the page to poll, for ten minutes.
-const reviews = new Map<string, {state: WebReviewState; expires: number}>();
-const REVIEW_MS = 10 * 60_000, MAX_REVIEWS = 200, MAX_RUNNING = 4;
-let running = 0;
-export function webReviewState(token: string): WebReviewState|null {
+const reviews = new Map<string, {state: WebReviewState; expires: number; owner?: string; abort: AbortController}>();
+const REVIEW_MS = 10 * 60_000, MAX_REVIEWS = 200, MAX_RUNNING = 4, MAX_ANSWERS = 4;
+let running = 0, answering = 0;
+export function webReviewState(token: string, owner?: string): WebReviewState|null {
  const review = reviews.get(token);
- return review && review.expires >= Date.now() ? review.state : null;
+ return review && review.expires >= Date.now() && (!review.owner || review.owner===owner) ? review.state : null;
+}
+export function cancelWebAnswer(token: string, owner: string) {
+ const review=reviews.get(token);
+ if (!review || !webReviewState(token,owner)) return false;
+ review.abort.abort();
+ if (review.state.answer) review.state.answer=answerState('cancelled','Answer stopped.');
+ return true;
 }
 export function webReviewSnapshot(state: WebReviewState): WebReviewState { return state; }
 
@@ -123,20 +134,41 @@ export function startWebReview(db: DB, config: Config, query: string, results: W
  const judge = 'judge' in deps ? deps.judge : webJudge(db, config);
  if (!judge) return null;
  const now = Date.now();
- for (const [token, r] of reviews) if (r.expires < now || reviews.size >= MAX_REVIEWS) reviews.delete(token);
+ for (const [token, r] of reviews) if (r.expires < now || reviews.size >= MAX_REVIEWS) { r.abort.abort(); reviews.delete(token); }
  const token = randomUUID();
  const state: WebReviewState = {status: 'running', results, removed: 0, providers: []};
- reviews.set(token, {state, expires: now + REVIEW_MS});
+ const abort=new AbortController();
+ const summarize=config.ANSWER_ENABLED && deps.answer!==false && (!!config.OPENROUTER_API_KEY || !!deps.answerDeps);
+ if (summarize) state.answer=answerState('reading','Reading sources for a cited answer…');
+ reviews.set(token, {state, expires: now + REVIEW_MS, owner:deps.owner, abort});
  if (running >= MAX_RUNNING) {
    state.status = 'complete';
    state.providers.push({provider: 'web_review', status: 'unavailable', message: 'The server is busy; results were not checked for relevance.'});
+   if (summarize) state.answer=answerState('unavailable','An answer could not be started. Search results are still available.');
    return token;
  }
  running++;
  void reviewWeb(db, config, query, results, {...deps, judge})
-   .then(out => Object.assign(state, {results: out.results, removed: out.removed, providers: out.providers}))
-   .catch(() => state.providers.push({provider: 'web_review', status: 'unavailable', message: 'Relevance checking stopped early; results are shown in search order.'}))
-   .finally(() => { running--; state.status = 'complete'; });
+   .then(out => { Object.assign(state, {results:out.results, removed:out.removed, providers:out.providers}); return out; }, () => {
+     state.providers.push({provider: 'web_review', status: 'unavailable', message: 'Relevance checking stopped early; results are shown in search order.'});
+     if (summarize && !abort.signal.aborted) state.answer=answerState('unavailable','A checked answer could not be completed. Search results are still available.');
+     return null;
+   })
+   // The review's slot is freed before the answer starts: answers have their own limit, so a slow answer never
+   // leaves another search's results unchecked.
+   .finally(() => { running--; state.status = 'complete'; })
+   .then(async out => {
+     if (!out || !summarize || abort.signal.aborted) return;
+     if (answering >= MAX_ANSWERS) { state.answer=answerState('unavailable','An answer could not be started. Search results are still available.'); return; }
+     answering++;
+     try {
+       const original=deps.originalQuery ?? query;
+       const sources=collectAnswerSources(original,out.results,out.evidence,config.ANSWER_SOURCES,deps.routed);
+       state.answer=await generateAnswer(db,config,original,sources,{signal:abort.signal,field:deps.field,routed:deps.routed,deps:deps.answerDeps,
+         onStage:answer=>{state.answer=answer;}});
+     } catch { state.answer=answerState('unavailable','A checked answer could not be completed. Search results are still available.'); }
+     finally { answering--; }
+   });
  return token;
 }
 

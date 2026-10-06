@@ -1,5 +1,6 @@
 import {SearchController} from './search-controller.js';
 import {mountLevel} from './level.js';
+import {mountAnswer} from './answer-panel.js';
 const form=document.querySelector('#search-form'),status=document.querySelector('#status'),notices=document.querySelector('#notices');
 const catalogueBox=document.querySelector('#catalogue-results'),foundBox=document.querySelector('#found-results');
 const deepBox=document.querySelector('#deep-results'),deepHeading=document.querySelector('#deep-heading');
@@ -21,6 +22,9 @@ const closestPanel=document.querySelector('#closest-panel'),closestBox=document.
 const closestStatus=document.querySelector('#closest-status'),closestRetry=document.querySelector('#closest-retry');
 let matchView='matches',closestSearch=null,closestLoaded=false,closestRequest=null,closestAbort=null,closestTimer=null,closestDeadline=0,lastSearchData=null;
 const controller=new SearchController();
+let answerReview=null;
+function stopAnswer(){if(answerReview){const token=answerReview;answerReview=null;void api(`/api/web/review?token=${encodeURIComponent(token)}`,{method:'DELETE',headers:{'X-Requested-With':'CreatorSearch'}}).catch(()=>{});}}
+const answerPanel=mountAnswer(document.querySelector('#answer-summary'),stopAnswer);
 // Images come from a separate discovery-only endpoint, so they keep their own paging state
 // rather than sharing the search snapshot's cursor.
 let imagePage=1,imageBusy=false,webPage=1,webBusy=false;
@@ -235,9 +239,16 @@ function render(data){
  showDeepHeading(data,busy);
  const count=shownCount();
  const label=`${count} ${count===1?'result':'results'}`;
+ // A partial search can mean a bounded candidate pool or missing evidence, even when every search provider answered.
+ // Keep the detailed notices above, and only describe limited source coverage when retrieval itself was affected.
+ const limitedSources=data.providers.some(p=>['brave','google','searxng','internet_archive','discovery','search_deadline'].includes(p.provider)&&p.status!=='ok');
+ const finished=limitedSources?'Search finished with limited source coverage'
+  :partial?'Search finished with limited checks':deepDone?'Deep dive complete':'Search complete';
+ const empty=data.discovery_job_id
+  ?`No verified matches.${limitedSources?' Search source coverage was limited.':partial?' Some checks were incomplete.':' Try another query or broader filters.'}`
+  :'No matching results. Try another query or broader filters.';
  status.textContent=busy?`${label} so far. ${progressText(data)}`:verifying?`${label} · Retrieval complete. Checking scenes; results will update.`
-  :count?`${label}${levelTag()} · ${deepDone?(partial?'Deep dive finished; some services were unavailable':'Deep dive complete'):partial?'Some search services are unavailable':'Search complete'}`
-  :partial?'No catalogue matches. Discovery is unavailable or incomplete.':'No matching results. Try another query or broader filters.';
+  :count?`${label}${levelTag()} · ${finished}`:empty;
  // A finished discovery with nothing verified opens the unverified candidates instead of an empty page (once per search,
  // so choosing "Matches" again is respected).
  if(!busy&&!count&&data.discovery_job_id&&data.status!=='cancelled'&&matchView==='matches'&&autoClosest!==data.search_id){
@@ -584,7 +595,7 @@ async function searchWebPage(token,kind,append){
   :data.hunt?'Searching inside websites for documents…'
   :kind==='docs'?'No documents found. Try another query or document type.':'No results found. Try another query.';
  if(data.hunt)void followHunt(token,page,data.hunt);
- if(data.review)void followReview(token,page,data.review);
+ if(data.review){if(page===1&&kind==='web')answerReview=data.review;void followReview(token,page,data.review);}
 }
 const VERDICTS={searching:'Searching…',document:'Document found',web_only:'On the page, no file',access:'Buy or borrow',not_found:'Not found'};
 // The websites the document hunt looked inside, each with what it found there.
@@ -621,13 +632,18 @@ function reorderPage(page,items){
 // with the judge's reason. A failed or expired poll leaves the search results as they are.
 async function followReview(token,page,review){
  const settle=()=>{if(controller.current(token.generation))status.textContent=status.textContent.replace(' · checking relevance…','');};
- for(let polls=0;polls<50;polls++){
+ let applied=false;
+ for(let polls=0;polls<180;polls++){
   await new Promise(resolve=>setTimeout(resolve,1200));
   if(!controller.current(token.generation))return;
   let snap;
-  try{snap=await api(`/api/web/review?token=${encodeURIComponent(review)}`,{signal:token.signal});}catch{settle();return;}
+  try{snap=await api(`/api/web/review?token=${encodeURIComponent(review)}`,{signal:token.signal});}catch{
+   if(controller.current(token.generation)&&answerReview===review){answerPanel.render({status:'unavailable',message:'The answer could not be loaded. Search results remain available.',claims:[],sources:[],limited:false});stopAnswer();}
+   settle();return;}
   if(!controller.current(token.generation))return;
+  if(page===1&&answerReview===review)answerPanel.render(snap.answer);
   if(snap.status!=='complete')continue;
+  if(!applied){
   const byId=new Map(snap.results.map(r=>[r.id,r]));
   if(walledOpen&&!walledOpen.row.isConnected)closeWalled();
   for(const row of reorderPage(page,snap.results)){
@@ -639,8 +655,13 @@ async function followReview(token,page,review){
   const count=webList.children.length;
   status.textContent=count?`${count} ${count===1?'result':'results'}${levelTag()}${snap.removed?` · ${snap.removed} removed as not matching`:''}`:'No page matched the request. Try another query.';
   placeWalled();
+  applied=true;
+  }
+  if(snap.answer&&['reading','drafting','checking'].includes(snap.answer.status)&&answerReview===review)continue;
+  if(answerReview===review)answerReview=null;
   return;
  }
+ if(controller.current(token.generation)&&answerReview===review){answerPanel.render({status:'unavailable',message:'The answer took too long. Search results remain available.',claims:[],sources:[],limited:false});stopAnswer();}
  settle();
 }
 // The Docs tab's document hunt, polled until it completes. Documents Jev finds inside websites appear as they are
@@ -693,7 +714,7 @@ function showRewrite(rewrite,typed){
   event.preventDefault();window.history.pushState(null,'',a.href);runTab(tabOf(window.location.search));});
  rewriteNote.append('Showing results for ',node('strong',rewrite.corrected),' · Search instead for ',a);
 }
-function runTab(tab){rewriteNote.hidden=true;if(tab==='images')void runImageSearch();else if(tab==='web'||tab==='docs')void runWebSearch(tab);else void search();}
+function runTab(tab){stopAnswer();answerPanel.reset();rewriteNote.hidden=true;if(tab==='images')void runImageSearch();else if(tab==='web'||tab==='docs')void runWebSearch(tab);else void search();}
 
 // ---- login-free preview ---------------------------------------------------------------------
 // Results from login-walled sites (X, Reddit, Quora…) open in a window attached to the result, showing the content the
@@ -888,6 +909,7 @@ function showModeNote(decision){
 }
 // Routes a query without a chosen tab, then records the tab in the URL (replace: Back skips the undecided address).
 async function routeAndRun(push){
+ stopAnswer();answerPanel.reset();controller.stop();
  const q=form.elements.namedItem('q').value;
  const decision=await routeQuery(q);
  if(!decision)return;

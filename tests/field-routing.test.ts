@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {database,testConfig} from './helpers.js';
-import {cleanSite,routeFields,learnFieldSources,clearRouteCache,learningField} from '../src/field-routing.js';
+import {cleanSite,routeFields,learnFieldSources,clearRouteCache,learningField,learnedSites} from '../src/field-routing.js';
 
 const config={...testConfig,FIELD_ROUTING_ENABLED:true,FIELD_ROUTING_SITES:2,QUERY_REWRITE_TIMEOUT_MS:1000} as any;
 
@@ -52,5 +52,18 @@ test('images learn their sites apart from the other tabs: a good article site is
    const route=await routeFields(db,config,'snow leopard photo','images',{log:()=>{},model:async()=>({field:'nature',sites:['wild.example']})});
    assert.deepEqual(route,{field:'nature',sites:['pictures.example','wild.example'],learned:['pictures.example']});
    assert.equal(learningField(null,'images'),null);
+ }finally{await db.close();}
+});
+
+test('claim-supported source history is separate from relevance and helps route Web answers',async()=>{
+ const db=await database();
+ try{
+   clearRouteCache();
+   for(let i=0;i<2;i++)await learnFieldSources(db,'answer_science',[{url:'https://primary.example/report',relevance:9}]);
+   assert.deepEqual(await learnedSites(db,'science',4),[]);
+   const route=await routeFields(db,config,'solar efficiency','web',{log:()=>{},model:async()=>({field:'science',sites:['secondary.example']})});
+   assert.deepEqual(route.sites,['primary.example','secondary.example']);
+   const images=await routeFields(db,config,'solar diagram','images',{log:()=>{},model:async()=>({field:'science',sites:[]})});
+   assert.deepEqual(images.sites,[]);
  }finally{await db.close();}
 });

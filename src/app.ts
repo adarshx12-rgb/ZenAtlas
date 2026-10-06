@@ -18,7 +18,7 @@ import { dependencyReport } from './watchdog.js';
 import { imageSearchInput, searchImages } from './images.js';
 import { searchWeb, webSearchInput } from './web.js';
 import { huntSnapshot, huntState } from './doc-hunt.js';
-import { webReviewSnapshot, webReviewState } from './web-review.js';
+import { webReviewSnapshot, webReviewState, cancelWebAnswer } from './web-review.js';
 import { imageReviewState } from './image-review.js';
 import { chooseMode, modeDeps } from './mode-router.js';
 import { tierConfig, tierSchema } from './tiers.js';
@@ -115,7 +115,7 @@ export async function createApp(db:DB,config:Config) {
    return state;
  });
  // Web pages and documents (PDF, Word, slides…) are discovery-only lists too.
- app.get('/api/web',async req=>{const input=webSearchInput.parse(req.query);return searchWeb(db,tierConfig(config,input.tier),input);});
+ app.get('/api/web',async req=>{const input=webSearchInput.parse(req.query);return searchWeb(db,tierConfig(config,input.tier),input,undefined,owner(req));});
  // The login-free preview of a login-walled result. Only URLs the engine returned carry a valid token.
  // With progress=1 it streams one JSON line per real step as it starts ({plan} first, then {stage, limit_ms}), then
  // {preview}, so the window can say what is happening while it loads. A cached preview comes back as {preview} alone.
@@ -137,9 +137,14 @@ export async function createApp(db:DB,config:Config) {
  });
  // The Web tab's relevance review, polled while it runs; complete, it lists the pages kept, ranked, with their reasons.
  app.get('/api/web/review',async req=>{
-   const state=webReviewState(z.object({token:z.string().uuid()}).strict().parse(req.query).token);
+   const state=webReviewState(z.object({token:z.string().uuid()}).strict().parse(req.query).token,owner(req));
    if(!state) throw new ApiError(404,'review_expired','This relevance check has expired; search again.');
    return webReviewSnapshot(state);
+ });
+ app.delete('/api/web/review',async(req,reply)=>{
+   const {token}=z.object({token:z.string().uuid()}).strict().parse(req.query);
+   if(!cancelWebAnswer(token,owner(req))) throw new ApiError(404,'review_expired','This answer has expired; search again.');
+   return reply.code(204).send();
  });
  // The Docs tab's document hunt, polled while it runs: websites searched with their verdicts, documents found and reviewed.
  app.get('/api/docs/hunt',async req=>{
