@@ -451,7 +451,7 @@ const gemini: Check = {name: 'gemini', label: 'Gemini models', category: 'ai', e
 const TIER_SETTINGS = [['JUDGE_MODELS', 'SSJ1_JUDGE_MODELS'], ['CASCADE_STRONG_MODELS', 'SSJ1_CASCADE_STRONG_MODELS'], ['COUNCIL_CHECKER_MODELS', 'SSJ1_COUNCIL_CHECKER_MODELS'],
  ['COUNCIL_CHAIR_MODELS', 'SSJ1_COUNCIL_CHAIR_MODELS'], ['CRITIC_MODEL', 'SSJ1_CRITIC_MODEL'], ['CRITIC_REVIEW_MODEL', 'SSJ1_CRITIC_REVIEW_MODEL'],
  ['MODE_ROUTER_MODEL', 'SSJ1_MODE_ROUTER_MODEL'], ['QUERY_REWRITE_MODEL', 'SSJ1_QUERY_REWRITE_MODEL'],
- ['ANSWER_WRITER_MODELS','SSJ1_ANSWER_WRITER_MODELS'], ['ANSWER_VERIFIER_MODELS','SSJ1_ANSWER_VERIFIER_MODELS']] as const;
+ ['ANSWER_WRITER_MODELS', 'SSJ1_ANSWER_WRITER_MODELS'], ['ANSWER_VERIFIER_MODELS', 'SSJ1_ANSWER_VERIFIER_MODELS']] as const;
 const tierModels: Check = {name: 'tier_models', label: 'Model tiers (SSJ3 / SSJ1)', category: 'ai', every: () => 60, confirm: 1,
  async run({config, transport}) {
    if (!config.OPENROUTER_API_KEY) return disabled('OPENROUTER_API_KEY is empty; both tiers run without OpenRouter models.');

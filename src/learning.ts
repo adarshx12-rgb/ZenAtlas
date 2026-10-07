@@ -248,7 +248,7 @@ export async function auditTrace(db: DB, config: Config, traceId: string, deps: 
  const tiered = tierConfig(config, trace.tier ?? 'ssj3');
  const client = deps.client ?? (deps.clientFor ?? (m => criticClient(db, tiered, m)))(tiered.CRITIC_MODEL);
  const shown = trace.pool.filter(p => p.shown).sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0));
- const closest = trace.pool.filter(p => p.placement === 'closest').sort((a,b) => (a.closest_rank ?? 0)-(b.closest_rank ?? 0));
+ const closest = trace.pool.filter(p => p.placement === 'closest').sort((a, b) => (a.closest_rank ?? 0) - (b.closest_rank ?? 0));
  const rejected = trace.pool.filter(p => !p.shown && p.placement !== 'closest').sort((a, b) => (b.relevance ?? -1) - (a.relevance ?? -1)).slice(0, 15);
  const brief = (p: TraceEntry) => ({url: p.url, title: p.title, site: p.site, round: p.round, relevance: p.relevance, basis: p.basis,
    badges: p.badges, judge_reason: p.reason});
@@ -257,7 +257,7 @@ export async function auditTrace(db: DB, config: Config, traceId: string, deps: 
    `Metrics: ${line({...metrics, duplicate_groups: metrics.duplicate_groups.length})}`,
    '<shown>', ...shown.map(p => line({rank: p.rank, ...brief(p)})), '</shown>',
    'Closest matches are available to the user as uncertain leads, not confirmed matches or hidden rejections.',
-   '<closest>', ...closest.map(p => line({rank:p.closest_rank,...brief(p)})), '</closest>',
+   '<closest>', ...closest.map(p => line({rank: p.closest_rank, ...brief(p)})), '</closest>',
    '<rejected_sample>', ...rejected.map(p => line(brief(p))), '</rejected_sample>'].join('\n');
  let reply: {model: string; value: unknown};
  try { reply = await client.json(BUCKET, CRITIC_SYSTEM, input, AUDIT_SCHEMA); }

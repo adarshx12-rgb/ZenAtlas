@@ -11,7 +11,7 @@ import { costOf, linesSince, logOffsets, search, sleep, type Tab } from './suite
 type Query = {id: string; field: string; tab: Tab; kind: 'surface'|'deep'; q: string};
 // kept/routed: set by the image judge comparison (scripts/image-judge-eval.ts), whose rows also hold the removed images.
 type Item = {url: string; title: string; detail: string|null; image: string|null; relevance: number|null; kept?: boolean; routed?: boolean};
-type Row = {id: string; field: string; tab: Tab; kind: string; q: string; ms: number; cost_usd: number|null; trace_id?:string; usage?:ReturnType<typeof costOf>; error?: string; providers?: unknown; items: Item[]; border?: number};
+type Row = {id: string; field: string; tab: Tab; kind: string; q: string; ms: number; cost_usd: number|null; trace_id?: string; usage?: ReturnType<typeof costOf>; error?: string; providers?: unknown; items: Item[]; border?: number};
 type Labels = Record<string, Record<string, 0|1|2>>;
 const DIR = process.env.FIELD_EVAL_DIR ?? 'output/field-eval', LABELS = 'evaluation/field-labels.json';
 const queries: Query[] = JSON.parse(readFileSync('evaluation/field-queries.json', 'utf8')).queries;
@@ -35,18 +35,18 @@ if (command === 'run') {
    const ms = Date.now() - started; await sleep(3000);
    const items: Item[] = (out.results ?? []).map((r: any) => ({url: r.url ?? r.page_url, title: r.title,
      detail: r.snippet ?? r.reason ?? r.creator ?? null, image: r.image_url ?? null, relevance: r.relevance ?? null}));
-   const usage=costOf(linesSince(start),out.trace_id);
-   const row: Row = {...query, ms, trace_id:out.trace_id,usage,cost_usd: usage.cost_usd, ...(out.error ? {error: out.error} : {}), providers: out.providers, items};
+   const usage = costOf(linesSince(start), out.trace_id);
+   const row: Row = {...query, ms, trace_id: out.trace_id, usage, cost_usd: usage.cost_usd, ...(out.error ? {error: out.error} : {}), providers: out.providers, items};
    const at = rows.findIndex(r => r.id === query.id);
    if (at >= 0) rows[at] = row; else rows.push(row);
    writeFileSync(file, JSON.stringify(rows, null, 1));
-   console.log(`${query.tab.padEnd(6)} ${(ms / 1000).toFixed(0).padStart(3)}s $${(row.cost_usd?.toFixed(4)??'unknown')} ${String(items.length).padStart(2)} results  ${query.id}${row.error ? `  ERROR ${row.error}` : ''}`);
+   console.log(`${query.tab.padEnd(6)} ${(ms / 1000).toFixed(0).padStart(3)}s $${row.cost_usd?.toFixed(4) ?? 'unknown'} ${String(items.length).padStart(2)} results  ${query.id}${row.error ? `  ERROR ${row.error}` : ''}`);
  }
  console.log('wrote', file);
 } else if (command === 'label') {
  // Every result any run showed for a query, once, with grades already given filled in.
  const given: Labels = existsSync(LABELS) ? JSON.parse(readFileSync(LABELS, 'utf8')) : {};
- for(const run of runs())console.log(`${run.file}: ${run.rows.length} attempted, ${run.rows.filter(r=>r.error).length} errors; paired scores below exclude failed or missing cases`);
+ for (const run of runs()) console.log(`${run.file}: ${run.rows.length} attempted, ${run.rows.filter(r => r.error).length} errors; paired scores below exclude failed or missing cases`);
  const shared = common();
  const pool = queries.filter(q => shared.has(q.id)).map(query => {
    const seen = new Map<string, Item>();
@@ -101,7 +101,7 @@ document.getElementById('save').onclick=()=>{const a=el('a',{href:URL.createObje
  // Per run: mean grade of the top 5 (2 good, 1 partly, 0 wrong; an empty slot counts 0), good results in the top 10,
  // queries with no good result, ungraded results, distinct sites, time and model cost.
  const score = (rows: Row[]) => {
-   let top5 = 0, good = 0, empty = 0, ungraded = 0, n = 0, ms = 0, cost = 0, missingCost=0, missing5=0, missing10=0; const sites = new Set<string>();
+   let top5 = 0, good = 0, empty = 0, ungraded = 0, n = 0, ms = 0, cost = 0, missingCost = 0, missing5 = 0, missing10 = 0; const sites = new Set<string>();
    // Judge comparison rows: what the judge kept against what was graded good, over the whole judged pool.
    let keptGood = 0, keptGraded = 0, poolGood = 0, border = 0; const routed: number[] = [], open: number[] = [];
    for (const row of rows) {
@@ -120,17 +120,19 @@ document.getElementById('save').onclick=()=>{const a=el('a',{href:URL.createObje
      const r = {...row, items: row.items.filter(i => i.kept !== false)};
      const g = (i: Item) => labels[r.id]?.[i.url];
      top5 += [0, 1, 2, 3, 4].reduce((s, k) => s + (r.items[k] ? g(r.items[k]) ?? 0 : 0), 0) / 5;
-     missing5+=r.items.slice(0,5).filter(i=>g(i)===undefined).length;
-     missing10+=r.items.slice(0,10).filter(i=>g(i)===undefined).length;
+     missing5 += r.items.slice(0, 5).filter(i => g(i) === undefined).length;
+     missing10 += r.items.slice(0, 10).filter(i => g(i) === undefined).length;
      const goods = r.items.slice(0, 10).filter(i => g(i) === 2).length;
      good += goods; if (!goods) empty++; ungraded += r.items.filter(i => g(i) === undefined).length;
      for (const i of r.items) sites.add(host(i.url));
-     n++; ms += r.ms; if(r.cost_usd===null)missingCost++;else cost += r.cost_usd;
+     n++; ms += r.ms; if (r.cost_usd === null) missingCost++; else cost += r.cost_usd;
    }
-   return {queries: n, top5: missing5||!n?null:+(top5 / n).toFixed(2), good_top10:missing10||!n?null:+(good / n).toFixed(1), no_good:missing10?null:empty,
-     ungraded, sites: sites.size, mean_s: +(ms / Math.max(n, 1) / 1000).toFixed(0), cost_usd: missingCost?null:+cost.toFixed(3), ...judged};
+   // A score with ungraded results in its slots, or a run with an unpriced call, is unknown rather than understated.
+   return {queries: n, top5: missing5 || !n ? null : +(top5 / n).toFixed(2), good_top10: missing10 || !n ? null : +(good / n).toFixed(1),
+     no_good: missing10 ? null : empty, ungraded, sites: sites.size, mean_s: +(ms / Math.max(n, 1) / 1000).toFixed(0),
+     cost_usd: missingCost ? null : +cost.toFixed(3), ...judged};
  };
- for(const run of runs())console.log(`${run.file}: ${run.rows.length} attempted, ${run.rows.filter(r=>r.error).length} errors; paired scores below exclude failed or missing cases`);
+ for (const run of runs()) console.log(`${run.file}: ${run.rows.length} attempted, ${run.rows.filter(r => r.error).length} errors; paired scores below exclude failed or missing cases`);
  const shared = common();
  console.log(`comparing the ${shared.size} queries every run answered`);
  for (const run of runs().map(r => ({...r, rows: r.rows.filter(x => shared.has(x.id))}))) {

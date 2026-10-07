@@ -571,7 +571,7 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
  for (const [id] of signals.previews) if (!results.some(r => r.id === id)) signals.previews.delete(id);
  const unmet = contract ? unmetRequirements(contract, results, signals.findings) : [];
  const byUrl = new Map(found.map(r => [r.canonical_url, r.id]));
- const closest = signals.closest.filter(r=>matchesFilters(r,input) && !kept.has(r.canonical_url));
+ const closest = signals.closest.filter(r => matchesFilters(r, input) && !kept.has(r.canonical_url));
  const traced = traceOf(input, plan, searches, rounds, [...statuses, ...signals.providers], leads, found, leadUrl, signals.judged, results, roundOf, closest);
  // Each candidate's link potential, to tune the evidence order from real searches.
  const base = {...traced, ...(names[0] ? {named: names[0]} : {}), ...(tidy.dropped.length ? {duplicates: tidy.dropped} : {}), pool: traced.pool.map(p => { const id = byUrl.get(p.url); return id && signals.links.has(id) ? {...p, link: signals.links.get(id)} : p; })};
@@ -646,14 +646,16 @@ export function traceOf(input: SearchInput, plan: SearchPlan, searches: PlannedS
  for (const l of leads) first.set(l.item.url, Math.min(first.get(l.item.url) ?? Infinity, l.round ?? 0));
  const verdicts = new Map(judged.map(j => [j.id, j]));
  const shown = new Map(results.map((r, i) => [r.canonical_url, {rank: i + 1, badges: r.badges ?? []}]));
- const leadsShown = new Map(closest.map((r,i) => [r.canonical_url,{rank:i+1,badges:r.badges ?? []}]));
- return {metrics_version:2,query: input.q, depth: input.depth === 'deep' && !input.source ? 'deep' : 'quick',
+ const leadsShown = new Map(closest.map((r, i) => [r.canonical_url, {rank: i + 1, badges: r.badges ?? []}]));
+ return {metrics_version: 2, query: input.q, depth: input.depth === 'deep' && !input.source ? 'deep' : 'quick',
    plan: {kind: plan.kind, criteria: plan.criteria, model: plan.model, ...(plan.target ? {target: plan.target} : {}), ...(plan.watch !== undefined ? {watch: plan.watch} : {})},
    searches: searches.map(s => ({query: s.query, target: s.target, round: roundOf.get(`${s.target}:${s.query.toLowerCase()}`) ?? 0})),
    rounds, providers,
-   pool: [...new Map([...found,...results,...closest].map(r=>[r.canonical_url,r])).values()].map(r => { const v = verdicts.get(r.id), place = shown.get(r.canonical_url), lead = leadsShown.get(r.canonical_url);
+   // Earlier results still on screen and closest matches belong in the pool even when this run did not find them.
+   pool: [...new Map([...found, ...results, ...closest].map(r => [r.canonical_url, r])).values()].map(r => {
+     const v = verdicts.get(r.id), place = shown.get(r.canonical_url), lead = leadsShown.get(r.canonical_url);
      return {url: r.canonical_url, title: r.title, site: new URL(r.canonical_url).hostname.replace(/^www\./, ''),
        round: first.get(leadUrl.get(r.id) ?? r.canonical_url) ?? 0, relevance: v?.relevance ?? null, reason: v?.reason ?? null, basis: v?.basis ?? null,
-       shown: !!place, rank: place?.rank ?? null, placement: place?'main':lead?'closest':'not_shown', closest_rank:place?null:lead?.rank ?? null,
+       shown: !!place, rank: place?.rank ?? null, placement: place ? 'main' : lead ? 'closest' : 'not_shown', closest_rank: place ? null : lead?.rank ?? null,
        badges: place?.badges ?? lead?.badges ?? []}; })};
 }
