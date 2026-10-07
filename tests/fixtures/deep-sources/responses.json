@@ -1,0 +1,21 @@
+{
+ "europe_pmc": {"resultList":{"result":[{"id":"12345678","source":"MED","pmcid":"PMC1234567","title":"Research article","abstractText":"Article abstract","firstPublicationDate":"2024-01-01"}]}},
+ "clinical_trials": {"studies":[{"protocolSection":{"identificationModule":{"nctId":"NCT01234567","briefTitle":"Clinical trial"},"descriptionModule":{"briefSummary":"Trial summary"},"statusModule":{"studyFirstSubmitDate":"2024-01-01"}}}]},
+ "openalex": {"results":[{"id":"https://openalex.org/W1234567","display_name":"Research paper","best_oa_location":{"pdf_url":"https://repository.example/paper.pdf"},"abstract_inverted_index":{"A":[0],"research":[1],"abstract":[2]},"publication_date":"2024-01-01"}]},
+ "doaj": {"results":[{"id":"article-1","bibjson":{"title":"Open access article","year":"2024","abstract":"Article summary","link":[{"type":"fulltext","url":"https://journal.example/article/1"}]}}]},
+ "courtlistener": {"count":2343,"next":null,"previous":null,"results":[{"absolute_url":"/opinion/6613686/foo-v-foo/","caseName":"Foo v. Foo","dateFiled":"2003-01-10","opinions":[{"snippet":"Affirmed in part, reversed in part, vacated and remanded"}]}]},
+ "sec_edgar": {"hits":{"total":{"value":1},"hits":[{"_id":"0001193125-15-118890:filing.htm","_source":{"ciks":["0001122304"],"adsh":"0001193125-15-118890","display_names":["Example Company"],"form":"10-K","file_date":"2015-04-01","root_forms":["10-K"]}}]}},
+ "govinfo": {"results":[{"packageId":"CREC-2018-10-04","title":"Congressional Record","collectionCode":"CREC","dateIssued":"2018-10-04"}]},
+ "federal_register": {"results":[{"title":"Agency notice","pdf_url":"https://www.govinfo.gov/content/pkg/FR-2024-01-02/pdf/2023-00001.pdf","html_url":"https://www.federalregister.gov/documents/2024/01/02/2023-00001/notice","abstract":"Notice summary","publication_date":"2024-01-02"}]},
+ "ckan": {"success":true,"result":{"count":1,"results":[{"id":"dataset-1","name":"public-data","title":"Public dataset","notes":"Dataset description","metadata_modified":"2024-01-01","resources":[{"url":"https://data.example/observations.csv","format":"CSV"}]}]}},
+ "eu_data": {"head":{"vars":["dataset","title","description"]},"results":{"bindings":[{"dataset":{"type":"uri","value":"http://data.europa.eu/88u/dataset/public-data"},"title":{"type":"literal","value":"European dataset"},"description":{"type":"literal","value":"Dataset description"}}]}},
+ "loc": {"results":[{"id":"https://www.loc.gov/item/2024000001/","url":"https://www.loc.gov/item/2024000001/","title":"Library item","description":["Collection description"],"date":"2024-01-01"}]},
+ "chronicling_america": {"results":[{"id":"https://www.loc.gov/resource/sn83030214/1918-11-11/ed-1/","url":"https://www.loc.gov/resource/sn83030214/1918-11-11/ed-1/","title":"Newspaper issue","description":["Historic newspaper"],"date":"1918-11-11"}]},
+ "europeana": {"success":true,"items":[{"id":"/123/item1","title":["Archive item"],"dcDescription":["Archive description"],"dataProvider":["Museum"],"year":["1920"]}]},
+ "open_library": {"numFound":1,"docs":[{"key":"/works/OL45804W","title":"Fantastic Mr Fox","author_name":["Roald Dahl"],"first_publish_year":1970}]},
+ "huggingface": [{"id":"google-bert/bert-base-uncased","tags":["transformers","fill-mask"],"lastModified":"2024-01-01"}],
+ "huggingface_datasets": [{"id":"stanfordnlp/imdb","tags":["task_categories:text-classification"],"lastModified":"2024-01-01"}],
+ "stack_exchange": {"items":[{"link":"https://stackoverflow.com/questions/1/example","title":"Example programming question","body":"Question text","creation_date":1704067200}],"has_more":false,"quota_remaining":299},
+ "gdelt": {"articles":[{"url":"https://news.example/story","title":"News story","domain":"news.example","seendate":"20240101T120000Z"}]},
+ "wayback": {"archived_snapshots":{"closest":{"available":true,"status":"200","url":"http://web.archive.org/web/20240101120000/https://source.example/report.pdf","timestamp":"20240101120000"}}}
+}

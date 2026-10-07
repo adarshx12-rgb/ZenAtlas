@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+ <ShortName>Public archive</ShortName>
+ <Url type="application/json" template="https://archive.example/api?q={searchTerms}"/>
+ <Url type="text/html" method="GET" template="https://archive.example/search?q={searchTerms}&amp;count={count?}&amp;start={startIndex?}"/>
+</OpenSearchDescription>
