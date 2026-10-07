@@ -5,6 +5,8 @@ import { runningIdentity, type RuntimeIdentity } from './runtime.js';
 
 const traces = new AsyncLocalStorage<string>();
 export const traceFields = (): {trace_id?: string; runtime?: RuntimeIdentity} => traces.getStore() ? {trace_id: traces.getStore(), ...(runningIdentity()?{runtime:runningIdentity()}:{})} : {};
+// For API responses: the trace ID only. The code/settings fingerprint stays in logs, traces and heartbeats.
+export const publicTraceFields = (): {trace_id?: string} => traces.getStore() ? {trace_id: traces.getStore()} : {};
 export function withSearchTrace<T>(work: () => Promise<T>): Promise<T> {
  return traces.getStore() ? work() : traces.run(randomUUID(), work);
 }

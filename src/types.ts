@@ -79,7 +79,7 @@ export interface ClosestMatchesResponse {
  search_id: string; status: 'pending'|'ready'|'unavailable'|'cancelled'; results: Result[]; message: string;
 }
 export interface SearchResponse {
- trace_id?: string; runtime?: {code_hash:string;settings_hash:string;started_at:string};
+ trace_id?: string;
  revision?: number;
  verification?: {status:'running'|'complete'|'partial'; deadline:string; items:{content_id:string; status:string}[]};
  query: string; search_id: string; status: 'complete'|'discovering'|'partial'|'cancelled';

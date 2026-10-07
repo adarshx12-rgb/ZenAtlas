@@ -51,7 +51,7 @@ const sourceListQuery = z.object({
 const sourceOrder = {newest:'s.created_at DESC,s.domain',seen:'s.discovery_appearances DESC,s.discovery_last_seen_at DESC NULLS LAST,s.domain',domain:'s.domain'};
 
 export async function createApp(db:DB,config:Config) {
- const runtime=initializeRuntime(config), migrations=requiredMigrations(process.cwd(),config.SEMANTIC_ENABLED);
+ initializeRuntime(config); const migrations=requiredMigrations(process.cwd(),config.SEMANTIC_ENABLED);
  const app=Fastify({logger:false,bodyLimit:16384,requestTimeout:15000,trustProxy:false});
  await app.register(cookie,{secret:config.SESSION_SECRET});
  const service=new SearchService(db,config);
@@ -105,7 +105,7 @@ export async function createApp(db:DB,config:Config) {
  app.get('/health/ready',async(_req,reply)=>{
    const ready=await databaseReadiness(db,migrations);
    reply.header('Cache-Control','no-store');
-   return reply.code(ready.status==='ready'?200:503).send({status:ready.status,code:ready.code,runtime});
+   return reply.code(ready.status==='ready'?200:503).send({status:ready.status,code:ready.code});
  });
  app.get('/api/session',async()=>({status:'ready'}));
  app.get('/api/search',async req=>service.start(req.query,owner(req)));

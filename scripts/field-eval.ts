@@ -11,7 +11,7 @@ import { costOf, linesSince, logOffsets, search, sleep, type Tab } from './suite
 type Query = {id: string; field: string; tab: Tab; kind: 'surface'|'deep'; q: string};
 // kept/routed: set by the image judge comparison (scripts/image-judge-eval.ts), whose rows also hold the removed images.
 type Item = {url: string; title: string; detail: string|null; image: string|null; relevance: number|null; kept?: boolean; routed?: boolean};
-type Row = {id: string; field: string; tab: Tab; kind: string; q: string; ms: number; cost_usd: number|null; trace_id?:string; runtime?:unknown; usage?:ReturnType<typeof costOf>; error?: string; providers?: unknown; items: Item[]; border?: number};
+type Row = {id: string; field: string; tab: Tab; kind: string; q: string; ms: number; cost_usd: number|null; trace_id?:string; usage?:ReturnType<typeof costOf>; error?: string; providers?: unknown; items: Item[]; border?: number};
 type Labels = Record<string, Record<string, 0|1|2>>;
 const DIR = process.env.FIELD_EVAL_DIR ?? 'output/field-eval', LABELS = 'evaluation/field-labels.json';
 const queries: Query[] = JSON.parse(readFileSync('evaluation/field-queries.json', 'utf8')).queries;
@@ -36,7 +36,7 @@ if (command === 'run') {
    const items: Item[] = (out.results ?? []).map((r: any) => ({url: r.url ?? r.page_url, title: r.title,
      detail: r.snippet ?? r.reason ?? r.creator ?? null, image: r.image_url ?? null, relevance: r.relevance ?? null}));
    const usage=costOf(linesSince(start),out.trace_id);
-   const row: Row = {...query, ms, trace_id:out.trace_id,runtime:out.runtime,usage,cost_usd: usage.cost_usd, ...(out.error ? {error: out.error} : {}), providers: out.providers, items};
+   const row: Row = {...query, ms, trace_id:out.trace_id,usage,cost_usd: usage.cost_usd, ...(out.error ? {error: out.error} : {}), providers: out.providers, items};
    const at = rows.findIndex(r => r.id === query.id);
    if (at >= 0) rows[at] = row; else rows.push(row);
    writeFileSync(file, JSON.stringify(rows, null, 1));

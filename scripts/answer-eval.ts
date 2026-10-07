@@ -14,7 +14,7 @@ type Passage = {id: string; text: string};
 type Source = {id: string; url: string; title: string; published: string|null; passages: Passage[]};
 type Answer = {status: string; message: string; claims: {id: string; text: string; evidence: string[]}[]; sources: Source[]; limited: boolean};
 type Row = {id: string; kind: string; q: string; ms: number; answer_ms: number|null; cost_usd: number|null; answer_cost_usd: number|null;
- trace_id?:string; runtime?:unknown; usage?:ReturnType<typeof costOf>; completed?:boolean;
+ trace_id?:string; usage?:ReturnType<typeof costOf>; completed?:boolean;
  proposed: number|null; error?: string; answer: Answer|null; results: {title: string; url: string}[]};
 // labels[query id]: claims by claim text (2 right and backed by its passages, 1 right but weakly backed or off the point, 0 wrong),
 // and the answer as a whole (useful: 2 helps, 1 somewhat, 0 no help or misleading).
@@ -45,10 +45,10 @@ if (command === 'run') {
    if (rows.some(r => r.id === query.id && !r.error) || (only && !only.includes(query.id))) continue;
    const start = logOffsets(), started = Date.now();
    let answer: Answer|null = null, results: Row['results'] = [], answerMs: number|null = null, error: string|undefined;
-   let traceId:string|undefined, runtime:unknown, completed=false;
+   let traceId:string|undefined, completed=false;
    try {
      const body = await get(`/api/web?${new URLSearchParams({q: query.q, kind: 'web', tier})}`);
-     traceId=body.trace_id;runtime=body.runtime;completed=!body.review;
+     traceId=body.trace_id;completed=!body.review;
      results = (body.results ?? []).slice(0, 5).map((r: any) => ({title: r.title, url: r.url}));
      // The review finishes first; its answer is read until it leaves the pending states (the site polls the same way).
      for (let i = 0; body.review && i < 150; i++) {
@@ -66,7 +66,7 @@ if (command === 'run') {
    const lines = linesSince(start), cost = costOf(lines,traceId);
    const cited = traceId?lines.find(l => l.event === 'cited_answer'&&l.trace_id===traceId):undefined;
    const answerCost=costOf(lines.filter(l=>['answer_writer','answer_verifier'].includes(l.bucket)),traceId);
-   const row: Row = {...query, ms, trace_id:traceId,runtime,completed,usage:cost,answer_ms: answerMs, cost_usd: cost.cost_usd,
+   const row: Row = {...query, ms, trace_id:traceId,completed,usage:cost,answer_ms: answerMs, cost_usd: cost.cost_usd,
      answer_cost_usd: answerCost.cost_usd,
      proposed: cited?.proposed ?? null, ...(error ? {error} : {}), answer, results};
    const at = rows.findIndex(r => r.id === query.id);

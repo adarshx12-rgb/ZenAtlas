@@ -7,7 +7,7 @@ reset quotas, apply migrations, or restart services.
 
 `/health/live` answers whether the API process is alive. `/health/ready` checks that it can read the database and that every
 required migration is applied (including optional vector migrations when semantic search is enabled). It returns safe failure
-codes and the startup code/settings fingerprints. Worker, provider, privileges, budget and queue checks remain in the operational
+codes only; the code/settings fingerprints are never in API responses (see heartbeats and `npm run check:runtime`). Worker, provider, privileges, budget and queue checks remain in the operational
 preflight/admin watchdog report; API readiness alone does not promise that all search modalities work.
 
 API, worker and watchdog heartbeats carry a snapshot of their startup code/settings version. New search traces and cost events

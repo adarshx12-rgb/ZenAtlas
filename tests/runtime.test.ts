@@ -15,7 +15,7 @@ test('readiness checks the complete migration set, including enabled vectors', a
    await db.query("DELETE FROM schema_migrations WHERE name='018_field_sources_grant.sql'");
    const missing=await app.inject('/health/ready');
    assert.equal(missing.statusCode,503); assert.equal(missing.json().code,'migrations_pending');
-   assert.match(missing.json().runtime.code_hash,/^[a-f0-9]{64}$/);
+   assert.equal(missing.json().runtime,undefined,'the code/settings fingerprint is not public');
    assert.ok(!missing.body.includes(testConfig.SESSION_SECRET));
  } finally {await app.close();await db.close();}
 });

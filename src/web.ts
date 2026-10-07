@@ -18,7 +18,7 @@ import { findDocuments, type SourceFindings } from './doc-sources.js';
 import { viewerOf } from './doc-viewers.js';
 import { refreshBlocklists, unsafeLink } from './safety.js';
 import { startWebReview, WEB_POOL } from './web-review.js';
-import { withSearchTrace, traceFields } from './search-trace.js';
+import { withSearchTrace, traceFields, publicTraceFields } from './search-trace.js';
 import { walledSite, walledToken } from './walled.js';
 import type { PeekResponse } from './http.js';
 import { wantsAnswer } from './answer.js';
@@ -115,7 +115,7 @@ type Deps = {transport: typeof fetchJSON; budget: (db: DB, key: string, limit: n
  rewrite?: (query: string, tab: 'web'|'docs') => Promise<QueryRewrite>;
  route?: (query: string, tab: 'web'|'docs') => Promise<FieldRoute>};
 
-export const searchWeb = (...args: Parameters<typeof searchWebImpl>) => withSearchTrace(async () => Object.assign(await searchWebImpl(...args), traceFields()));
+export const searchWeb = (...args: Parameters<typeof searchWebImpl>) => withSearchTrace(async () => Object.assign(await searchWebImpl(...args), publicTraceFields()));
 async function searchWebImpl(db: DB, config: Config, input: WebSearchInput,
  deps: Deps = {transport: fetchJSON, budget: takeBudget}, owner?: string): Promise<WebSearchResponse> {
  const docs = input.kind === 'docs';

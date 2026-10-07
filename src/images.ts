@@ -13,7 +13,7 @@ import { planImages, rankSearches, type ImagePlan } from './image-plan.js';
 import { aiGenerated, excludesAI, openverseQuery, openverseResults, wantsLicense, type ImageLicense } from './image-signals.js';
 import { startImageJob } from './image-review.js';
 import { bySource, interleaveImages, mergeShares, onSite, rankSearxng, siteWord } from './image-sources.js';
-import { withSearchTrace, traceFields } from './search-trace.js';
+import { withSearchTrace, traceFields, publicTraceFields } from './search-trace.js';
 import { routeFields, type FieldRoute } from './field-routing.js';
 
 const engineList = (engines: string) => [...new Set(engines.split(',').map(e => e.trim()).filter(Boolean))];
@@ -221,7 +221,7 @@ export async function collectImages(db: DB, config: Config, input: ImageSearchIn
 // redesigns the request, collects a pool from every search, has Jev screen it, collapses duplicates and judges the best
 // (src/image-review.ts). /api/images/review reports its stage until the judged page is ready. Without a judge, the
 // collected images are returned as found.
-export const searchImages = (...args: Parameters<typeof searchImagesImpl>) => withSearchTrace(async () => Object.assign(await searchImagesImpl(...args), traceFields()));
+export const searchImages = (...args: Parameters<typeof searchImagesImpl>) => withSearchTrace(async () => Object.assign(await searchImagesImpl(...args), publicTraceFields()));
 async function searchImagesImpl(db: DB, config: Config, input: ImageSearchInput, deps: ImageSearchDeps = {}): Promise<ImageSearchResponse> {
  if (deps.review !== false) {
    const start = deps.review ?? ((query: string, collect: () => Promise<CollectedImages>) => startImageJob(db, config, query, input.limit, collect));
