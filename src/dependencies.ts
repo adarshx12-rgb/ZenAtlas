@@ -14,6 +14,7 @@ import { compareVersions, newer, parseVersion, satisfies } from './versions.js';
 import { plannerModels } from './planner.js';
 import { judgeModels } from './judge.js';
 import { TIERS } from './tiers.js';
+import { requiredMigrations } from './runtime.js';
 
 // Everything the search engine needs from outside its own code, each with a check the watchdog runs on a schedule.
 // A check reports what it observed and, when something is wrong, what it breaks and how to fix it.
@@ -126,11 +127,11 @@ export async function codeChanges(root: string): Promise<{what: string; at: Date
 }
 
 const database: Check = {name: 'database', label: 'PostgreSQL', category: 'services', every: () => 5, confirm: 1,
- async run({db, root}) {
+ async run({db, root, config}) {
    let applied: Set<string>;
    try { applied = new Set((await db.query<{name: string}>('SELECT name FROM schema_migrations')).rows.map(r => r.name)); }
    catch (error) { return failing('unreachable', `The database is not answering (${reason(error)}), so search is down. Check that PostgreSQL is running (docker compose up -d db).`); }
-   const files = (await readdir(join(root, 'migrations'))).filter(f => f.endsWith('.sql')).sort();
+   const files = requiredMigrations(root, config.SEMANTIC_ENABLED);
    const pending = files.filter(f => !applied.has(f));
    if (pending.length) return warning('migrations_pending', `${plural(pending.length, 'database migration')} not applied (${list(pending)}), so features that need ${pending.length === 1 ? 'it' : 'them'} fail. Run npm run migrate, then npm run db:app-user.`, {pending});
    // has_table_privilege is true when any one listed privilege is held, so each is asked separately.
@@ -212,6 +213,15 @@ const FIXED_BUDGETS: {bucket: string; label: string; setting: keyof Config; esse
  {bucket: 'discovery:brave', label: 'Brave requests', setting: 'BRAVE_DAILY_BUDGET', essential: true},
  {bucket: 'planner_calls', label: 'AI planning calls', setting: 'JUDGE_DAILY_BUDGET'},
  {bucket: 'judge_calls', label: 'AI judging calls', setting: 'JUDGE_DAILY_BUDGET'},
+ {bucket: 'answer_writer', label: 'answer writing calls', setting: 'ANSWER_DAILY_BUDGET'},
+ {bucket: 'answer_verifier', label: 'answer verification calls', setting: 'ANSWER_DAILY_BUDGET'},
+ {bucket: 'cascade_strong_calls', label: 'strong review calls', setting: 'CASCADE_STRONG_DAILY_BUDGET'},
+ {bucket: 'jev_screen_calls', label: 'candidate screening calls', setting: 'JEV_SCREEN_DAILY_BUDGET'},
+ {bucket: 'jev_judge_calls', label: 'evidence screening calls', setting: 'JEV_JUDGE_DAILY_BUDGET'},
+ {bucket: 'jev_exploration_calls', label: 'source exploration calls', setting: 'JEV_EXPLORATION_DAILY_BUDGET'},
+ {bucket: 'jev_doc_hunt_calls', label: 'document inspection calls', setting: 'JEV_DOC_HUNT_DAILY_BUDGET'},
+ {bucket: 'youtube_caption_jobs', label: 'caption jobs', setting: 'YOUTUBE_CAPTIONS_DAILY_BUDGET'},
+ {bucket: 'supadata_requests', label: 'caption provider requests', setting: 'SUPADATA_DAILY_BUDGET'},
  {bucket: 'youtube_units', label: 'YouTube quota units', setting: 'YOUTUBE_DAILY_UNITS'},
  {bucket: 'anilist_calls', label: 'AniList requests', setting: 'ANILIST_DAILY_BUDGET'},
  {bucket: 'reddit_signals', label: 'Reddit lookups', setting: 'DISCOVERY_DAILY_BUDGET'},
@@ -244,7 +254,7 @@ const runningCode: Check = {name: 'running_code', label: 'Running code', categor
  async run({db, config, root}) {
    // The watchdog restarts itself when its own code changes (see watchdog-main.ts), so only the other services are listed.
    const services = (await db.query<{service: 'api'|'worker'; started_at: Date}>(`SELECT service,started_at FROM service_heartbeats
-     WHERE service<>'watchdog' AND beat_at>now()-($1*interval '1 second') ORDER BY service`, [config.WATCHDOG_STALE_SECONDS])).rows;
+     WHERE service IN ('api','worker') AND beat_at>now()-($1*interval '1 second') ORDER BY service`, [config.WATCHDOG_STALE_SECONDS])).rows;
    const changes = await codeChanges(root);
    const stale = services.flatMap(s => {
      const later = changes.filter(c => c.at > new Date(s.started_at)).map(c => c.what);
@@ -440,7 +450,8 @@ const gemini: Check = {name: 'gemini', label: 'Gemini models', category: 'ai', e
 // than fails.
 const TIER_SETTINGS = [['JUDGE_MODELS', 'SSJ1_JUDGE_MODELS'], ['CASCADE_STRONG_MODELS', 'SSJ1_CASCADE_STRONG_MODELS'], ['COUNCIL_CHECKER_MODELS', 'SSJ1_COUNCIL_CHECKER_MODELS'],
  ['COUNCIL_CHAIR_MODELS', 'SSJ1_COUNCIL_CHAIR_MODELS'], ['CRITIC_MODEL', 'SSJ1_CRITIC_MODEL'], ['CRITIC_REVIEW_MODEL', 'SSJ1_CRITIC_REVIEW_MODEL'],
- ['MODE_ROUTER_MODEL', 'SSJ1_MODE_ROUTER_MODEL'], ['QUERY_REWRITE_MODEL', 'SSJ1_QUERY_REWRITE_MODEL']] as const;
+ ['MODE_ROUTER_MODEL', 'SSJ1_MODE_ROUTER_MODEL'], ['QUERY_REWRITE_MODEL', 'SSJ1_QUERY_REWRITE_MODEL'],
+ ['ANSWER_WRITER_MODELS','SSJ1_ANSWER_WRITER_MODELS'], ['ANSWER_VERIFIER_MODELS','SSJ1_ANSWER_VERIFIER_MODELS']] as const;
 const tierModels: Check = {name: 'tier_models', label: 'Model tiers (SSJ3 / SSJ1)', category: 'ai', every: () => 60, confirm: 1,
  async run({config, transport}) {
    if (!config.OPENROUTER_API_KEY) return disabled('OPENROUTER_API_KEY is empty; both tiers run without OpenRouter models.');

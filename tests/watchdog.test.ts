@@ -406,7 +406,7 @@ test('tier models: a model OpenRouter no longer offers is named, with the tier a
  const check=CHECKS.find(c=>c.name==='tier_models')!;
  assert.ok(check,'the tier_models check exists');
  const offered=['google/gemini-2.5-flash-lite','openai/gpt-5.6-luna','anthropic/claude-haiku-4.5','openai/gpt-4.1-nano',
-   'google/gemini-3.5-flash-lite','openai/gpt-5.6-terra','openai/gpt-6-luna','anthropic/claude-sonnet-5'];
+   'google/gemini-3.5-flash-lite','openai/gpt-5.6-terra','openai/gpt-6-luna','anthropic/claude-sonnet-5','mistralai/mistral-medium-3.1'];
  const config={...testConfig,OPENROUTER_API_KEY:'k',JUDGE_MODELS:'google/gemini-3.5-flash-lite',COUNCIL_CHECKER_MODELS:'openai/gpt-5.6-terra',
    COUNCIL_CHAIR_MODELS:'anthropic/claude-sonnet-5',MODE_ROUTER_MODEL:'google/gemini-3.5-flash-lite',QUERY_REWRITE_MODEL:'google/gemini-3.5-flash-lite'};
  const env=(ids:string[]):CheckEnv=>({db:{} as any,config,root:'.',launchBrowser:async()=>'',extractor:()=>({}) as any,
@@ -415,5 +415,14 @@ test('tier models: a model OpenRouter no longer offers is named, with the tier a
  const gone=await check.run(env(offered.filter(m=>m!=='openai/gpt-5.6-luna')));
  assert.equal(gone.status,'warning');
  assert.match(gone.summary,/SSJ1.*openai\/gpt-5\.6-luna.*SSJ1_COUNCIL_CHECKER_MODELS/);
+ assert.match((await check.run(env(offered.filter(m=>m!=='mistralai/mistral-medium-3.1')))).summary,/ANSWER_VERIFIER_MODELS/);
  assert.equal((await check.run({...env(offered),config:{...config,OPENROUTER_API_KEY:''}})).status,'disabled');
+});
+
+test('answer verification and caption provider budgets are visible before they prevent useful answers',async()=>{
+ const db=await database();try {
+   await db.query("INSERT INTO budgets(bucket,window_start,used) VALUES('answer_verifier',date_trunc('day',now()),3),('supadata_requests',date_trunc('day',now()),4)");
+   const observed=await check('budgets').run(env(db,{config:{...testConfig,ANSWER_DAILY_BUDGET:3,SUPADATA_DAILY_BUDGET:4}}));
+   assert.equal(observed.status,'warning');assert.match(observed.summary,/answer verification/);assert.match(observed.summary,/caption provider/);
+ }finally{await db.close();}
 });

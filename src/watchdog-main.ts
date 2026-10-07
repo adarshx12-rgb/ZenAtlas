@@ -3,6 +3,7 @@ import { readConfig } from './config.js';
 import { CHECKS, codeChanges, defaultEnv, list } from './dependencies.js';
 import { Watchdog, probe, prune } from './watchdog.js';
 import { keepBeating } from './health.js';
+import { initializeRuntime } from './runtime.js';
 
 // npm run watchdog               keeps checking every dependency (run it supervised, like the worker)
 // npm run watchdog -- --once     checks everything now, prints the results and exits 1 if anything is failing
@@ -15,6 +16,7 @@ if (unknown.length || args.some(a => a.startsWith('--') && a !== '--once')) {
  process.exit(2);
 }
 const config = readConfig(); const db = connect(config.DATABASE_URL);
+initializeRuntime(config);
 const env = defaultEnv(db, config);
 const TICK_MS = 15_000;
 

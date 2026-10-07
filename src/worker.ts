@@ -45,6 +45,7 @@ export async function workOnce(db:DB,config:Config,adapters?:SourceAdapter[],pro
      await db.transaction(async tx=>{
        if(!(await tx.query("SELECT 1 FROM jobs WHERE id=$1 AND lease_token=$2 AND status='running' FOR UPDATE",[job.id,job.lease_token])).rows.length)return;
        await complete(tx,job,{results:outcome.results,closest:outcome.closest,providers:outcome.providers,dropped:outcome.dropped,searches:outcome.searches,revision:1,
+         trace_id:outcome.trace.trace_id,runtime:outcome.trace.runtime,
          ...(outcome.sceneReview?{_scene_review:outcome.sceneReview,verification:sceneProgress(outcome.sceneReview)}:{}),
          ...(outcome.contract?{contract:outcome.contract,unmet:outcome.unmet??[]}:{})});
        if(outcome.sceneReview)await enqueue(tx,'scene_review',`scene-review:${job.id}:${job.lease_token}`,{discovery_job_id:job.id,run_id:job.lease_token});

@@ -25,7 +25,8 @@ test('search metrics show late finds, near-duplicate uploads, evidence strength 
    entry('Off topic',{relevance:3,shown:false}),entry('Contradicted',{relevance:1,shown:false}),entry('Unchecked',{relevance:null,shown:false}),
  ],2));
  assert.deepEqual({shown:m.shown,verified:m.verified,possible:m.possible,rejected:m.rejected,near_misses:m.near_misses,unjudged:m.unjudged},
-   {shown:4,verified:3,possible:1,rejected:2,near_misses:1,unjudged:1});
+   {shown:4,verified:0,possible:1,rejected:2,near_misses:1,unjudged:1});
+ assert.equal(m.high_scoring,3,'a model score alone does not establish verification');
  assert.equal(m.last_round_share,0.5);
  assert.equal(m.duplicate_groups.length,1);assert.equal(m.duplicate_groups[0].length,2);
  assert.deepEqual(m.basis,{metadata:2,viewer_claims:1,direct_evidence:1});

@@ -1,9 +1,10 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { randomUUID } from 'node:crypto';
 import type { Config } from './config.js';
+import { runningIdentity, type RuntimeIdentity } from './runtime.js';
 
 const traces = new AsyncLocalStorage<string>();
-export const traceFields = () => traces.getStore() ? {trace_id: traces.getStore()} : {};
+export const traceFields = (): {trace_id?: string; runtime?: RuntimeIdentity} => traces.getStore() ? {trace_id: traces.getStore(), ...(runningIdentity()?{runtime:runningIdentity()}:{})} : {};
 export function withSearchTrace<T>(work: () => Promise<T>): Promise<T> {
  return traces.getStore() ? work() : traces.run(randomUUID(), work);
 }

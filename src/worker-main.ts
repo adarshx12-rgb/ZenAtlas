@@ -4,7 +4,9 @@ import { schedule, workOnce } from './worker.js';
 import { keepBeating } from './health.js';
 import { critiqueOnce } from './learning.js';
 import {reviewScenesOnce} from './scene-verification.js';
+import { initializeRuntime } from './runtime.js';
 const config=readConfig(); const db=connect(config.DATABASE_URL);
+initializeRuntime(config);
 let stopping=false;
 process.on('SIGINT',()=>{stopping=true;}); process.on('SIGTERM',()=>{stopping=true;});
 // The heartbeat runs on its own timer, so a long discovery job does not look like a stopped worker.

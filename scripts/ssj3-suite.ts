@@ -26,9 +26,9 @@ for (const {tab, q, repeat} of QUERIES) for (let run = 1; run <= (repeat ?? 1); 
  try { out = await search(tab, q, TIER); }
  catch (e) { out = {error: String(e)}; }
  const ms = Date.now() - started; await sleep(3000);
- const lines = linesSince(start), {cost_usd: cost, by_role: byRole} = costOf(lines);
- rows.push({tab, q, run, tier: TIER, ms, cost_usd: cost, by_role: byRole, cascade: lines.filter(l => l.event === 'cascade'), council: lines.filter(l => l.event === 'council'), ...out});
- console.log(`${tab.padEnd(6)} #${run} ${(ms / 1000).toFixed(0)}s $${cost.toFixed(4)} ${out.results?.length ?? 0} results  ${q.slice(0, 60)}`);
+ const lines = linesSince(start), {cost_usd: cost, by_role: byRole} = costOf(lines,out.trace_id);
+ rows.push({tab, q, run, tier: TIER, ms, cost_usd: cost, by_role: byRole, cascade: lines.filter(l => l.event === 'cascade' && !!out.trace_id && l.trace_id===out.trace_id), council: lines.filter(l => l.event === 'council' && !!out.trace_id && l.trace_id===out.trace_id), ...out});
+ console.log(`${tab.padEnd(6)} #${run} ${(ms / 1000).toFixed(0)}s $${(cost?.toFixed(4)??'unknown')} ${out.results?.length ?? 0} results  ${q.slice(0, 60)}`);
 }
 const file = `output/ssj3-suite-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
 writeFileSync(file, JSON.stringify(rows, null, 1)); console.log('wrote', file);

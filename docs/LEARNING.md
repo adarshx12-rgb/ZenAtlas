@@ -8,13 +8,20 @@ The engine keeps evidence about how well each search went, so later changes can 
 
 | Metric | Meaning |
 |---|---|
-| `verified`, `possible`, `closest` | Shown results that passed quote verification; `possible` and `closest` track historical fill-ins and are zero for new searches under strict filtering |
+| `verified`, `possible`, `closest` | Explicit verified decisions in the main list, main-list possible badges, and separately available closest matches |
 | `rejected`, `near_misses` | Judged candidates not shown; those that scored 3–4 |
 | `last_round_share` | Share of shown results first found in the final follow-up round. High means the search stopped too early; `null` when no follow-up round ran |
 | `duplicate_groups` | Shown results that look like one series (for example "Part 17", "Part 18") |
 | `basis` | Shown results judged on metadata, viewer claims or direct evidence |
 
-The optional Closest matches tab does not change these main-ranking metrics. Its candidates remain marked as not shown in the discovery trace; opening or voting on an optional result records ordinary result feedback with the same search and trace.
+Version 2 traces record `placement` (`main`, `closest`, `not_shown`) and a separate `closest_rank`.
+`shown`/`rank` describe the main list only. Closest matches count as available leads and are excluded from rejected counts;
+the critic receives them in their own list. Older traces have no placement data, so their closest list cannot be reconstructed.
+`verified` counts explicit verified decisions; `high_scoring` counts scores of at least six. Neither is independently measured accuracy.
+Requirement satisfaction counts supported per-result obligations plus covered set items, divided by all expected obligations.
+Missing, provisional and waived support does not earn credit. An unchecked exclusion can allow admission while still remaining unknown in this metric.
+Code/settings fingerprints identify the process that produced each new trace. Discovery traces describe the initial discovery ranking;
+later scene-verification revisions must be evaluated from the final API response separately.
 
 **Searcher feedback** (`result_feedback`). Every result card has *Useful* / *Not useful*; after *Not useful*, optional reasons (off-topic, low quality, wrong format, duplicate). Opening a result is recorded, and *Missing something?* under the results takes a free-text note. Unlike `POST /api/feedback`, this works for every result, retained in the catalogue or not. Votes on retained records still feed the bounded personal ranking.
 

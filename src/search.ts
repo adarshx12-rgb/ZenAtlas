@@ -249,6 +249,7 @@ export class SearchService {
      discovered:found.flatMap(r=>shown.get(r.id)??[]),catalogue_total:all.length-found.length,
      ranked:all.flatMap(r=>shown.get(r.id)??[]),
      discovery_job_id:snapshot.job_id,providers,ranking_version:snapshot.ranking_version,revision:snapshot.applied_revision??0,
+     ...(job?.result?.trace_id?{trace_id:job.result.trace_id,runtime:job.result.runtime}:{}),
      ...(!snapshot.cancelled&&job?.result?.verification?{verification:{...job.result.verification,
        ...(job.result.verification.status==='running'&&Date.now()>Date.parse(job.result.verification.deadline)+15000?{status:'partial',items:job.result.verification.items.map((i:any)=>
          ['queued','analysing'].includes(i.status)?{...i,status:'timed_out'}:i)}:{})}}:{}),

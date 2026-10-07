@@ -7,12 +7,14 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, statSyn
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { costOf, linesSince, logOffsets, sleep } from './suite-client.js';
+import { scoreAnswers } from '../src/evaluation.js';
 
 type Query = {id: string; kind: string; q: string};
 type Passage = {id: string; text: string};
 type Source = {id: string; url: string; title: string; published: string|null; passages: Passage[]};
 type Answer = {status: string; message: string; claims: {id: string; text: string; evidence: string[]}[]; sources: Source[]; limited: boolean};
-type Row = {id: string; kind: string; q: string; ms: number; answer_ms: number|null; cost_usd: number; answer_cost_usd: number;
+type Row = {id: string; kind: string; q: string; ms: number; answer_ms: number|null; cost_usd: number|null; answer_cost_usd: number|null;
+ trace_id?:string; runtime?:unknown; usage?:ReturnType<typeof costOf>; completed?:boolean;
  proposed: number|null; error?: string; answer: Answer|null; results: {title: string; url: string}[]};
 // labels[query id]: claims by claim text (2 right and backed by its passages, 1 right but weakly backed or off the point, 0 wrong),
 // and the answer as a whole (useful: 2 helps, 1 somewhat, 0 no help or misleading).
@@ -27,7 +29,7 @@ const runs = () => readdirSync(DIR).filter(f => f.endsWith('.json')).sort().map(
 // One session for the whole run: review tokens are bound to the session that searched.
 let cookie = '';
 async function get(path: string) {
- const r = await fetch(BASE + path, {headers: cookie ? {cookie} : {}});
+ const r = await fetch(BASE + path, {headers: cookie ? {cookie} : {},signal:AbortSignal.timeout(30000)});
  const set = r.headers.get('set-cookie'); if (set && !cookie) cookie = set.split(';')[0];
  if (!r.ok) throw new Error(`${r.status} ${path.split('?')[0]}`);
  return r.json();
@@ -38,12 +40,15 @@ if (command === 'run') {
  const file = join(DIR, `${label}.json`);
  const rows: Row[] = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : [];
  const only = process.env.ANSWER_EVAL_IDS?.split(',');
+ await get('/health/ready');
  for (const query of queries) {
    if (rows.some(r => r.id === query.id && !r.error) || (only && !only.includes(query.id))) continue;
    const start = logOffsets(), started = Date.now();
    let answer: Answer|null = null, results: Row['results'] = [], answerMs: number|null = null, error: string|undefined;
+   let traceId:string|undefined, runtime:unknown, completed=false;
    try {
      const body = await get(`/api/web?${new URLSearchParams({q: query.q, kind: 'web', tier})}`);
+     traceId=body.trace_id;runtime=body.runtime;completed=!body.review;
      results = (body.results ?? []).slice(0, 5).map((r: any) => ({title: r.title, url: r.url}));
      // The review finishes first; its answer is read until it leaves the pending states (the site polls the same way).
      for (let i = 0; body.review && i < 150; i++) {
@@ -51,20 +56,23 @@ if (command === 'run') {
        const s = await get(`/api/web/review?token=${body.review}`);
        if (s.status === 'complete') results = (s.results ?? []).slice(0, 5).map((r: any) => ({title: r.title, url: r.url}));
        answer = s.answer ?? null;
-       if (s.status === 'complete' && (!answer || !PENDING.includes(answer.status))) break;
+       if (s.status === 'complete' && (!answer || !PENDING.includes(answer.status))) {completed=true;break;}
      }
+     if(!completed)throw new Error('evaluation_timeout');
      if (answer && !PENDING.includes(answer.status)) answerMs = Date.now() - started;
    } catch (e) { error = String(e); }
+   const ms=Date.now()-started;
    await sleep(2000);
-   const lines = linesSince(start), cost = costOf(lines);
-   const cited = lines.find(l => l.event === 'cited_answer');
-   const row: Row = {...query, ms: Date.now() - started, answer_ms: answerMs, cost_usd: cost.cost_usd,
-     answer_cost_usd: +((cost.by_role.answer_writer ?? 0) + (cost.by_role.answer_verifier ?? 0)).toFixed(5),
+   const lines = linesSince(start), cost = costOf(lines,traceId);
+   const cited = traceId?lines.find(l => l.event === 'cited_answer'&&l.trace_id===traceId):undefined;
+   const answerCost=costOf(lines.filter(l=>['answer_writer','answer_verifier'].includes(l.bucket)),traceId);
+   const row: Row = {...query, ms, trace_id:traceId,runtime,completed,usage:cost,answer_ms: answerMs, cost_usd: cost.cost_usd,
+     answer_cost_usd: answerCost.cost_usd,
      proposed: cited?.proposed ?? null, ...(error ? {error} : {}), answer, results};
    const at = rows.findIndex(r => r.id === query.id);
    if (at >= 0) rows[at] = row; else rows.push(row);
    writeFileSync(file, JSON.stringify(rows, null, 1));
-   console.log(`${query.kind.padEnd(11)} ${(row.ms / 1000).toFixed(0).padStart(3)}s $${row.cost_usd.toFixed(4)} (answer $${row.answer_cost_usd.toFixed(4)}) `
+   console.log(`${query.kind.padEnd(11)} ${(row.ms / 1000).toFixed(0).padStart(3)}s $${row.cost_usd?.toFixed(4)??'unknown'} (answer $${row.answer_cost_usd?.toFixed(4)??'unknown'}) `
      + `${(answer?.status ?? 'none').padEnd(12)} ${answer?.claims.length ?? 0}/${row.proposed ?? '-'} claims  ${query.id}${error ? `  ERROR ${error}` : ''}`);
  }
  console.log('wrote', file);
@@ -124,19 +132,7 @@ document.getElementById('save').onclick=()=>{const a=el('a',{href:URL.createObje
  const labels: Labels = existsSync(LABELS) ? JSON.parse(readFileSync(LABELS, 'utf8')) : {};
  // Per run: how often an answer appeared where one should, skip searches left alone, claims kept of those proposed,
  // human claim grade and wrong-claim rate, usefulness, and the answer's own time and cost.
- const mean = (l: number[], d = 2) => l.length ? +(l.reduce((a, b) => a + b, 0) / l.length).toFixed(d) : null;
- const score = (rows: Row[]) => {
-   const asked = rows.filter(r => r.kind !== 'skip' && !r.error), skips = rows.filter(r => r.kind === 'skip' && !r.error);
-   const ready = asked.filter(r => r.answer?.status === 'ready');
-   const grades = ready.flatMap(r => r.answer!.claims.map(c => labels[r.id]?.claims?.[c.text]).filter((g): g is 0|1|2 => g !== undefined));
-   const ungraded = ready.reduce((n, r) => n + r.answer!.claims.filter(c => labels[r.id]?.claims?.[c.text] === undefined).length, 0);
-   const useful = ready.flatMap(r => labels[r.id]?.useful ?? []);
-   return {queries: asked.length, answered: `${ready.length}/${asked.length}`, skipped_ok: `${skips.filter(r => !r.answer).length}/${skips.length}`,
-     claims_kept: `${ready.reduce((n, r) => n + r.answer!.claims.length, 0)}/${ready.reduce((n, r) => n + (r.proposed ?? r.answer!.claims.length), 0)}`,
-     claim_grade: mean(grades), wrong: grades.length ? +(grades.filter(g => g === 0).length / grades.length).toFixed(2) : null, ungraded,
-     useful: mean(useful), answer_s: mean(asked.flatMap(r => r.answer_ms ?? []).map(ms => ms / 1000), 0),
-     answer_usd: mean(asked.map(r => r.answer_cost_usd), 4), search_usd: mean(rows.map(r => r.cost_usd), 4)};
- };
+ const score = (rows: Row[]) => scoreAnswers(rows, labels);
  for (const run of runs()) {
    console.log(`\n== ${run.file}`);
    const kinds = [...new Set(queries.map(q => q.kind))].filter(k => k !== 'skip');

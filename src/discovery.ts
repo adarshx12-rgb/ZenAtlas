@@ -571,17 +571,18 @@ async function runDiscoveryImpl(db: DB, config: Config, input: SearchInput, adap
  for (const [id] of signals.previews) if (!results.some(r => r.id === id)) signals.previews.delete(id);
  const unmet = contract ? unmetRequirements(contract, results, signals.findings) : [];
  const byUrl = new Map(found.map(r => [r.canonical_url, r.id]));
- const traced = traceOf(input, plan, searches, rounds, [...statuses, ...signals.providers], leads, found, leadUrl, signals.judged, results, roundOf);
+ const closest = signals.closest.filter(r=>matchesFilters(r,input) && !kept.has(r.canonical_url));
+ const traced = traceOf(input, plan, searches, rounds, [...statuses, ...signals.providers], leads, found, leadUrl, signals.judged, results, roundOf, closest);
  // Each candidate's link potential, to tune the evidence order from real searches.
  const base = {...traced, ...(names[0] ? {named: names[0]} : {}), ...(tidy.dropped.length ? {duplicates: tidy.dropped} : {}), pool: traced.pool.map(p => { const id = byUrl.get(p.url); return id && signals.links.has(id) ? {...p, link: signals.links.get(id)} : p; })};
- return {results, closest:signals.closest.filter(r=>matchesFilters(r,input)), ingested: found, previews: signals.previews, searches,
+ return {results, closest, ingested: found, previews: signals.previews, searches,
    dropped: [...new Set([...found, ...earlier.results].filter(r => !kept.has(r.canonical_url)).map(r => r.canonical_url))], providers: [...statuses, ...signals.providers],
    contract, unmet,sceneReview:signals.sceneReview,
    trace: {...base, timings: {...timings, evidence: signals.timings}, ...(exploration?{exploration}:{}),
      ...(contract ? {contract, unmet, ...(gapTrace ? {gaps: gapTrace} : {}),
        pool: base.pool.map(p => {
          const id = byUrl.get(p.url), decision = id ? signals.decisions.get(id) : undefined;
-         return {...p, ...(decision ? {decision: {status: decision.status, contradicted: decision.contradicted, unconfirmed: decision.unconfirmed}} : {}),
+         return {...p, ...(decision ? {decision: {status: decision.status, contradicted: decision.contradicted, unconfirmed: decision.unconfirmed, requirements: decision.requirements}} : {}),
            ...(id && signals.jev.has(id) ? {jev: signals.jev.get(id)} : {}),
            findings: signals.findings.filter(f => f.url === p.url).map(f => ({requirement_id: f.requirement_id, status: f.status, method: f.method,
              access: f.access, provisional: f.provisional, excerpt: f.excerpt, ...(f.location.key ? {key: f.location.key} : {})}))};
@@ -639,18 +640,20 @@ async function quickJob(db: DB, input: SearchInput): Promise<{results: Result[];
 
 // What this search did, for the learning loop: every admitted candidate with the round that first found it, the judge's
 // verdict (rejected ones included), and where it was shown.
-function traceOf(input: SearchInput, plan: SearchPlan, searches: PlannedSearch[], rounds: number, providers: ProviderStatus[], leads: Lead[],
- found: Result[], leadUrl: Map<string,string>, judged: Judged[], results: Result[], roundOf: Map<string,number>): SearchTrace {
+export function traceOf(input: SearchInput, plan: SearchPlan, searches: PlannedSearch[], rounds: number, providers: ProviderStatus[], leads: Lead[],
+ found: Result[], leadUrl: Map<string,string>, judged: Judged[], results: Result[], roundOf: Map<string,number>, closest: Result[] = []): SearchTrace {
  const first = new Map<string,number>();
  for (const l of leads) first.set(l.item.url, Math.min(first.get(l.item.url) ?? Infinity, l.round ?? 0));
  const verdicts = new Map(judged.map(j => [j.id, j]));
  const shown = new Map(results.map((r, i) => [r.canonical_url, {rank: i + 1, badges: r.badges ?? []}]));
- return {query: input.q, depth: input.depth === 'deep' && !input.source ? 'deep' : 'quick',
+ const leadsShown = new Map(closest.map((r,i) => [r.canonical_url,{rank:i+1,badges:r.badges ?? []}]));
+ return {metrics_version:2,query: input.q, depth: input.depth === 'deep' && !input.source ? 'deep' : 'quick',
    plan: {kind: plan.kind, criteria: plan.criteria, model: plan.model, ...(plan.target ? {target: plan.target} : {}), ...(plan.watch !== undefined ? {watch: plan.watch} : {})},
    searches: searches.map(s => ({query: s.query, target: s.target, round: roundOf.get(`${s.target}:${s.query.toLowerCase()}`) ?? 0})),
    rounds, providers,
-   pool: found.map(r => { const v = verdicts.get(r.id), place = shown.get(r.canonical_url);
+   pool: [...new Map([...found,...results,...closest].map(r=>[r.canonical_url,r])).values()].map(r => { const v = verdicts.get(r.id), place = shown.get(r.canonical_url), lead = leadsShown.get(r.canonical_url);
      return {url: r.canonical_url, title: r.title, site: new URL(r.canonical_url).hostname.replace(/^www\./, ''),
        round: first.get(leadUrl.get(r.id) ?? r.canonical_url) ?? 0, relevance: v?.relevance ?? null, reason: v?.reason ?? null, basis: v?.basis ?? null,
-       shown: !!place, rank: place?.rank ?? null, badges: place?.badges ?? []}; })};
+       shown: !!place, rank: place?.rank ?? null, placement: place?'main':lead?'closest':'not_shown', closest_rank:place?null:lead?.rank ?? null,
+       badges: place?.badges ?? lead?.badges ?? []}; })};
 }

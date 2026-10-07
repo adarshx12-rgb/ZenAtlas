@@ -15,6 +15,7 @@ import type { GapTrace } from './gaps.js';
 import { tierConfig, type Tier } from './tiers.js';
 import type { AnswerPicture } from './planner.js';
 import type { Duplicate } from './duplicates.js';
+import type { RuntimeIdentity } from './runtime.js';
 
 // Learning loop, step 1. Every discovery search leaves a trace; a critic model audits it once results are shown,
 // testing any source it says was missed with a real search; once a week a reviewer re-checks a sample of audits.
@@ -26,16 +27,21 @@ export interface TraceEntry {
  round: number;
  relevance: number|null; reason: string|null; basis: 'metadata'|'viewer_claims'|'direct_evidence'|null;
  shown: boolean; rank: number|null; badges: string[];
+ // shown/rank remain the main list; closest has its own independent position.
+ placement?: 'main'|'closest'|'not_shown'; closest_rank?: number|null;
  // Link potential when it was computed (src/link-potential.ts).
  link?: {value: number; base: number; creator: boolean; comment: boolean; capped: boolean};
  // With a requirements contract: the decision behind the outcome, the evidence findings, and Jev's pre-judgement.
- decision?: {status: 'verified'|'uncertain'|'excluded'; contradicted: string[]; unconfirmed: string[]};
+ decision?: {status: 'verified'|'uncertain'|'excluded'; contradicted: string[]; unconfirmed: string[];
+   requirements?: {id: string; status: string; excerpt: string|null; method: string|null}[]};
  findings?: {requirement_id: string; status: string; method: string; access: string; provisional: boolean; excerpt: string|null; key?: string}[];
  jev?: unknown;
 }
 export interface SearchTrace {
  // Correlates model-cost and cascade logs with this persisted trace; separate from the database row ID.
  trace_id?: string;
+ runtime?: RuntimeIdentity;
+ metrics_version?: number;
  exploration?: ExplorationTrace;
  query: string; depth: 'quick'|'deep';
  plan: {kind: string; criteria: string[]; model: string|null; target?: AnswerPicture; watch?: boolean};
@@ -73,7 +79,8 @@ function sameSeries(a: string, b: string) {
 // Deterministic facts about a search, which need no model: what was shown and on what evidence, how much the last
 // follow-up round still added (a high share means it stopped too early), and near-identical uploads of one series.
 export function traceMetrics(trace: SearchTrace) {
- const shown = trace.pool.filter(p => p.shown), rejected = trace.pool.filter(p => !p.shown && p.relevance !== null);
+ const shown = trace.pool.filter(p => p.shown), closest = trace.pool.filter(p => p.placement === 'closest'),
+   rejected = trace.pool.filter(p => !p.shown && p.placement !== 'closest' && p.relevance !== null);
  const groups: string[][] = [];
  for (const item of shown) {
    const group = groups.find(g => sameSeries(shown.find(s => s.url === g[0])!.title, item.title));
@@ -82,10 +89,13 @@ export function traceMetrics(trace: SearchTrace) {
  const basis = {metadata: 0, viewer_claims: 0, direct_evidence: 0};
  for (const item of shown) if (item.basis) basis[item.basis]++;
  return {
+   version: 2,
    pool: trace.pool.length, shown: shown.length, judged: trace.pool.filter(p => p.relevance !== null).length,
-   verified: shown.filter(p => (p.relevance ?? 0) >= 6).length,
+   verified: shown.filter(p => p.decision?.status === 'verified').length,
+   high_scoring: shown.filter(p => (p.relevance ?? 0) >= 6).length,
    possible: shown.filter(p => p.badges.includes('Possible match')).length,
-   closest: shown.filter(p => p.badges.includes('Closest match')).length,
+   closest: closest.length,
+   available: shown.length + closest.length,
    rejected: rejected.length, near_misses: rejected.filter(p => (p.relevance ?? 0) >= 3).length,
    unjudged: trace.pool.filter(p => p.relevance === null).length,
    basis,
@@ -104,13 +114,25 @@ function requirementMetrics(trace: SearchTrace, contract: RequirementsContract) 
  const hard = contract.requirements.filter(r => r.hardness === 'hard' && r.scope === 'each');
  const items = contract.requirements.filter(r => r.scope === 'set').flatMap(r => (r.set_items ?? []).map(item => ({id: r.id, item})));
  const covered = items.filter(({id, item}) => shown.some(p => p.findings?.some(f => f.requirement_id === id && f.key === item && f.status === 'supported' && !f.provisional)));
- const total = hard.length + items.length;
- const hardFindings = shown.flatMap(p => (p.findings ?? []).filter(f => hard.some(r => r.id === f.requirement_id)));
+ // Each main result owes evidence for every hard per-result requirement. Missing records are unknown.
+ const states = shown.flatMap(p => hard.map(r => {
+   const final = p.decision?.requirements?.find(s => s.id === r.id);
+   if (final) return final.status === 'supported' ? 'supported' : final.status === 'contradicted' ? 'contradicted' : 'unknown';
+   const findings = (p.findings ?? []).filter(f => f.requirement_id === r.id && !f.provisional && f.access === 'ok');
+   if (findings.some(f => f.status === 'contradicted')) return 'contradicted';
+   return findings.some(f => f.status === 'supported') ? 'supported' : 'unknown';
+ }));
+ const obligations = Math.max(1, shown.length) * hard.length;
+ const total = obligations + items.length;
+ const supported = states.filter(s => s === 'supported').length;
  const jev = trace.pool.map(p => p.jev as {outcome?: string}|undefined).filter(Boolean);
  const shadow = trace.pool.filter(p => (p.jev as {outcome?: string}|undefined)?.outcome === 'would_reject' && p.relevance !== null);
  return {
-   requirement_satisfaction: total ? ((shown.length ? hard.length : 0) + covered.length) / total : null,
-   unknown_rate: hardFindings.length ? hardFindings.filter(f => f.status === 'unknown').length / hardFindings.length : null,
+   requirement_satisfaction: total ? (supported + covered.length) / total : null,
+   requirement_counts: {per_result_expected: obligations, per_result_supported: supported,
+     per_result_unknown: shown.length ? states.filter(s => s === 'unknown').length : obligations,
+     per_result_contradicted: states.filter(s => s === 'contradicted').length, set_expected: items.length, set_supported: covered.length},
+   unknown_rate: obligations ? (shown.length ? states.filter(s => s === 'unknown').length : obligations) / obligations : null,
    decisions: {verified: trace.pool.filter(p => p.decision?.status === 'verified').length,
      uncertain: trace.pool.filter(p => p.decision?.status === 'uncertain').length, excluded: trace.pool.filter(p => p.decision?.status === 'excluded').length},
    unmet: trace.unmet?.length ?? 0,
@@ -226,13 +248,17 @@ export async function auditTrace(db: DB, config: Config, traceId: string, deps: 
  const tiered = tierConfig(config, trace.tier ?? 'ssj3');
  const client = deps.client ?? (deps.clientFor ?? (m => criticClient(db, tiered, m)))(tiered.CRITIC_MODEL);
  const shown = trace.pool.filter(p => p.shown).sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0));
- const rejected = trace.pool.filter(p => !p.shown).sort((a, b) => (b.relevance ?? -1) - (a.relevance ?? -1)).slice(0, 15);
+ const closest = trace.pool.filter(p => p.placement === 'closest').sort((a,b) => (a.closest_rank ?? 0)-(b.closest_rank ?? 0));
+ const rejected = trace.pool.filter(p => !p.shown && p.placement !== 'closest').sort((a, b) => (b.relevance ?? -1) - (a.relevance ?? -1)).slice(0, 15);
  const brief = (p: TraceEntry) => ({url: p.url, title: p.title, site: p.site, round: p.round, relevance: p.relevance, basis: p.basis,
    badges: p.badges, judge_reason: p.reason});
  const input = [today(), `Request: ${line(trace.query)}`, `Depth: ${trace.depth}`, `Plan: ${line(trace.plan)}`,
    `Searches: ${line(trace.searches.slice(0, 40))}`, `Providers: ${line(trace.providers.map(p => ({provider: p.provider, status: p.status})))}`,
    `Metrics: ${line({...metrics, duplicate_groups: metrics.duplicate_groups.length})}`,
-   '<shown>', ...shown.map(p => line({rank: p.rank, ...brief(p)})), '</shown>', '<rejected_sample>', ...rejected.map(p => line(brief(p))), '</rejected_sample>'].join('\n');
+   '<shown>', ...shown.map(p => line({rank: p.rank, ...brief(p)})), '</shown>',
+   'Closest matches are available to the user as uncertain leads, not confirmed matches or hidden rejections.',
+   '<closest>', ...closest.map(p => line({rank:p.closest_rank,...brief(p)})), '</closest>',
+   '<rejected_sample>', ...rejected.map(p => line(brief(p))), '</rejected_sample>'].join('\n');
  let reply: {model: string; value: unknown};
  try { reply = await client.json(BUCKET, CRITIC_SYSTEM, input, AUDIT_SCHEMA); }
  catch (error) {

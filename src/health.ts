@@ -1,5 +1,6 @@
 import { hostname } from 'node:os';
 import type { DB } from './db.js';
+import { runningIdentity } from './runtime.js';
 
 // Consecutive failures per provider, engine or model, as seen by real searches. code says why the latest one failed.
 export async function providerHealth(db: DB, provider: string, ok: boolean, code = 'unavailable') {
@@ -15,7 +16,7 @@ export type Service = 'api'|'worker'|'watchdog';
 export async function heartbeat(db: DB, service: Service, started: Date, details: Record<string,unknown> = {}) {
  await db.query(`INSERT INTO service_heartbeats(service,pid,host,started_at,beat_at,details) VALUES($1,$2,$3,$4,now(),$5)
  ON CONFLICT(service) DO UPDATE SET pid=excluded.pid,host=excluded.host,started_at=excluded.started_at,beat_at=now(),details=excluded.details`,
-   [service,process.pid,hostname().slice(0,200),started,JSON.stringify(details)]);
+   [service,process.pid,hostname().slice(0,200),started,JSON.stringify({...details,...(runningIdentity()?{runtime:runningIdentity()}:{})})]);
 }
 
 // Beats now and then every 15 seconds without keeping the process alive. A failed beat is only logged once in a row.

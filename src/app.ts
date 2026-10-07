@@ -25,6 +25,7 @@ import { tierConfig, tierSchema } from './tiers.js';
 import { validWalledToken, walledCached, walledPlan, walledPreview } from './walled.js';
 import { DocumentPreviews, PreviewError } from './doc-preview.js';
 import { auditReport } from './learning.js';
+import { databaseReadiness, initializeRuntime, requiredMigrations } from './runtime.js';
 
 // Learning-loop feedback on a search: a vote on one of its results (with an optional reason), opening a result,
 // or a note on what was missing. Unlike /api/feedback it works for every result, retained in the catalogue or not.
@@ -50,6 +51,7 @@ const sourceListQuery = z.object({
 const sourceOrder = {newest:'s.created_at DESC,s.domain',seen:'s.discovery_appearances DESC,s.discovery_last_seen_at DESC NULLS LAST,s.domain',domain:'s.domain'};
 
 export async function createApp(db:DB,config:Config) {
+ const runtime=initializeRuntime(config), migrations=requiredMigrations(process.cwd(),config.SEMANTIC_ENABLED);
  const app=Fastify({logger:false,bodyLimit:16384,requestTimeout:15000,trustProxy:false});
  await app.register(cookie,{secret:config.SESSION_SECRET});
  const service=new SearchService(db,config);
@@ -101,8 +103,9 @@ export async function createApp(db:DB,config:Config) {
  };
  app.get('/health/live',async()=>({status:'ok'}));
  app.get('/health/ready',async(_req,reply)=>{
-   try {await db.query('SELECT 1 FROM schema_migrations LIMIT 1');return {status:'ready'};}
-   catch {return reply.code(503).send({status:'not_ready'});}
+   const ready=await databaseReadiness(db,migrations);
+   reply.header('Cache-Control','no-store');
+   return reply.code(ready.status==='ready'?200:503).send({status:ready.status,code:ready.code,runtime});
  });
  app.get('/api/session',async()=>({status:'ready'}));
  app.get('/api/search',async req=>service.start(req.query,owner(req)));
