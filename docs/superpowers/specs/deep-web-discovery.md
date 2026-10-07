@@ -33,3 +33,27 @@ Fixture-only tests cover all connector parsers, request construction, selection/
 Add an opt-in evaluation script that runs both flag values against Web/Docs queries indexed by evaluation/field-labels.json and evaluation/field-queries.json. Report model-judged good results/query, judged precision, human-label precision and label coverage separately, plus time to first nonempty result and completion time. Do not claim unlabeled discoveries are wrong or treat this as exhaustive recall. Use isolated evaluation databases/state for each variant, alternate run order, preserve per-query output, and never start/restart PM2. The evaluation is not run during implementation.
 
 The request also says both to run npm test and to leave all tests until integration. Follow its final instruction: author tests but do not execute them; run the non-network TypeScript check. Record this limitation in the final handoff.
+
+## Implementation notes and operator handoff
+
+- Apply `migrations/019_site_search.sql` with the normal migration workflow before enabling `DEEP_SOURCES=1`. It includes explicit `search_app` grants. No migration was applied to a running database during implementation.
+- Optional free credentials: `COURTLISTENER_API_KEY`, `DATA_GOV_API_KEY` (GovInfo), `EUROPEANA_API_KEY`, and `OPENALEX_API_KEY`. Set `SEC_USER_AGENT` to your app/organisation and contact email. Each missing credential skips its connector silently. OpenAlex uses an account's free daily allowance; do not add prepaid usage for this feature. There is no paid fallback.
+- Existing field routing must be enabled and configured (`FIELD_ROUTING_ENABLED`, `FIELD_ROUTING_SITES`, `QUERY_REWRITE_MODEL`, and its existing model credentials). `DEEP_SOURCES` does not change routing models or introduce a paid discovery provider.
+- API documentation confirmed that Chronicling America now uses LOC's collection endpoint, and the current EU catalogue provides SPARQL. The CKAN connector therefore queries three CKAN portals plus the EU SPARQL catalogue. No legacy Chronicling America or guessed EU CKAN endpoint is used.
+- Source circuits are per process and restart resets them. Budgets and template learning live in Postgres. Site budget units cover a search attempt (robots/home/descriptor/results); connector budget units cover HTTP requests, including each multi-portal subrequest.
+- Site requests do not follow redirects automatically. This avoids fetching a redirect destination before checking its robots rules; a redirecting site falls back to Brave. Add a verified template on the destination host under the routed domain where appropriate. Only same-domain HTML GET OpenSearch templates are supported; POST/JS-only search is left to Brave.
+- Hand-add verified templates with `node --env-file-if-exists=.env --import tsx scripts/site-search-template.ts <domain> '<verified URL containing {searchTerms}>'`. Supported operator domains are RBI, SEBI, both eGazette domains and Elephind. This resets previous template quality counters and clears rejection. No endpoints for these sites were guessed or enabled.
+- No UI assets changed. The existing provider status format reports deep-source results. Record pages seed the Docs hunt; its nested web lookup disables deep retrieval to avoid spending a second three-connector/two-site allowance for the same request.
+- Fixture files in `tests/fixtures/deep-sources/` are reduced documentation-derived contracts, **not freshly recorded live responses**. Tests never call the services. Obtaining real response recordings remains an operator integration task under the no-live-search constraint; authenticated contracts and current endpoint behavior are unverified.
+
+### Evaluation command (not executed)
+
+```powershell
+node --env-file-if-exists=.env --import tsx scripts/deep-sources-eval.ts --run
+```
+
+This is explicitly opt-in and makes live searches when the operator runs it. It never connects to the production database or manages PM2. It uses the intersection of Web/Docs query IDs and `evaluation/field-labels.json`. Optional `DEEP_EVAL_IDS` narrows IDs and `DEEP_EVAL_TIER` chooses the existing tier. Optional `DEEP_EVAL_SEED` points at a JSON object with `field_sources` and `site_search` arrays exported by the operator; both variants get identical initial learning. Without a seed they start with no learned domains/templates. All variants disable cited-answer generation so completion measures retrieval and review.
+
+Each query gets fresh caches, circuit state and an isolated in-memory migrated database. This also resets provider budgets between cases; run it at a volume appropriate to your free provider quotas. Results go to a new `output/deep-sources-eval/<timestamp>/` directory. Reported precision is macro-averaged among returned judged rows. Human precision excludes unlabelled results, and label coverage is shown separately. First-result timing measures the first nonempty API response, including initial unjudged candidates; empty queries have null timing. Completion waits for review/hunt and records failures, which are excluded from paired comparisons. It does not estimate exhaustive recall.
+
+References: [LOC migration](https://www.loc.gov/apis/additional-apis/chronicling-america-api/), [EU catalogue API](https://data.europa.eu/en/about/sparql), [OpenAlex free allowance](https://help.openalex.org/access/pricing/), [GovInfo API keys](https://www.govinfo.gov/features/api), [SEC User-Agent guidance](https://www.sec.gov/search-filings/edgar-search-assistance/accessing-edgar-data).
