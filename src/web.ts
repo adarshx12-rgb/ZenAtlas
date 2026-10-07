@@ -22,6 +22,9 @@ import { withSearchTrace, traceFields, publicTraceFields } from './search-trace.
 import { walledSite, walledToken } from './walled.js';
 import type { PeekResponse } from './http.js';
 import { wantsAnswer } from './answer.js';
+import { deepRegistry, findDeepSources } from './deep-sources.js';
+import { searchSites, sameSite, type SiteRow, type SiteAttribution } from './site-search.js';
+import { rescueDeadLinks } from './wayback.js';
 
 // Web and document search are discovery-only, like image search: results come straight from the engines and never
 // enter the catalogue. Brave and SearXNG start together, then their deduplicated results are reviewed together.
@@ -38,7 +41,7 @@ const ALL_EXTENSIONS: readonly string[] = Object.values(DOCUMENT_TYPES).flat();
 // Hosts that serve PDFs from extension-less paths such as arxiv.org/pdf/2401.00001.
 const PDF_PATHS: Record<string, RegExp> = {'arxiv.org': /^\/pdf(\/|$)/, 'openreview.net': /^\/pdf\/?$/};
 // Routed specialist sites (src/field-routing.ts): each site's best few results, and at most this many in all.
-const FIELD_ROWS_PER_SITE = 5, FIELD_ROWS = 10;
+const FIELD_ROWS_PER_SITE = 5, FIELD_ROWS = 16;
 // Lists taken in turn: each one's first result, then each one's second, and so on.
 const inTurn = <T>(lists: T[][]) => Array.from({length: Math.max(0, ...lists.map(l => l.length))}, (_, i) =>
  lists.flatMap(l => l[i] ? [l[i]] : [])).flat();
@@ -105,11 +108,12 @@ const plain = (value: unknown, max: number) => {
 };
 const isoDate = (value: unknown) => { const d = typeof value === 'string' ? new Date(value) : null; return d && !isNaN(+d) ? d.toISOString() : null; };
 
-type Row = {url: string; title: unknown; snippet: unknown; published: unknown; engine: string};
+type Row = SiteRow;
 type Deps = {transport: typeof fetchJSON; budget: (db: DB, key: string, limit: number) => Promise<boolean>;
  peek?: (url: string, options: {timeoutMs: number}) => Promise<PeekResponse>;
  hunt?: (query: string, docs: VerifiedDoc[], explore: boolean, sites: WebResult[]) => string;
  sources?: (db: DB, config: Config, query: string) => Promise<SourceFindings>;
+ deep?: typeof findDeepSources; siteSearch?: typeof searchSites; rescue?: typeof rescueDeadLinks;
  // false: no relevance review (the Docs hunt's own web search).
  review?: false | ((query: string, results: WebResult[]) => string | null);
  rewrite?: (query: string, tab: 'web'|'docs') => Promise<QueryRewrite>;
@@ -140,12 +144,21 @@ async function searchWebImpl(db: DB, config: Config, input: WebSearchInput,
  let more = false, unsafe = 0;
  // Documents are also looked for directly in free-document sources, alongside the engines (first page only).
  const sourcesTask = docs && input.page === 1 ? (deps.sources ?? findDocuments)(db, config, meant).catch((): SourceFindings => ({docs: [], sites: [], providers: []})) : null;
+ const deadline = Date.now() + config.DEEP_SOURCES_TIMEOUT_MS;
+ const deepEnabled = config.DEEP_SOURCES && input.page === 1 && !!route;
+ const siteAttribution: SiteAttribution = new Map(), originalURLs = new Map<string, string>();
+ const covered = deepEnabled ? deepRegistry(config, async () => null).filter(c => route.field && c.fields.includes(route.field)).flatMap(c => c.domains) : [];
+ const ownSites = deepEnabled ? route.sites.filter(s => !covered.some(d => sameSite(`https://${s}/`, d))).slice(0, 2) : [];
+ const siteTask = deepEnabled ? (deps.siteSearch ?? searchSites)(db, config, meant, ownSites, {budget: deps.budget}, deadline).catch(() => [] as SiteRow[]) : Promise.resolve([] as SiteRow[]);
+ const deepTask = deepEnabled ? (deps.deep ?? findDeepSources)(db, config, meant, route, input.kind,
+   {json: deps.transport, budget: deps.budget}, deadline).catch(() => [] as Row[]) : Promise.resolve([] as Row[]);
  if (docs) void refreshBlocklists(config).catch(() => {});
 
  const keep = (rows: Row[]) => {
    for (const row of rows) {
      let url: string;
      try { url = publicURL(directFile(row.url)).href; } catch { continue; }
+     if (row.siteSearch) siteAttribution.set(url, row.siteSearch);
      if (url.length > 2048 || seen.has(url)) continue;
      const kind = accessKind(url);
      if (kind === 'unauthorized') continue;
@@ -183,7 +196,12 @@ async function searchWebImpl(db: DB, config: Config, input: WebSearchInput,
          .parse(await deps.transport(url.href, {trustedOrigin: url.origin, headers: {'X-Subscription-Token': config.BRAVE_SEARCH_API_KEY},
            timeoutMs: config.PROVIDER_TIMEOUT_MS, redirects: 0}));
      };
-     const answers = await Promise.allSettled(braveQueries.map((q, i) => ask(q, i === 0)));
+     const answers = await Promise.allSettled(braveQueries.map(async (q, i) => {
+       // Only routed fallback queries wait for site search. General Brave starts immediately.
+       if (deepEnabled && i >= general && ownSites.includes(route.sites[i - general]) &&
+         (await siteTask).some(r => r.siteSearch?.domain === route.sites[i - general])) return null;
+       return ask(q, i === 0);
+     }));
      const lists = answers.map(a => a.status === 'fulfilled' && a.value ? (a.value.web?.results ?? []).flatMap(raw => {
        const r = z.looseObject({url: z.string()}).safeParse(raw);
        return r.success ? [{url: r.data.url, title: r.data.title, snippet: r.data.description, published: r.data.page_age, engine: 'brave'}] : [];
@@ -215,13 +233,17 @@ async function searchWebImpl(db: DB, config: Config, input: WebSearchInput,
      providers.push({provider: 'searxng', status: 'unavailable', message: 'Web search engines are unavailable right now.'});
    }
  }};
- await Promise.all([askBrave(), askSearXNG()]);
+ const [, , deepRows, ownRows] = await Promise.all([askBrave(), askSearXNG(), deepTask, siteTask]);
+ const routedRows = inTurn([siteRows, deepRows, ownRows]).slice(0, config.DEEP_SOURCES ? FIELD_ROWS : 10);
+ const recordRows = docs && config.DEEP_SOURCES ? routedRows.filter(r => !documentType(directFile(r.url))) : [];
+ for (const row of ownRows) if (row.siteSearch) siteAttribution.set(directFile(row.url), row.siteSearch);
+ if (deepRows.length || ownRows.length) providers.push({provider: 'deep_sources', status: 'ok', message: `${deepRows.length + ownRows.length} results from specialist sources.`});
  // Stable interleaving keeps either provider's discoveries near the front regardless of response time.
  keep(inTurn([braveRows, searxngRows]));
  // Routed sites' results sit just inside the end of the review pool: they add to the open web's best results instead of
  // displacing them, and a site that found nothing leaves its slots to the open web.
  const before = results.length;
- keep(siteRows.slice(0, FIELD_ROWS));
+ keep(routedRows);
  const routedResults = results.splice(before);
  results.splice(Math.min(before, (docs ? REVIEW_POOL : WEB_POOL) - routedResults.length), 0, ...routedResults);
  const braveUrls = new Set([...braveRows, ...siteRows].flatMap(r => { try { return [publicURL(directFile(r.url)).href]; } catch { return []; } }));
@@ -231,13 +253,28 @@ async function searchWebImpl(db: DB, config: Config, input: WebSearchInput,
  if (!providers.length) providers.push({provider: 'web', status: 'disabled', message: 'Web search is not configured on this instance.'});
  const said = rewrite?.changed ? {rewrite: {corrected: rewrite.corrected}} : {};
  const next_cursor = more && input.page < 10 ? String(input.page + 1) : null;
+ const rescue = async () => {
+   if (!config.DEEP_SOURCES || input.page !== 1 || deps.review === false) return;
+   const swaps = await (deps.rescue ?? rescueDeadLinks)(db, config, results).catch(() => new Map<string, string>());
+   for (const result of results) {
+     const url = swaps.get(result.url);
+     if (!url) continue;
+     originalURLs.set(url, result.url);
+     const credit = siteAttribution.get(result.url); if (credit) siteAttribution.set(url, credit);
+     result.url = url;
+     result.id = createHash('sha1').update(url).digest('hex');
+     if (result.preview) result.preview = previewToken(config.SESSION_SECRET, url);
+     delete result.walled;
+   }
+ };
  if (!docs) {
+   await rescue();
    // A refill round's searches run through this same search, as typed (no rewrite) and without a review of their own.
    const fetch = async (searches: string[]) => (await Promise.all(searches.map(q => searchWeb(db, config,
      webSearchInput.parse({q, kind: 'web', page: '1', exact: '1', tier: config.TIER, ...(input.language ? {language: input.language} : {})}),
      {...deps, review: false}).then(r => r.results, () => [] as WebResult[])))).flat();
    const review = deps.review === false ? null : (deps.review ?? ((q, list) => startWebReview(db, config, q, list, {fetch, field: route?.field ?? null,
-     owner, originalQuery:input.q, answer:wantsAnswer(input.q,input.page),
+     owner, originalQuery:input.q, answer:wantsAnswer(input.q,input.page), siteAttribution, originalURLs,
      routed: new Set(routedResults.map(r => r.url))})))(meant, results);
    return {query: input.q, results, providers, next_cursor, ...(review ? {review} : {}), ...said};
  }
@@ -251,6 +288,7 @@ async function searchWebImpl(db: DB, config: Config, input: WebSearchInput,
      : 'Free-document sources did not answer; web search results only.'});
  }
  if (unsafe) providers.push({provider: 'safety', status: 'ok', message: `${unsafe} unsafe links (malware, phishing or explicit) were left out.`});
+ await rescue();
  const verified = await verifyDocuments(results, config, deps.peek);
  const {spam, dead, not_document} = verified.removed, removed = spam + dead + not_document;
  if (results.length) providers.push({provider: 'document_check', status: 'ok', message: removed
@@ -258,10 +296,11 @@ async function searchWebImpl(db: DB, config: Config, input: WebSearchInput,
    : 'Every document link was checked.'});
  // The first page also explores the websites the search found, even when it found no document files itself.
  const explore = input.page === 1 && config.DOC_HUNT_ENABLED;
- const sites = (found?.sites ?? []).flatMap(r => { try { const url = publicURL(r.url).href;
+ const sites = inTurn([recordRows, found?.sites ?? []]).flatMap(r => { try { const url = publicURL(r.url).href;
    return unsafeLink(url) || accessKind(url) === 'unauthorized' ? [] : [{id: url, url, title: plain(r.title, 300) ?? url, source_name: new URL(url).hostname,
      snippet: plain(r.snippet, 600), published: isoDate(r.published), doc_type: null, access: null, engine: r.engine, preview: null}]; } catch { return []; } });
  const hunt = verified.results.length || explore
-   ? (deps.hunt ?? ((q, list, e, s) => startHunt(db, config, q, list, e, {sites: q => discoverSites(db, config, q, rewrite)}, s)))(meant, verified.results, explore, sites) : null;
+   ? (deps.hunt ?? ((q, list, e, s) => startHunt(db, config, q, list, e, {sites: q => discoverSites(db, {...config, DEEP_SOURCES: false}, q, rewrite),
+     ...(config.DEEP_SOURCES ? {field: route?.field, siteAttribution, originalURLs} : {})}, s)))(meant, verified.results, explore, sites) : null;
  return {query: input.q, results: verified.results.map(({bytes: _bytes, ...d}) => d), providers, next_cursor, hunt, ...said};
 }

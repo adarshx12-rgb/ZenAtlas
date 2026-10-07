@@ -15,6 +15,8 @@ import { checkDocument, reviewDocuments, spamLink, type ReviewedDoc, type Verifi
 import { documentType, searchWeb, webSearchInput, type WebResult } from './web.js';
 import { viewerOf } from './doc-viewers.js';
 import { unsafeLink } from './safety.js';
+import { learnFailed, learnFieldSources } from './field-routing.js';
+import { learnSiteSearch, type SiteAttribution } from './site-search.js';
 
 // Document hunting. Search engines rarely index the document itself; it usually sits inside a website (a publisher's
 // archive, a ministry's publications page, an issue list). After a Docs search, the websites that search discovers are
@@ -101,6 +103,7 @@ export interface HuntState {
  checked_pages: number; removed: number; providers: ProviderStatus[];
 }
 export interface HuntDeps {
+ field?: string|null; siteAttribution?: SiteAttribution; originalURLs?: ReadonlyMap<string, string>;
  sites?: (query: string) => Promise<WebResult[]>; pages?: PageCheck; hunter?: DocHunter;
  peek?: (url: string, options: {timeoutMs: number}) => Promise<PeekResponse>; judge?: Judge;
  review?: (query: string, docs: VerifiedDoc[]) => ReturnType<typeof reviewDocuments>;
@@ -259,6 +262,18 @@ async function review(db: DB, config: Config, state: HuntState, docs: HuntDoc[],
  if (!docs.length) return {checked: 0, removed: 0, providers: [] as ProviderStatus[]};
  const out = await (deps.review ?? ((q, list) => reviewDocuments(db, config, q, list, 'judge' in deps ? {judge: deps.judge} : {})))(state.query, docs);
  const kept = new Map(out.results.map(r => [r.url, r]));
+ if (config.DEEP_SOURCES && out.trace) {
+   const origins = new Map(docs.map(d => [d.url, d.found_via[0]?.url]));
+   const attribution: SiteAttribution = new Map(deps.siteAttribution);
+   for (const [url, origin] of origins) {
+     const credit = origin && deps.siteAttribution?.get(origin);
+     if (credit) attribution.set(url, credit);
+   }
+   await learnSiteSearch(db, out.trace, attribution).catch(learnFailed);
+   await learnFieldSources(db, deps.field ?? null, out.trace.flatMap(t => [
+     {...t, url: deps.originalURLs?.get(t.url) ?? t.url}, ...(origins.get(t.url) ? [{...t, url: origins.get(t.url)!}] : []),
+   ])).catch(learnFailed);
+ }
  for (const d of docs) {
    const k = kept.get(d.url);
    if (k) Object.assign(d, k, {state: 'kept'});
@@ -305,6 +320,11 @@ async function verdicts(db: DB, config: Config, state: HuntState, seedPages: Map
        page: {status: page.status, title: page.title, description: page.description, text: page.text, libraries: []}};
    }), {kind: 'websites', criteria: ['The page itself contains the information the request asks for, as readable text']});
    for (const [key, s] of keys) s.verdict = (judged.get(key)?.relevance ?? 0) > 5 ? 'web_only' : 'not_found';
+   if (config.DEEP_SOURCES) {
+     const trace = [...keys].map(([key, s]) => ({url: s.url, relevance: judged.get(key)?.relevance}));
+     await learnFieldSources(db, deps.field ?? null, trace).catch(learnFailed);
+     if (deps.siteAttribution) await learnSiteSearch(db, trace, deps.siteAttribution).catch(learnFailed);
+   }
  } catch { for (const s of unsure) s.verdict = 'not_found'; }
 }
 

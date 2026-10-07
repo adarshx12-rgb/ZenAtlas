@@ -18,7 +18,7 @@ type Options = { timeoutMs?: number; maxBytes?: number; method?: 'GET'|'POST'|'H
  token?: string; trustedOrigin?: string; contentTypes?: string[]; redirects?: number;
  headers?: Record<string,string>; probe?: boolean; accept?: string;
  // peek: read only this many bytes of a 200 response, whatever its content type, then close the connection.
- peek?: number };
+ peek?: number; distinguishDNS?: boolean };
 export interface ProbeResponse {status:number;url:string;redirects:{from:string;to:string;status:number}[]}
 export interface TextResponse {url:string;contentType:string;text:string}
 export interface BinaryResponse {url:string;contentType:string;data:Buffer}
@@ -100,7 +100,8 @@ async function request(input: string, options: Options, defaultTypes: string[]):
        });
        req.on('error', () => finish(new UpstreamError('network_error')));
        req.end(body);
-     })().catch(e => finish(e instanceof UpstreamError ? e : new UpstreamError('network_error')));
+     })().catch(e => finish(e instanceof UpstreamError ? e : new UpstreamError(options.distinguishDNS &&
+       ['ENOTFOUND', 'EAI_AGAIN', 'ENODATA'].includes(e?.code) ? 'dns_failure' : 'network_error')));
    });
    if (response.location) {
      if (trusted) throw new UpstreamError('redirect_blocked');
@@ -157,8 +158,8 @@ export async function peekDocument(input: string, options: Options = {}): Promis
  return {url: response.url, status: response.status, contentType: response.contentType, length: response.length ?? null, head: response.data};
 }
 
-export async function probeURL(url:string,timeoutMs=5000):Promise<ProbeResponse>{
- const result=await fetchJSON(url,{method:'HEAD',probe:true,timeoutMs,redirects:2});
+export async function probeURL(url:string,timeoutMs=5000,distinguishDNS=false):Promise<ProbeResponse>{
+ const result=await fetchJSON(url,{method:'HEAD',probe:true,timeoutMs,redirects:2,distinguishDNS});
  // Some sites do not implement HEAD; consume headers only on the GET fallback.
- return result.status===405 || result.status===501 ? fetchJSON(url,{method:'GET',probe:true,timeoutMs,redirects:2}):result;
+ return result.status===405 || result.status===501 ? fetchJSON(url,{method:'GET',probe:true,timeoutMs,redirects:2,distinguishDNS}):result;
 }

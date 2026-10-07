@@ -70,6 +70,11 @@ export const configSchema = z.object({
   DOC_SOURCES_DAILY_BUDGET: number(1500, 0, 100000), SEMANTIC_SCHOLAR_API_KEY: optional,
   // Each source's time limit: they normally answer within 1.5 s, and one stalling (Zenodo, 12 s) held up the whole Docs tab.
   DOC_SOURCES_TIMEOUT_MS: number(5000, 500, 15000),
+  DEEP_SOURCES: z.enum(['0', '1']).default('0').transform(v => v === '1'),
+  DEEP_SOURCES_TIMEOUT_MS: number(4000, 100, 15000),
+  DEEP_SOURCES_DAILY_BUDGET: number(200, 0, 100000),
+  COURTLISTENER_API_KEY: optional, DATA_GOV_API_KEY: optional, EUROPEANA_API_KEY: optional, OPENALEX_API_KEY: optional,
+  SEC_USER_AGENT: z.string().max(200).refine(v => !/[\r\n]/.test(v), 'Single-line User-Agent required').default(''),
   // Public malware and phishing host lists the Docs tab checks every link against (src/safety.ts), refreshed daily.
   DOC_BLOCKLISTS: z.string().default('https://urlhaus.abuse.ch/downloads/hostfile/,https://raw.githubusercontent.com/openphish/public_feed/refs/heads/main/feed.txt')
     .refine(v => v.split(',').map(s => s.trim()).filter(Boolean).every(s => /^https:\/\/\S+$/.test(s)), 'Use comma-separated https URLs'),

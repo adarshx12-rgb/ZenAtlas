@@ -137,7 +137,7 @@ export async function reviewDocuments(db: DB, config: Config, query: string, doc
      'A word for a general kind of document ("catalogue", "guide", "overview", "collection") says what the person wants to get from it, not a required genre: a document that substantially sets out the requested subject that way (a thesis or guide that walks through a style with its examples, for a style catalogue) matches; one on a different subject that only shares the word (a product or course catalogue) does not. A named work, edition or year is still exact'],
    requirement: {text: `The document itself is what the request asks for: "${query.slice(0, 150)}" (its subject, edition, year and language as stated)`,
      evidence: 'The document text or title shows its subject, edition or year.'}});
- return {results: out.results as ReviewedDoc[], removed: out.removed, providers: out.providers};
+ return {results: out.results as ReviewedDoc[], removed: out.removed, providers: out.providers, ...(out.trace.length ? {trace: out.trace} : {})};
 }
 
 async function mapLimit<T>(items: T[], limit: number, fn: (item: T) => Promise<void>) {

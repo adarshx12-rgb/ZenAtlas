@@ -1,4 +1,5 @@
 import { learnFailed, learnFieldSources } from './field-routing.js';
+import { learnSiteSearch, type SiteAttribution } from './site-search.js';
 import { randomUUID } from 'node:crypto';
 import type { DB } from './db.js';
 import type { Config } from './config.js';
@@ -27,7 +28,7 @@ export type WebReviewDeps = ContractDeps & {judge?: Judge; pages?: PageCheck; sc
  refill?: RefillPlanner|null; fetch?: (searches: string[]) => Promise<WebResult[]>; log?: (line: Record<string, unknown>) => void;
  // field: the request's field (src/field-routing.ts); the review's verdicts teach which sites answer it.
  // routed: the URLs that came from the field's specialist sites.
- field?: string|null; routed?: ReadonlySet<string>};
+ field?: string|null; routed?: ReadonlySet<string>; siteAttribution?: SiteAttribution; originalURLs?: ReadonlyMap<string, string>};
 // New pages a refill may add to the review.
 const REFILL_POOL = 20;
 // A results page holds about 20 results, at most about 40: all are read and judged.
@@ -107,7 +108,8 @@ export async function reviewWeb(db: DB, config: Config, query: string, results: 
    log({event: 'refill', tier: config.TIER, tab: 'web', complete: decision?.complete ?? null, failed: !decision, searches: decision?.searches.length ?? 0,
      fetched, added, ms: Date.now() - started});
  }
- await learnFieldSources(db, deps.field ?? null, out.trace).catch(learnFailed);
+ await learnFieldSources(db, deps.field ?? null, out.trace.map(t => ({...t, url: deps.originalURLs?.get(t.url) ?? t.url}))).catch(learnFailed);
+ if (config.DEEP_SOURCES && deps.siteAttribution) await learnSiteSearch(db, out.trace, deps.siteAttribution).catch(learnFailed);
  return {...out, evidence, results: holdBackRouted(out.results, deps.routed ?? new Set())};
 }
 
