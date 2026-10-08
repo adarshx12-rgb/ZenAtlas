@@ -10,6 +10,8 @@ import { deepCircuit, interleave, remaining, SourceCircuit, within } from './dee
 export type DeepTab = 'web'|'docs';
 export interface DeepConnector {
  name: string; fields: string[]; tabs: DeepTab[]; domains: string[];
+ // What the source holds and where from, for the field router choosing which sources fit a request.
+ about: string;
  search(query: string): Promise<SourceRow[]>;
 }
 type Request = (name: string, url: string, options?: Parameters<typeof fetchJSON>[1]) => Promise<unknown>;
@@ -31,8 +33,8 @@ export function topRows(rows: SourceRow[], limit = 5): SourceRow[] {
  return [...new Map(rows.map(r => [r.url, r])).values()].slice(0, limit);
 }
 
+// catalog.data.gov's CKAN API was retired (404, 2026-10-08).
 export const CKAN_PORTALS = [
- {domain: 'data.gov', endpoint: 'https://catalog.data.gov/api/3/action/package_search', record: 'https://catalog.data.gov/dataset/'},
  {domain: 'data.gov.uk', endpoint: 'https://ckan.publishing.service.gov.uk/api/3/action/package_search', record: 'https://www.data.gov.uk/dataset/'},
  {domain: 'open.canada.ca', endpoint: 'https://open.canada.ca/data/api/3/action/package_search', record: 'https://open.canada.ca/data/en/dataset/'},
 ] as const;
@@ -91,27 +93,32 @@ export function parseDeepRows(name: string, value: unknown, portal = CKAN_PORTAL
 
 export function deepRegistry(config: Config, request: Request): DeepConnector[] {
  const entries: DeepConnector[] = [];
- const add = (name: string, fields: string[], domains: string[], search: DeepConnector['search'], enabled = true) => {
-   if (enabled) entries.push({name, fields, domains, tabs: ['web', 'docs'], search: async q => topRows(await search(q))});
+ const add = (name: string, fields: string[], domains: string[], about: string, search: DeepConnector['search'], enabled = true) => {
+   if (enabled) entries.push({name, fields, domains, about, tabs: ['web', 'docs'], search: async q => topRows(await search(q))});
  };
  const get = async (name: string, base: string, params: Record<string, string>, options?: Parameters<typeof fetchJSON>[1]) =>
    parseDeepRows(name, await request(name, urlWith(base, params), options));
+ // Sources that need every word in a title or name: when the keywords find nothing, their first three words once more.
+ const fewer = (search: DeepConnector['search']): DeepConnector['search'] => async q => {
+   const rows = await search(q), words = q.split(/\s+/).filter(Boolean);
+   return rows.length || words.length <= 3 ? rows : search(words.slice(0, 3).join(' '));
+ };
  // Stable registry priority is field-specific: specialist sources precede broad catalogues.
- add('europe_pmc', ['medicine', 'science', 'nature'], ['europepmc.org'], q => get('europe_pmc', 'https://www.ebi.ac.uk/europepmc/webservices/rest/search', {query: q, format: 'json', pageSize: '5', resultType: 'core'}));
- add('clinical_trials', ['medicine'], ['clinicaltrials.gov'], q => get('clinical_trials', 'https://clinicaltrials.gov/api/v2/studies', {'query.term': q, pageSize: '5', format: 'json'}));
- add('courtlistener', ['law'], ['courtlistener.com'], q => get('courtlistener', 'https://www.courtlistener.com/api/rest/v4/search/', {q, type: 'o', order_by: 'score desc'},
+ add('europe_pmc', ['medicine', 'science', 'nature'], ['europepmc.org'], 'biomedical and life-science research papers and abstracts (worldwide)', q => get('europe_pmc', 'https://www.ebi.ac.uk/europepmc/webservices/rest/search', {query: q, format: 'json', pageSize: '5', resultType: 'core'}));
+ add('clinical_trials', ['medicine'], ['clinicaltrials.gov'], 'registered clinical trials and their results (worldwide, US registry)', q => get('clinical_trials', 'https://clinicaltrials.gov/api/v2/studies', {'query.term': q, pageSize: '5', format: 'json'}));
+ add('courtlistener', ['law'], ['courtlistener.com'], 'US court opinions and case law', q => get('courtlistener', 'https://www.courtlistener.com/api/rest/v4/search/', {q, type: 'o', order_by: 'score desc'},
    {headers: {Authorization: `Token ${config.COURTLISTENER_API_KEY}`}}), !!config.COURTLISTENER_API_KEY);
- add('sec_edgar', ['finance'], ['sec.gov'], q => get('sec_edgar', 'https://efts.sec.gov/LATEST/search-index', {q, dateRange: 'all', from: '0', size: '5'},
+ add('sec_edgar', ['finance'], ['sec.gov'], 'filings of US-listed companies (10-K, 10-Q, 8-K, prospectuses)', q => get('sec_edgar', 'https://efts.sec.gov/LATEST/search-index', {q, dateRange: 'all', from: '0', size: '5'},
    {headers: {'User-Agent': config.SEC_USER_AGENT}}), !!config.SEC_USER_AGENT);
- add('govinfo', ['government', 'law', 'finance'], ['govinfo.gov'], q => get('govinfo', 'https://api.govinfo.gov/search', {api_key: config.DATA_GOV_API_KEY},
+ add('govinfo', ['government', 'law', 'finance'], ['govinfo.gov'], 'US federal government publications: Congressional Record, bills, US Code, CFR, federal reports', q => get('govinfo', 'https://api.govinfo.gov/search', {api_key: config.DATA_GOV_API_KEY},
    {method: 'POST', body: {query: q, pageSize: 5, offsetMark: '*', sorts: [{field: 'score', sortOrder: 'DESC'}]}}), !!config.DATA_GOV_API_KEY);
- add('federal_register', ['government', 'law', 'finance'], ['federalregister.gov'], q => get('federal_register', 'https://www.federalregister.gov/api/v1/documents.json', {'conditions[term]': q, per_page: '5', order: 'relevance'}));
- add('huggingface', ['ai_models', 'datasets', 'software'], ['huggingface.co'], async q => interleave(await partial([
+ add('federal_register', ['government', 'law', 'finance'], ['federalregister.gov'], 'US federal rules, proposed rules and notices from US agencies only', q => get('federal_register', 'https://www.federalregister.gov/api/v1/documents.json', {'conditions[term]': q, per_page: '5', order: 'relevance'}));
+ add('huggingface', ['ai_models', 'datasets', 'software'], ['huggingface.co'], 'machine-learning models and datasets on the Hugging Face Hub', fewer(async q => interleave(await partial([
    ...['models', 'datasets'].map(kind => async () => parseDeepRows('huggingface', await request('huggingface', urlWith(`https://huggingface.co/api/${kind}`, {search: q, limit: '5'})), kind)),
- ])));
- add('stack_exchange', ['software', 'engineering', 'diy_repair'], ['stackoverflow.com', 'stackexchange.com'], q => get('stack_exchange', 'https://api.stackexchange.com/2.3/search/advanced',
-   {q, site: 'stackoverflow', pagesize: '5', order: 'desc', sort: 'relevance', filter: 'withbody'}));
- add('ckan', ['datasets', 'government', 'nature'], ['data.gov', 'data.gov.uk', 'open.canada.ca', 'data.europa.eu'], async q => interleave(await partial([
+ ]))));
+ add('stack_exchange', ['software', 'engineering', 'diy_repair'], ['stackoverflow.com', 'stackexchange.com'], 'programming questions and answers on Stack Overflow', fewer(q => get('stack_exchange', 'https://api.stackexchange.com/2.3/search/advanced',
+   {q, site: 'stackoverflow', pagesize: '5', order: 'desc', sort: 'relevance', filter: 'withbody'})));
+ add('ckan', ['datasets', 'government', 'nature'], ['data.gov.uk', 'open.canada.ca', 'data.europa.eu'], 'government open-data datasets from the UK, Canada and the EU', async q => interleave(await partial([
    ...CKAN_PORTALS.map(p => async () => parseDeepRows('ckan', await request('ckan', urlWith(p.endpoint, {q, rows: '5'})), p.record)),
    // The EU portal migrated away from CKAN; its supported public catalogue interface is SPARQL.
    async () => parseDeepRows('eu_data', await request('ckan', urlWith('https://data.europa.eu/sparql', {
@@ -119,15 +126,15 @@ export function deepRegistry(config: Config, request: Request): DeepConnector[] 
      format: 'application/sparql-results+json',
    }), {contentTypes: ['application/sparql-results+json', 'application/json']})).map(r => ({...r, engine: 'deep:ckan'})),
  ])));
- add('loc', ['history', 'regional_news', 'books', 'education'], ['loc.gov', 'chroniclingamerica.loc.gov'], async q => interleave(await partial([
+ add('loc', ['history', 'regional_news', 'books', 'education'], ['loc.gov', 'chroniclingamerica.loc.gov'], 'US Library of Congress collections: books, manuscripts, maps, photos and historic US newspapers', async q => interleave(await partial([
    () => get('loc', 'https://www.loc.gov/search/', {q, fo: 'json', c: '5'}),
    () => get('loc', 'https://www.loc.gov/collections/chronicling-america/', {q, fo: 'json', c: '5'}),
- ])));
- add('europeana', ['history', 'design', 'architecture', 'photography', 'books'], ['europeana.eu'], q => get('europeana', 'https://api.europeana.eu/record/v2/search.json', {query: q, wskey: config.EUROPEANA_API_KEY, rows: '5'}), !!config.EUROPEANA_API_KEY);
- add('open_library', ['books', 'education', 'history'], ['openlibrary.org'], q => get('open_library', 'https://openlibrary.org/search.json', {q, limit: '5', fields: 'key,title,author_name,first_publish_year'}));
- add('gdelt', ['news', 'regional_news'], ['gdeltproject.org'], q => get('gdelt', 'https://api.gdeltproject.org/api/v2/doc/doc', {query: q, mode: 'ArtList', format: 'json', maxrecords: '5', sort: 'HybridRel'}));
- add('openalex', ['science', 'medicine', 'education', 'engineering', 'ai_models', 'nature'], ['openalex.org'], q => get('openalex', 'https://api.openalex.org/works', {search: q, per_page: '5', api_key: config.OPENALEX_API_KEY}), !!config.OPENALEX_API_KEY);
- add('doaj', ['science', 'medicine', 'education', 'engineering', 'nature'], ['doaj.org'], q => get('doaj', `https://doaj.org/api/search/articles/${encodeURIComponent(q)}`, {pageSize: '5'}));
+ ])), config.DEEP_SOURCES_LOC);
+ add('europeana', ['history', 'design', 'architecture', 'photography', 'books'], ['europeana.eu'], 'digitised items from European museums, libraries and archives: artworks, photos, drawings, books', q => get('europeana', 'https://api.europeana.eu/record/v2/search.json', {query: q, wskey: config.EUROPEANA_API_KEY, rows: '5'}), !!config.EUROPEANA_API_KEY);
+ add('open_library', ['books', 'education', 'history'], ['openlibrary.org'], 'catalogue records for books by title or author (worldwide)', q => get('open_library', 'https://openlibrary.org/search.json', {q, limit: '5', fields: 'key,title,author_name,first_publish_year'}));
+ add('gdelt', ['news', 'regional_news'], ['gdeltproject.org'], 'recent news articles from outlets worldwide (last few months)', q => get('gdelt', 'https://api.gdeltproject.org/api/v2/doc/doc', {query: q, mode: 'ArtList', format: 'json', maxrecords: '5', sort: 'HybridRel'}));
+ add('openalex', ['science', 'medicine', 'education', 'engineering', 'ai_models', 'nature'], ['openalex.org'], 'scholarly works in every discipline: papers, preprints, theses, reports (worldwide)', q => get('openalex', 'https://api.openalex.org/works', {search: q, per_page: '5', api_key: config.OPENALEX_API_KEY}), !!config.OPENALEX_API_KEY);
+ add('doaj', ['science', 'medicine', 'education', 'engineering', 'nature'], ['doaj.org'], 'open-access journal articles in every discipline (worldwide)', q => get('doaj', `https://doaj.org/api/search/articles/${encodeURIComponent(q)}`, {pageSize: '5'}));
  return entries;
 }
 async function partial(tasks: (() => Promise<SourceRow[]>)[]): Promise<SourceRow[][]> {
@@ -138,27 +145,44 @@ async function partial(tasks: (() => Promise<SourceRow[]>)[]): Promise<SourceRow
  }
  return answers.map(a => a.status === 'fulfilled' ? a.value : []);
 }
-export const selectConnectors = (registry: DeepConnector[], field: string|null, tab: DeepTab) =>
- registry.filter(c => field && c.fields.includes(field) && c.tabs.includes(tab)).slice(0, 3);
-export type DeepDeps = {json?: typeof fetchJSON; budget?: typeof takeBudget; circuit?: SourceCircuit};
+// The sources the router chose for this request (src/field-routing.ts); without a choice, the field's first sources.
+export const selectConnectors = (registry: DeepConnector[], field: string|null, tab: DeepTab, chosen?: string[]) =>
+ (chosen ? chosen.flatMap(name => registry.filter(c => c.name === name)) : registry.filter(c => field && c.fields.includes(field)))
+   .filter(c => c.tabs.includes(tab)).slice(0, 3);
+export type DeepDeps = {json?: typeof fetchJSON; budget?: typeof takeBudget; circuit?: SourceCircuit; log?: (line: Record<string, unknown>) => void};
 export async function findDeepSources(db: DB, config: Config, query: string, route: FieldRoute, tab: DeepTab,
  deps: DeepDeps = {}, deadline = Date.now() + config.DEEP_SOURCES_TIMEOUT_MS): Promise<SourceRow[]> {
- if (!config.DEEP_SOURCES || !route.field) return [];
+ if (!config.DEEP_SOURCES || !route.field && !route.sources?.length) return [];
+ const log = deps.log ?? (line => process.stdout.write(`${JSON.stringify(line)}\n`));
+ // Source APIs match keywords: a whole sentence with its conditions finds nothing in most of them.
+ const terms = route.keywords || query;
  const circuit = deps.circuit ?? deepCircuit;
+ // Set once the search has returned: a timer can fire a millisecond before the clock reaches the deadline, so late work
+ // checks this rather than the clock before it sends anything.
+ let closed = false;
  const request: Request = async (name, url, options) => within(deadline - 5, async () => {
    if (!await (deps.budget ?? takeBudget)(db, `deep:${name}`, config.DEEP_SOURCES_DAILY_BUDGET)) throw new UpstreamError('budget_exhausted');
+   if (closed) throw new UpstreamError('timeout');
    return (deps.json ?? fetchJSON)(url, {...options, trustedOrigin: new URL(url).origin, redirects: 0, maxBytes: 2 * 1024 * 1024, timeoutMs: remaining(deadline)});
  });
- const selected = selectConnectors(deepRegistry(config, request).filter(c => circuit.allows(c.name)), route.field, tab);
+ const selected = selectConnectors(deepRegistry(config, request).filter(c => circuit.allows(c.name)), route.field, tab, route.sources);
  const lists = await Promise.all(selected.map(async c => {
+   const started = Date.now();
+   // One line per source for tuning: never the query or the results.
+   const done = (rows: SourceRow[], e?: unknown) => {
+     log({event: 'deep_source', tier: config.TIER, tab, field: route.field, connector: c.name, rows: rows.length, ms: Date.now() - started,
+       ...(e ? {error: e instanceof UpstreamError ? e.code : 'error', ...(e instanceof UpstreamError && e.status ? {status: e.status} : {})} : {})});
+     return rows;
+   };
    try {
      // Requests expire just before the shared deadline so multi-endpoint sources can return partial successes.
-     const rows = await within(deadline, () => c.search(query));
-     circuit.success(c.name); return rows;
+     const rows = await within(deadline, () => c.search(terms));
+     circuit.success(c.name); return done(rows);
    } catch (e) {
      if (!(e instanceof UpstreamError && e.code === 'budget_exhausted')) circuit.failure(c.name);
-     return [];
+     return done([], e);
    }
  }));
+ closed = true;
  return interleave(lists);
 }

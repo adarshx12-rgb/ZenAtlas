@@ -43,7 +43,7 @@ test('deep and site retrieval start alongside Brave and SearXNG; site success su
 test('missing/failed site search keeps Brave site: fallback, and connector domains are not crawled', async () => {
  const asked: string[] = [], sites: string[][] = [];
  const out = await searchWeb(noDB, config, webSearchInput.parse({q: 'archive'}), {...base,
-   route: async () => ({field: 'history', sites: ['loc.gov', 'archive.example', 'second.example', 'third.example'], learned: []}),
+   route: async () => ({field: 'history', sites: ['openlibrary.org', 'archive.example', 'second.example', 'third.example'], learned: []}),
    siteSearch: async (_db, _config, _q, domains) => { sites.push(domains); throw new Error('timeout'); },
    transport: async url => { const u = new URL(url); if (u.hostname !== 'api.search.brave.com') return {results: []};
      const q = u.searchParams.get('q')!; asked.push(q); return {web: {results: q.includes('site:') ? [{url: `https://${q.split('site:')[1]}/record`, title: 'Record'}] : []}}; },

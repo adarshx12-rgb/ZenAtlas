@@ -4,6 +4,7 @@ import type { Config } from './config.js';
 import { OpenAICompatibleClient } from './openai-compatible.js';
 import { accessKind } from './access.js';
 import { unsafeLink } from './safety.js';
+import { deepRegistry } from './deep-sources.js';
 
 // Field-aware sources, for any request. The open web answers most searches, but the best answers to many live on a
 // field's own sites: an RBI rate on rbi.org.in, launch footage on nasa.gov, a model on huggingface.co. The critic's audits
@@ -15,7 +16,8 @@ import { unsafeLink } from './safety.js';
 export const FIELDS = ['ai_models', 'software', 'education', 'medicine', 'law', 'government', 'finance', 'news', 'regional_news',
  'history', 'science', 'books', 'cooking', 'cars_repair', 'diy_repair', 'music', 'sports', 'gaming', 'film', 'viral_clips',
  'travel', '3d_assets', 'datasets', 'design', 'photography', 'engineering', 'nature', 'architecture', 'shopping', 'other'] as const;
-export interface FieldRoute { field: string|null; sites: string[]; learned: string[] }
+// With deep sources on (src/deep-sources.ts): the request's search keywords and the source APIs that fit it.
+export interface FieldRoute { field: string|null; sites: string[]; learned: string[]; keywords?: string; sources?: string[] }
 export type RouteTab = 'videos'|'web'|'docs'|'images';
 type RouteDeps = {model?: (query: string, tab: RouteTab) => Promise<unknown>; log?: (line: Record<string, unknown>) => void};
 
@@ -25,7 +27,17 @@ Return JSON:
 - sites: up to 4 domains (like "rbi.org.in" or "huggingface.co", no paths) that publish the best answers to this exact request: official bodies, the institution or publisher concerned, the field's specialist databases, archives and curated collections, and respected specialist publications. Prefer primary and official sources. Only name sites you are sure exist and hold this kind of material, and that anyone may read legally (no piracy, adult or scam sites). Never name general search engines, video platforms (youtube.com) or social networks. For the "videos" tab, name sites that host or embed videos on the subject; for "docs", sites that publish documents (reports, papers, standards, legal texts); for "images", archives and collections of pictures. Return [] when general web search is enough.`;
 const SCHEMA = {type: 'object', required: ['field', 'sites'], properties: {
  field: {type: 'string', enum: [...FIELDS]}, sites: {type: 'array', items: {type: 'string'}, maxItems: 4}}};
-const reply = z.object({field: z.string(), sites: z.array(z.string().max(200)).max(8)});
+const reply = z.object({field: z.string(), sites: z.array(z.string().max(200)).max(8),
+ keywords: z.string().max(200).optional(), sources: z.array(z.string().max(40)).max(8).optional()});
+// With deep sources on, the same call also writes the request's keywords for source APIs and picks the sources that hold
+// what it asks for: by subject and country, not by field alone (a satellite handbook is "science" but not biomedicine).
+type Source = {name: string; about: string};
+const deepSystem = (sources: Source[]) => `${SYSTEM}
+- keywords: 2 to 6 words naming what the request is about, as a catalogue or database search box expects them, the most identifying words first (some databases use only the first three): names, titles, identifiers and subject terms only; no conditions, negations, formats or filler ("Sentinel-2 User Handbook", "Indian Driving Dataset segmentation").
+- sources: up to 3 of these databases, only ones whose holdings can contain what the request asks for, matching its subject and country; [] when none fits:
+${sources.map(s => `  ${s.name}: ${s.about}`).join('\n')}`;
+const deepSchema = {...SCHEMA, required: ['field', 'sites', 'keywords', 'sources'], properties: {...SCHEMA.properties,
+ keywords: {type: 'string'}, sources: {type: 'array', items: {type: 'string'}, maxItems: 3}}};
 
 // Hosts a site: search cannot add to: the engines and platforms the normal searches already cover.
 const GENERAL = /(^|\.)(google|bing|duckduckgo|yahoo|youtube|youtu|facebook|instagram|tiktok|twitter|x|pinterest|reddit|quora|linkedin|amazon|wikipedia)\.[a-z.]+$/;
@@ -40,11 +52,16 @@ const cache = new Map<string, {route: FieldRoute; expires: number}>();
 const CACHE_MS = 60 * 60_000, CACHE_MAX = 1000;
 export function clearRouteCache() { cache.clear(); }
 
+// The source APIs this instance can query (those needing a key only once it is set).
+const deepSources = (config: Config): Source[] => config.DEEP_SOURCES ? deepRegistry(config, async () => null).map(c => ({name: c.name, about: c.about})) : [];
+
 function modelDeps(db: DB, config: Config): RouteDeps['model'] {
  if (!config.OPENROUTER_API_KEY || !config.QUERY_REWRITE_MODEL) return undefined;
  const client = new OpenAICompatibleClient(db, {...config, JUDGE_DAILY_BUDGET: config.QUERY_REWRITE_DAILY_BUDGET, JUDGE_TIMEOUT_MS: config.QUERY_REWRITE_TIMEOUT_MS},
    [config.QUERY_REWRITE_MODEL], undefined, 300);
- return async (query, tab) => (await client.json('field_route', SYSTEM, JSON.stringify({request: query, tab}), SCHEMA)).value;
+ const sources = deepSources(config);
+ const [system, schema] = config.DEEP_SOURCES ? [deepSystem(sources), deepSchema] : [SYSTEM, SCHEMA];
+ return async (query, tab) => (await client.json('field_route', system, JSON.stringify({request: query, tab}), schema)).value;
 }
 
 // The field's key in field_sources. Images learn apart: a site whose articles answer a field need not hold its pictures.
@@ -62,7 +79,7 @@ export async function routeFields(db: DB, config: Config, query: string, tab: Ro
  if (!config.FIELD_ROUTING_ENABLED || !config.FIELD_ROUTING_SITES || /(?:^|\s)-?site:/i.test(query)) return none;
  const model = deps.model ?? modelDeps(db, config);
  if (!model) return none;
- const key = `${config.QUERY_REWRITE_MODEL}:${tab}:${query.normalize('NFC').toLowerCase().replace(/\s+/g, ' ').trim()}`;
+ const key = `${config.QUERY_REWRITE_MODEL}:${config.DEEP_SOURCES ? 'deep:' : ''}${tab}:${query.normalize('NFC').toLowerCase().replace(/\s+/g, ' ').trim()}`;
  const hit = cache.get(key);
  if (hit && hit.expires > Date.now()) return hit.route;
  const log = deps.log ?? (line => process.stdout.write(`${JSON.stringify(line)}\n`));
@@ -78,11 +95,18 @@ export async function routeFields(db: DB, config: Config, query: string, tab: Ro
    const learned = [...new Set([...cited, ...relevant])];
    const named = value.sites.map(cleanSite).filter((s): s is string => !!s);
    const sites = [...new Set([...learned, ...named])].slice(0, config.FIELD_ROUTING_SITES);
-   const route = {field, sites, learned: learned.filter(s => sites.includes(s))};
+   const route: FieldRoute = {field, sites, learned: learned.filter(s => sites.includes(s))};
+   if (config.DEEP_SOURCES && tab !== 'videos' && tab !== 'images') {
+     const known = new Set(deepSources(config).map(c => c.name));
+     const keywords = value.keywords?.replace(/\s+/g, ' ').trim();
+     if (keywords) route.keywords = keywords;
+     route.sources = [...new Set(value.sources ?? [])].filter(name => known.has(name)).slice(0, 3);
+   }
    if (cache.size >= CACHE_MAX) cache.delete(cache.keys().next().value!);
    cache.set(key, {route, expires: Date.now() + CACHE_MS});
    // One line per route for tuning: the field and how many sites, never the query or the sites.
-   log({event: 'field_route', tier: config.TIER, tab, field, named: named.length, learned: route.learned.length, sites: sites.length, ms: Date.now() - started});
+   log({event: 'field_route', tier: config.TIER, tab, field, named: named.length, learned: route.learned.length, sites: sites.length,
+     ...(route.sources ? {sources: route.sources, keywords: !!route.keywords} : {}), ms: Date.now() - started});
    return route;
  } catch {
    log({event: 'field_route', tier: config.TIER, tab, field: null, outcome: 'failed', ms: Date.now() - started});

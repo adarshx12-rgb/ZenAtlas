@@ -140,3 +140,18 @@ test('manual templates persist, count only actual judgements, drop strictly belo
    await assert.rejects(addSiteTemplate(db, 'unknown.example', 'https://unknown.example/?q={searchTerms}'), /invalid_site_template/);
  } finally { await db.close(); }
 });
+
+test('each site logs how far its search got, without the query or the site', async () => {
+ const db = await database();
+ try {
+   const lines: Record<string, unknown>[] = [];
+   const deps = {...fixtureTransport(), log: (l: Record<string, unknown>) => lines.push(l)};
+   await searchSites(db, config, 'secret words', [domain], deps);
+   assert.equal(lines.length, 1);
+   assert.equal(lines[0].event, 'site_search'); assert.equal(lines[0].stage, 'search'); assert.equal(lines[0].rows, 5);
+   assert.ok(!JSON.stringify(lines).includes('secret') && !JSON.stringify(lines).includes(domain));
+   const failed: Record<string, unknown>[] = [];
+   await searchSites(db, config, 'query', ['other.example'], {...fixtureTransport({'/': new UpstreamError('too_many_redirects')}), log: (l: Record<string, unknown>) => failed.push(l)});
+   assert.equal(failed[0].stage, 'home'); assert.equal(failed[0].error, 'too_many_redirects'); assert.equal(failed[0].rows, 0);
+ } finally { await db.close(); }
+});

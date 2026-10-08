@@ -73,6 +73,8 @@ export const configSchema = z.object({
   DEEP_SOURCES: z.enum(['0', '1']).default('0').transform(v => v === '1'),
   DEEP_SOURCES_TIMEOUT_MS: number(4000, 100, 15000),
   DEEP_SOURCES_DAILY_BUDGET: number(200, 0, 100000),
+  // The Library of Congress answers API clients with a Cloudflare challenge (403, 2026-10-08): off until it serves them.
+  DEEP_SOURCES_LOC: z.enum(['0', '1']).default('0').transform(v => v === '1'),
   COURTLISTENER_API_KEY: optional, DATA_GOV_API_KEY: optional, EUROPEANA_API_KEY: optional, OPENALEX_API_KEY: optional,
   SEC_USER_AGENT: z.string().max(200).refine(v => !/[\r\n]/.test(v), 'Single-line User-Agent required').default(''),
   // Public malware and phishing host lists the Docs tab checks every link against (src/safety.ts), refreshed daily.

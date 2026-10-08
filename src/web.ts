@@ -22,7 +22,7 @@ import { withSearchTrace, traceFields, publicTraceFields } from './search-trace.
 import { walledSite, walledToken } from './walled.js';
 import type { PeekResponse } from './http.js';
 import { wantsAnswer } from './answer.js';
-import { deepRegistry, findDeepSources } from './deep-sources.js';
+import { deepRegistry, findDeepSources, selectConnectors } from './deep-sources.js';
 import { searchSites, sameSite, type SiteRow, type SiteAttribution } from './site-search.js';
 import { rescueDeadLinks } from './wayback.js';
 
@@ -147,9 +147,10 @@ async function searchWebImpl(db: DB, config: Config, input: WebSearchInput,
  const deadline = Date.now() + config.DEEP_SOURCES_TIMEOUT_MS;
  const deepEnabled = config.DEEP_SOURCES && input.page === 1 && !!route;
  const siteAttribution: SiteAttribution = new Map(), originalURLs = new Map<string, string>();
- const covered = deepEnabled ? deepRegistry(config, async () => null).filter(c => route.field && c.fields.includes(route.field)).flatMap(c => c.domains) : [];
+ // Sites a chosen source API already searches are not crawled for their own search box as well.
+ const covered = deepEnabled ? selectConnectors(deepRegistry(config, async () => null), route.field, input.kind, route.sources).flatMap(c => c.domains) : [];
  const ownSites = deepEnabled ? route.sites.filter(s => !covered.some(d => sameSite(`https://${s}/`, d))).slice(0, 2) : [];
- const siteTask = deepEnabled ? (deps.siteSearch ?? searchSites)(db, config, meant, ownSites, {budget: deps.budget}, deadline).catch(() => [] as SiteRow[]) : Promise.resolve([] as SiteRow[]);
+ const siteTask = deepEnabled ? (deps.siteSearch ?? searchSites)(db, config, route.keywords || meant, ownSites, {budget: deps.budget}, deadline).catch(() => [] as SiteRow[]) : Promise.resolve([] as SiteRow[]);
  const deepTask = deepEnabled ? (deps.deep ?? findDeepSources)(db, config, meant, route, input.kind,
    {json: deps.transport, budget: deps.budget}, deadline).catch(() => [] as Row[]) : Promise.resolve([] as Row[]);
  if (docs) void refreshBlocklists(config).catch(() => {});

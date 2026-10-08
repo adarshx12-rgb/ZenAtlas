@@ -73,7 +73,7 @@ export function parseSiteResults(html: string, base: string, domain: string): So
  return rows;
 }
 
-export type SiteDeps = {text?: typeof fetchText; budget?: typeof takeBudget; circuit?: SourceCircuit};
+export type SiteDeps = {text?: typeof fetchText; budget?: typeof takeBudget; circuit?: SourceCircuit; log?: (line: Record<string, unknown>) => void};
 class RobotsDenied extends Error {}
 // Redirects are not followed: a new destination needs its own robots check first.
 function robotReader(deadline: number, transport: typeof fetchText) {
@@ -95,19 +95,30 @@ export async function searchSites(db: DB, config: Config, query: string, domains
  deadline = Date.now() + config.DEEP_SOURCES_TIMEOUT_MS): Promise<SiteRow[]> {
  if (!config.DEEP_SOURCES) return [];
  const circuit = deps.circuit ?? deepCircuit, read = robotReader(deadline, deps.text ?? fetchText);
+ const log = deps.log ?? (line => process.stdout.write(`${JSON.stringify(line)}\n`));
  const lists = await Promise.all([...new Set(domains.map(cleanSite).filter((s): s is string => !!s))].slice(0, 2).map(async domain => {
-   const key = `site:${domain}`;
+   const key = `site:${domain}`, started = Date.now();
    if (!circuit.allows(key)) return [];
+   // How far each site got (cache, home page, descriptor, search page), for tuning: never the query or the site.
+   let stage = 'cache';
+   const done = (rows: SiteRow[], e?: unknown) => {
+     log({event: 'site_search', tier: config.TIER, stage, rows: rows.length, ms: Date.now() - started,
+       ...(e ? {error: e instanceof RobotsDenied ? 'robots_denied' : e instanceof UpstreamError ? e.code : 'error',
+         ...(e instanceof UpstreamError && e.status ? {status: e.status} : {})} : {})});
+     return rows;
+   };
    try {
      return await within(deadline, async () => {
        let cached = (await db.query<CacheRow>('SELECT * FROM site_search WHERE domain=$1', [domain])).rows[0];
        remaining(deadline);
-       if (cached?.status === 'rejected') return [];
+       if (cached?.status === 'rejected') { stage = 'rejected'; return []; }
        if (!await (deps.budget ?? takeBudget)(db, `deep:${key}`, config.DEEP_SOURCES_DAILY_BUDGET)) throw new UpstreamError('budget_exhausted');
        remaining(deadline);
        if (!cached || cached.status !== 'manual' && Date.now() - +new Date(cached.checked_at) >= TTL) {
+         stage = 'home';
          const base = `https://${domain}/`, home = await read(base);
          const descriptor = discoverDescriptor(home.text, home.url, domain);
+         stage = descriptor ? 'descriptor' : 'no_descriptor';
          const template = descriptor ? parseTemplate((await read(descriptor, true)).text, descriptor, domain) : null;
          remaining(deadline);
          const saved = await db.query<CacheRow>(`INSERT INTO site_search(domain,template,status) VALUES($1,$2,$3)
@@ -117,14 +128,15 @@ export async function searchSites(db: DB, config: Config, query: string, domains
            WHERE site_search.status NOT IN ('manual','rejected') RETURNING *`, [domain, template, template ? 'active' : 'absent']);
          cached = saved.rows[0];
        }
-       if (!cached?.template || !validTemplate(cached.template, domain)) return [];
+       if (!cached?.template || !validTemplate(cached.template, domain)) { if (stage === 'descriptor') stage = 'no_template'; return []; }
+       stage = 'search';
        const url = cached.template.replaceAll('{searchTerms}', encodeURIComponent(query)), page = await read(url);
        remaining(deadline);
        return parseSiteResults(page.text, page.url, domain).map(r => ({...r, siteSearch: {domain, template: cached!.template!}}));
-     }).then(rows => { circuit.success(key); return rows; });
+     }).then(rows => { circuit.success(key); return done(rows); });
    } catch (e) {
      if (!(e instanceof RobotsDenied) && !(e instanceof UpstreamError && e.code === 'budget_exhausted')) circuit.failure(key);
-     return [];
+     return done([], e);
    }
  }));
  return interleave(lists);

@@ -10,7 +10,7 @@ import {database, testConfig} from './helpers.js';
 
 const fixtures = JSON.parse(readFileSync(new URL('./fixtures/deep-sources/responses.json', import.meta.url), 'utf8'));
 const config = {...testConfig, DEEP_SOURCES: true, COURTLISTENER_API_KEY: 'fixture-court', DATA_GOV_API_KEY: 'fixture-gov',
- EUROPEANA_API_KEY: 'fixture-europeana', OPENALEX_API_KEY: 'fixture-openalex', SEC_USER_AGENT: 'Fixture App contact@example.org'};
+ EUROPEANA_API_KEY: 'fixture-europeana', OPENALEX_API_KEY: 'fixture-openalex', DEEP_SOURCES_LOC: true, SEC_USER_AGENT: 'Fixture App contact@example.org'};
 const route = (field: string) => ({field, sites: [], learned: []});
 const noDB = {} as any;
 const expected: Record<string, string> = {
@@ -59,7 +59,7 @@ test('registry request contracts: encoded query, fixed origins, credentials, POS
    const rows = await connector.search(query);
    assert.ok(rows.length >= 1 && rows.length <= 5, connector.name);
  }
- assert.equal(calls.filter(c => c.name === 'ckan').length, 4);
+ assert.equal(calls.filter(c => c.name === 'ckan').length, 3);
  assert.equal(calls.filter(c => c.name === 'loc').length, 2);
  assert.equal(calls.filter(c => c.name === 'huggingface').length, 2);
  assert.equal(calls.find(c => c.name === 'sec_edgar')!.options.headers['User-Agent'], config.SEC_USER_AGENT);
@@ -108,11 +108,11 @@ test('sources run concurrently; one stall cannot lose fast peers or successful C
      const u = new URL(url); asked.push(u.hostname);
      assert.ok(options!.timeoutMs! <= 80); assert.equal(options!.trustedOrigin, u.origin); assert.equal(options!.redirects, 0);
      if (u.hostname === 'huggingface.co') return u.pathname.endsWith('datasets') ? fixtures.huggingface_datasets : fixtures.huggingface;
-     if (u.hostname === 'catalog.data.gov') return fixtures.ckan;
+     if (u.hostname === 'ckan.publishing.service.gov.uk') return fixtures.ckan;
      return new Promise(() => {});
    },
  });
- assert.equal(asked.length, 6); assert.equal(buckets.filter(b => b === 'deep:ckan').length, 4);
+ assert.equal(asked.length, 5); assert.equal(buckets.filter(b => b === 'deep:ckan').length, 3);
  assert.ok(rows.some(r => r.engine === 'deep:huggingface'));
  assert.ok(rows.some(r => r.engine === 'deep:ckan'));
 });
@@ -147,4 +147,39 @@ test('large responses deduplicate and cap each connector at five rows', async ()
  const d = {articles: Array.from({length: 20}, (_, i) => ({...fixtures.gdelt.articles[0], url: `https://news.example/story/${Math.floor(i / 2)}`}))};
  const rows = await deepRegistry(config, async () => d).find(c => c.name === 'gdelt')!.search('news');
  assert.equal(rows.length, 5); assert.equal(new Set(rows.map(r => r.url)).size, 5);
+});
+
+test('the router\'s chosen connectors replace field selection, and an empty choice runs none', () => {
+ const registry = deepRegistry(config, async () => { throw new Error('must not call'); });
+ assert.deepEqual(selectConnectors(registry, 'science', 'docs', ['doaj', 'unknown', 'openalex']).map(c => c.name), ['doaj', 'openalex']);
+ assert.equal(selectConnectors(registry, 'finance', 'web', []).length, 0, 'no fitting source: no connector, not the field\'s first');
+ assert.deepEqual(selectConnectors(registry, null, 'web', ['gdelt']).map(c => c.name), ['gdelt'], 'a chosen source needs no field');
+ for (const c of registry) assert.ok(c.about.length > 20, `${c.name} describes its topic and coverage for the router`);
+});
+
+test('connectors search the router\'s keywords, not the whole request, and log one line each without the query', async () => {
+ const asked: string[] = [], lines: Record<string, unknown>[] = [];
+ const request = 'Indian driving dataset with pixel level segmentation labels, not just bounding boxes';
+ await findDeepSources(noDB, config, request, {...route('news'), keywords: 'Indian driving dataset segmentation', sources: ['gdelt']}, 'web', {
+   circuit: new SourceCircuit(), budget: async () => true, log: line => lines.push(line),
+   json: async url => { asked.push(new URL(url).searchParams.get('query')!); return fixtures.gdelt; }});
+ assert.deepEqual(asked, ['Indian driving dataset segmentation']);
+ assert.equal(lines.length, 1);
+ assert.equal(lines[0].event, 'deep_source'); assert.equal(lines[0].connector, 'gdelt'); assert.equal(lines[0].rows, 1);
+ assert.ok(!JSON.stringify(lines).includes('Indian'), 'the query never reaches the logs');
+ const failed: Record<string, unknown>[] = [];
+ await findDeepSources(noDB, config, request, {...route('news'), sources: ['gdelt']}, 'web', {
+   circuit: new SourceCircuit(), budget: async () => true, log: line => failed.push(line), json: async () => { throw new UpstreamError('upstream_failure', 403); }});
+ assert.equal(failed[0].rows, 0); assert.equal(failed[0].error, 'upstream_failure'); assert.equal(failed[0].status, 403);
+});
+
+test('sources needing every word retry once with the first three; Library of Congress is off by default', async () => {
+ const asked: string[] = [];
+ const registry = deepRegistry(config, async (name, url) => {
+   const q = new URL(url).searchParams.get('q')!; asked.push(q);
+   return q.split(' ').length > 3 ? {items: []} : fixtures.stack_exchange;
+ });
+ const rows = await registry.find(c => c.name === 'stack_exchange')!.search('duckdb memory limit disk spilling');
+ assert.equal(rows.length, 1); assert.deepEqual(asked, ['duckdb memory limit disk spilling', 'duckdb memory limit']);
+ assert.ok(!deepRegistry(testConfig, async () => null).some(c => c.name === 'loc'));
 });

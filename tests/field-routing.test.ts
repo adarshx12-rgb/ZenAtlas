@@ -67,3 +67,21 @@ test('claim-supported source history is separate from relevance and helps route 
    assert.deepEqual(images.sites,[]);
  }finally{await db.close();}
 });
+
+test('with deep sources on, the route also carries search keywords and only the registered connectors chosen',async()=>{
+ const db=await database();
+ try{
+   clearRouteCache();
+   const deep={...config,DEEP_SOURCES:true};
+   const route=await routeFields(db,deep,'Sentinel-2 User Handbook Issue 1 Revision 2 full PDF','docs',{log:()=>{},
+     model:async()=>({field:'science',sites:['esa.int'],keywords:' Sentinel-2 User Handbook ',sources:['doaj','openalex','made_up']})});
+   assert.deepEqual(route,{field:'science',sites:['esa.int'],learned:[],keywords:'Sentinel-2 User Handbook',sources:['doaj']},
+     'openalex is not registered without its key; unknown names are dropped');
+   clearRouteCache();
+   const none=await routeFields(db,deep,'RBI annual report 2024','docs',{log:()=>{},model:async()=>({field:'finance',sites:[],keywords:'RBI annual report 2024',sources:[]})});
+   assert.deepEqual(none.sources,[]);
+   clearRouteCache();
+   const off=await routeFields(db,config,'RBI annual report 2024','docs',{log:()=>{},model:async()=>({field:'finance',sites:[],keywords:'x',sources:['doaj']})});
+   assert.deepEqual(off,{field:'finance',sites:[],learned:[]},'flag off: the route is unchanged');
+ }finally{clearRouteCache();await db.close();}
+});
