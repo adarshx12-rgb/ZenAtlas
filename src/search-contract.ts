@@ -70,11 +70,16 @@ type DraftModel = (query: string, modality: SearchModality) => Promise<unknown>;
 export interface ContractDeps { contract?: RequirementsContract; contractModel?: DraftModel; searchDate?: string }
 const cache = new Map<string, {contract: RequirementsContract; expires: number}>();
 
+// The contract must arrive within PLANNER_ASSIST_TIMEOUT_MS or the search falls back to the query's own clauses (the
+// whole request as one requirement, lists split at commas). The planner list took 8-10 s on 8 Oct 2026 and missed the
+// limit on 11 of 12 searches; the fast rewrite model drafts equally usable contracts in 2-5 s.
+export const contractModels = (config: Config) => (config.CONTRACT_MODELS || config.QUERY_REWRITE_MODEL).split(',').map(s => s.trim()).filter(Boolean);
+
 // One primary planner call, with provider fallbacks; no ensemble on every review. Reused across Docs hunt/refill passes.
 export async function planContract(db: DB, config: Config, query: string, modality: SearchModality, deps: ContractDeps = {}) {
  if (deps.contract) return deps.contract;
  const date = deps.searchDate ?? new Date().toISOString().slice(0, 10);
- const models = config.PLANNER_MODELS.split(',').map(s => s.trim()).filter(Boolean);
+ const models = contractModels(config);
  const key = JSON.stringify([config.TIER, models, modality, query, date]);
  const hit = !deps.contractModel && cache.get(key);
  if (hit && hit.expires > Date.now()) return hit.contract;

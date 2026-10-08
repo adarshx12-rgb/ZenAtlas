@@ -21,7 +21,7 @@ import { planContract, type ContractDeps } from './search-contract.js';
 
 export type DocCheck = {status: 'document'; kind: string; bytes: number|null} | {status: 'blocked'|'dead'|'not_document'};
 // check: 'checked' when the file was confirmed to be a document; 'blocked' when the site refused the check.
-export type VerifiedDoc = WebResult & {check: 'checked'|'blocked'; bytes: number|null};
+export type VerifiedDoc = WebResult & {check: 'checked'|'blocked'; bytes: number|null; file?: string};
 type Peek = (url: string, options: {timeoutMs: number}) => Promise<PeekResponse>;
 
 // Search engines index generated spam that poses as free copies of documents: a script path followed by a made-up file
@@ -66,7 +66,7 @@ export async function verifyDocuments(results: WebResult[], config: Config, peek
  const checks = await Promise.all(candidates.map(r => checkDocument(r.url, config.PAGE_TIMEOUT_MS, peek)));
  const kept: VerifiedDoc[] = [];
  checks.forEach((c, i) => {
-   if (c.status === 'document') kept.push({...candidates[i], check: 'checked', bytes: c.bytes});
+   if (c.status === 'document') kept.push({...candidates[i], check: 'checked', bytes: c.bytes, file: c.kind});
    else if (c.status === 'blocked') kept.push({...candidates[i], check: 'blocked', bytes: null});
    else removed[c.status]++;
  });

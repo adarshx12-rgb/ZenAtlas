@@ -151,3 +151,29 @@ test('a known duration confirms or contradicts a duration limit; an unknown one 
  assert.ok(!verified.unconfirmed.includes(r.id));
  assert.equal(decide(c,[at(626)],[{id:r.id,status:'supported',field:'title',quote:'short'}]).status,'excluded','a model quote cannot override the known duration');
 });
+
+test('a file whose bytes were checked as a PDF is a PDF, not a guess from its address',()=>{
+ const c=rulesContract('RFC 9110 HTTP Semantics PDF',DAY);const f=req(c,'format').id;
+ const guessed=inspect(c,{url:'https://www.rfc-editor.org/rfc/rfc9110.pdf',title:'RFC 9110',description:null});
+ assert.equal(status(guessed,f)?.provisional,true);
+ const checked=inspect(c,{url:'https://www.rfc-editor.org/rfc/rfc9110',title:'RFC 9110',description:null,file:'pdf'});
+ assert.deepEqual([status(checked,f)?.status,status(checked,f)?.provisional,status(checked,f)?.excerpt],['supported',false,'%PDF- file signature']);
+});
+
+test('a checked document file on the publisher\'s own domain is the complete work when it carries the work\'s title',()=>{
+ const c=normaliseContract('Kerala State Disaster Management Plan full PDF',DAY,{official_domains:['sdma.kerala.gov.in'],completeness:'full',
+   entities:[{name:'Kerala State Disaster Management Plan',kind:'work'}]});
+ assert.deepEqual(c.official_domains,['sdma.kerala.gov.in']);
+ const r=req(c,'completeness').id, url='https://sdma.kerala.gov.in/wp-content/uploads/2018/11/plan.pdf';
+ const own=inspect(c,{url,title:'Kerala State Disaster Management Plan, 2016',description:null,file:'pdf'});
+ assert.deepEqual([status(own,r)?.status,status(own,r)?.provisional],['supported',false]);
+ assert.equal(status(inspect(c,{url,title:'Kerala State Disaster Management Plan, 2016',description:null}),r)?.status,'unknown','an unchecked file is not enough');
+ assert.notEqual(status(inspect(c,{url:'https://mirror.example/plan.pdf',title:'Kerala State Disaster Management Plan',description:null,file:'pdf'}),r)?.status,'supported','a mirror is not the publisher');
+ assert.notEqual(status(inspect(c,{url,title:'Annual report 2019',description:null,file:'pdf'}),r)?.status,'supported','another work on the same site');
+});
+
+test('the official owner is the one the request names after "official", not the first entity drafted',()=>{
+ const c=normaliseContract('Chandrayaan-3 Vikram lander photographed by the Pragyan rover, official ISRO image',DAY,{
+   entities:[{name:'Vikram',kind:'product'},{name:'ISRO',kind:'organisation'}],official_domains:['isro.gov.in']});
+ assert.equal(req(c,'authority').text,'From an official ISRO source');
+});

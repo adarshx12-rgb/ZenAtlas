@@ -22,6 +22,8 @@ export interface InspectionInput {
  duration?: number|null;
  // From the video platform's API, not from the search result.
  video?: {publishedAt: string|null; official: boolean; channel?: string|null};
+ // The file type its first bytes showed when the Docs check fetched it (src/doc-review.ts sniff).
+ file?: string;
 }
 
 const VIDEO_URL = [/(^|\.)youtube\.com\/(watch|shorts\/|live\/)/, /^youtu\.be\//, /(^|\.)vimeo\.com\/\d+/, /(^|\.)dailymotion\.com\/video\//,
@@ -52,9 +54,10 @@ function source(input: InspectionInput): {method: Method; access: Access; checke
 }
 
 // The format of what was retrieved. 'website' means an HTML page that declares no more specific type.
-export function detectFormat(url: string, page: PageEvidence|undefined): {format: Format|'website'|null; excerpt: string|null; provisional: boolean; field: Finding['location']['field']} {
+export function detectFormat(url: string, page: PageEvidence|undefined, file?: string): {format: Format|'website'|null; excerpt: string|null; provisional: boolean; field: Finding['location']['field']} {
  if (VIDEO_URL.some(p => p.test(hostPath(url)))) return {format: 'video', excerpt: host(url), provisional: false, field: 'url'};
  if (page?.meta?.content_type === 'application/pdf' || page?.pdf) return {format: 'pdf', excerpt: 'application/pdf', provisional: false, field: 'metadata'};
+ if (file === 'pdf') return {format: 'pdf', excerpt: '%PDF- file signature', provisional: false, field: 'metadata'};
  // Unread: a .pdf address is probably a PDF; any other ordinary address is a web page, which is all a "website"
  // request needs, but says nothing about whether it is an article or a document (see inspect).
  if (!page || page.status !== 'checked') return /\.pdf$/i.test(new URL(url).pathname)
@@ -82,6 +85,9 @@ export function inspect(contract: RequirementsContract, input: InspectionInput):
  const add = (r: Requirement, f: Omit<Finding,'url'|'requirement_id'>) => out.push({url: input.url, requirement_id: r.id, ...f});
  const unknown = (r: Requirement) => add(r, {status: 'unknown', excerpt: null, location: {field: 'page'}, method: src.method, access: src.access, provisional: false});
  const page = input.page?.status === 'checked' ? input.page : undefined;
+ const work = contract.entities.find(e => e.kind === 'work')?.name;
+ const titledWork = (title: string) => !work || words(work).filter(w => w.length > 2).every(w => words(title).includes(w));
+ const onOfficial = (url: string) => { const h = host(url); return !!h && (contract.official_domains ?? []).some(d => h === d || h.endsWith(`.${d}`)); };
  const retrieved = page ? [page.pdf?.title, page.title, page.description, page.text, page.pdf?.text].filter((s): s is string => !!s) : [];
  // Dates, best source first: what the page or PDF declares, the video platform, then the search result (provisional).
  const dated = page?.meta?.published ? {day: page.meta.published, method: src.method, field: 'metadata' as const, provisional: false}
@@ -89,7 +95,7 @@ export function inspect(contract: RequirementsContract, input: InspectionInput):
    : input.published_at ? {day: input.published_at.slice(0, 10), method: 'search_snippet' as const, field: 'metadata' as const, provisional: true} : null;
  for (const r of contract.requirements) {
    if (r.kind === 'format' && r.formats) {
-     const d = detectFormat(input.url, input.page);
+     const d = detectFormat(input.url, input.page, input.file);
      const unread = d.field === 'url' && d.format === 'website';
      const status = formatStatus(r.formats, d.format);
      // An unread page supports a website request, and nothing else: it may still be an article or a document.
@@ -142,10 +148,11 @@ export function inspect(contract: RequirementsContract, input: InspectionInput):
      else if (derivative) add(r, {status: 'contradicted', excerpt: derivative.text.length <= 200 ? derivative.text : derivative.match![0],
        location: {field: page?.pdf ? 'pdf' : 'page', page: page?.pdf ? 1 : undefined}, method: src.method, access: 'ok', provisional: false});
      else if (guessed) add(r, {status: 'contradicted', excerpt: guessed[0], location: {field: 'title'}, method: 'search_snippet', access: src.access, provisional: true});
+     // A checked document file on the publisher's own domain is its own copy, when it carries the work's title.
+     else if (input.file && input.file !== 'html' && onOfficial(input.url) && titledWork(page?.title ?? input.title))
+       add(r, {status: 'supported', excerpt: host(input.url), location: {field: 'url'}, method: 'url', access: src.access, provisional: false});
      else if (fullCopyAccess(kind)) {
-       const work = contract.entities.find(e => e.kind === 'work')?.name;
-       const titled = !work || words(work).filter(w => w.length > 2).every(w => words(page?.title ?? input.title).includes(w));
-       if (titled) add(r, {status: 'supported', excerpt: accessLabel(kind), location: {field: 'metadata'}, method: page ? src.method : 'url',
+       if (titledWork(page?.title ?? input.title)) add(r, {status: 'supported', excerpt: accessLabel(kind), location: {field: 'metadata'}, method: page ? src.method : 'url',
          access: src.access, provisional: !page});
        else unknown(r);
      } else unknown(r);

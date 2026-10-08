@@ -56,7 +56,8 @@ export async function reviewResults<T extends Reviewable>(query: string, items: 
    return {key, kind: 'website', site: d.source_name, url: d.url, title: d.title, channel: null, official: false, duration: null, live: null,
      description: d.snippet, comments: [], moments: [], discussions: [], description_source: 'search',
      inspected: {format: d.doc_type, published: page?.meta?.published ?? d.published?.slice(0, 10) ?? null, publisher: null, access: accessKind(d.url)},
-     ...(plan.contract ? {facts: factsFromFindings(inspect(plan.contract, {url: d.url, title: d.title, description: d.snippet, published_at: d.published, page}))} : {}),
+     ...(plan.contract ? {facts: factsFromFindings(inspect(plan.contract, {url: d.url, title: d.title, description: d.snippet, published_at: d.published, page,
+       ...('file' in d && typeof d.file === 'string' ? {file: d.file} : {})}))} : {}),
      ...(page ? {page: {status: page.status, title: page.title, description: page.description, text: page.text, libraries: []}} : {})};
  };
  const candidates = [...keys].map(([key, d]) => candidateFor(key, d));

@@ -33,6 +33,8 @@ export const contractSchema = z.object({
  requirements: z.array(requirement).max(12), entities: z.array(entity).max(8), exclusions: z.array(z.string()).max(10),
  ambiguities: z.array(z.string().max(200)).max(5), assumptions: z.array(z.string().max(200)).max(5),
  source: z.enum(['model', 'rules']),
+ // Domains the named organisation publishes on, from the draft: a document there comes from its publisher.
+ official_domains: z.array(z.string()).max(6).optional(),
 });
 export type RequirementsContract = z.infer<typeof contractSchema>;
 
@@ -160,8 +162,10 @@ export function rulesContract(query: string, searchDate: string, draft: Contract
    const listed = draft.requirements?.find(r => r.kind === 'authority' && r.scope === 'set' && r.set_items?.length)?.set_items;
    // Without a draft, the word the user put after "official" names the owner ("official whatsapp ..." → whatsapp).
    const said = /\bofficial\s+(?:the\s+)?([\p{L}\p{N}][\p{L}\p{N}&'-]*)/u.exec(query)?.[1];
-   const names = listed?.length ? listed.slice(0, 6)
-     : [draft.entities?.find(e => e.kind === 'organisation' || e.kind === 'product')?.name ?? said ?? 'the named organisation'];
+   // An entity the user named right after "official" ("official ISRO image") beats the first one drafted (the lander Vikram).
+   const owners = draft.entities?.filter(e => e.kind === 'organisation' || e.kind === 'product') ?? [];
+   const named = said ? owners.find(e => e.name.toLowerCase() === said.toLowerCase()) : undefined;
+   const names = listed?.length ? listed.slice(0, 6) : [named?.name ?? owners[0]?.name ?? said ?? 'the named organisation'];
    const owner = names.length > 1 ? `${names.slice(0, -1).join(', ')} or ${names.at(-1)}` : names[0];
    // A brand's owning company publishes for it officially too (Meta for WhatsApp): see data/owning-companies.json.
    const owning = OWNERS.filter(o => names.some(n => o.brands.includes(n.toLowerCase())));
@@ -191,11 +195,13 @@ export function rulesContract(query: string, searchDate: string, draft: Contract
      ...(r.scope === 'set' && r.set_items?.length ? {set_items: r.set_items.slice(0, 12)} : {})});
  }
  const exclusions = [...new Set([...query.matchAll(/(?:^|\s)-(\w[\w'-]*)/g)].map(m => m[1].toLowerCase()))];
+ const officialDomains = [...new Set((draft.official_domains ?? []).map(d => d.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, ''))
+   .filter(d => /^(?:[a-z0-9-]+\.)+[a-z]{2,24}$/.test(d)))].slice(0, 6);
  const requirements = out.slice(0, 12).map((r, i) => ({...r, id: `R${i + 1}`}));
  return contractSchema.parse({version: 'req-v1', query, search_date: searchDate,
    intent: draft.intent?.trim() || query, deliverable: {formats: formats.length ? formats : ['any'], completeness},
    requirements, entities: draft.entities ?? [], exclusions, ambiguities: draft.ambiguities ?? [],
-   assumptions: draft.assumptions ?? [], source});
+   assumptions: draft.assumptions ?? [], source, ...(officialDomains.length ? {official_domains: officialDomains} : {})});
 }
 
 // Normalise whatever the planner returned into a valid contract. An unusable draft degrades to the rules-only contract.

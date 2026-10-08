@@ -285,6 +285,8 @@ export const configSchema = z.object({
   // An assist must not hold up a search, so it is dropped when it does not answer within this; well under
   // JUDGE_TIMEOUT_MS, because a free model can hang for a minute.
   PLANNER_ASSIST_TIMEOUT_MS: number(6000, 500, 30000),
+  // Models that draft a search's requirements contract, within PLANNER_ASSIST_TIMEOUT_MS. Empty: QUERY_REWRITE_MODEL.
+  CONTRACT_MODELS: z.string().regex(/^[\w.,\/:\s-]*$/).default(''),
   // Hours the same request keeps its plan and requirements contract (0 plans every search afresh).
   PLAN_CACHE_HOURS: number(24, 0, 168),
   // Hours a final judge verdict is reused for the same request, judge setup and evidence (0 judges every search afresh).
