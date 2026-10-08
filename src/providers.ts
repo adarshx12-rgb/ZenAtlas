@@ -94,6 +94,8 @@ function failureReason(reason: string) {
 // A metasearch where most engines answered is a normal search: the status names the engines that did not, without flagging it.
 export function engineStatus(provider: string, asked: string[], failed: EngineFailure[]): ProviderStatus {
  if (!failed.length) return {provider, status: 'ok', message: 'Discovery completed.'};
+ if (provider === 'searxng' && failed.length === asked.length && failed.every(f => f.reason.startsWith('SearXNG service unreachable')))
+   return {provider, status: 'unavailable', message: 'Cannot connect to the SearXNG service. Check that it is running at the configured address.'};
  const answered = asked.length - failed.length;
  return {provider, status: answered * 2 >= asked.length ? 'ok' : 'partial',
    message: `${answered} of ${asked.length} search engines answered; ${failed.map(f => `${engineName(f.engine)} (${f.reason})`).join(', ')} did not.`};
@@ -167,6 +169,7 @@ export async function searchSearXNG(config: Config, options: SearXNGOptions, tra
        reason = error instanceof UpstreamError
          ? error.status === 403 || error.status === 402 ? 'access denied'
            : error.code === 'rate_limited' || error.status === 429 ? 'rate-limited'
+           : error.code === 'network_error' || error.code === 'dns_failure' ? 'SearXNG service unreachable'
            : error.code === 'timeout' ? 'timed out' : 'returned an error'
          : 'returned an error';
      }

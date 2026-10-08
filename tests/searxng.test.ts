@@ -4,6 +4,34 @@ import {searchSearXNG} from '../src/providers.js';
 import {UpstreamError} from '../src/http.js';
 import {testConfig} from './helpers.js';
 
+test('an unreachable SearXNG service is reported once, including during cooldown, and recovers',async t=>{
+ t.mock.timers.enable({apis:['Date']});
+ const config={...testConfig,SEARXNG_BASE_URL:'http://service-down.test'};
+ let down=true,calls=0;
+ const transport=async()=>{calls++;if(down)throw new UpstreamError('network_error');return {results:[{url:'https://example.org/found'}]};};
+ const options={query:'notes',engines:['bing','yahoo']};
+ const first=await searchSearXNG(config,options,transport);
+ assert.equal(first.status.status,'unavailable');
+ assert.match(first.status.message,/Cannot connect to the SearXNG service/);
+ assert.doesNotMatch(first.status.message,/Bing|Yahoo|returned an error/);
+ const queued=await searchSearXNG(config,options,transport);
+ assert.equal(calls,2);assert.equal(queued.status.status,'unavailable');
+ down=false;t.mock.timers.tick(30001);
+ const recovered=await searchSearXNG(config,options,transport);
+ assert.equal(recovered.status.status,'ok');assert.equal(recovered.results.length,2);
+});
+
+test('an isolated transport failure does not mark responding SearXNG engines unavailable',async()=>{
+ const config={...testConfig,SEARXNG_BASE_URL:'http://service-intermittent.test'};
+ const out=await searchSearXNG(config,{query:'notes',engines:['bing','yahoo']},async url=>{
+   if(new URL(url).searchParams.get('engines')==='bing')throw new UpstreamError('dns_failure');
+   return {results:[{url:'https://example.org/found'}]};
+ });
+ assert.equal(out.status.status,'ok');assert.equal(out.results.length,1);
+ assert.match(out.status.message,/1 of 2 search engines answered/);
+ assert.deepEqual(out.engines.failed,[{engine:'bing',reason:'SearXNG service unreachable'}]);
+});
+
 test('a CAPTCHA pauses queued queries for only that engine and allows a probe after cooldown',async t=>{
  t.mock.timers.enable({apis:['Date']});
  const config={...testConfig,SEARXNG_BASE_URL:'http://captcha.test',SEARXNG_BLOCK_COOLDOWN_SECONDS:60};
